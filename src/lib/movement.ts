@@ -71,6 +71,8 @@ export type TestGuide = {
   steps: string[];
   mistakes: string[];
   reps: string;
+  /** Search string used to find a real demo GIF in the exercise library. */
+  libraryQuery: string;
 };
 
 export const TEST_GUIDES: Record<string, TestGuide> = {
@@ -81,7 +83,8 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     setup: ["Stand facing the camera, full body in frame", "Feet shoulder-width apart, toes slightly out", "Arms straight out in front for balance"],
     steps: ["Push hips back and bend knees", "Go as low as you can while keeping heels down", "Stand all the way back up", "Repeat for 3 slow reps in 10 seconds"],
     mistakes: ["Heels lifting off the floor", "Knees caving inward", "Rounding your lower back"],
-    reps: "3 slow reps · 10 sec",
+    reps: "3 slow reps · ~10 sec",
+    libraryQuery: "bodyweight squat",
   },
   hinge: {
     id: "hinge", name: "Hip Hinge",
@@ -90,7 +93,8 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     setup: ["Stand sideways to the camera so we can see your back line", "Feet hip-width apart", "Hands resting on the front of your thighs"],
     steps: ["Push your hips straight back (like closing a car door with your butt)", "Slide your hands down your thighs as your chest tips forward", "Keep your back long and flat — no rounding", "Stand back up. 3 slow reps."],
     mistakes: ["Rounding the upper back", "Bending the knees a lot (that's a squat, not a hinge)", "Looking up — keep your neck neutral"],
-    reps: "3 slow reps · 10 sec",
+    reps: "3 slow reps · ~10 sec",
+    libraryQuery: "stiff leg deadlift",
   },
   balance: {
     id: "balance", name: "Single-leg Balance",
@@ -100,6 +104,7 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     steps: ["Lift your right foot a few inches off the ground", "Hold steady for 5 seconds", "Switch legs and hold the other 5 seconds"],
     mistakes: ["Holding onto a wall or chair", "Looking down at the floor", "Hopping on the standing foot"],
     reps: "5 sec each leg",
+    libraryQuery: "single leg balance",
   },
   lunge: {
     id: "lunge", name: "Lunge Reach",
@@ -108,7 +113,8 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     setup: ["Stand facing the camera, arms at sides", "Feet together"],
     steps: ["Take a long step forward with your right foot", "Bend both knees until your back knee almost touches the floor", "Push back up to standing", "Repeat with the left leg"],
     mistakes: ["Front knee collapsing inward", "Leaning too far forward", "Tiny step (makes it harder, not easier)"],
-    reps: "1 rep each leg · 10 sec",
+    reps: "1 rep each leg",
+    libraryQuery: "bodyweight walking lunge",
   },
   overhead: {
     id: "overhead", name: "Overhead Reach + Rotation",
@@ -117,7 +123,8 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     setup: ["Stand facing the camera, full body in frame", "Feet shoulder-width apart", "Arms relaxed at sides"],
     steps: ["Raise both arms straight up overhead — try to get them next to your ears", "Hold for 2 seconds at the top", "Rotate your torso slowly to the right, then left", "Lower arms"],
     mistakes: ["Arching the lower back to fake more reach", "Arms bending at the elbow", "Shrugging shoulders up to the ears"],
-    reps: "1 cycle · 10 sec",
+    reps: "1 slow cycle",
+    libraryQuery: "standing overhead reach",
   },
   ankle_df: {
     id: "ankle_df", name: "Ankle Dorsiflexion (knee-to-wall)",
@@ -126,7 +133,8 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     setup: ["Get into a half-kneel: one foot flat on the floor in front, the other knee on the floor behind", "Position sideways to the camera"],
     steps: ["Slowly push your front knee forward, past your toes", "Keep your front heel pressed firmly into the floor", "Go as far as you can, then return", "Repeat slowly for 10 seconds"],
     mistakes: ["Heel lifting off the floor (that's cheating)", "Knee caving inward instead of tracking over the toes"],
-    reps: "Slow reps · 10 sec",
+    reps: "Slow reps",
+    libraryQuery: "ankle mobility",
   },
   knee_sld: {
     id: "knee_sld", name: "Single-leg Step-down",
@@ -135,7 +143,8 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     setup: ["Stand on a low step (a stair works) facing the camera", "One foot on the step, the other hanging off the edge"],
     steps: ["Slowly bend the standing knee", "Lightly tap the other heel on the floor", "Push back up — slow and controlled", "Switch legs"],
     mistakes: ["Standing knee caving inward", "Hip dropping on the lowering side", "Falling fast instead of controlling it"],
-    reps: "Slow reps · 10 sec",
+    reps: "Slow reps",
+    libraryQuery: "single leg step down",
   },
   hip_abd: {
     id: "hip_abd", name: "Standing Hip Abduction",
@@ -144,7 +153,8 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     setup: ["Stand facing the camera, full body in frame", "Hands on hips"],
     steps: ["Shift weight onto your right leg", "Lift your left leg straight out to the side, keep it straight", "Hold 2 seconds, lower with control", "Switch sides"],
     mistakes: ["Leaning the upper body to the opposite side", "Letting the lifted leg drift forward instead of straight out"],
-    reps: "Both sides · 10 sec",
+    reps: "Both sides",
+    libraryQuery: "standing hip abduction",
   },
   bridge_hold: {
     id: "bridge_hold", name: "Glute Bridge Endurance",
@@ -153,7 +163,8 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     setup: ["Lie on your back so the camera sees your side profile", "Knees bent, feet flat, arms relaxed at your sides"],
     steps: ["Squeeze your glutes and lift your hips toward the ceiling", "Create a straight line from your shoulders to your knees", "Hold the position — don't let the hips sag", "Hold for the full 10 seconds"],
     mistakes: ["Lower back arching instead of glutes squeezing", "Hips dropping before the timer ends", "Pushing through the toes instead of the heels"],
-    reps: "Hold · 10 sec",
+    reps: "Hold ~10 sec",
+    libraryQuery: "glute bridge",
   },
   wall_slide: {
     id: "wall_slide", name: "Scapular Wall Slide",
@@ -162,7 +173,8 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     setup: ["Stand with your back, head and butt against a wall", "Position sideways to the camera so we can see your arms", "Arms in a 'W' — elbows bent, forearms touching the wall"],
     steps: ["Slide forearms up the wall toward overhead — keep contact", "Go as high as you can without losing wall contact", "Slide back down to the 'W' position", "Repeat slowly"],
     mistakes: ["Hands or forearms peeling off the wall", "Lower back arching to fake more range", "Shrugging shoulders to the ears"],
-    reps: "Slow reps · 10 sec",
+    reps: "Slow reps",
+    libraryQuery: "wall slide",
   },
   elbow_rom: {
     id: "elbow_rom", name: "Elbow Flex/Extend Range",
@@ -171,7 +183,8 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     setup: ["Stand facing the camera", "Arms out in front of you, palms up"],
     steps: ["Bend both elbows fully — try to touch your shoulders with your fingers", "Then straighten them completely", "Repeat slowly and fully"],
     mistakes: ["Stopping short of full bend or full straight"],
-    reps: "Slow reps · 10 sec",
+    reps: "Slow reps",
+    libraryQuery: "biceps curl",
   },
   wrist_rom: {
     id: "wrist_rom", name: "Guided Wrist Range Check",
@@ -180,6 +193,7 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     setup: ["Stand facing the camera", "Arms straight out in front, palms down"],
     steps: ["Bend wrists so fingers point up at the ceiling (extension)", "Then bend so fingers point down at the floor (flexion)", "Move slowly through full range"],
     mistakes: ["Letting elbows bend instead of moving from the wrist"],
-    reps: "Slow reps · 10 sec",
+    reps: "Slow reps",
+    libraryQuery: "wrist stretch",
   },
 };
