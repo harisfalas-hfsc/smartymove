@@ -9,38 +9,220 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DesktopRouteImport } from './routes/desktop'
+import { Route as OnboardingRouteRouteImport } from './routes/onboarding/route'
+import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as OnboardingQuestionnaireRouteImport } from './routes/onboarding/questionnaire'
+import { Route as OnboardingJointsRouteImport } from './routes/onboarding/joints'
+import { Route as OnboardingGoalRouteImport } from './routes/onboarding/goal'
+import { Route as OnboardingDisclaimerRouteImport } from './routes/onboarding/disclaimer'
+import { Route as AppScreenRouteImport } from './routes/app/screen'
+import { Route as AppProgressRouteImport } from './routes/app/progress'
+import { Route as AppProgramRouteImport } from './routes/app/program'
+import { Route as AppProfileRouteImport } from './routes/app/profile'
+import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
 
+const DesktopRoute = DesktopRouteImport.update({
+  id: '/desktop',
+  path: '/desktop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRouteRoute = OnboardingRouteRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const OnboardingQuestionnaireRoute = OnboardingQuestionnaireRouteImport.update({
+  id: '/questionnaire',
+  path: '/questionnaire',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
+const OnboardingJointsRoute = OnboardingJointsRouteImport.update({
+  id: '/joints',
+  path: '/joints',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
+const OnboardingGoalRoute = OnboardingGoalRouteImport.update({
+  id: '/goal',
+  path: '/goal',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
+const OnboardingDisclaimerRoute = OnboardingDisclaimerRouteImport.update({
+  id: '/disclaimer',
+  path: '/disclaimer',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
+const AppScreenRoute = AppScreenRouteImport.update({
+  id: '/screen',
+  path: '/screen',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProgressRoute = AppProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProgramRoute = AppProgramRouteImport.update({
+  id: '/program',
+  path: '/program',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppScreenRunRoute = AppScreenRunRouteImport.update({
+  id: '/run',
+  path: '/run',
+  getParentRoute: () => AppScreenRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteRouteWithChildren
+  '/onboarding': typeof OnboardingRouteRouteWithChildren
+  '/desktop': typeof DesktopRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/program': typeof AppProgramRoute
+  '/app/progress': typeof AppProgressRoute
+  '/app/screen': typeof AppScreenRouteWithChildren
+  '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
+  '/onboarding/goal': typeof OnboardingGoalRoute
+  '/onboarding/joints': typeof OnboardingJointsRoute
+  '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
+  '/app/': typeof AppIndexRoute
+  '/app/screen/run': typeof AppScreenRunRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRouteRouteWithChildren
+  '/desktop': typeof DesktopRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/program': typeof AppProgramRoute
+  '/app/progress': typeof AppProgressRoute
+  '/app/screen': typeof AppScreenRouteWithChildren
+  '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
+  '/onboarding/goal': typeof OnboardingGoalRoute
+  '/onboarding/joints': typeof OnboardingJointsRoute
+  '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
+  '/app': typeof AppIndexRoute
+  '/app/screen/run': typeof AppScreenRunRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteRouteWithChildren
+  '/onboarding': typeof OnboardingRouteRouteWithChildren
+  '/desktop': typeof DesktopRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/program': typeof AppProgramRoute
+  '/app/progress': typeof AppProgressRoute
+  '/app/screen': typeof AppScreenRouteWithChildren
+  '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
+  '/onboarding/goal': typeof OnboardingGoalRoute
+  '/onboarding/joints': typeof OnboardingJointsRoute
+  '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
+  '/app/': typeof AppIndexRoute
+  '/app/screen/run': typeof AppScreenRunRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/onboarding'
+    | '/desktop'
+    | '/app/profile'
+    | '/app/program'
+    | '/app/progress'
+    | '/app/screen'
+    | '/onboarding/disclaimer'
+    | '/onboarding/goal'
+    | '/onboarding/joints'
+    | '/onboarding/questionnaire'
+    | '/app/'
+    | '/app/screen/run'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/onboarding'
+    | '/desktop'
+    | '/app/profile'
+    | '/app/program'
+    | '/app/progress'
+    | '/app/screen'
+    | '/onboarding/disclaimer'
+    | '/onboarding/goal'
+    | '/onboarding/joints'
+    | '/onboarding/questionnaire'
+    | '/app'
+    | '/app/screen/run'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/onboarding'
+    | '/desktop'
+    | '/app/profile'
+    | '/app/program'
+    | '/app/progress'
+    | '/app/screen'
+    | '/onboarding/disclaimer'
+    | '/onboarding/goal'
+    | '/onboarding/joints'
+    | '/onboarding/questionnaire'
+    | '/app/'
+    | '/app/screen/run'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRouteRoute: typeof AppRouteRouteWithChildren
+  OnboardingRouteRoute: typeof OnboardingRouteRouteWithChildren
+  DesktopRoute: typeof DesktopRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/desktop': {
+      id: '/desktop'
+      path: '/desktop'
+      fullPath: '/desktop'
+      preLoaderRoute: typeof DesktopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +230,135 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/onboarding/questionnaire': {
+      id: '/onboarding/questionnaire'
+      path: '/questionnaire'
+      fullPath: '/onboarding/questionnaire'
+      preLoaderRoute: typeof OnboardingQuestionnaireRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
+    '/onboarding/joints': {
+      id: '/onboarding/joints'
+      path: '/joints'
+      fullPath: '/onboarding/joints'
+      preLoaderRoute: typeof OnboardingJointsRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
+    '/onboarding/goal': {
+      id: '/onboarding/goal'
+      path: '/goal'
+      fullPath: '/onboarding/goal'
+      preLoaderRoute: typeof OnboardingGoalRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
+    '/onboarding/disclaimer': {
+      id: '/onboarding/disclaimer'
+      path: '/disclaimer'
+      fullPath: '/onboarding/disclaimer'
+      preLoaderRoute: typeof OnboardingDisclaimerRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
+    '/app/screen': {
+      id: '/app/screen'
+      path: '/screen'
+      fullPath: '/app/screen'
+      preLoaderRoute: typeof AppScreenRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/progress': {
+      id: '/app/progress'
+      path: '/progress'
+      fullPath: '/app/progress'
+      preLoaderRoute: typeof AppProgressRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/program': {
+      id: '/app/program'
+      path: '/program'
+      fullPath: '/app/program'
+      preLoaderRoute: typeof AppProgramRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/screen/run': {
+      id: '/app/screen/run'
+      path: '/run'
+      fullPath: '/app/screen/run'
+      preLoaderRoute: typeof AppScreenRunRouteImport
+      parentRoute: typeof AppScreenRoute
+    }
   }
 }
 
+interface AppScreenRouteChildren {
+  AppScreenRunRoute: typeof AppScreenRunRoute
+}
+
+const AppScreenRouteChildren: AppScreenRouteChildren = {
+  AppScreenRunRoute: AppScreenRunRoute,
+}
+
+const AppScreenRouteWithChildren = AppScreenRoute._addFileChildren(
+  AppScreenRouteChildren,
+)
+
+interface AppRouteRouteChildren {
+  AppProfileRoute: typeof AppProfileRoute
+  AppProgramRoute: typeof AppProgramRoute
+  AppProgressRoute: typeof AppProgressRoute
+  AppScreenRoute: typeof AppScreenRouteWithChildren
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppProfileRoute: AppProfileRoute,
+  AppProgramRoute: AppProgramRoute,
+  AppProgressRoute: AppProgressRoute,
+  AppScreenRoute: AppScreenRouteWithChildren,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
+  AppRouteRouteChildren,
+)
+
+interface OnboardingRouteRouteChildren {
+  OnboardingDisclaimerRoute: typeof OnboardingDisclaimerRoute
+  OnboardingGoalRoute: typeof OnboardingGoalRoute
+  OnboardingJointsRoute: typeof OnboardingJointsRoute
+  OnboardingQuestionnaireRoute: typeof OnboardingQuestionnaireRoute
+}
+
+const OnboardingRouteRouteChildren: OnboardingRouteRouteChildren = {
+  OnboardingDisclaimerRoute: OnboardingDisclaimerRoute,
+  OnboardingGoalRoute: OnboardingGoalRoute,
+  OnboardingJointsRoute: OnboardingJointsRoute,
+  OnboardingQuestionnaireRoute: OnboardingQuestionnaireRoute,
+}
+
+const OnboardingRouteRouteWithChildren = OnboardingRouteRoute._addFileChildren(
+  OnboardingRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRouteRoute: AppRouteRouteWithChildren,
+  OnboardingRouteRoute: OnboardingRouteRouteWithChildren,
+  DesktopRoute: DesktopRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
