@@ -5,7 +5,6 @@ export function SiteFooter() {
     color: "#6B7A90",
     textDecoration: "none",
     fontSize: 12,
-    ,
   };
   return (
     <footer
