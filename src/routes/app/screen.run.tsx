@@ -160,11 +160,11 @@ function Runner() {
     setTimeout(() => navigate({ to: "/app/progress" }), 1200);
   }
 
-  if (!u) return null;
   const cur = seq[idx];
   const curGuide = cur ? TEST_GUIDES[cur.id] : undefined;
   const demoQuery = curGuide?.libraryQuery;
   const { data: demoGif } = useTestDemoGif(demoQuery);
+  if (!u) return null;
   const progress = seq.length ? ((idx + (phase === "running" ? 1 - countdown / (cur?.duration ?? 1) : 0)) / seq.length) * 100 : 0;
 
   return (
