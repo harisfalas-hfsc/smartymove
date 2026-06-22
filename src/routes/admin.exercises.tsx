@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Upload, Image as ImageIcon, Database, Search, FileDown, Wrench } from "lucide-react";
 import { isAdminEmail } from "@/lib/admin";
 import { getUser } from "@/lib/store";
+import { useUnresolvedCanonicals } from "@/lib/exercises";
 
 export const Route = createFileRoute("/admin/exercises")({ component: AdminExercises });
 
@@ -92,6 +93,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 function Manager() {
   const jsonRef = useRef<HTMLInputElement>(null);
   const gifRef = useRef<HTMLInputElement>(null);
+  const { data: unresolved = [], isLoading: unresolvedLoading } = useUnresolvedCanonicals();
 
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
@@ -415,6 +417,35 @@ function Manager() {
           </table>
         </div>
         {filtered.length > 300 && <p className="mt-2 text-xs text-muted-foreground">Showing first 300 results — refine search to see more.</p>}
+      </section>
+
+      <section className="rounded-3xl bg-card p-4 shadow-card">
+        <h3 className="text-base font-bold">Curated names not resolved to a library row</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          These are SmartyMove curated exercises (per pain area + category) that don't currently match any row in <code>public.exercises</code> with a GIF. Seed them or rename library rows so the engine can pick them.
+        </p>
+        {unresolvedLoading ? (
+          <div className="mt-3 text-sm text-muted-foreground">Checking…</div>
+        ) : unresolved.length === 0 ? (
+          <div className="mt-3 text-sm text-success">All curated names resolve. 🎉</div>
+        ) : (
+          <div className="mt-3 max-h-72 overflow-auto rounded-2xl border border-border">
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 bg-card text-left text-xs uppercase tracking-wide text-muted-foreground">
+                <tr><th className="px-3 py-2">Area</th><th className="px-3 py-2">Category</th><th className="px-3 py-2">Canonical name</th></tr>
+              </thead>
+              <tbody>
+                {unresolved.map((u, i) => (
+                  <tr key={`${u.area}-${u.category}-${i}`} className="border-t border-border">
+                    <td className="px-3 py-2 capitalize">{u.area.replace("_", " ")}</td>
+                    <td className="px-3 py-2 capitalize">{u.category}</td>
+                    <td className="px-3 py-2 font-medium">{u.canonical}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </div>
   );
