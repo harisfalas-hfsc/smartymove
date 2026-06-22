@@ -9,38 +9,110 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OnboardingRouteRouteImport } from './routes/onboarding/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OnboardingQuestionnaireRouteImport } from './routes/onboarding/questionnaire'
+import { Route as OnboardingJointsRouteImport } from './routes/onboarding/joints'
+import { Route as OnboardingGoalRouteImport } from './routes/onboarding/goal'
+import { Route as OnboardingDisclaimerRouteImport } from './routes/onboarding/disclaimer'
 
+const OnboardingRouteRoute = OnboardingRouteRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingQuestionnaireRoute = OnboardingQuestionnaireRouteImport.update({
+  id: '/questionnaire',
+  path: '/questionnaire',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
+const OnboardingJointsRoute = OnboardingJointsRouteImport.update({
+  id: '/joints',
+  path: '/joints',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
+const OnboardingGoalRoute = OnboardingGoalRouteImport.update({
+  id: '/goal',
+  path: '/goal',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
+const OnboardingDisclaimerRoute = OnboardingDisclaimerRouteImport.update({
+  id: '/disclaimer',
+  path: '/disclaimer',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRouteRouteWithChildren
+  '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
+  '/onboarding/goal': typeof OnboardingGoalRoute
+  '/onboarding/joints': typeof OnboardingJointsRoute
+  '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRouteRouteWithChildren
+  '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
+  '/onboarding/goal': typeof OnboardingGoalRoute
+  '/onboarding/joints': typeof OnboardingJointsRoute
+  '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRouteRouteWithChildren
+  '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
+  '/onboarding/goal': typeof OnboardingGoalRoute
+  '/onboarding/joints': typeof OnboardingJointsRoute
+  '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/onboarding'
+    | '/onboarding/disclaimer'
+    | '/onboarding/goal'
+    | '/onboarding/joints'
+    | '/onboarding/questionnaire'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/onboarding'
+    | '/onboarding/disclaimer'
+    | '/onboarding/goal'
+    | '/onboarding/joints'
+    | '/onboarding/questionnaire'
+  id:
+    | '__root__'
+    | '/'
+    | '/onboarding'
+    | '/onboarding/disclaimer'
+    | '/onboarding/goal'
+    | '/onboarding/joints'
+    | '/onboarding/questionnaire'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  OnboardingRouteRoute: typeof OnboardingRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +120,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding/questionnaire': {
+      id: '/onboarding/questionnaire'
+      path: '/questionnaire'
+      fullPath: '/onboarding/questionnaire'
+      preLoaderRoute: typeof OnboardingQuestionnaireRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
+    '/onboarding/joints': {
+      id: '/onboarding/joints'
+      path: '/joints'
+      fullPath: '/onboarding/joints'
+      preLoaderRoute: typeof OnboardingJointsRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
+    '/onboarding/goal': {
+      id: '/onboarding/goal'
+      path: '/goal'
+      fullPath: '/onboarding/goal'
+      preLoaderRoute: typeof OnboardingGoalRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
+    '/onboarding/disclaimer': {
+      id: '/onboarding/disclaimer'
+      path: '/disclaimer'
+      fullPath: '/onboarding/disclaimer'
+      preLoaderRoute: typeof OnboardingDisclaimerRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
   }
 }
 
+interface OnboardingRouteRouteChildren {
+  OnboardingDisclaimerRoute: typeof OnboardingDisclaimerRoute
+  OnboardingGoalRoute: typeof OnboardingGoalRoute
+  OnboardingJointsRoute: typeof OnboardingJointsRoute
+  OnboardingQuestionnaireRoute: typeof OnboardingQuestionnaireRoute
+}
+
+const OnboardingRouteRouteChildren: OnboardingRouteRouteChildren = {
+  OnboardingDisclaimerRoute: OnboardingDisclaimerRoute,
+  OnboardingGoalRoute: OnboardingGoalRoute,
+  OnboardingJointsRoute: OnboardingJointsRoute,
+  OnboardingQuestionnaireRoute: OnboardingQuestionnaireRoute,
+}
+
+const OnboardingRouteRouteWithChildren = OnboardingRouteRoute._addFileChildren(
+  OnboardingRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  OnboardingRouteRoute: OnboardingRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
