@@ -4,7 +4,7 @@ import { useUser } from "@/lib/store";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
 import { Activity, ArrowRight, Flame, Calendar, Lock, Loader2 } from "lucide-react";
-import { useMicroRoutine } from "@/lib/exercises";
+import { useMicroRoutine, useCurrentPhase } from "@/lib/exercises";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
 
 export const Route = createFileRoute("/app/")({ component: Home });
@@ -13,10 +13,12 @@ function Home() {
   const u = useUser();
   const [openId, setOpenId] = useState<string | null>(null);
   const { data: routine = [], isLoading } = useMicroRoutine(u?.goal, u?.questionnaire?.joints ?? []);
+  const phase = useCurrentPhase();
   if (!u) return null;
   const latest = u.sessions[u.sessions.length - 1];
   const daysSince = latest ? Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000) : null;
   const daysUntilRetest = latest ? Math.max(0, 14 - (daysSince ?? 0)) : null;
+  const retestDue = latest != null && (daysSince ?? 0) >= 14;
 
   return (
     <div className="pb-6">
@@ -50,6 +52,30 @@ function Home() {
       </header>
 
       <div className="-mt-5 space-y-4 rounded-t-[2rem] bg-background px-5 pt-6">
+        {phase && (
+          <div className="rounded-3xl bg-card p-4 shadow-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Phase</div>
+                <div className="text-base font-extrabold capitalize">{phase.label} · Week {phase.weekInPhase}</div>
+              </div>
+              <div className="flex gap-1.5 text-[10px] font-bold uppercase tracking-wide">
+                <span className="rounded-full bg-accent px-2 py-1">Mob {Math.round(phase.ratios.mobility * 100)}%</span>
+                <span className="rounded-full bg-accent px-2 py-1">Stab {Math.round(phase.ratios.stability * 100)}%</span>
+                <span className="rounded-full bg-accent px-2 py-1">Str {Math.round(phase.ratios.strength * 100)}%</span>
+              </div>
+            </div>
+          </div>
+        )}
+        {retestDue && (
+          <Link to="/app/screen" className="flex items-center justify-between rounded-3xl bg-warning/15 p-4 ring-1 ring-warning/40">
+            <div>
+              <div className="text-xs font-bold uppercase tracking-widest text-warning">Retest due</div>
+              <div className="text-sm font-semibold">Re-take your Movement Screen to update your plan.</div>
+            </div>
+            <ArrowRight className="h-5 w-5" />
+          </Link>
+        )}
         {!latest ? (
           <Link to="/app/screen" className="block rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft">
             <div className="flex items-center justify-between">
