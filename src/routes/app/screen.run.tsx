@@ -121,7 +121,7 @@ function Runner() {
       done = true;
       clearInterval(tickId); clearInterval(sampleId);
       const score: TestResult = skipped
-        ? { id: test.id, name: test.name, score: 2, notes: "Skipped" }
+        ? { id: test.id, name: test.name, score: 1, notes: "Skipped", valid: false }
         : scoreSamples(test.id, samplesRef.current);
       setResults(r => [...r, score]);
       setTimeout(() => {
