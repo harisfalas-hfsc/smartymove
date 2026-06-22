@@ -76,6 +76,7 @@ export function setUser(u: User | null) {
   if (u) localStorage.setItem(KEY, JSON.stringify(u));
   else localStorage.removeItem(KEY);
   window.dispatchEvent(new Event("smartymove:user"));
+  if (u) void saveProfile(u).catch(() => undefined);
 }
 function cacheOnly(u: User | null) {
   if (typeof window === "undefined") return;
