@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useUser, updateUser } from "@/lib/store";
-import { useMicroRoutine } from "@/lib/exercises";
+import { useMicroRoutine, useCurrentPhase } from "@/lib/exercises";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
 import { Play, Pause, CheckCircle2, Lock, ChevronLeft, ChevronRight, Crown, Info } from "lucide-react";
 
@@ -16,6 +16,7 @@ function Program() {
   const intervalRef = useRef<number | null>(null);
 
   const { data: routine = [] } = useMicroRoutine(u?.goal, u?.questionnaire?.joints ?? []);
+  const phase = useCurrentPhase();
   const cur = routine[idx];
 
   useEffect(() => {
@@ -58,7 +59,9 @@ function Program() {
       <header className="brand-gradient-strong px-5 pb-7 pt-7 text-primary-foreground">
         <div className="text-xs font-semibold uppercase tracking-widest opacity-80">Today's program</div>
         <h1 className="mt-1 text-2xl font-extrabold">5-minute corrective routine</h1>
-        <p className="mt-1 text-sm opacity-90">Built around your goal & joint focus.</p>
+        <p className="mt-1 text-sm opacity-90">
+          {phase ? `${phase.label} · Week ${phase.weekInPhase} · ${Math.round(phase.ratios.mobility * 100)}/${Math.round(phase.ratios.stability * 100)}/${Math.round(phase.ratios.strength * 100)} Mob/Stab/Str` : "Built around your goal & joint focus."}
+        </p>
       </header>
 
       <div className="-mt-4 space-y-4 rounded-t-[2rem] bg-background px-5 pt-5">
