@@ -312,3 +312,40 @@ export function useLibraryExercise(id: string | null) {
     staleTime: 30 * 60 * 1000,
   });
 }
+
+/**
+ * React hook: find the best library GIF that demonstrates a Movement Screen test.
+ * Searches the exercise library by the curated query string and returns a
+ * signed URL to its GIF (or null if nothing matched).
+ */
+export function useTestDemoGif(query: string | undefined) {
+  return useQuery({
+    queryKey: ["test-demo-gif", query ?? "none"],
+    enabled: !!query,
+    queryFn: async () => {
+      if (!query) return null;
+      const library = await fetchLibrary();
+      const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+      let best: { row: LibraryExercise; score: number } | null = null;
+      for (const row of library) {
+        if (!row.gif_url) continue;
+        const name = row.name.toLowerCase();
+        let matched = 0;
+        for (const t of tokens) if (name.includes(t)) matched++;
+        if (matched === 0) continue;
+        // Require at least half of the tokens to match.
+        if (matched < Math.ceil(tokens.length / 2)) continue;
+        let score = matched * 100;
+        if (row.equipment === "body weight") score += 50;
+        score += Math.max(0, 60 - name.length);
+        if (!best || score > best.score) best = { row, score };
+      }
+      if (!best) return null;
+      const { data } = await supabase.storage
+        .from("exercise-gifs")
+        .createSignedUrl(best.row.gif_url!, 60 * 60);
+      return { name: best.row.name, signedUrl: data?.signedUrl ?? null };
+    },
+    staleTime: 60 * 60 * 1000,
+  });
+}

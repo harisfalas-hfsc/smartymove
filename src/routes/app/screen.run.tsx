@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { getPoseLandmarker, PL } from "@/lib/pose";
 import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, scoreFromRange, TEST_GUIDES } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
-import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, Info, AlertCircle } from "lucide-react";
+import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, Info, AlertCircle, SkipForward } from "lucide-react";
 import { MovementDemo } from "@/components/MovementDemo";
+import { useTestDemoGif } from "@/lib/exercises";
 
 export const Route = createFileRoute("/app/screen/run")({ component: Runner });
 
@@ -35,12 +36,14 @@ function Runner() {
   const [seq, setSeq] = useState<TestDef[]>([]);
   const [idx, setIdx] = useState(0);
   const [countdown, setCountdown] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
   const [poseReady, setPoseReady] = useState(false);
   const [starting, setStarting] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<TestResult[]>([]);
   const samplesRef = useRef<any[]>([]);
+  const finishHandlerRef = useRef<((skipped?: boolean) => void) | null>(null);
 
   useEffect(() => { if (u) setSeq(buildSequence(u.questionnaire?.joints ?? [])); }, [u]);
 
@@ -112,23 +115,31 @@ function Runner() {
     const test = seq[idx]; if (!test) return;
     samplesRef.current = [];
     setCountdown(test.duration);
+    setElapsed(0);
     const sampleId = setInterval(() => { if (latestLandmarksRef.current) samplesRef.current.push(latestLandmarksRef.current); }, 100);
+    let done = false;
+    const finish = (skipped = false) => {
+      if (done) return;
+      done = true;
+      clearInterval(tickId); clearInterval(sampleId);
+      const score: TestResult = skipped
+        ? { id: test.id, name: test.name, score: 2, notes: "Skipped" }
+        : scoreSamples(test.id, samplesRef.current);
+      setResults(r => [...r, score]);
+      setTimeout(() => {
+        if (idx + 1 >= seq.length) finalize([...results, score]);
+        else setIdx(i => i + 1);
+      }, 400);
+    };
+    finishHandlerRef.current = finish;
     const tickId = setInterval(() => {
+      setElapsed(e => e + 1);
       setCountdown(c => {
-        if (c <= 1) {
-          clearInterval(tickId); clearInterval(sampleId);
-          const score = scoreSamples(test.id, samplesRef.current);
-          setResults(r => [...r, score]);
-          setTimeout(() => {
-            if (idx + 1 >= seq.length) finalize([...results, score]);
-            else setIdx(i => i + 1);
-          }, 600);
-          return 0;
-        }
+        if (c <= 1) { finish(false); return 0; }
         return c - 1;
       });
     }, 1000);
-    return () => { clearInterval(tickId); clearInterval(sampleId); };
+    return () => { clearInterval(tickId); clearInterval(sampleId); finishHandlerRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, idx]);
 
@@ -151,6 +162,9 @@ function Runner() {
 
   if (!u) return null;
   const cur = seq[idx];
+  const curGuide = cur ? TEST_GUIDES[cur.id] : undefined;
+  const demoQuery = curGuide?.libraryQuery;
+  const { data: demoGif } = useTestDemoGif(demoQuery);
   const progress = seq.length ? ((idx + (phase === "running" ? 1 - countdown / (cur?.duration ?? 1) : 0)) / seq.length) * 100 : 0;
 
   return (
@@ -206,9 +220,16 @@ function Runner() {
                 <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Test {idx + 1} of {seq.length} · {g?.reps ?? "10 sec"}</div>
                 <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
                 <p className="mt-1 text-sm text-muted-foreground">{g?.what ?? cur.instruction}</p>
-                <div className="mt-3 grid h-44 w-full place-items-center rounded-2xl bg-accent/40">
-                  <MovementDemo testId={cur.id} className="h-40 w-40 text-primary" />
+                <div className="mt-3 grid h-56 w-full place-items-center overflow-hidden rounded-2xl bg-accent/40">
+                  {demoGif?.signedUrl ? (
+                    <img src={demoGif.signedUrl} alt={`${cur.name} demonstration`} className="h-full w-full object-contain" />
+                  ) : (
+                    <MovementDemo testId={cur.id} className="h-44 w-44 text-primary" />
+                  )}
                 </div>
+                {demoGif?.name && (
+                  <p className="mt-1 text-center text-[10px] uppercase tracking-widest text-muted-foreground">Demo: {demoGif.name}</p>
+                )}
                 {g?.why && (
                   <div className="mt-3 flex gap-2 rounded-xl bg-accent/40 p-3 text-xs">
                     <Info className="h-4 w-4 shrink-0 text-primary" />
@@ -256,6 +277,22 @@ function Runner() {
                 <div className="text-5xl font-extrabold tabular-nums brand-text">{countdown}</div>
               </div>
               <p className="mt-3 text-sm opacity-90">{cur.instruction}</p>
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() => finishHandlerRef.current?.(true)}
+                  className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-white/15 text-sm font-semibold backdrop-blur"
+                >
+                  <SkipForward className="h-4 w-4" /> Skip
+                </button>
+                <button
+                  onClick={() => finishHandlerRef.current?.(false)}
+                  disabled={elapsed < 3}
+                  className="flex h-12 flex-[2] items-center justify-center gap-1.5 rounded-2xl brand-gradient text-base font-bold text-primary-foreground disabled:opacity-50"
+                >
+                  <CheckCircle2 className="h-5 w-5" /> {elapsed < 3 ? `Done in ${3 - elapsed}s…` : "Done — next test"}
+                </button>
+              </div>
+              <p className="mt-2 text-center text-[11px] opacity-60">Tap Done when you've finished the movement, or wait for the timer.</p>
             </div>
           )}
           {phase === "done" && (
