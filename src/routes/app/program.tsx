@@ -57,8 +57,8 @@ function Program() {
   return (
     <div className="pb-6">
       <header className="brand-gradient-strong px-5 pb-7 pt-7 text-primary-foreground">
-        <div className="text-xs font-semibold uppercase tracking-widest opacity-80">Today's program</div>
-        <h1 className="mt-1 text-2xl font-extrabold">5-minute corrective routine</h1>
+        <div className="text-xs font-semibold uppercase tracking-widest opacity-80">Today's workout</div>
+        <h1 className="mt-1 text-2xl font-extrabold">Training Session</h1>
         <p className="mt-1 text-sm opacity-90">
           {phase ? `${phase.label} · Week ${phase.weekInPhase} · ${Math.round(phase.ratios.mobility * 100)}/${Math.round(phase.ratios.stability * 100)}/${Math.round(phase.ratios.strength * 100)} Mob/Stab/Str` : "Built around your goal & joint focus."}
         </p>
