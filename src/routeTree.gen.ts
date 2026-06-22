@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as DesktopRouteImport } from './routes/desktop'
 import { Route as OnboardingRouteRouteImport } from './routes/onboarding/route'
 import { Route as AppRouteRouteImport } from './routes/app/route'
@@ -34,6 +35,11 @@ const TermsRoute = TermsRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DisclaimerRoute = DisclaimerRouteImport.update({
+  id: '/disclaimer',
+  path: '/disclaimer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DesktopRoute = DesktopRouteImport.update({
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteRouteWithChildren
   '/onboarding': typeof OnboardingRouteRouteWithChildren
   '/desktop': typeof DesktopRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/app/profile': typeof AppProfileRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRouteRouteWithChildren
   '/desktop': typeof DesktopRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/app/profile': typeof AppProfileRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteRouteWithChildren
   '/onboarding': typeof OnboardingRouteRouteWithChildren
   '/desktop': typeof DesktopRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/app/profile': typeof AppProfileRoute
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/onboarding'
     | '/desktop'
+    | '/disclaimer'
     | '/privacy'
     | '/terms'
     | '/app/profile'
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
     | '/'
     | '/onboarding'
     | '/desktop'
+    | '/disclaimer'
     | '/privacy'
     | '/terms'
     | '/app/profile'
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/onboarding'
     | '/desktop'
+    | '/disclaimer'
     | '/privacy'
     | '/terms'
     | '/app/profile'
@@ -222,6 +234,7 @@ export interface RootRouteChildren {
   AppRouteRoute: typeof AppRouteRouteWithChildren
   OnboardingRouteRoute: typeof OnboardingRouteRouteWithChildren
   DesktopRoute: typeof DesktopRoute
+  DisclaimerRoute: typeof DisclaimerRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
 }
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/disclaimer': {
+      id: '/disclaimer'
+      path: '/disclaimer'
+      fullPath: '/disclaimer'
+      preLoaderRoute: typeof DisclaimerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/desktop': {
@@ -398,6 +418,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRouteRoute: AppRouteRouteWithChildren,
   OnboardingRouteRoute: OnboardingRouteRouteWithChildren,
   DesktopRoute: DesktopRoute,
+  DisclaimerRoute: DisclaimerRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
 }
