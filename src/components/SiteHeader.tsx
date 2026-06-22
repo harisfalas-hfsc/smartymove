@@ -28,7 +28,10 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
     <header
       className="sticky top-0 z-30 flex w-full items-center justify-between"
       style={{
-        padding: "12px 18px",
+        paddingLeft: 18,
+        paddingRight: 18,
+        paddingTop: "max(12px, env(safe-area-inset-top))",
+        paddingBottom: 12,
         background: "rgba(231,236,236,0.85)",
         backdropFilter: "saturate(180%) blur(12px)",
         WebkitBackdropFilter: "saturate(180%) blur(12px)",

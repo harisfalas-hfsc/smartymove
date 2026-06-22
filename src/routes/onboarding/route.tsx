@@ -23,7 +23,7 @@ function OnboardingLayout() {
   return (
     <div className="flex min-h-[100dvh] w-full flex-col" style={{ background: "#E7ECEC", color: "#14213A" }}>
       <SiteHeader showBack onBack={goBack} />
-      <main className="mx-auto w-full max-w-[420px] px-5 pb-8 pt-4">
+      <main className="mx-auto w-full max-w-[440px] px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-4">
         <div className="mb-4">
           <div className="text-[11px] font-semibold uppercase text-muted-foreground">Step {idx + 1} of {STEPS.length} · {STEPS[idx]?.label}</div>
           <div className="mt-2 grid grid-cols-4 gap-1.5">
