@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useUser, updateUser } from "@/lib/store";
 import { useMicroRoutine, useCurrentPhase } from "@/lib/exercises";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
-import { Play, Pause, CheckCircle2, Lock, ChevronLeft, ChevronRight, Crown, Info } from "lucide-react";
+import { Play, Pause, CheckCircle2, Lock, ChevronLeft, ChevronRight, Crown, Info, Camera, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/app/program")({ component: Program });
 
@@ -35,7 +35,27 @@ function Program() {
     return () => { if (intervalRef.current) window.clearInterval(intervalRef.current); };
   }, [running, idx, cur]);
 
-  if (!u || !cur) return null;
+  if (!u) return null;
+  // Lock the program until the user has completed at least one Movement Screen.
+  if (u.sessions.length === 0) {
+    return (
+      <div className="space-y-5 p-5">
+        <div className="rounded-3xl bg-card p-6 text-center shadow-card">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl brand-gradient-soft">
+            <Camera className="h-6 w-6 text-primary" />
+          </div>
+          <h2 className="mt-4 text-xl font-extrabold">Your workout is built from your scan</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Take your first Movement Screen so we can pick the right exercises for what your body actually needs — not a guess.
+          </p>
+          <Link to="/app/screen" className="mt-5 flex h-12 items-center justify-center gap-2 rounded-2xl brand-gradient font-semibold text-primary-foreground">
+            Start Movement Screen <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  if (!cur) return null;
 
   function completeSession() {
     const today = new Date().toISOString().slice(0,10);
