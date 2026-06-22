@@ -18,6 +18,9 @@ import { Route as OnboardingJointsRouteImport } from './routes/onboarding/joints
 import { Route as OnboardingGoalRouteImport } from './routes/onboarding/goal'
 import { Route as OnboardingDisclaimerRouteImport } from './routes/onboarding/disclaimer'
 import { Route as AppScreenRouteImport } from './routes/app/screen'
+import { Route as AppProgressRouteImport } from './routes/app/progress'
+import { Route as AppProgramRouteImport } from './routes/app/program'
+import { Route as AppProfileRouteImport } from './routes/app/profile'
 import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
 
 const OnboardingRouteRoute = OnboardingRouteRouteImport.update({
@@ -65,6 +68,21 @@ const AppScreenRoute = AppScreenRouteImport.update({
   path: '/screen',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppProgressRoute = AppProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProgramRoute = AppProgramRouteImport.update({
+  id: '/program',
+  path: '/program',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppScreenRunRoute = AppScreenRunRouteImport.update({
   id: '/run',
   path: '/run',
@@ -75,6 +93,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
   '/onboarding': typeof OnboardingRouteRouteWithChildren
+  '/app/profile': typeof AppProfileRoute
+  '/app/program': typeof AppProgramRoute
+  '/app/progress': typeof AppProgressRoute
   '/app/screen': typeof AppScreenRouteWithChildren
   '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
   '/onboarding/goal': typeof OnboardingGoalRoute
@@ -86,6 +107,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRouteRouteWithChildren
+  '/app/profile': typeof AppProfileRoute
+  '/app/program': typeof AppProgramRoute
+  '/app/progress': typeof AppProgressRoute
   '/app/screen': typeof AppScreenRouteWithChildren
   '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
   '/onboarding/goal': typeof OnboardingGoalRoute
@@ -99,6 +123,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
   '/onboarding': typeof OnboardingRouteRouteWithChildren
+  '/app/profile': typeof AppProfileRoute
+  '/app/program': typeof AppProgramRoute
+  '/app/progress': typeof AppProgressRoute
   '/app/screen': typeof AppScreenRouteWithChildren
   '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
   '/onboarding/goal': typeof OnboardingGoalRoute
@@ -113,6 +140,9 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/onboarding'
+    | '/app/profile'
+    | '/app/program'
+    | '/app/progress'
     | '/app/screen'
     | '/onboarding/disclaimer'
     | '/onboarding/goal'
@@ -124,6 +154,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/onboarding'
+    | '/app/profile'
+    | '/app/program'
+    | '/app/progress'
     | '/app/screen'
     | '/onboarding/disclaimer'
     | '/onboarding/goal'
@@ -136,6 +169,9 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/onboarding'
+    | '/app/profile'
+    | '/app/program'
+    | '/app/progress'
     | '/app/screen'
     | '/onboarding/disclaimer'
     | '/onboarding/goal'
@@ -216,6 +252,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppScreenRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/app/progress': {
+      id: '/app/progress'
+      path: '/progress'
+      fullPath: '/app/progress'
+      preLoaderRoute: typeof AppProgressRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/program': {
+      id: '/app/program'
+      path: '/program'
+      fullPath: '/app/program'
+      preLoaderRoute: typeof AppProgramRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/app/screen/run': {
       id: '/app/screen/run'
       path: '/run'
@@ -239,11 +296,17 @@ const AppScreenRouteWithChildren = AppScreenRoute._addFileChildren(
 )
 
 interface AppRouteRouteChildren {
+  AppProfileRoute: typeof AppProfileRoute
+  AppProgramRoute: typeof AppProgramRoute
+  AppProgressRoute: typeof AppProgressRoute
   AppScreenRoute: typeof AppScreenRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppProfileRoute: AppProfileRoute,
+  AppProgramRoute: AppProgramRoute,
+  AppProgressRoute: AppProgressRoute,
   AppScreenRoute: AppScreenRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
 }
