@@ -5,22 +5,12 @@ import { SiteFooter } from "@/components/SiteFooter";
 export function LegalLayout({ title, icon, lastUpdated, children }: { title: string; icon: ReactNode; lastUpdated: string; children: ReactNode }) {
   return (
     <div
-      className="flex min-h-[100dvh] w-full justify-center px-4 py-8"
+      className="flex min-h-[100dvh] w-full flex-col"
       style={{ background: "#E7ECEC", color: "#14213A" }}
     >
-      <div
-        className="w-full"
-        style={{
-          maxWidth: 760,
-          background: "#F4F6F7",
-          borderRadius: 28,
-          boxShadow: "0 30px 60px -20px rgba(20,33,58,0.18)",
-          padding: "22px 22px 24px",
-        }}
-      >
-        <SiteHeader />
-
-        <div className="mt-2 flex items-center gap-3">
+      <SiteHeader />
+      <main className="mx-auto w-full max-w-[760px] px-5 pb-8 pt-5">
+        <div className="flex items-center gap-3">
           <span
             className="grid place-items-center"
             style={{ width: 44, height: 44, borderRadius: 14, background: "linear-gradient(160deg,#0E7C86,#1f6fa8)", color: "#fff" }}
@@ -65,7 +55,7 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
           .legal-prose .callout strong{ color:#B23A1A; }
           .legal-prose .note{ background:#F1F5F4; border:1px solid #D9E0E2; border-radius:14px; padding:12px 14px; margin:14px 0; font-size:13.5px; }
         `}</style>
-      </div>
+      </main>
     </div>
   );
 }
