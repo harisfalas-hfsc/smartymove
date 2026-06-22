@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { type Joint, updateUser, getUser } from "@/lib/store";
+import { type Joint, updateOnboardingDraft, updateUser, getOnboardingDraft, getUser } from "@/lib/store";
 
 export const Route = createFileRoute("/onboarding/joints")({ component: Page });
 
@@ -18,7 +18,7 @@ const OPTIONS: { v: Joint; label: string; emoji: string }[] = [
 
 function Page() {
   const navigate = useNavigate();
-  const [picked, setPicked] = useState<Joint[]>(getUser()?.questionnaire?.joints ?? []);
+  const [picked, setPicked] = useState<Joint[]>(getUser()?.questionnaire?.joints ?? getOnboardingDraft().questionnaire?.joints ?? []);
   function toggle(j: Joint) {
     if (j === "none") { setPicked(["none"]); return; }
     setPicked(p => {
@@ -29,7 +29,9 @@ function Page() {
     });
   }
   function next() {
-    updateUser(u => ({ ...u, questionnaire: { ...(u.questionnaire!), joints: picked } }));
+    const user = getUser();
+    if (user) updateUser(u => ({ ...u, questionnaire: { ...(u.questionnaire!), joints: picked } }));
+    else updateOnboardingDraft(draft => ({ ...draft, questionnaire: { ...(draft.questionnaire!), joints: picked } }));
     navigate({ to: "/onboarding/disclaimer" });
   }
   return (

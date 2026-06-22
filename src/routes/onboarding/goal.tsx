@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { type Goal, updateUser, getUser } from "@/lib/store";
+import { type Goal, updateOnboardingDraft, updateUser, getOnboardingDraft, getUser } from "@/lib/store";
 
 export const Route = createFileRoute("/onboarding/goal")({ component: Page });
 
@@ -15,11 +15,16 @@ const GOALS: { v: Goal; title: string; sub: string; emoji: string }[] = [
 
 function Page() {
   const navigate = useNavigate();
-  const [g, setG] = useState<Goal | null>(getUser()?.goal ?? null);
+  const [g, setG] = useState<Goal | null>(getUser()?.goal ?? getOnboardingDraft().goal ?? null);
   function next() {
     if (!g) return;
-    updateUser({ goal: g });
-    navigate({ to: "/app" });
+    if (getUser()) {
+      updateUser({ goal: g });
+      navigate({ to: "/app" });
+      return;
+    }
+    updateOnboardingDraft({ goal: g });
+    window.location.assign("/?auth=signup");
   }
   return (
     <div className="space-y-6 pb-6">
@@ -42,7 +47,7 @@ function Page() {
           );
         })}
       </div>
-      <Button disabled={!g} onClick={next} className="h-12 w-full rounded-2xl brand-gradient text-base font-semibold shadow-soft disabled:opacity-50">Finish setup</Button>
+      <Button disabled={!g} onClick={next} className="h-12 w-full rounded-2xl brand-gradient text-base font-semibold shadow-soft disabled:opacity-50">Create account to continue</Button>
     </div>
   );
 }

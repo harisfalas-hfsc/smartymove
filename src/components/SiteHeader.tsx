@@ -1,13 +1,26 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Activity, ChevronLeft } from "lucide-react";
 
 type Props = {
   onSignIn?: () => void;
   onSignUp?: () => void;
   onBack?: () => void;
+  showBack?: boolean;
 };
 
-export function SiteHeader({ onSignIn, onSignUp, onBack }: Props) {
+export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Props) {
+  const navigate = useNavigate();
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+      return;
+    }
+    if (typeof window !== "undefined" && window.history.length > 1) window.history.back();
+    else navigate({ to: "/" });
+  };
+  const handleSignIn = () => onSignIn ? onSignIn() : window.location.assign("/?auth=signin");
+  const handleSignUp = () => onSignUp ? onSignUp() : window.location.assign("/?auth=signup");
+
   return (
     <header
       className="sticky top-0 z-30 flex w-full items-center justify-between"
@@ -20,10 +33,10 @@ export function SiteHeader({ onSignIn, onSignUp, onBack }: Props) {
       }}
     >
       <div className="flex items-center gap-2">
-        {onBack && (
+        {(showBack || onBack) && (
           <button
             type="button"
-            onClick={onBack}
+            onClick={handleBack}
             aria-label="Go back"
             className="grid place-items-center"
             style={{
@@ -41,7 +54,7 @@ export function SiteHeader({ onSignIn, onSignUp, onBack }: Props) {
         style={{
           fontWeight: 800,
           fontSize: 17,
-          letterSpacing: "-0.01em",
+          letterSpacing: 0,
           color: "#14213A",
           textDecoration: "none",
         }}
@@ -65,7 +78,7 @@ export function SiteHeader({ onSignIn, onSignUp, onBack }: Props) {
       <div className="flex items-center gap-2">
         <button
           type="button"
-          onClick={onSignIn}
+          onClick={handleSignIn}
           style={{
             background: "transparent",
             border: "none",
@@ -80,7 +93,7 @@ export function SiteHeader({ onSignIn, onSignUp, onBack }: Props) {
         </button>
         <button
           type="button"
-          onClick={onSignUp}
+          onClick={handleSignUp}
           style={{
             background: "linear-gradient(160deg,#0E7C86,#1f6fa8)",
             border: "none",

@@ -51,6 +51,12 @@ export interface User {
 }
 
 const KEY = "smartymove.user";
+const DRAFT_KEY = "smartymove.onboardingDraft";
+
+export interface OnboardingDraft {
+  questionnaire?: Questionnaire;
+  goal?: Goal;
+}
 
 export function getUser(): User | null {
   if (typeof window === "undefined") return null;
@@ -66,6 +72,23 @@ export function updateUser(patch: Partial<User> | ((u: User) => User)) {
   const cur = getUser(); if (!cur) return;
   const next = typeof patch === "function" ? patch(cur) : { ...cur, ...patch };
   setUser(next);
+}
+export function getOnboardingDraft(): OnboardingDraft {
+  if (typeof window === "undefined") return {};
+  try { const r = localStorage.getItem(DRAFT_KEY); return r ? JSON.parse(r) as OnboardingDraft : {}; } catch { return {}; }
+}
+export function setOnboardingDraft(draft: OnboardingDraft) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+}
+export function updateOnboardingDraft(patch: Partial<OnboardingDraft> | ((draft: OnboardingDraft) => OnboardingDraft)) {
+  const cur = getOnboardingDraft();
+  const next = typeof patch === "function" ? patch(cur) : { ...cur, ...patch };
+  setOnboardingDraft(next);
+}
+export function clearOnboardingDraft() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(DRAFT_KEY);
 }
 export function useUser() {
   const [u, setU] = useState<User | null>(() => getUser());

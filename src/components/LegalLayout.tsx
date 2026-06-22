@@ -8,7 +8,7 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
       className="flex min-h-[100dvh] w-full flex-col"
       style={{ background: "#E7ECEC", color: "#14213A" }}
     >
-      <SiteHeader />
+      <SiteHeader showBack />
       <main className="mx-auto w-full max-w-[760px] px-5 pb-8 pt-5">
         <div className="flex items-center gap-3">
           <span
@@ -17,7 +17,7 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
           >
             {icon}
           </span>
-          <h1 style={{ fontWeight: 700, fontSize: 26, lineHeight: 1.1, letterSpacing: "-0.01em", margin: 0 }}>
+          <h1 style={{ fontWeight: 700, fontSize: 26, lineHeight: 1.1, letterSpacing: 0, margin: 0 }}>
             {title}
           </h1>
         </div>
@@ -42,7 +42,7 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
         <SiteFooter />
 
         <style>{`
-          .legal-prose h2{ font-weight:700; font-size:18px; color:#14213A; margin:22px 0 8px; letter-spacing:-0.01em; }
+          .legal-prose h2{ font-weight:700; font-size:18px; color:#14213A; margin:22px 0 8px; letter-spacing:0; }
           .legal-prose h2:first-child{ margin-top:0; }
           .legal-prose h3{ font-weight:600; font-size:15px; color:#14213A; margin:16px 0 6px; }
           .legal-prose p{ margin:0 0 10px; }
