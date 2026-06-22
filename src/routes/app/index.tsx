@@ -106,7 +106,7 @@ function Home() {
 
         <section>
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-base font-bold">Today's micro-routine</h3>
+            <h3 className="text-base font-bold">Today's Workout</h3>
             <Link to="/app/program" className="text-xs font-semibold text-primary">Open</Link>
           </div>
           <div className="space-y-2">
