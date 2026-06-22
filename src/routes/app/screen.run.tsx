@@ -128,7 +128,14 @@ function Runner() {
     const joints = (u.questionnaire?.joints ?? []).filter(j => j !== "none") as Joint[];
     const session = computeSession(allResults, joints, u.age);
     const wasReTest = u.sessions.length > 0;
-    updateUser(prev => ({ ...prev, sessions: [...prev.sessions, session], firstRetestDone: prev.firstRetestDone || wasReTest }));
+    const nextRetest = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+    updateUser(prev => ({
+      ...prev,
+      sessions: [...prev.sessions, session],
+      firstRetestDone: prev.firstRetestDone || wasReTest,
+      nextRetestDate: nextRetest,
+      programStartDate: prev.programStartDate ?? prev.createdAt,
+    }));
     setPhase("done");
     setTimeout(() => navigate({ to: "/app/progress" }), 1200);
   }
