@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as DesktopRouteImport } from './routes/desktop'
 import { Route as OnboardingRouteRouteImport } from './routes/onboarding/route'
 import { Route as AppRouteRouteImport } from './routes/app/route'
@@ -24,6 +25,11 @@ import { Route as AppProgramRouteImport } from './routes/app/program'
 import { Route as AppProfileRouteImport } from './routes/app/profile'
 import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DesktopRoute = DesktopRouteImport.update({
   id: '/desktop',
   path: '/desktop',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteRouteWithChildren
   '/onboarding': typeof OnboardingRouteRouteWithChildren
   '/desktop': typeof DesktopRoute
+  '/terms': typeof TermsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
   '/app/progress': typeof AppProgressRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRouteRouteWithChildren
   '/desktop': typeof DesktopRoute
+  '/terms': typeof TermsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
   '/app/progress': typeof AppProgressRoute
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteRouteWithChildren
   '/onboarding': typeof OnboardingRouteRouteWithChildren
   '/desktop': typeof DesktopRoute
+  '/terms': typeof TermsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
   '/app/progress': typeof AppProgressRoute
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/onboarding'
     | '/desktop'
+    | '/terms'
     | '/app/profile'
     | '/app/program'
     | '/app/progress'
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/'
     | '/onboarding'
     | '/desktop'
+    | '/terms'
     | '/app/profile'
     | '/app/program'
     | '/app/progress'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/onboarding'
     | '/desktop'
+    | '/terms'
     | '/app/profile'
     | '/app/program'
     | '/app/progress'
@@ -198,10 +210,18 @@ export interface RootRouteChildren {
   AppRouteRoute: typeof AppRouteRouteWithChildren
   OnboardingRouteRoute: typeof OnboardingRouteRouteWithChildren
   DesktopRoute: typeof DesktopRoute
+  TermsRoute: typeof TermsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/desktop': {
       id: '/desktop'
       path: '/desktop'
@@ -358,6 +378,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRouteRoute: AppRouteRouteWithChildren,
   OnboardingRouteRoute: OnboardingRouteRouteWithChildren,
   DesktopRoute: DesktopRoute,
+  TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
