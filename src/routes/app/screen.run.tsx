@@ -3,9 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { getPoseLandmarker, PL } from "@/lib/pose";
 import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, scoreFromRange, TEST_GUIDES } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
-import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, Info, AlertCircle, SkipForward } from "lucide-react";
-import { MovementDemo } from "@/components/MovementDemo";
-import { useTestDemoGif } from "@/lib/exercises";
+import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward } from "lucide-react";
 
 export const Route = createFileRoute("/app/screen/run")({ component: Runner });
 
@@ -161,9 +159,6 @@ function Runner() {
   }
 
   const cur = seq[idx];
-  const curGuide = cur ? TEST_GUIDES[cur.id] : undefined;
-  const demoQuery = curGuide?.libraryQuery;
-  const { data: demoGif } = useTestDemoGif(demoQuery);
   if (!u) return null;
   const progress = seq.length ? ((idx + (phase === "running" ? 1 - countdown / (cur?.duration ?? 1) : 0)) / seq.length) * 100 : 0;
 
@@ -219,23 +214,6 @@ function Runner() {
               <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
                 <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Test {idx + 1} of {seq.length} · {g?.reps ?? "10 sec"}</div>
                 <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
-                <p className="mt-1 text-sm text-muted-foreground">{g?.what ?? cur.instruction}</p>
-                <div className="mt-3 grid h-56 w-full place-items-center overflow-hidden rounded-2xl bg-accent/40">
-                  {demoGif?.signedUrl ? (
-                    <img src={demoGif.signedUrl} alt={`${cur.name} demonstration`} className="h-full w-full object-contain" />
-                  ) : (
-                    <MovementDemo testId={cur.id} className="h-44 w-44 text-primary" />
-                  )}
-                </div>
-                {demoGif?.name && (
-                  <p className="mt-1 text-center text-[10px] uppercase tracking-widest text-muted-foreground">Demo: {demoGif.name}</p>
-                )}
-                {g?.why && (
-                  <div className="mt-3 flex gap-2 rounded-xl bg-accent/40 p-3 text-xs">
-                    <Info className="h-4 w-4 shrink-0 text-primary" />
-                    <span><strong>Why this test:</strong> {g.why}</span>
-                  </div>
-                )}
                 {g && (
                   <>
                     <div className="mt-4">
