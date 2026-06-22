@@ -133,6 +133,12 @@ export interface BuildInput {
   programStartDate: string;
   dateISO?: string; // defaults to today
   phaseOverride?: PhaseInfo["phase"];
+  /**
+   * Latest Movement Screen sub-scores (0-100). When present, the engine
+   * biases category slot counts toward the user's weakest dimensions and
+   * forces the Foundation phase for very low overall scores.
+   */
+  sessionSub?: { mobility: number; stability: number; balance: number; quality: number; strength: number };
 }
 
 export interface BuiltRoutine {
@@ -162,7 +168,12 @@ export function buildCorrectiveRoutine(
   input: BuildInput,
   library: LibraryExercise[],
 ): BuiltRoutine {
-  const phase = getPhaseInfo(input.programStartDate, input.phaseOverride);
+  const sub = input.sessionSub;
+  const overall = sub ? Math.round((sub.mobility + sub.stability + sub.balance + sub.quality + sub.strength) / 5) : null;
+  // Force the gentlest phase when the user's scan flags poor movement.
+  const effectiveOverride: PhaseInfo["phase"] | undefined =
+    input.phaseOverride ?? (overall !== null && overall < 50 ? "foundation" : undefined);
+  const phase = getPhaseInfo(input.programStartDate, effectiveOverride);
   const areas = resolveAreas(input.joints, input.goal);
   const date = input.dateISO ?? new Date().toISOString().slice(0, 10);
   const seed = hashSeed(input.userId, date);
@@ -181,9 +192,34 @@ export function buildCorrectiveRoutine(
   const picks: ResolvedPick[] = [];
   const unresolved: BuiltRoutine["unresolved"] = [];
 
-  const order: Category[] = ["mobility", "stability", "strength"];
+  // Bias category order by the user's weakest dimension so the weakest
+  // bucket is filled first, before slots get consumed by other categories.
+  const order: Category[] = sub
+    ? (["mobility", "stability", "strength"] as Category[]).slice().sort((a, b) => {
+        const sa = a === "mobility" ? sub.mobility
+          : a === "stability" ? Math.min(sub.stability, sub.balance)
+          : sub.strength;
+        const sb = b === "mobility" ? sub.mobility
+          : b === "stability" ? Math.min(sub.stability, sub.balance)
+          : sub.strength;
+        return sa - sb;
+      })
+    : ["mobility", "stability", "strength"];
+
+  // Build a copy of slot counts we can adjust based on scan weaknesses.
+  const slots: Record<Category, number> = { ...phase.slotCounts };
+  if (sub) {
+    const weakest = order[0];
+    const strongest = order[order.length - 1];
+    if (weakest !== strongest && slots[strongest] > 1) {
+      // Take one slot from the strongest dimension, give it to the weakest.
+      slots[strongest] -= 1;
+      slots[weakest] += 1;
+    }
+  }
+
   for (const cat of order) {
-    const want = phase.slotCounts[cat];
+    const want = slots[cat];
     let filled = 0;
     let areaCursor = 0;
     let exhausted = 0;
