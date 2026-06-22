@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Image as ImageIcon, Database, Search } from "lucide-react";
+import { Upload, Image as ImageIcon, Database, Search, FileDown, Wrench } from "lucide-react";
 
 export const Route = createFileRoute("/admin/exercises")({ component: AdminExercises });
 
@@ -86,6 +86,7 @@ function Manager() {
   const [gifBusy, setGifBusy] = useState(false);
   const [gifProgress, setGifProgress] = useState(0);
   const [gifStatus, setGifStatus] = useState("");
+  const [showMissingOnly, setShowMissingOnly] = useState(false);
 
   async function loadAll() {
     setLoading(true);
@@ -160,6 +161,74 @@ function Manager() {
     }
   }
 
+  async function listExistingGifNames() {
+    const existing = new Set<string>();
+    let offset = 0;
+    while (true) {
+      const { data, error } = await supabase.storage
+        .from("exercise-gifs")
+        .list("", { limit: 1000, offset, sortBy: { column: "name", order: "asc" } });
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      for (const o of data) existing.add(o.name);
+      if (data.length < 1000) break;
+      offset += 1000;
+    }
+    return existing;
+  }
+
+  async function linkGifRows(ids: string[], onProgress?: (done: number, total: number, failed: number) => void) {
+    const valid = Array.from(new Set(ids)).filter((id) => rows.some((r) => r.id === id));
+    let done = 0;
+    let failed = 0;
+    for (let i = 0; i < valid.length; i += 25) {
+      const slice = valid.slice(i, i + 25);
+      await Promise.all(slice.map(async (id) => {
+        const { error } = await supabase.from("exercises").update({ gif_url: `${id}.gif` }).eq("id", id);
+        if (error) failed++;
+      }));
+      done += slice.length;
+      onProgress?.(done, valid.length, failed);
+    }
+    return { linked: valid.length - failed, failed, total: valid.length };
+  }
+
+  async function repairExistingLinks() {
+    setGifBusy(true); setGifProgress(0); setGifStatus("Scanning uploaded GIFs and repairing library links…");
+    try {
+      const existing = await listExistingGifNames();
+      const ids = rows
+        .filter((r) => existing.has(`${r.id}.gif`) && r.gif_url !== `${r.id}.gif`)
+        .map((r) => r.id);
+      if (ids.length === 0) {
+        setGifProgress(100);
+        setGifStatus("No broken links found. Every uploaded matching GIF is already connected.");
+      } else {
+        const result = await linkGifRows(ids, (done, total, failed) => {
+          setGifProgress(Math.round((done / total) * 100));
+          setGifStatus(`Repairing links ${done}/${total} · failed ${failed}`);
+        });
+        setGifStatus(`Repair done. Connected ${result.linked} existing GIFs to exercises${result.failed ? `, ${result.failed} failed` : ""}.`);
+        await loadAll();
+      }
+    } catch (err: any) {
+      setGifStatus(`Repair failed: ${err?.message ?? err}`);
+    } finally {
+      setGifBusy(false);
+    }
+  }
+
+  function downloadMissingList() {
+    const missing = rows.filter((r) => !r.gif_url);
+    const csv = ["id,name,body_part,equipment,target", ...missing.map((r) => [r.id, r.name, r.body_part ?? "", r.equipment ?? "", r.target ?? ""].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))].join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "missing-exercise-gifs.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function handleGIFs(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -168,34 +237,25 @@ function Manager() {
     const errors: string[] = [];
     let uploaded = 0, matched = 0, skipped = 0, failed = 0;
     try {
-      // 1) List everything already in the bucket so we can skip it
-      const existing = new Set<string>();
-      let offset = 0;
-      while (true) {
-        const { data, error } = await supabase.storage
-          .from("exercise-gifs")
-          .list("", { limit: 1000, offset, sortBy: { column: "name", order: "asc" } });
-        if (error) { console.error(error); break; }
-        if (!data || data.length === 0) break;
-        for (const o of data) existing.add(o.name);
-        if (data.length < 1000) break;
-        offset += 1000;
-      }
+      // 1) List everything already in the bucket so we can skip uploads safely
+      const existing = await listExistingGifNames();
 
       // 2) Build the work queue, skipping files already uploaded
       const queue: File[] = [];
+      const selectedIds: string[] = [];
       for (let i = 0; i < files.length; i++) {
         const f = files[i];
         const id = f.name.replace(/\.gif$/i, "").trim();
+        selectedIds.push(id);
         if (existing.has(`${id}.gif`)) { skipped++; continue; }
         queue.push(f);
       }
       const total = queue.length;
-      setGifStatus(`Skipping ${skipped} already uploaded. Uploading ${total} new files…`);
+      setGifStatus(`Selected ${files.length}. Skipping ${skipped} already uploaded, uploading ${total} missing files automatically…`);
 
       // 3) Upload with bounded concurrency + retry
-      const CONCURRENCY = 5;
-      const RETRIES = 2;
+      const CONCURRENCY = 10;
+      const RETRIES = 4;
       let cursor = 0;
       let done = 0;
 
@@ -209,11 +269,7 @@ function Manager() {
             .upload(path, f, { upsert: true, contentType: "image/gif" });
           if (!upErr) {
             uploaded++;
-            const { error: updErr } = await supabase
-              .from("exercises")
-              .update({ gif_url: path })
-              .eq("id", id);
-            if (!updErr) matched++;
+            matched++;
             return;
           }
           lastErr = upErr;
@@ -230,13 +286,17 @@ function Manager() {
           done++;
           if (done % 5 === 0 || done === total) {
             setGifProgress(total === 0 ? 100 : Math.round((done / total) * 100));
-            setGifStatus(`Uploaded ${uploaded} · matched ${matched} · skipped ${skipped} · failed ${failed} (${done}/${total})`);
+            setGifStatus(`Uploaded ${uploaded} · skipped ${skipped} · failed ${failed} (${done}/${total})`);
           }
         }
       }
       await Promise.all(Array.from({ length: Math.min(CONCURRENCY, Math.max(1, total)) }, worker));
 
-      setGifStatus(`Done. ${uploaded} uploaded, ${matched} matched, ${skipped} skipped, ${failed} failed.` +
+      setGifStatus("Connecting uploaded and already-existing GIFs to the exercise rows…");
+      setGifProgress(95);
+      const linkResult = await linkGifRows(selectedIds);
+
+      setGifStatus(`Done. ${uploaded} uploaded, ${skipped} already existed, ${linkResult.linked} linked to exercises, ${failed + linkResult.failed} failed.` +
         (errors.length ? ` First errors: ${errors.slice(0, 5).join(" | ")}` : ""));
       if (failed > 0) console.warn("GIF upload errors:", errors);
       await loadAll();
