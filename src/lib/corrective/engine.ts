@@ -172,7 +172,7 @@ export function buildCorrectiveRoutine(
   const overall = sub ? Math.round((sub.mobility + sub.stability + sub.balance + sub.quality + sub.strength) / 5) : null;
   // Force the gentlest phase when the user's scan flags poor movement.
   const effectiveOverride: PhaseInfo["phase"] | undefined =
-    input.phaseOverride ?? (overall !== null && overall < 50 ? "foundation" : undefined);
+    input.phaseOverride ?? (overall !== null && overall < 50 ? "restore" : undefined);
   const phase = getPhaseInfo(input.programStartDate, effectiveOverride);
   const areas = resolveAreas(input.joints, input.goal);
   const date = input.dateISO ?? new Date().toISOString().slice(0, 10);
