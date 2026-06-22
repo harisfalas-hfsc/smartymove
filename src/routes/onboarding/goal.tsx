@@ -15,6 +15,7 @@ const GOALS: { v: Goal; title: string; sub: string; emoji: string }[] = [
 
 function Page() {
   const navigate = useNavigate();
+  const loggedIn = !!getUser();
   const [g, setG] = useState<Goal | null>(getUser()?.goal ?? getOnboardingDraft().goal ?? null);
   function next() {
     if (!g) return;
@@ -47,7 +48,9 @@ function Page() {
           );
         })}
       </div>
-      <Button disabled={!g} onClick={next} className="h-12 w-full rounded-2xl brand-gradient text-base font-semibold shadow-soft disabled:opacity-50">Create account to continue</Button>
+      <Button disabled={!g} onClick={next} className="h-12 w-full rounded-2xl brand-gradient text-base font-semibold shadow-soft disabled:opacity-50">
+        {loggedIn ? "Save goal" : "Create account to continue"}
+      </Button>
     </div>
   );
 }
