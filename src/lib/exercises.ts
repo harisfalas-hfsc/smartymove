@@ -2,6 +2,9 @@ import type { Goal, Joint } from "./store";
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { getUser } from "./store";
+import { buildCorrectiveRoutine, pickToRoutineItem, findUnresolvedCanonicals } from "./corrective/engine";
+import { getPhaseInfo, type PhaseInfo } from "./corrective/phase";
 
 /** Row from the public.exercises library table. */
 export interface LibraryExercise {
@@ -30,6 +33,9 @@ export interface RoutineItem {
   instructions: string[];
   gifPath: string | null;
   gifUrl: string | null;
+  area?: string;
+  category?: string;
+  canonical?: string;
 }
 
 /**
@@ -233,17 +239,49 @@ async function attachSignedUrls(items: RoutineItem[]): Promise<RoutineItem[]> {
   return items.map(i => ({ ...i, gifUrl: i.gifPath ? byPath.get(i.gifPath) ?? null : null }));
 }
 
-/** React hook: returns today's micro-routine pulled from the library. */
+/**
+ * React hook: returns today's micro-routine, built strictly from the
+ * curated SmartyMove libraries via the Corrective Exercise Engine.
+ */
 export function useMicroRoutine(goal: Goal | undefined, joints: Joint[]) {
   const jointsKey = [...joints].sort().join(",");
+  const u = getUser();
+  const userId = u?.id ?? "anon";
+  const programStart = u?.programStartDate ?? u?.createdAt ?? new Date().toISOString();
+  const phaseOverride = u?.phaseOverride;
+  const dateISO = new Date().toISOString().slice(0, 10);
   return useQuery({
-    queryKey: ["micro-routine", goal ?? "none", jointsKey],
+    queryKey: ["corrective-routine", userId, goal ?? "none", jointsKey, dateISO, phaseOverride ?? "auto"],
     queryFn: async () => {
       const library = await fetchLibrary();
-      const routine = buildRoutine(goal, joints, library);
-      return attachSignedUrls(routine);
+      const built = buildCorrectiveRoutine(
+        { userId, goal, joints, programStartDate: programStart, dateISO, phaseOverride },
+        library,
+      );
+      const items: RoutineItem[] = built.picks.map(pickToRoutineItem);
+      return attachSignedUrls(items);
     },
     staleTime: 30 * 60 * 1000,
+  });
+}
+
+/** Phase info hook for the current user (UI banners). */
+export function useCurrentPhase(): PhaseInfo | null {
+  const u = getUser();
+  if (!u) return null;
+  const start = u.programStartDate ?? u.createdAt;
+  return getPhaseInfo(start, u.phaseOverride);
+}
+
+/** Admin: list curated canonical names that don't resolve to any library row. */
+export function useUnresolvedCanonicals() {
+  return useQuery({
+    queryKey: ["unresolved-canonicals"],
+    queryFn: async () => {
+      const library = await fetchLibrary();
+      return findUnresolvedCanonicals(library);
+    },
+    staleTime: 10 * 60 * 1000,
   });
 }
 
