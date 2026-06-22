@@ -30,7 +30,7 @@ function Runner() {
   const rafRef = useRef<number>(0);
   const latestLandmarksRef = useRef<any[] | null>(null);
 
-  const [phase, setPhase] = useState<"setup" | "preview" | "intro" | "running" | "done" | "failed">("setup");
+  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "done" | "failed">("setup");
   const [seq, setSeq] = useState<TestDef[]>([]);
   const [idx, setIdx] = useState(0);
   const [countdown, setCountdown] = useState(0);
@@ -59,11 +59,11 @@ function Runner() {
       if (!videoRef.current) return;
       videoRef.current.srcObject = stream;
       await videoRef.current.play();
-      setPhase("preview");
       setStatusMsg("Loading pose detection model...");
       const lm = await getPoseLandmarker();
       setPoseReady(true);
       setStatusMsg("");
+      setPhase("intro");
       const tick = () => {
         if (!videoRef.current || !canvasRef.current) return;
         const v = videoRef.current; const c = canvasRef.current;
@@ -172,7 +172,7 @@ function Runner() {
       <div className="relative flex-1 overflow-hidden bg-black">
         <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-contain [transform:scaleX(-1)]" />
         <canvas ref={canvasRef} className="absolute inset-0 h-full w-full object-contain [transform:scaleX(-1)]" />
-        {(phase === "setup" || phase === "preview") && (
+        {phase === "setup" && (
           <svg viewBox="0 0 200 400" className="pointer-events-none absolute inset-0 m-auto h-[80%] w-auto opacity-30">
             <path d="M100 30 a18 18 0 1 1 0.1 0 M82 70 h36 v90 l-16 70 v100 l-10 30 M118 70 v90 l16 70 v100 l10 30 M82 80 l-30 70 M118 80 l30 70" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" />
           </svg>
@@ -202,15 +202,6 @@ function Runner() {
                 {starting ? (statusMsg || "Starting...") : "Enable camera"}
               </button>
               {starting && statusMsg && <p className="mt-2 text-[11px] opacity-70">{statusMsg}</p>}
-            </div>
-          )}
-          {phase === "preview" && cur && (
-            <div className="rounded-3xl bg-white/10 p-5 backdrop-blur-xl">
-              <div className="text-xs font-semibold uppercase tracking-widest opacity-80">Next up</div>
-              <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
-              <p className="mt-2 text-sm opacity-90">{TEST_GUIDES[cur.id]?.what ?? cur.instruction}</p>
-              <p className="mt-2 text-[11px] opacity-60">{poseReady ? "Pose detection active" : (statusMsg || "Loading pose model...")}</p>
-              <button onClick={() => setPhase("intro")} disabled={!poseReady} className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-semibold disabled:opacity-50">Show me how</button>
             </div>
           )}
           {phase === "intro" && cur && (() => {
@@ -244,8 +235,8 @@ function Runner() {
                   </>
                 )}
                 <div className="mt-5 flex gap-2">
-                  <button onClick={() => setPhase("preview")} className="h-12 flex-1 rounded-2xl bg-secondary text-sm font-semibold text-foreground">Back</button>
-                  <button onClick={() => setPhase("running")} className="h-12 flex-[2] rounded-2xl brand-gradient text-base font-semibold text-primary-foreground">I'm ready · Start</button>
+                  <button onClick={() => navigate({ to: "/app/screen" })} className="h-12 flex-1 rounded-2xl bg-secondary text-sm font-semibold text-foreground">Exit</button>
+                  <button onClick={() => setPhase("running")} disabled={!poseReady} className="h-12 flex-[2] rounded-2xl brand-gradient text-base font-semibold text-primary-foreground disabled:opacity-50">{poseReady ? "I'm ready · Start" : "Loading…"}</button>
                 </div>
               </div>
             );
@@ -293,7 +284,7 @@ function Runner() {
                 The camera didn't detect enough movement to give a reliable result. Stand 6–8 feet back so your full body is in frame, then actually perform each movement during the timer. Skipping or staying still will not produce a real score.
               </p>
               <button
-                onClick={() => { setResults([]); setIdx(0); setPhase("preview"); }}
+                onClick={() => { setResults([]); setIdx(0); setPhase("intro"); }}
                 className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-semibold"
               >
                 Try again
