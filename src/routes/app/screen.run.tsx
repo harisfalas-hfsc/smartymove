@@ -285,6 +285,27 @@ function Runner() {
               <p className="text-sm opacity-85">Crunching your scores...</p>
             </div>
           )}
+          {phase === "failed" && (
+            <div className="rounded-3xl bg-destructive/30 p-5 text-center backdrop-blur-xl">
+              <AlertTriangle className="mx-auto h-8 w-8" />
+              <div className="mt-1 text-lg font-bold">We couldn't score your scan</div>
+              <p className="mt-1 text-sm opacity-90">
+                The camera didn't detect enough movement to give a reliable result. Stand 6–8 feet back so your full body is in frame, then actually perform each movement during the timer. Skipping or staying still will not produce a real score.
+              </p>
+              <button
+                onClick={() => { setResults([]); setIdx(0); setPhase("preview"); }}
+                className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-semibold"
+              >
+                Try again
+              </button>
+              <button
+                onClick={() => navigate({ to: "/app/screen" })}
+                className="mt-2 h-10 w-full rounded-2xl bg-white/10 text-sm font-semibold"
+              >
+                Back
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -294,7 +315,26 @@ function Runner() {
 function scoreSamples(testId: string, samples: any[]): TestResult {
   const name = ({ ...Object.fromEntries(CORE_TESTS.map(t => [t.id, t.name])),
     ...Object.fromEntries(Object.values(CONDITIONAL_TESTS).map(t => [t.id, t.name])) } as Record<string,string>)[testId] ?? testId;
-  if (samples.length < 5) return { id: testId, name, score: 2, notes: "Limited data — partial score" };
+  // Need enough frames with a detected pose to score anything.
+  if (samples.length < 15) {
+    return { id: testId, name, score: 1, notes: "No pose detected — make sure your full body is in frame", valid: false };
+  }
+  // Detect actual movement by summing frame-to-frame displacement of major joints.
+  const joints = [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_WRIST, PL.RIGHT_WRIST];
+  let motion = 0;
+  for (let i = 1; i < samples.length; i++) {
+    for (const j of joints) {
+      const a = samples[i - 1][j]; const b = samples[i][j];
+      if (!a || !b) continue;
+      motion += Math.hypot(a.x - b.x, a.y - b.y);
+    }
+  }
+  const motionPerFrame = motion / Math.max(1, samples.length - 1);
+  // "Stillness" tests (balance, bridge_hold) intentionally don't need movement.
+  const stillnessTest = testId === "balance" || testId === "bridge_hold";
+  if (!stillnessTest && motionPerFrame < 0.015) {
+    return { id: testId, name, score: 1, notes: "No movement detected during the test", valid: false };
+  }
   switch (testId) {
     case "squat": {
       let minA = 180;
