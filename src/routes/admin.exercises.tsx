@@ -163,27 +163,82 @@ function Manager() {
   async function handleGIFs(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    setGifBusy(true); setGifProgress(0); setGifStatus(`Uploading ${files.length} files…`);
-    let uploaded = 0, matched = 0;
+    setGifBusy(true); setGifProgress(0);
+    setGifStatus(`Checking which of ${files.length} files are already uploaded…`);
+    const errors: string[] = [];
+    let uploaded = 0, matched = 0, skipped = 0, failed = 0;
     try {
+      // 1) List everything already in the bucket so we can skip it
+      const existing = new Set<string>();
+      let offset = 0;
+      while (true) {
+        const { data, error } = await supabase.storage
+          .from("exercise-gifs")
+          .list("", { limit: 1000, offset, sortBy: { column: "name", order: "asc" } });
+        if (error) { console.error(error); break; }
+        if (!data || data.length === 0) break;
+        for (const o of data) existing.add(o.name);
+        if (data.length < 1000) break;
+        offset += 1000;
+      }
+
+      // 2) Build the work queue, skipping files already uploaded
+      const queue: File[] = [];
       for (let i = 0; i < files.length; i++) {
         const f = files[i];
         const id = f.name.replace(/\.gif$/i, "").trim();
-        const path = `${id}.gif`;
-        const { error: upErr } = await supabase.storage
-          .from("exercise-gifs")
-          .upload(path, f, { upsert: true, contentType: "image/gif" });
-        if (upErr) { console.error(upErr); continue; }
-        uploaded++;
-        const { error: updErr } = await supabase
-          .from("exercises")
-          .update({ gif_url: path })
-          .eq("id", id);
-        if (!updErr) matched++;
-        setGifProgress(Math.round(((i + 1) / files.length) * 100));
-        setGifStatus(`Uploaded ${uploaded}, matched ${matched} / ${files.length}`);
+        if (existing.has(`${id}.gif`)) { skipped++; continue; }
+        queue.push(f);
       }
-      setGifStatus(`Done. ${uploaded} uploaded, ${matched} matched.`);
+      const total = queue.length;
+      setGifStatus(`Skipping ${skipped} already uploaded. Uploading ${total} new files…`);
+
+      // 3) Upload with bounded concurrency + retry
+      const CONCURRENCY = 5;
+      const RETRIES = 2;
+      let cursor = 0;
+      let done = 0;
+
+      async function uploadOne(f: File) {
+        const id = f.name.replace(/\.gif$/i, "").trim();
+        const path = `${id}.gif`;
+        let lastErr: any = null;
+        for (let attempt = 0; attempt <= RETRIES; attempt++) {
+          const { error: upErr } = await supabase.storage
+            .from("exercise-gifs")
+            .upload(path, f, { upsert: true, contentType: "image/gif" });
+          if (!upErr) {
+            uploaded++;
+            const { error: updErr } = await supabase
+              .from("exercises")
+              .update({ gif_url: path })
+              .eq("id", id);
+            if (!updErr) matched++;
+            return;
+          }
+          lastErr = upErr;
+          await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+        }
+        failed++;
+        if (errors.length < 20) errors.push(`${f.name}: ${lastErr?.message ?? lastErr}`);
+      }
+
+      async function worker() {
+        while (cursor < queue.length) {
+          const idx = cursor++;
+          await uploadOne(queue[idx]);
+          done++;
+          if (done % 5 === 0 || done === total) {
+            setGifProgress(total === 0 ? 100 : Math.round((done / total) * 100));
+            setGifStatus(`Uploaded ${uploaded} · matched ${matched} · skipped ${skipped} · failed ${failed} (${done}/${total})`);
+          }
+        }
+      }
+      await Promise.all(Array.from({ length: Math.min(CONCURRENCY, Math.max(1, total)) }, worker));
+
+      setGifStatus(`Done. ${uploaded} uploaded, ${matched} matched, ${skipped} skipped, ${failed} failed.` +
+        (errors.length ? ` First errors: ${errors.slice(0, 5).join(" | ")}` : ""));
+      if (failed > 0) console.warn("GIF upload errors:", errors);
       await loadAll();
     } catch (err: any) {
       setGifStatus(`Failed: ${err?.message ?? err}`);
@@ -226,7 +281,7 @@ function Manager() {
 
         <Card title="2 · Upload GIFs (bulk)">
           <input ref={gifRef} type="file" accept="image/gif" multiple onChange={handleGIFs} disabled={gifBusy} className="text-sm" />
-          <p className="mt-2 text-xs text-muted-foreground">Pick all your <code>.gif</code> files at once. Filenames are matched to the exercise id.</p>
+          <p className="mt-2 text-xs text-muted-foreground">Pick all your <code>.gif</code> files at once — files already uploaded are skipped automatically, so it's safe to re-select the whole folder. Uploads run 5 in parallel with retries.</p>
           {gifBusy || gifStatus ? (
             <div className="mt-3 space-y-2">
               <Progress value={gifProgress} />
