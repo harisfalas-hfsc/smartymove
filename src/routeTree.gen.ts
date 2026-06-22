@@ -25,6 +25,7 @@ import { Route as AppScreenRouteImport } from './routes/app/screen'
 import { Route as AppProgressRouteImport } from './routes/app/progress'
 import { Route as AppProgramRouteImport } from './routes/app/program'
 import { Route as AppProfileRouteImport } from './routes/app/profile'
+import { Route as AdminExercisesRouteImport } from './routes/admin/exercises'
 import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
 
 const TermsRoute = TermsRouteImport.update({
@@ -107,6 +108,11 @@ const AppProfileRoute = AppProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AdminExercisesRoute = AdminExercisesRouteImport.update({
+  id: '/admin/exercises',
+  path: '/admin/exercises',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppScreenRunRoute = AppScreenRunRouteImport.update({
   id: '/run',
   path: '/run',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/disclaimer': typeof DisclaimerRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/admin/exercises': typeof AdminExercisesRoute
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
   '/app/progress': typeof AppProgressRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/disclaimer': typeof DisclaimerRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/admin/exercises': typeof AdminExercisesRoute
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
   '/app/progress': typeof AppProgressRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/disclaimer': typeof DisclaimerRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/admin/exercises': typeof AdminExercisesRoute
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
   '/app/progress': typeof AppProgressRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/privacy'
     | '/terms'
+    | '/admin/exercises'
     | '/app/profile'
     | '/app/program'
     | '/app/progress'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/privacy'
     | '/terms'
+    | '/admin/exercises'
     | '/app/profile'
     | '/app/program'
     | '/app/progress'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/privacy'
     | '/terms'
+    | '/admin/exercises'
     | '/app/profile'
     | '/app/program'
     | '/app/progress'
@@ -237,6 +249,7 @@ export interface RootRouteChildren {
   DisclaimerRoute: typeof DisclaimerRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  AdminExercisesRoute: typeof AdminExercisesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -353,6 +366,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/admin/exercises': {
+      id: '/admin/exercises'
+      path: '/admin/exercises'
+      fullPath: '/admin/exercises'
+      preLoaderRoute: typeof AdminExercisesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/screen/run': {
       id: '/app/screen/run'
       path: '/run'
@@ -421,6 +441,7 @@ const rootRouteChildren: RootRouteChildren = {
   DisclaimerRoute: DisclaimerRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  AdminExercisesRoute: AdminExercisesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

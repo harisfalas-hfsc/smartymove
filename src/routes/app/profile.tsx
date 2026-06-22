@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useUser, updateUser, setUser } from "@/lib/store";
-import { Bell, Crown, LogOut, Settings2, Target, MapPin, Monitor } from "lucide-react";
+import { Bell, Crown, LogOut, Settings2, Target, MapPin, Monitor, Database } from "lucide-react";
 
 export const Route = createFileRoute("/app/profile")({ component: Profile });
 
@@ -26,6 +26,7 @@ function Profile() {
         <Row icon={Bell} label="Notifications" value="Daily reminder" />
         <Row icon={Settings2} label="Account settings" value="Edit profile" />
         <Row icon={Monitor} label="Desktop view" value="Open" onClick={() => { window.location.href = "/desktop"; }} />
+        <Row icon={Database} label="Admin · Exercise library" value="Upload JSON & GIFs" onClick={() => { window.location.href = "/admin/exercises"; }} />
         {!u.premium ? (
           <div className="rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft">
             <Crown className="h-5 w-5" />
