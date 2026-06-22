@@ -5,7 +5,7 @@ export function SiteFooter() {
     color: "#6B7A90",
     textDecoration: "none",
     fontSize: 12,
-    fontFamily: "'IBM Plex Sans', sans-serif",
+    ,
   };
   return (
     <footer
@@ -19,7 +19,7 @@ export function SiteFooter() {
         <span style={{ color: "#D9E0E2" }}>·</span>
         <Link to="/disclaimer" style={linkStyle}>Disclaimer</Link>
       </nav>
-      <p style={{ fontSize: 11, color: "#94A3B8", fontFamily: "'IBM Plex Sans', sans-serif", margin: 0 }}>
+      <p style={{ fontSize: 11, color: "#94A3B8", margin: 0 }}>
         © {new Date().getFullYear()} SmartyMove · Part of the Smarty family
       </p>
     </footer>

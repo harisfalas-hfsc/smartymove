@@ -6,7 +6,7 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
   return (
     <div
       className="flex min-h-[100dvh] w-full justify-center px-4 py-8"
-      style={{ background: "#E7ECEC", fontFamily: "'IBM Plex Sans', sans-serif", color: "#14213A" }}
+      style={{ background: "#E7ECEC", color: "#14213A" }}
     >
       <div
         className="w-full"
@@ -27,7 +27,7 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
           >
             {icon}
           </span>
-          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 26, lineHeight: 1.1, letterSpacing: "-0.01em", margin: 0 }}>
+          <h1 style={{ fontWeight: 700, fontSize: 26, lineHeight: 1.1, letterSpacing: "-0.01em", margin: 0 }}>
             {title}
           </h1>
         </div>
@@ -52,9 +52,9 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
         <SiteFooter />
 
         <style>{`
-          .legal-prose h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:#14213A; margin:22px 0 8px; letter-spacing:-0.01em; }
+          .legal-prose h2{ font-weight:700; font-size:18px; color:#14213A; margin:22px 0 8px; letter-spacing:-0.01em; }
           .legal-prose h2:first-child{ margin-top:0; }
-          .legal-prose h3{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; color:#14213A; margin:16px 0 6px; }
+          .legal-prose h3{ font-weight:600; font-size:15px; color:#14213A; margin:16px 0 6px; }
           .legal-prose p{ margin:0 0 10px; }
           .legal-prose ul{ margin:0 0 12px; padding-left:18px; }
           .legal-prose li{ margin-bottom:6px; }
