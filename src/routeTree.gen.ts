@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as DesktopRouteImport } from './routes/desktop'
 import { Route as OnboardingRouteRouteImport } from './routes/onboarding/route'
 import { Route as AppRouteRouteImport } from './routes/app/route'
@@ -28,6 +29,11 @@ import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DesktopRoute = DesktopRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteRouteWithChildren
   '/onboarding': typeof OnboardingRouteRouteWithChildren
   '/desktop': typeof DesktopRoute
+  '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRouteRouteWithChildren
   '/desktop': typeof DesktopRoute
+  '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteRouteWithChildren
   '/onboarding': typeof OnboardingRouteRouteWithChildren
   '/desktop': typeof DesktopRoute
+  '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/onboarding'
     | '/desktop'
+    | '/privacy'
     | '/terms'
     | '/app/profile'
     | '/app/program'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/'
     | '/onboarding'
     | '/desktop'
+    | '/privacy'
     | '/terms'
     | '/app/profile'
     | '/app/program'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/onboarding'
     | '/desktop'
+    | '/privacy'
     | '/terms'
     | '/app/profile'
     | '/app/program'
@@ -210,6 +222,7 @@ export interface RootRouteChildren {
   AppRouteRoute: typeof AppRouteRouteWithChildren
   OnboardingRouteRoute: typeof OnboardingRouteRouteWithChildren
   DesktopRoute: typeof DesktopRoute
+  PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
 }
 
@@ -220,6 +233,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/desktop': {
@@ -378,6 +398,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRouteRoute: AppRouteRouteWithChildren,
   OnboardingRouteRoute: OnboardingRouteRouteWithChildren,
   DesktopRoute: DesktopRoute,
+  PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
