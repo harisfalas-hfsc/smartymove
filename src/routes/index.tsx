@@ -15,9 +15,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "SmartyMove" },
       { property: "og:description", content: "Know how you move. Move smarter." },
     ],
-    links: [
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" },
-    ],
+    links: [],
   }),
   component: Welcome,
 });
@@ -44,34 +42,17 @@ function Welcome() {
 
   return (
     <div
-      className="flex min-h-[100dvh] w-full justify-center px-4 py-8"
-      style={{ background: "#E7ECEC", fontFamily: "'IBM Plex Sans', sans-serif", color: "#14213A" }}
+      className="flex min-h-[100dvh] w-full flex-col"
+      style={{ background: "#E7ECEC", color: "#14213A" }}
     >
-      <div
-        className="relative w-full overflow-hidden"
-        style={{
-          maxWidth: 390,
-          background: "#F4F6F7",
-          borderRadius: 36,
-          boxShadow: "0 30px 60px -20px rgba(20,33,58,0.25)",
-          padding: "28px 22px 32px",
-        }}
-      >
-        {/* notch */}
-        <div
-          className="absolute left-1/2 -translate-x-1/2"
-          style={{ top: 14, width: 90, height: 5, borderRadius: 3, background: "rgba(20,33,58,0.15)" }}
-        />
-
-        <div className="mt-7">
-          <SiteHeader onSignIn={() => setMode("signup")} />
-        </div>
+      <SiteHeader onSignIn={() => setMode("signup")} />
+      <main className="mx-auto w-full max-w-[420px] px-5 pb-8 pt-5">
 
         {mode === "intro" ? (
           <>
             <div
               className="flex items-center gap-2"
-              style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "#0E7C86", fontWeight: 600 }}
+              style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "#0E7C86", fontWeight: 700 }}
             >
               <span
                 style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF6B4A", boxShadow: "0 0 0 3px rgba(255,107,74,0.18)" }}
@@ -80,7 +61,7 @@ function Welcome() {
             </div>
 
             <h1
-              style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 30, lineHeight: 1.12, letterSpacing: "-0.01em", margin: "14px 0 16px" }}
+              style={{ fontWeight: 800, fontSize: 32, lineHeight: 1.1, letterSpacing: "-0.02em", margin: "14px 0 16px" }}
             >
               Know how you move.<br />
               <span style={{ color: "#0E7C86" }}>Move smarter.</span>
@@ -103,13 +84,13 @@ function Welcome() {
               <span style={cornerStyle({ bottom: 14, right: 14, borderLeft: "none", borderTop: "none", borderRadius: "0 0 6px 0" })} />
               <span className="sm-scanline" />
               <div className="relative text-center" style={{ zIndex: 2, padding: "14px 0 6px" }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10.5, letterSpacing: ".12em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
+                <div style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", fontWeight: 700 }}>
                   Movement Score
                 </div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 600, fontSize: 54, lineHeight: 1, margin: "2px 0 10px" }}>
+                <div style={{ fontWeight: 800, fontSize: 56, lineHeight: 1, margin: "4px 0 10px", letterSpacing: "-0.02em" }}>
                   72<sup style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", marginLeft: 2 }}>/100</sup>
                 </div>
-                <div className="flex items-baseline justify-center gap-1.5" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: "rgba(255,255,255,0.75)" }}>
+                <div className="flex items-baseline justify-center gap-1.5" style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", fontWeight: 500 }}>
                   Movement Age <b style={{ color: "#4FB286", fontSize: 15 }}>41</b> · Chronological 47
                 </div>
               </div>
@@ -133,7 +114,7 @@ function Welcome() {
               style={{
                 display: "block", width: "100%", textAlign: "center",
                 background: "#FF6B4A", color: "#fff",
-                fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 16,
+                fontWeight: 700, fontSize: 16,
                 padding: "16px 0", borderRadius: 16, border: "none",
                 boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)",
                 marginBottom: 14, cursor: "pointer",
@@ -143,14 +124,14 @@ function Welcome() {
             </button>
             <div className="text-center" style={{ fontSize: 13.5, color: "#6B7A90" }}>
               Already have an account?{" "}
-              <button onClick={() => setMode("signup")} style={{ color: "#0E7C86", fontWeight: 600, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+              <button onClick={() => setMode("signup")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                 Sign in
               </button>
             </div>
           </>
         ) : (
-          <form onSubmit={submit} className="mt-7 flex flex-col gap-3">
-            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 22, color: "#14213A" }}>
+          <form onSubmit={submit} className="mt-2 flex flex-col gap-3">
+            <h2 style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}>
               Create your account
             </h2>
             <p className="-mt-1 text-sm" style={{ color: "#6B7A90" }}>Saved locally on this device for now.</p>
@@ -198,7 +179,7 @@ function Welcome() {
           }
           @media (prefers-reduced-motion: reduce){ .sm-scanline{ animation:none; top:50% } }
         `}</style>
-      </div>
+      </main>
     </div>
   );
 }
@@ -213,8 +194,7 @@ function cornerStyle(extra: React.CSSProperties): React.CSSProperties {
 }
 
 const pillStyle: React.CSSProperties = {
-  fontFamily: "'IBM Plex Mono', monospace",
-  fontSize: 11, letterSpacing: ".02em",
+  fontSize: 12, fontWeight: 600, letterSpacing: ".01em",
   padding: "7px 11px", borderRadius: 999,
   background: "#fff", border: "1px solid #D9E0E2",
   color: "#3B4A63", display: "inline-flex",

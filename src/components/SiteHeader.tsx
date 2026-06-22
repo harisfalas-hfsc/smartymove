@@ -4,16 +4,21 @@ import { Activity, User } from "lucide-react";
 export function SiteHeader({ onSignIn }: { onSignIn?: () => void }) {
   return (
     <header
-      className="flex w-full items-center justify-between"
-      style={{ padding: "10px 4px 18px" }}
+      className="sticky top-0 z-30 flex w-full items-center justify-between"
+      style={{
+        padding: "12px 18px",
+        background: "rgba(231,236,236,0.85)",
+        backdropFilter: "saturate(180%) blur(12px)",
+        WebkitBackdropFilter: "saturate(180%) blur(12px)",
+        borderBottom: "1px solid rgba(20,33,58,0.06)",
+      }}
     >
       <Link
         to="/"
         className="flex items-center gap-2"
         style={{
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontWeight: 700,
-          fontSize: 16,
+          fontWeight: 800,
+          fontSize: 17,
           letterSpacing: "-0.01em",
           color: "#14213A",
           textDecoration: "none",
@@ -22,9 +27,9 @@ export function SiteHeader({ onSignIn }: { onSignIn?: () => void }) {
         <span
           className="grid place-items-center"
           style={{
-            width: 28,
-            height: 28,
-            borderRadius: 10,
+            width: 30,
+            height: 30,
+            borderRadius: 9,
             background: "linear-gradient(160deg,#0E7C86,#1f6fa8)",
             color: "#fff",
           }}
@@ -45,8 +50,7 @@ export function SiteHeader({ onSignIn }: { onSignIn?: () => void }) {
           padding: "6px 12px 6px 6px",
           color: "#14213A",
           fontSize: 13,
-          fontWeight: 600,
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          fontWeight: 700,
           cursor: "pointer",
         }}
       >
