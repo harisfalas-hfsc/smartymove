@@ -22,12 +22,16 @@ function Page() {
   const [run, setRun] = useState(existing?.canRun ?? true);
   const [jump, setJump] = useState(existing?.canJump ?? true);
   const [injury, setInjury] = useState(existing?.recentInjury ?? false);
-  const [flags, setFlags] = useState(existing?.redFlags ?? false);
+  const [numbness, setNumbness] = useState(existing?.numbness ?? false);
+  const [nightPain, setNightPain] = useState(existing?.nightPain ?? false);
+  const [unexplained, setUnexplained] = useState(existing?.unexplainedSymptoms ?? false);
+  const flags = numbness || nightPain || unexplained;
 
   function next() {
     const questionnaire = {
       pain, canWalk: walk, canRun: run, canJump: jump,
       recentInjury: injury, redFlags: flags,
+      numbness, nightPain, unexplainedSymptoms: unexplained,
       joints: existing?.joints ?? [],
       disclaimerAccepted: existing?.disclaimerAccepted ?? false,
     };
@@ -60,7 +64,9 @@ function Page() {
           { label: "I can run without pain", v: run, set: setRun },
           { label: "I can jump and land without pain", v: jump, set: setJump },
           { label: "I had a recent injury or surgery", v: injury, set: setInjury },
-          { label: "Any numbness, night pain, or unexplained symptoms", v: flags, set: setFlags },
+          { label: "Numbness or tingling", v: numbness, set: setNumbness },
+          { label: "Night pain (wakes you up)", v: nightPain, set: setNightPain },
+          { label: "Unexplained symptoms (weight loss, fever)", v: unexplained, set: setUnexplained },
         ].map((row, i, arr) => (
           <div key={row.label} className={`flex items-center justify-between gap-4 px-4 py-3 ${i < arr.length - 1 ? "border-b border-border" : ""}`}>
             <span className="text-sm font-medium">{row.label}</span>
