@@ -26,6 +26,7 @@ import { Route as AppProgressRouteImport } from './routes/app/progress'
 import { Route as AppProgramRouteImport } from './routes/app/program'
 import { Route as AppProfileRouteImport } from './routes/app/profile'
 import { Route as AdminExercisesRouteImport } from './routes/admin.exercises'
+import { Route as AppScreenIndexRouteImport } from './routes/app/screen.index'
 import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
 
 const TermsRoute = TermsRouteImport.update({
@@ -113,6 +114,11 @@ const AdminExercisesRoute = AdminExercisesRouteImport.update({
   path: '/admin/exercises',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppScreenIndexRoute = AppScreenIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppScreenRoute,
+} as any)
 const AppScreenRunRoute = AppScreenRunRouteImport.update({
   id: '/run',
   path: '/run',
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
+  '/app/screen/': typeof AppScreenIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -150,13 +157,13 @@ export interface FileRoutesByTo {
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
   '/app/progress': typeof AppProgressRoute
-  '/app/screen': typeof AppScreenRouteWithChildren
   '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
   '/onboarding/goal': typeof OnboardingGoalRoute
   '/onboarding/joints': typeof OnboardingJointsRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
   '/app': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
+  '/app/screen': typeof AppScreenIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -178,6 +185,7 @@ export interface FileRoutesById {
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
+  '/app/screen/': typeof AppScreenIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -200,6 +208,7 @@ export interface FileRouteTypes {
     | '/onboarding/questionnaire'
     | '/app/'
     | '/app/screen/run'
+    | '/app/screen/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -212,13 +221,13 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/program'
     | '/app/progress'
-    | '/app/screen'
     | '/onboarding/disclaimer'
     | '/onboarding/goal'
     | '/onboarding/joints'
     | '/onboarding/questionnaire'
     | '/app'
     | '/app/screen/run'
+    | '/app/screen'
   id:
     | '__root__'
     | '/'
@@ -239,6 +248,7 @@ export interface FileRouteTypes {
     | '/onboarding/questionnaire'
     | '/app/'
     | '/app/screen/run'
+    | '/app/screen/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -373,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminExercisesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/screen/': {
+      id: '/app/screen/'
+      path: '/'
+      fullPath: '/app/screen/'
+      preLoaderRoute: typeof AppScreenIndexRouteImport
+      parentRoute: typeof AppScreenRoute
+    }
     '/app/screen/run': {
       id: '/app/screen/run'
       path: '/run'
@@ -385,10 +402,12 @@ declare module '@tanstack/react-router' {
 
 interface AppScreenRouteChildren {
   AppScreenRunRoute: typeof AppScreenRunRoute
+  AppScreenIndexRoute: typeof AppScreenIndexRoute
 }
 
 const AppScreenRouteChildren: AppScreenRouteChildren = {
   AppScreenRunRoute: AppScreenRunRoute,
+  AppScreenIndexRoute: AppScreenIndexRoute,
 }
 
 const AppScreenRouteWithChildren = AppScreenRoute._addFileChildren(
