@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { clearOnboardingDraft, createUser, getOnboardingDraft, getUser, setUser } from "@/lib/store";
+import { clearOnboardingDraft, getOnboardingDraft, getUser, restoreUserFromBackend, signInWithEmailProfile, signUpWithEmailProfile } from "@/lib/store";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 
@@ -27,6 +27,8 @@ function Welcome() {
   const [email, setEmail] = useState("");
   const [age, setAge] = useState<number | "">("");
   const [pw, setPw] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const requestedMode = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("auth") : null;
@@ -35,30 +37,43 @@ function Welcome() {
       window.history.replaceState(null, "", "/");
       return;
     }
-    const u = getUser();
-    if (u && u.questionnaire && u.goal) navigate({ to: "/app" });
+    const cached = getUser();
+    if (cached && cached.questionnaire && cached.goal) navigate({ to: "/app" });
+    void restoreUserFromBackend()
+      .then((u) => { if (u?.questionnaire && u.goal) navigate({ to: "/app" }); })
+      .catch(() => undefined);
   }, [navigate]);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!name || !email || !age || !pw) return;
-    const u = createUser(name, email, Number(age));
-    const draft = getOnboardingDraft();
-    if (draft.questionnaire || draft.goal) {
-      setUser({ ...u, questionnaire: draft.questionnaire, goal: draft.goal });
+    setAuthError("");
+    setSubmitting(true);
+    try {
+      const u = await signUpWithEmailProfile(name, email, Number(age), pw);
+      const draft = getOnboardingDraft();
       clearOnboardingDraft();
-      navigate({ to: draft.questionnaire && draft.goal ? "/app" : "/onboarding/questionnaire" });
-      return;
+      navigate({ to: (u.questionnaire || draft.questionnaire) && (u.goal || draft.goal) ? "/app" : "/onboarding/questionnaire" });
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Account creation failed. Try again.");
+    } finally {
+      setSubmitting(false);
     }
-    navigate({ to: "/onboarding/questionnaire" });
   }
 
-  function submitSignin(e: React.FormEvent) {
+  async function submitSignin(e: React.FormEvent) {
     e.preventDefault();
     if (!email || !pw) return;
-    const u = getUser();
-    if (u) navigate({ to: "/app" });
-    else setMode("signup");
+    setAuthError("");
+    setSubmitting(true);
+    try {
+      const u = await signInWithEmailProfile(email, pw);
+      navigate({ to: u.questionnaire && u.goal ? "/app" : "/onboarding/questionnaire" });
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Sign in failed. Check your email and password.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -159,7 +174,7 @@ function Welcome() {
             <h2 style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}>
               Create your account
             </h2>
-            <p className="-mt-1 text-sm" style={{ color: "#6B7A90" }}>Saved locally on this device for now.</p>
+            <p className="-mt-1 text-sm" style={{ color: "#6B7A90" }}>Saved securely to your account.</p>
             <div className="space-y-1.5">
               <Label htmlFor="n">Name</Label>
               <Input id="n" value={name} onChange={(e) => setName(e.target.value)} required className="h-11 rounded-xl" />
@@ -180,11 +195,13 @@ function Welcome() {
             </div>
             <Button
               type="submit"
+              disabled={submitting}
               style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
               className="mt-2 h-12 w-full rounded-2xl text-base font-semibold text-white hover:opacity-95"
             >
-              Continue
+              {submitting ? "Saving..." : "Continue"}
             </Button>
+            {authError && <p className="text-center text-sm font-semibold text-destructive">{authError}</p>}
             <p className="mt-1 text-center text-sm" style={{ color: "#6B7A90" }}>
               Have an account?{" "}
               <button type="button" onClick={() => setMode("signin")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
@@ -208,11 +225,13 @@ function Welcome() {
             </div>
             <Button
               type="submit"
+              disabled={submitting}
               style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
               className="mt-2 h-12 w-full rounded-2xl text-base font-semibold text-white hover:opacity-95"
             >
-              Sign in
+              {submitting ? "Signing in..." : "Sign in"}
             </Button>
+            {authError && <p className="text-center text-sm font-semibold text-destructive">{authError}</p>}
             <p className="mt-1 text-center text-sm" style={{ color: "#6B7A90" }}>
               New here?{" "}
               <button type="button" onClick={() => setMode("signup")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>

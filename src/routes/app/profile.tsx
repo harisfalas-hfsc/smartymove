@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useUser, updateUser, setUser } from "@/lib/store";
+import { useUser, updateUser, signOutUser } from "@/lib/store";
 import { Bell, Crown, LogOut, Settings2, Target, MapPin, Monitor, Database } from "lucide-react";
 
 export const Route = createFileRoute("/app/profile")({ component: Profile });
@@ -45,7 +45,7 @@ function Profile() {
             </div>
           </div>
         )}
-        <button onClick={() => { setUser(null); navigate({ to: "/" }); }} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-secondary p-3 font-semibold text-foreground">
+        <button onClick={() => { void signOutUser().finally(() => navigate({ to: "/" })); }} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-secondary p-3 font-semibold text-foreground">
           <LogOut className="h-4 w-4" /> Sign out
         </button>
       </div>
