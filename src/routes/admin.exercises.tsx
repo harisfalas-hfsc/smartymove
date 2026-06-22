@@ -281,7 +281,7 @@ function Manager() {
 
         <Card title="2 · Upload GIFs (bulk)">
           <input ref={gifRef} type="file" accept="image/gif" multiple onChange={handleGIFs} disabled={gifBusy} className="text-sm" />
-          <p className="mt-2 text-xs text-muted-foreground">Pick all your <code>.gif</code> files at once. Filenames are matched to the exercise id.</p>
+          <p className="mt-2 text-xs text-muted-foreground">Pick all your <code>.gif</code> files at once — files already uploaded are skipped automatically, so it's safe to re-select the whole folder. Uploads run 5 in parallel with retries.</p>
           {gifBusy || gifStatus ? (
             <div className="mt-3 space-y-2">
               <Progress value={gifProgress} />
