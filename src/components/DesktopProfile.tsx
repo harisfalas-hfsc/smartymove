@@ -28,12 +28,13 @@ export function DesktopProfile() {
 }
 
 function DesktopProfileInner() {
-  const u = useUser()!;
-  const [name, setName] = useState(u.name);
-  const [email, setEmail] = useState(u.email);
-  const [age, setAge] = useState(u.age);
-  const [goal, setGoal] = useState<Goal | undefined>(u.goal);
+  const u = useUser();
+  const [name, setName] = useState(u?.name ?? "");
+  const [email, setEmail] = useState(u?.email ?? "");
+  const [age, setAge] = useState(u?.age ?? 30);
+  const [goal, setGoal] = useState<Goal | undefined>(u?.goal);
   const [saved, setSaved] = useState(false);
+  if (!u) return null;
   const latest = u.sessions[u.sessions.length - 1];
   const data = u.sessions.map((s, i) => ({ name: `#${i+1}`, score: s.overall }));
 
