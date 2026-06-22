@@ -18,9 +18,9 @@ export interface PhaseInfo {
 }
 
 export const PHASE_LABEL: Record<Phase, string> = {
-  restore: "Restore",
+  restore: "Foundation",
   build: "Build",
-  perform: "Perform",
+  perform: "Maintain & Perform",
 };
 
 export const PHASE_RATIOS: Record<Phase, Record<Category, number>> = {
