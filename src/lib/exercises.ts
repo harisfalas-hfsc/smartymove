@@ -1,32 +1,273 @@
 import type { Goal, Joint } from "./store";
 
-export interface Exercise {
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+/** Row from the public.exercises library table. */
+export interface LibraryExercise {
   id: string;
+  name: string;
+  body_part: string | null;
+  equipment: string | null;
+  target: string | null;
+  secondary_muscles: string[] | null;
+  instructions: string[] | null;
+  gif_url: string | null;
+}
+
+/** What the UI consumes for the daily micro-routine. */
+export interface RoutineItem {
+  id: string;
+  slot: string;
   name: string;
   description: string;
   durationSec: number;
-  targets: { restriction?: string[]; goals?: Goal[]; joints?: Joint[] };
   emoji: string;
+  bodyPart: string | null;
+  equipment: string | null;
+  target: string | null;
+  secondaryMuscles: string[];
+  instructions: string[];
+  gifPath: string | null;
+  gifUrl: string | null;
 }
 
-export const EXERCISES: Exercise[] = [
-  { id: "ankle_rocker", name: "Ankle Rocker", description: "Half-kneel, drive front knee over toes. Pulse 10×.", durationSec: 45, targets: { restriction: ["mobility"], joints: ["ankle","knee"], goals: ["prevent_injury","start_sport"] }, emoji: "🦵" },
-  { id: "hip_90_90", name: "90/90 Hip Switches", description: "Sit tall, rotate hips side-to-side, slow and controlled.", durationSec: 60, targets: { restriction: ["mobility"], joints: ["hip","back"], goals: ["feel_better","reduce_pain"] }, emoji: "🦴" },
-  { id: "glute_bridge", name: "Glute Bridge Hold", description: "Lie on back, drive hips up, squeeze glutes for the hold.", durationSec: 45, targets: { restriction: ["strength","stability"], joints: ["back","hip"], goals: ["reduce_pain","prevent_injury"] }, emoji: "🌉" },
-  { id: "wall_slide", name: "Wall Slide", description: "Back to wall, slide forearms up and down keeping contact.", durationSec: 60, targets: { restriction: ["mobility","quality"], joints: ["shoulder"], goals: ["feel_better","perform_better"] }, emoji: "🧱" },
-  { id: "single_leg_rdl", name: "Single-leg RDL (tempo)", description: "Hinge at hip on one leg, reach down with control.", durationSec: 60, targets: { restriction: ["balance","stability"], joints: ["hip","knee"], goals: ["perform_better","start_sport"] }, emoji: "⚖️" },
-  { id: "cat_cow", name: "Cat-Cow Flow", description: "On hands and knees, alternate arching and rounding spine.", durationSec: 45, targets: { restriction: ["mobility","quality"], joints: ["back"], goals: ["reduce_pain","feel_better"] }, emoji: "🐈" },
-  { id: "thoracic_open", name: "Thoracic Opener", description: "Side-lying, top arm sweeps open. 8 per side.", durationSec: 60, targets: { restriction: ["mobility"], joints: ["back","shoulder"], goals: ["perform_better","feel_better"] }, emoji: "🌀" },
-  { id: "split_squat", name: "Split Squat", description: "Back foot elevated. 8 controlled reps per side.", durationSec: 60, targets: { restriction: ["strength","stability"], joints: ["knee","hip"], goals: ["perform_better","start_sport"] }, emoji: "🏋️" },
+/**
+ * Concept slots. Each represents a movement we WANT to give the user.
+ * The picker searches the library for the best matching exercise — we never
+ * hard-code a specific library row, only the keywords and filters that
+ * describe the kind of movement we're after.
+ */
+interface Slot {
+  slot: string;
+  label: string;
+  emoji: string;
+  durationSec: number;
+  // Library filters
+  bodyParts?: string[];
+  targets?: string[];
+  // Substrings to match (lower-case) in the exercise name. Higher in the list = higher weight.
+  keywords: string[];
+  // Prefer body-weight unless overridden
+  preferEquipment?: string[];
+  // Relevance
+  joints?: Joint[];
+  goals?: Goal[];
+  baseScore?: number;
+}
+
+const SLOTS: Slot[] = [
+  {
+    slot: "ankle_mobility", label: "Ankle mobility", emoji: "🦵", durationSec: 45,
+    bodyParts: ["lower legs"], keywords: ["ankle", "calf stretch", "dorsi"],
+    joints: ["ankle", "knee"], goals: ["prevent_injury", "start_sport"], baseScore: 1,
+  },
+  {
+    slot: "hip_mobility", label: "Hip mobility", emoji: "🦴", durationSec: 60,
+    bodyParts: ["upper legs", "waist"], keywords: ["90", "hip", "pigeon", "figure", "frog", "rotation"],
+    joints: ["hip", "back"], goals: ["feel_better", "reduce_pain", "perform_better"], baseScore: 2,
+  },
+  {
+    slot: "glute_activation", label: "Glute activation", emoji: "🌉", durationSec: 45,
+    bodyParts: ["upper legs"], targets: ["glutes"],
+    keywords: ["glute bridge", "bridge", "hip thrust", "clam"],
+    joints: ["hip", "back"], goals: ["reduce_pain", "prevent_injury", "feel_better"], baseScore: 2,
+  },
+  {
+    slot: "core_stability", label: "Core stability", emoji: "🪨", durationSec: 45,
+    bodyParts: ["waist"], keywords: ["plank", "dead bug", "bird dog", "hollow"],
+    joints: ["back"], goals: ["prevent_injury", "perform_better", "reduce_pain"], baseScore: 2,
+  },
+  {
+    slot: "thoracic_mobility", label: "Thoracic mobility", emoji: "🌀", durationSec: 60,
+    bodyParts: ["back", "waist"], keywords: ["thoracic", "cat", "cobra", "open book", "rotation"],
+    joints: ["back", "shoulder"], goals: ["feel_better", "perform_better"], baseScore: 1,
+  },
+  {
+    slot: "shoulder_mobility", label: "Shoulder mobility", emoji: "🧱", durationSec: 60,
+    bodyParts: ["shoulders", "upper arms"], keywords: ["wall slide", "shoulder", "scapular", "y t w"],
+    joints: ["shoulder"], goals: ["feel_better", "perform_better"], baseScore: 1,
+  },
+  {
+    slot: "balance", label: "Single-leg balance", emoji: "⚖️", durationSec: 45,
+    bodyParts: ["upper legs"], keywords: ["single leg", "single-leg", "one leg", "stork", "rdl"],
+    joints: ["hip", "knee", "ankle"], goals: ["perform_better", "start_sport", "prevent_injury"], baseScore: 1,
+  },
+  {
+    slot: "lower_strength", label: "Lower-body strength", emoji: "🏋️", durationSec: 60,
+    bodyParts: ["upper legs"], targets: ["quads", "glutes"],
+    keywords: ["split squat", "bulgarian", "lunge", "squat", "step up"],
+    joints: ["knee", "hip"], goals: ["perform_better", "start_sport"], baseScore: 1,
+  },
+  {
+    slot: "posterior_chain", label: "Posterior chain", emoji: "🦿", durationSec: 60,
+    bodyParts: ["upper legs", "back"], targets: ["hamstrings", "glutes"],
+    keywords: ["good morning", "deadlift", "rdl", "hip hinge", "hyperextension"],
+    joints: ["hip", "back"], goals: ["perform_better", "prevent_injury"], baseScore: 1,
+  },
+  {
+    slot: "upper_pull", label: "Upper-body pull", emoji: "💪", durationSec: 45,
+    bodyParts: ["back", "upper arms"], targets: ["lats", "upper back"],
+    keywords: ["row", "pull", "scapular pull"],
+    joints: ["shoulder"], goals: ["perform_better", "start_sport"], baseScore: 0,
+  },
+  {
+    slot: "neck_relief", label: "Neck relief", emoji: "💆", durationSec: 30,
+    bodyParts: ["neck"], keywords: ["neck", "chin tuck"],
+    joints: ["back", "shoulder"], goals: ["feel_better", "reduce_pain"], baseScore: 0,
+  },
+  {
+    slot: "calf_strength", label: "Calf strength", emoji: "🦵", durationSec: 45,
+    bodyParts: ["lower legs"], keywords: ["calf raise", "heel raise"],
+    joints: ["ankle"], goals: ["prevent_injury", "start_sport"], baseScore: 0,
+  },
 ];
 
-export function pickRoutine(goal: Goal | undefined, joints: Joint[]): Exercise[] {
-  const scored = EXERCISES.map(e => {
-    let s = 0;
-    if (goal && e.targets.goals?.includes(goal)) s += 2;
-    for (const j of joints) if (j !== "none" && e.targets.joints?.includes(j)) s += 3;
-    return { e, s };
+const ROUTINE_SIZE = 7;
+
+function scoreSlot(s: Slot, goal: Goal | undefined, joints: Joint[]): number {
+  let score = s.baseScore ?? 0;
+  if (goal && s.goals?.includes(goal)) score += 3;
+  for (const j of joints) if (j !== "none" && s.joints?.includes(j)) score += 4;
+  return score;
+}
+
+/** Pick the best library exercise that matches a slot. */
+function pickBestForSlot(slot: Slot, library: LibraryExercise[], used: Set<string>): LibraryExercise | null {
+  const bodyParts = slot.bodyParts;
+  const targets = slot.targets;
+  const preferEq = slot.preferEquipment ?? ["body weight"];
+
+  let best: { row: LibraryExercise; score: number } | null = null;
+  for (const row of library) {
+    if (used.has(row.id)) continue;
+    if (!row.gif_url) continue;
+    if (bodyParts && row.body_part && !bodyParts.includes(row.body_part)) continue;
+    if (targets && row.target && !targets.includes(row.target)) continue;
+
+    const name = row.name.toLowerCase();
+    let score = 0;
+    slot.keywords.forEach((kw, idx) => {
+      if (name.includes(kw)) score += 10 + (slot.keywords.length - idx);
+    });
+    if (score === 0) continue; // no keyword hit → not a match
+
+    if (row.equipment && preferEq.includes(row.equipment)) score += 5;
+    // Prefer shorter, simpler names
+    score += Math.max(0, 30 - name.length) * 0.05;
+
+    if (!best || score > best.score) best = { row, score };
+  }
+  return best?.row ?? null;
+}
+
+/** Build a micro-routine for this user from the library. */
+export function buildRoutine(goal: Goal | undefined, joints: Joint[], library: LibraryExercise[]): RoutineItem[] {
+  const ordered = [...SLOTS]
+    .map(s => ({ s, score: scoreSlot(s, goal, joints) }))
+    .sort((a, b) => b.score - a.score)
+    .map(x => x.s);
+
+  const used = new Set<string>();
+  const out: RoutineItem[] = [];
+  for (const slot of ordered) {
+    if (out.length >= ROUTINE_SIZE) break;
+    const row = pickBestForSlot(slot, library, used);
+    if (!row) continue;
+    used.add(row.id);
+    out.push(toRoutineItem(slot, row));
+  }
+  // Backfill from any remaining slots with looser matching if we still need more
+  if (out.length < ROUTINE_SIZE) {
+    for (const slot of ordered) {
+      if (out.length >= ROUTINE_SIZE) break;
+      const row = pickBestForSlot({ ...slot, bodyParts: undefined, targets: undefined }, library, used);
+      if (!row) continue;
+      used.add(row.id);
+      out.push(toRoutineItem(slot, row));
+    }
+  }
+  return out;
+}
+
+function toRoutineItem(slot: Slot, row: LibraryExercise): RoutineItem {
+  return {
+    id: row.id,
+    slot: slot.slot,
+    name: titleCase(row.name),
+    description: slot.label,
+    durationSec: slot.durationSec,
+    emoji: slot.emoji,
+    bodyPart: row.body_part,
+    equipment: row.equipment,
+    target: row.target,
+    secondaryMuscles: row.secondary_muscles ?? [],
+    instructions: row.instructions ?? [],
+    gifPath: row.gif_url,
+    gifUrl: null,
+  };
+}
+
+function titleCase(s: string): string {
+  return s.replace(/\b\w/g, c => c.toUpperCase());
+}
+
+/** Fetch the full library once and cache. */
+async function fetchLibrary(): Promise<LibraryExercise[]> {
+  const { data, error } = await supabase
+    .from("exercises")
+    .select("id,name,body_part,equipment,target,secondary_muscles,instructions,gif_url")
+    .not("gif_url", "is", null);
+  if (error) throw error;
+  return (data ?? []) as LibraryExercise[];
+}
+
+/** Sign GIF URLs in one batch and attach them. */
+async function attachSignedUrls(items: RoutineItem[]): Promise<RoutineItem[]> {
+  const paths = items.map(i => i.gifPath).filter((p): p is string => !!p);
+  if (paths.length === 0) return items;
+  const { data, error } = await supabase.storage.from("exercise-gifs").createSignedUrls(paths, 60 * 60);
+  if (error || !data) return items;
+  const byPath = new Map<string, string>();
+  data.forEach(d => { if (d.path && d.signedUrl) byPath.set(d.path, d.signedUrl); });
+  return items.map(i => ({ ...i, gifUrl: i.gifPath ? byPath.get(i.gifPath) ?? null : null }));
+}
+
+/** React hook: returns today's micro-routine pulled from the library. */
+export function useMicroRoutine(goal: Goal | undefined, joints: Joint[]) {
+  const jointsKey = [...joints].sort().join(",");
+  return useQuery({
+    queryKey: ["micro-routine", goal ?? "none", jointsKey],
+    queryFn: async () => {
+      const library = await fetchLibrary();
+      const routine = buildRoutine(goal, joints, library);
+      return attachSignedUrls(routine);
+    },
+    staleTime: 30 * 60 * 1000,
   });
-  scored.sort((a,b) => b.s - a.s);
-  return scored.slice(0, 8).map(x => x.e);
+}
+
+/** React hook: fetch a single library exercise by id with a signed GIF URL. */
+export function useLibraryExercise(id: string | null) {
+  return useQuery({
+    queryKey: ["library-exercise", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("exercises")
+        .select("id,name,body_part,equipment,target,secondary_muscles,instructions,gif_url")
+        .eq("id", id!)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      const row = data as LibraryExercise;
+      let signed: string | null = null;
+      if (row.gif_url) {
+        const res = await supabase.storage.from("exercise-gifs").createSignedUrl(row.gif_url, 60 * 60);
+        signed = res.data?.signedUrl ?? null;
+      }
+      return { row, signedUrl: signed };
+    },
+    staleTime: 30 * 60 * 1000,
+  });
 }

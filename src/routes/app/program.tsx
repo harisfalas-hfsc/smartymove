@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useUser, updateUser } from "@/lib/store";
-import { pickRoutine } from "@/lib/exercises";
-import { Play, Pause, CheckCircle2, Lock, ChevronLeft, ChevronRight, Crown } from "lucide-react";
+import { useMicroRoutine } from "@/lib/exercises";
+import { ExerciseSheet } from "@/components/ExerciseSheet";
+import { Play, Pause, CheckCircle2, Lock, ChevronLeft, ChevronRight, Crown, Info } from "lucide-react";
 
 export const Route = createFileRoute("/app/program")({ component: Program });
 
@@ -11,9 +12,10 @@ function Program() {
   const [running, setRunning] = useState(false);
   const [idx, setIdx] = useState(0);
   const [remaining, setRemaining] = useState(0);
+  const [openId, setOpenId] = useState<string | null>(null);
   const intervalRef = useRef<number | null>(null);
 
-  const routine = u ? pickRoutine(u.goal, u.questionnaire?.joints ?? []) : [];
+  const { data: routine = [] } = useMicroRoutine(u?.goal, u?.questionnaire?.joints ?? []);
   const cur = routine[idx];
 
   useEffect(() => {
@@ -72,8 +74,11 @@ function Program() {
           <div className="mt-4 flex items-center gap-4">
             <span className="grid h-20 w-20 shrink-0 place-items-center rounded-3xl brand-gradient-soft text-4xl">{cur.emoji}</span>
             <div className="min-w-0">
-              <div className="text-xl font-extrabold">{cur.name}</div>
+              <div className="text-xl font-extrabold capitalize">{cur.name}</div>
               <p className="mt-0.5 text-sm text-muted-foreground">{cur.description}</p>
+              <button onClick={() => setOpenId(cur.id)} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                <Info className="h-3.5 w-3.5" /> See demonstration
+              </button>
             </div>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2">
@@ -93,11 +98,11 @@ function Program() {
             {routine.map((e, i) => {
               const locked = !u.premium && i >= 1;
               return (
-                <button key={e.id} onClick={() => !locked && setIdx(i)}
+                <button key={e.id} onClick={() => { if (locked) return; setIdx(i); setOpenId(e.id); }}
                   className={`flex w-full items-center gap-3 rounded-2xl p-3 text-left shadow-card transition-all ${i === idx ? "bg-accent ring-2 ring-primary" : "bg-card"} ${locked ? "opacity-60" : ""}`}>
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl brand-gradient-soft text-xl">{e.emoji}</span>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold">{e.name}</div>
+                    <div className="truncate text-sm font-semibold capitalize">{e.name}</div>
                     <div className="text-xs text-muted-foreground">{e.durationSec}s</div>
                   </div>
                   {locked && <Lock className="h-4 w-4 text-muted-foreground" />}
@@ -116,6 +121,7 @@ function Program() {
           </div>
         )}
       </div>
+      <ExerciseSheet exerciseId={openId} onClose={() => setOpenId(null)} />
     </div>
   );
 }
