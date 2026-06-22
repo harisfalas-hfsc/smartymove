@@ -22,12 +22,16 @@ function Page() {
   const [run, setRun] = useState(existing?.canRun ?? true);
   const [jump, setJump] = useState(existing?.canJump ?? true);
   const [injury, setInjury] = useState(existing?.recentInjury ?? false);
-  const [flags, setFlags] = useState(existing?.redFlags ?? false);
+  const [numbness, setNumbness] = useState(existing?.numbness ?? false);
+  const [nightPain, setNightPain] = useState(existing?.nightPain ?? false);
+  const [unexplained, setUnexplained] = useState(existing?.unexplainedSymptoms ?? false);
+  const flags = numbness || nightPain || unexplained;
 
   function next() {
     const questionnaire = {
       pain, canWalk: walk, canRun: run, canJump: jump,
       recentInjury: injury, redFlags: flags,
+      numbness, nightPain, unexplainedSymptoms: unexplained,
       joints: existing?.joints ?? [],
       disclaimerAccepted: existing?.disclaimerAccepted ?? false,
     };
