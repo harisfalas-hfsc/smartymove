@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useUser, updateUser, signOutUser } from "@/lib/store";
+import { useUser, updateUser, signOutUser, type User } from "@/lib/store";
 import { Bell, Crown, LogOut, Settings2, Target, MapPin, Monitor, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,10 @@ function Profile() {
   const u = useUser();
   const navigate = useNavigate();
   if (!u) return null;
+  return <ProfileInner u={u} navigate={navigate} />;
+}
+
+function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof useNavigate> }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(u.name);
   const [age, setAge] = useState(String(u.age));
