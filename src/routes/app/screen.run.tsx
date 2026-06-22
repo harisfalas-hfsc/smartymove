@@ -30,7 +30,7 @@ function Runner() {
   const rafRef = useRef<number>(0);
   const latestLandmarksRef = useRef<any[] | null>(null);
 
-  const [phase, setPhase] = useState<"setup" | "preview" | "intro" | "running" | "done">("setup");
+  const [phase, setPhase] = useState<"setup" | "preview" | "intro" | "running" | "done" | "failed">("setup");
   const [seq, setSeq] = useState<TestDef[]>([]);
   const [idx, setIdx] = useState(0);
   const [countdown, setCountdown] = useState(0);
