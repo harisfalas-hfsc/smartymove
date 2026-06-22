@@ -28,7 +28,7 @@ export function ExerciseSheet({ exerciseId, onClose }: Props) {
         </DrawerHeader>
 
         <div className="overflow-y-auto px-4 pb-8">
-          <div className="aspect-square w-full overflow-hidden rounded-2xl bg-secondary">
+          <div className="mx-auto mt-2 aspect-square w-[calc(100%-1rem)] max-w-[420px] overflow-hidden rounded-2xl bg-secondary">
             {isLoading && (
               <div className="grid h-full w-full place-items-center">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
