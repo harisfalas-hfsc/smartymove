@@ -143,6 +143,11 @@ function Runner() {
 
   function finalize(allResults: TestResult[]) {
     if (!u) return;
+    const validCount = allResults.filter(r => r.valid !== false).length;
+    if (validCount < 3) {
+      setPhase("failed");
+      return;
+    }
     const joints = (u.questionnaire?.joints ?? []).filter(j => j !== "none") as Joint[];
     const session = computeSession(allResults, joints, u.age);
     const wasReTest = u.sessions.length > 0;
