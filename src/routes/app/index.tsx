@@ -81,7 +81,7 @@ function Home() {
             <Link to="/app/program" className="text-xs font-semibold text-primary">Open</Link>
           </div>
           <div className="space-y-2">
-            {routine.slice(0,3).map((e, i) => (
+            {routine.slice(0,7).map((e, i) => (
               <div key={e.id} className="flex items-center gap-3 rounded-2xl bg-card p-3 shadow-card">
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl brand-gradient-soft text-xl">{e.emoji}</span>
                 <div className="min-w-0 flex-1">
