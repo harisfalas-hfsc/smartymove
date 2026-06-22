@@ -23,7 +23,7 @@ function Page() {
     void restoreUserFromBackend()
       .then((restored) => {
         if (!alive) return;
-        if (restored?.goal && !g) setG(restored.goal);
+        if (restored?.goal) setG((current) => current ?? restored.goal ?? null);
       })
       .finally(() => { if (alive) setAuthChecked(true); });
     return () => { alive = false; };
