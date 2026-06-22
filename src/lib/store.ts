@@ -197,7 +197,7 @@ export async function restoreUserFromBackend(): Promise<User | null> {
   const cached = getUser();
   const meta = authUser.user_metadata ?? {};
   const pending = getPendingProfile(authUser.email ?? "");
-  const base = cached?.email === authUser.email ? cached : pending;
+  const base = cached && authUser.email && normalizeEmail(cached.email) === normalizeEmail(authUser.email) ? cached : pending;
   const name = base?.name ?? meta.name ?? meta.full_name ?? (authUser.email ?? "SmartyMove user").split("@")[0];
   const age = Number(base?.age ?? meta.age ?? 18);
   const user = makeUser(authUser.id, name, authUser.email ?? base?.email ?? "", age, base);
@@ -237,7 +237,7 @@ export async function signInWithEmailProfile(email: string, password: string): P
   const cached = getUser();
   const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
   if (error) throw error;
-  if (cached?.email === normalizedEmail) setPendingProfile(cached);
+  if (cached && normalizeEmail(cached.email) === normalizedEmail) setPendingProfile(cached);
   const user = await restoreUserFromBackend();
   if (!user) throw new Error("Signed in, but your profile could not be loaded.");
   return user;
