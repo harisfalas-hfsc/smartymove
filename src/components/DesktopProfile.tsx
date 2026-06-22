@@ -1,5 +1,5 @@
 import { useUser, updateUser, setUser, type Goal } from "@/lib/store";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,10 @@ import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianG
 import { Activity, LogOut, Smartphone } from "lucide-react";
 
 export function DesktopProfile() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const u = useUser();
+  if (!mounted) return null;
   if (!u) {
     return (
       <div className="grid min-h-screen place-items-center bg-background p-8 text-center">

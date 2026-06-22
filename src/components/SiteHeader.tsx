@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Activity, ChevronLeft } from "lucide-react";
+import { Activity, ChevronLeft, LogOut } from "lucide-react";
+import { useUser, setUser } from "@/lib/store";
 
 type Props = {
   onSignIn?: () => void;
@@ -10,6 +11,7 @@ type Props = {
 
 export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Props) {
   const navigate = useNavigate();
+  const user = useUser();
   const handleBack = () => {
     if (onBack) {
       onBack();
@@ -20,6 +22,7 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
   };
   const handleSignIn = () => onSignIn ? onSignIn() : window.location.assign("/?auth=signin");
   const handleSignUp = () => onSignUp ? onSignUp() : window.location.assign("/?auth=signup");
+  const handleSignOut = () => { setUser(null); navigate({ to: "/" }); };
 
   return (
     <header
@@ -76,7 +79,37 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
       </div>
 
       <div className="flex items-center gap-2">
-        <button
+        {user ? (
+          <>
+            <Link
+              to="/app/profile"
+              aria-label="Profile"
+              className="grid place-items-center"
+              style={{
+                width: 34, height: 34, borderRadius: 999,
+                background: "linear-gradient(160deg,#0E7C86,#1f6fa8)",
+                color: "#fff", fontWeight: 800, fontSize: 13, textDecoration: "none",
+              }}
+            >
+              {user.name.slice(0,1).toUpperCase()}
+            </Link>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              aria-label="Sign out"
+              className="grid place-items-center"
+              style={{
+                width: 34, height: 34, borderRadius: 12,
+                background: "#fff", border: "1px solid #D9E0E2",
+                color: "#14213A", cursor: "pointer",
+              }}
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </>
+        ) : (
+          <>
+            <button
           type="button"
           onClick={handleSignIn}
           style={{
@@ -108,6 +141,8 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
         >
           Sign up
         </button>
+          </>
+        )}
       </div>
     </header>
   );
