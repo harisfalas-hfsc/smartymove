@@ -241,34 +241,6 @@ function Runner() {
               </div>
             );
           })()}
-          {phase === "running" && cur && (
-            <div className="rounded-3xl bg-white/10 p-5 backdrop-blur-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-widest opacity-80">In progress</div>
-                  <div className="text-xl font-extrabold">{cur.name}</div>
-                </div>
-                <div className="text-5xl font-extrabold tabular-nums brand-text">{countdown}</div>
-              </div>
-              <p className="mt-3 text-sm opacity-90">{cur.instruction}</p>
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={() => finishHandlerRef.current?.(true)}
-                  className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-white/15 text-sm font-semibold backdrop-blur"
-                >
-                  <SkipForward className="h-4 w-4" /> Skip
-                </button>
-                <button
-                  onClick={() => finishHandlerRef.current?.(false)}
-                  disabled={elapsed < 3}
-                  className="flex h-12 flex-[2] items-center justify-center gap-1.5 rounded-2xl brand-gradient text-base font-bold text-primary-foreground disabled:opacity-50"
-                >
-                  <CheckCircle2 className="h-5 w-5" /> {elapsed < 3 ? `Done in ${3 - elapsed}s…` : "Done — next test"}
-                </button>
-              </div>
-              <p className="mt-2 text-center text-[11px] opacity-60">Tap Done when you've finished the movement, or wait for the timer.</p>
-            </div>
-          )}
           {phase === "done" && (
             <div className="rounded-3xl bg-success/30 p-5 text-center backdrop-blur-xl">
               <CheckCircle2 className="mx-auto h-8 w-8" />
@@ -299,6 +271,31 @@ function Runner() {
           )}
         </div>
       </div>
+      {phase === "running" && cur && (
+        <div className="shrink-0 border-t border-white/10 bg-black p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <div className="mx-auto flex max-w-[720px] items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] font-semibold uppercase tracking-widest text-white/60">In progress</div>
+              <div className="truncate text-base font-extrabold text-white">{cur.name}</div>
+            </div>
+            <div className="w-12 text-center text-4xl font-extrabold tabular-nums brand-text">{countdown}</div>
+            <button
+              onClick={() => finishHandlerRef.current?.(true)}
+              aria-label="Skip test"
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/15 text-white"
+            >
+              <SkipForward className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => finishHandlerRef.current?.(false)}
+              disabled={elapsed < 3}
+              className="flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-full brand-gradient px-4 text-sm font-bold text-primary-foreground disabled:opacity-50"
+            >
+              <CheckCircle2 className="h-5 w-5" /> {elapsed < 3 ? `${3 - elapsed}s` : "Done"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

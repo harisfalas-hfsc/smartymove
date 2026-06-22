@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { BottomTabs } from "@/components/BottomTabs";
 import { DesktopProfile } from "@/components/DesktopProfile";
@@ -9,6 +9,8 @@ export const Route = createFileRoute("/app")({ component: AppLayout });
 
 function AppLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isScreenRun = location.pathname === "/app/screen/run";
   useEffect(() => {
     const u = getUser();
     if (u?.questionnaire && u.goal) return;
@@ -21,10 +23,10 @@ function AppLayout() {
     <>
       <div className="hidden lg:block"><DesktopProfile /></div>
       <div className="lg:hidden flex min-h-[100dvh] w-full flex-col" style={{ background: "#E7ECEC", color: "#14213A" }}>
-        <SiteHeader />
-        <div className="mx-auto flex w-full max-w-[440px] flex-1 flex-col bg-background">
-          <div className="flex-1 overflow-y-auto pb-20"><Outlet /></div>
-          <BottomTabs />
+        {!isScreenRun && <SiteHeader />}
+        <div className={`mx-auto flex w-full flex-1 flex-col bg-background ${isScreenRun ? "max-w-none" : "max-w-[440px]"}`}>
+          <div className={`flex-1 overflow-y-auto ${isScreenRun ? "pb-0" : "pb-20"}`}><Outlet /></div>
+          {!isScreenRun && <BottomTabs />}
         </div>
       </div>
     </>
