@@ -5,9 +5,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Image as ImageIcon, Database, Search, FileDown, Wrench } from "lucide-react";
+import { Upload, Image as ImageIcon, Database, Search, FileDown, Wrench, ShieldAlert } from "lucide-react";
 import { isAdminEmail } from "@/lib/admin";
-import { getUser } from "@/lib/store";
 import { useUnresolvedCanonicals } from "@/lib/exercises";
 
 export const Route = createFileRoute("/admin/exercises")({ component: AdminExercises });
@@ -21,54 +20,25 @@ type Row = {
   gif_url: string | null;
 };
 
-const PASS_KEY = "smartymove.adminPass";
-const ADMIN_PASS = "smarty-admin";
-
 function AdminExercises() {
-  const [authed, setAuthed] = useState(false);
-  const [pass, setPass] = useState("");
+  const [authed, setAuthed] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (localStorage.getItem(PASS_KEY) === ADMIN_PASS) {
-      setAuthed(true);
-      return;
-    }
-    // Auto-unlock for admin emails (local profile)
-    const local = getUser();
-    if (isAdminEmail(local?.email)) {
-      localStorage.setItem(PASS_KEY, ADMIN_PASS);
-      setAuthed(true);
-      return;
-    }
-    // Auto-unlock for admin emails (Lovable Cloud session)
+    localStorage.removeItem("smartymove.adminPass");
     supabase.auth.getUser().then(({ data }) => {
-      if (isAdminEmail(data.user?.email)) {
-        localStorage.setItem(PASS_KEY, ADMIN_PASS);
-        setAuthed(true);
-      }
-    });
+      setAuthed(isAdminEmail(data.user?.email));
+    }).catch(() => setAuthed(false));
   }, []);
 
-  if (!authed) {
+  if (authed !== true) {
     return (
       <Shell>
-        <div className="mx-auto mt-10 max-w-sm rounded-3xl bg-card p-6 shadow-card">
-          <h1 className="text-xl font-extrabold">Admin access</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Enter the admin passphrase to manage the exercise library.</p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (pass === ADMIN_PASS) {
-                localStorage.setItem(PASS_KEY, ADMIN_PASS);
-                setAuthed(true);
-              } else alert("Wrong passphrase");
-            }}
-            className="mt-4 flex flex-col gap-3"
-          >
-            <Input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="Passphrase" className="h-11 rounded-xl" />
-            <Button type="submit" className="h-11 rounded-2xl brand-gradient text-sm font-semibold">Unlock</Button>
-          </form>
+        <div className="mx-auto mt-10 max-w-sm rounded-3xl bg-card p-6 text-center shadow-card">
+          <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl brand-gradient-soft text-primary"><ShieldAlert className="h-6 w-6" /></div>
+          <h1 className="mt-4 text-xl font-extrabold">Admin access only</h1>
+          <p className="mt-1 text-sm text-muted-foreground">The exercise library manager is restricted to administrator accounts.</p>
+          <a href="/app/profile" className="mt-5 inline-flex h-11 items-center justify-center rounded-2xl bg-secondary px-5 text-sm font-semibold text-foreground">Back to profile</a>
         </div>
       </Shell>
     );

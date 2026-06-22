@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { type Goal, updateOnboardingDraft, updateUser, getOnboardingDraft, getUser } from "@/lib/store";
+import { type Goal, updateOnboardingDraft, updateUser, getOnboardingDraft, getUser, restoreUserFromBackend, useUser } from "@/lib/store";
 
 export const Route = createFileRoute("/onboarding/goal")({ component: Page });
 
@@ -15,8 +15,21 @@ const GOALS: { v: Goal; title: string; sub: string; emoji: string }[] = [
 
 function Page() {
   const navigate = useNavigate();
-  const loggedIn = !!getUser();
+  const user = useUser();
+  const [hasAccount, setHasAccount] = useState(() => !!getUser());
+  const [authChecked, setAuthChecked] = useState(false);
   const [g, setG] = useState<Goal | null>(getUser()?.goal ?? getOnboardingDraft().goal ?? null);
+  useEffect(() => {
+    let alive = true;
+    void restoreUserFromBackend()
+      .then((restored) => {
+        if (!alive) return;
+        setHasAccount(!!restored || !!getUser());
+        if (restored?.goal) setG((current) => current ?? restored.goal ?? null);
+      })
+      .finally(() => { if (alive) setAuthChecked(true); });
+    return () => { alive = false; };
+  }, []);
   function next() {
     if (!g) return;
     if (getUser()) {
@@ -48,8 +61,8 @@ function Page() {
           );
         })}
       </div>
-      <Button disabled={!g} onClick={next} className="h-12 w-full rounded-2xl brand-gradient text-base font-semibold shadow-soft disabled:opacity-50">
-        {loggedIn ? "Save goal" : "Create account to continue"}
+      <Button disabled={!g || !authChecked} onClick={next} className="h-12 w-full rounded-2xl brand-gradient text-base font-semibold shadow-soft disabled:opacity-50">
+        {!authChecked ? "Checking account…" : (user || hasAccount) ? "Save goal" : "Create account to continue"}
       </Button>
     </div>
   );
