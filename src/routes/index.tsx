@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { clearOnboardingDraft, getUser, restoreUserFromBackend, signInWithEmailProfile, signUpWithEmailProfile } from "@/lib/store";
+import { clearOnboardingDraft, getOnboardingDraft, getUser, restoreUserFromBackend, signInWithEmailProfile, signUpWithEmailProfile } from "@/lib/store";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 
@@ -174,7 +174,7 @@ function Welcome() {
             <h2 style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}>
               Create your account
             </h2>
-            <p className="-mt-1 text-sm" style={{ color: "#6B7A90" }}>Saved locally on this device for now.</p>
+            <p className="-mt-1 text-sm" style={{ color: "#6B7A90" }}>Saved securely to your account.</p>
             <div className="space-y-1.5">
               <Label htmlFor="n">Name</Label>
               <Input id="n" value={name} onChange={(e) => setName(e.target.value)} required className="h-11 rounded-xl" />
@@ -195,11 +195,13 @@ function Welcome() {
             </div>
             <Button
               type="submit"
+              disabled={submitting}
               style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
               className="mt-2 h-12 w-full rounded-2xl text-base font-semibold text-white hover:opacity-95"
             >
-              Continue
+              {submitting ? "Saving..." : "Continue"}
             </Button>
+            {authError && <p className="text-center text-sm font-semibold text-destructive">{authError}</p>}
             <p className="mt-1 text-center text-sm" style={{ color: "#6B7A90" }}>
               Have an account?{" "}
               <button type="button" onClick={() => setMode("signin")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
@@ -223,11 +225,13 @@ function Welcome() {
             </div>
             <Button
               type="submit"
+              disabled={submitting}
               style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
               className="mt-2 h-12 w-full rounded-2xl text-base font-semibold text-white hover:opacity-95"
             >
-              Sign in
+              {submitting ? "Signing in..." : "Sign in"}
             </Button>
+            {authError && <p className="text-center text-sm font-semibold text-destructive">{authError}</p>}
             <p className="mt-1 text-center text-sm" style={{ color: "#6B7A90" }}>
               New here?{" "}
               <button type="button" onClick={() => setMode("signup")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>

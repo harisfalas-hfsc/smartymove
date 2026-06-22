@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { BottomTabs } from "@/components/BottomTabs";
 import { DesktopProfile } from "@/components/DesktopProfile";
 import { SiteHeader } from "@/components/SiteHeader";
-import { getUser } from "@/lib/store";
+import { getUser, restoreUserFromBackend } from "@/lib/store";
 
 export const Route = createFileRoute("/app")({ component: AppLayout });
 
@@ -11,8 +11,11 @@ function AppLayout() {
   const navigate = useNavigate();
   useEffect(() => {
     const u = getUser();
-    if (!u) navigate({ to: "/" });
-    else if (!u.questionnaire || !u.goal) navigate({ to: "/onboarding/questionnaire" });
+    if (u?.questionnaire && u.goal) return;
+    void restoreUserFromBackend().then((restored) => {
+      if (!restored) navigate({ to: "/" });
+      else if (!restored.questionnaire || !restored.goal) navigate({ to: "/onboarding/questionnaire" });
+    }).catch(() => navigate({ to: "/" }));
   }, [navigate]);
   return (
     <>
