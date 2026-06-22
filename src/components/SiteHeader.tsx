@@ -18,8 +18,8 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
     if (typeof window !== "undefined" && window.history.length > 1) window.history.back();
     else navigate({ to: "/" });
   };
-  const handleSignIn = () => onSignIn ? onSignIn() : navigate({ to: "/", search: { auth: "signin" } });
-  const handleSignUp = () => onSignUp ? onSignUp() : navigate({ to: "/", search: { auth: "signup" } });
+  const handleSignIn = () => onSignIn ? onSignIn() : window.location.assign("/?auth=signin");
+  const handleSignUp = () => onSignUp ? onSignUp() : window.location.assign("/?auth=signup");
 
   return (
     <header

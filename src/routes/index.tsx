@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createUser, getUser } from "@/lib/store";
+import { clearOnboardingDraft, createUser, getOnboardingDraft, getUser, setUser } from "@/lib/store";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 
@@ -29,6 +29,12 @@ function Welcome() {
   const [pw, setPw] = useState("");
 
   useEffect(() => {
+    const requestedMode = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("auth") : null;
+    if (requestedMode === "signin" || requestedMode === "signup") {
+      setMode(requestedMode);
+      window.history.replaceState(null, "", "/");
+      return;
+    }
     const u = getUser();
     if (u && u.questionnaire && u.goal) navigate({ to: "/app" });
   }, [navigate]);
@@ -36,7 +42,14 @@ function Welcome() {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!name || !email || !age || !pw) return;
-    createUser(name, email, Number(age));
+    const u = createUser(name, email, Number(age));
+    const draft = getOnboardingDraft();
+    if (draft.questionnaire || draft.goal) {
+      setUser({ ...u, questionnaire: draft.questionnaire, goal: draft.goal });
+      clearOnboardingDraft();
+      navigate({ to: draft.questionnaire && draft.goal ? "/app" : "/onboarding/questionnaire" });
+      return;
+    }
     navigate({ to: "/onboarding/questionnaire" });
   }
 
@@ -122,7 +135,7 @@ function Welcome() {
             </div>
 
             <button
-              onClick={() => setMode("signup")}
+              onClick={() => navigate({ to: "/onboarding/questionnaire" })}
               style={{
                 display: "block", width: "100%", textAlign: "center",
                 background: "#FF6B4A", color: "#fff",
