@@ -16,6 +16,7 @@ const GOALS: { v: Goal; title: string; sub: string; emoji: string }[] = [
 function Page() {
   const navigate = useNavigate();
   const user = useUser();
+  const [hasAccount, setHasAccount] = useState(() => !!getUser());
   const [authChecked, setAuthChecked] = useState(false);
   const [g, setG] = useState<Goal | null>(getUser()?.goal ?? getOnboardingDraft().goal ?? null);
   useEffect(() => {
@@ -23,6 +24,7 @@ function Page() {
     void restoreUserFromBackend()
       .then((restored) => {
         if (!alive) return;
+        setHasAccount(!!restored || !!getUser());
         if (restored?.goal) setG((current) => current ?? restored.goal ?? null);
       })
       .finally(() => { if (alive) setAuthChecked(true); });
@@ -60,7 +62,7 @@ function Page() {
         })}
       </div>
       <Button disabled={!g || !authChecked} onClick={next} className="h-12 w-full rounded-2xl brand-gradient text-base font-semibold shadow-soft disabled:opacity-50">
-        {!authChecked ? "Checking account…" : user ? "Save goal" : "Create account to continue"}
+        {!authChecked ? "Checking account…" : (user || hasAccount) ? "Save goal" : "Create account to continue"}
       </Button>
     </div>
   );

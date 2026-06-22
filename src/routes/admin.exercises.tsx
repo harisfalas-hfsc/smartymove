@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Upload, Image as ImageIcon, Database, Search, FileDown, Wrench, ShieldAlert } from "lucide-react";
 import { isAdminEmail } from "@/lib/admin";
-import { getUser } from "@/lib/store";
 import { useUnresolvedCanonicals } from "@/lib/exercises";
 
 export const Route = createFileRoute("/admin/exercises")({ component: AdminExercises });
@@ -27,11 +26,6 @@ function AdminExercises() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     localStorage.removeItem("smartymove.adminPass");
-    const local = getUser();
-    if (isAdminEmail(local?.email)) {
-      setAuthed(true);
-      return;
-    }
     supabase.auth.getUser().then(({ data }) => {
       setAuthed(isAdminEmail(data.user?.email));
     }).catch(() => setAuthed(false));
