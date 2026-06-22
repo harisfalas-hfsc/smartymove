@@ -27,6 +27,8 @@ export interface TestResult {
   metric?: number;
   side?: "L" | "R" | "both";
   notes?: string;
+  /** False when the camera couldn't reliably score this test (no pose, no motion, skipped). */
+  valid?: boolean;
 }
 
 export interface ScreenSession {

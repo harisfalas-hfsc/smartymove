@@ -46,13 +46,15 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
     wall_slide: ["mobility","quality"], elbow_rom: ["mobility"], wrist_rom: ["mobility"],
   };
   const subs = { mobility: [] as number[], stability: [] as number[], balance: [] as number[], quality: [] as number[], strength: [] as number[] };
-  for (const r of results) {
+  const valid = results.filter(r => r.valid !== false);
+  for (const r of valid) {
     const pct = (r.score / 3) * 100;
     for (const f of focusMap[r.id] ?? []) (subs as any)[f].push(pct);
   }
-  const avg = (a: number[]) => a.length ? Math.round(a.reduce((x,y)=>x+y,0)/a.length) : 70;
+  const avg = (a: number[]) => a.length ? Math.round(a.reduce((x,y)=>x+y,0)/a.length) : 0;
   const sub = { mobility: avg(subs.mobility), stability: avg(subs.stability), balance: avg(subs.balance), quality: avg(subs.quality), strength: avg(subs.strength) };
-  const overall = Math.round((sub.mobility + sub.stability + sub.balance + sub.quality + sub.strength) / 5);
+  const present = [sub.mobility, sub.stability, sub.balance, sub.quality, sub.strength].filter(v => v > 0);
+  const overall = present.length ? Math.round(present.reduce((a,b)=>a+b,0) / present.length) : 0;
   const offset = Math.round(((75 - overall) / 25) * 5);
   const movementAge = Math.max(16, Math.min(90, age + offset));
   return { date: new Date().toISOString(), overall, sub, movementAge, tests: results, conditional };
