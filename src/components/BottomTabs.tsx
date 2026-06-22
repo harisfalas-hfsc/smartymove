@@ -3,10 +3,10 @@ import { Home, Activity, Dumbbell, LineChart, User } from "lucide-react";
 
 const tabs = [
   { to: "/app", label: "Home", icon: Home, exact: true },
-  { to: "/app/screen", label: "Screen", icon: Activity },
-  { to: "/app/program", label: "Program", icon: Dumbbell },
-  { to: "/app/progress", label: "Progress", icon: LineChart },
-  { to: "/app/profile", label: "Profile", icon: User },
+  { to: "/app/screen", label: "Screen", icon: Activity, exact: false },
+  { to: "/app/program", label: "Program", icon: Dumbbell, exact: false },
+  { to: "/app/progress", label: "Progress", icon: LineChart, exact: false },
+  { to: "/app/profile", label: "Profile", icon: User, exact: false },
 ] as const;
 
 export function BottomTabs() {
