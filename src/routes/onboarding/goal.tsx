@@ -59,7 +59,7 @@ function Page() {
           );
         })}
       </div>
-      <Button disabled={!g} onClick={next} className="h-12 w-full rounded-2xl brand-gradient text-base font-semibold shadow-soft disabled:opacity-50">
+      <Button disabled={!g || !authChecked} onClick={next} className="h-12 w-full rounded-2xl brand-gradient text-base font-semibold shadow-soft disabled:opacity-50">
         {!authChecked ? "Checking account…" : user ? "Save goal" : "Create account to continue"}
       </Button>
     </div>
