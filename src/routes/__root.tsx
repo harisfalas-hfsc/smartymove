@@ -94,8 +94,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" },
-      { rel: "icon", type: "image/png", href: "/__l5e/assets-v1/f9426666-d5f7-415d-9e73-0062a238fcc9/favicon.png" },
-      { rel: "apple-touch-icon", href: "/__l5e/assets-v1/f9426666-d5f7-415d-9e73-0062a238fcc9/favicon.png" },
+      { rel: "icon", type: "image/png", href: "/__l5e/assets-v1/96e554d0-a8d8-4890-8280-4c595e2d844e/favicon.png" },
+      { rel: "apple-touch-icon", href: "/__l5e/assets-v1/96e554d0-a8d8-4890-8280-4c595e2d844e/favicon.png" },
       {
         rel: "stylesheet",
         href: appCss,

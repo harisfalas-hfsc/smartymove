@@ -22,7 +22,7 @@ export const Route = createFileRoute("/")({
 
 function Welcome() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"intro" | "signup">("intro");
+  const [mode, setMode] = useState<"intro" | "signup" | "signin">("intro");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [age, setAge] = useState<number | "">("");
@@ -40,12 +40,24 @@ function Welcome() {
     navigate({ to: "/onboarding/questionnaire" });
   }
 
+  function submitSignin(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email || !pw) return;
+    const u = getUser();
+    if (u) navigate({ to: "/app" });
+    else setMode("signup");
+  }
+
   return (
     <div
       className="flex min-h-[100dvh] w-full flex-col"
       style={{ background: "#E7ECEC", color: "#14213A" }}
     >
-      <SiteHeader onSignIn={() => setMode("signup")} />
+      <SiteHeader
+        onSignIn={() => setMode("signin")}
+        onSignUp={() => setMode("signup")}
+        onBack={mode === "intro" ? undefined : () => setMode("intro")}
+      />
       <main className="mx-auto w-full max-w-[420px] px-5 pb-8 pt-5">
 
         {mode === "intro" ? (
@@ -124,12 +136,12 @@ function Welcome() {
             </button>
             <div className="text-center" style={{ fontSize: 13.5, color: "#6B7A90" }}>
               Already have an account?{" "}
-              <button onClick={() => setMode("signup")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+              <button onClick={() => setMode("signin")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                 Sign in
               </button>
             </div>
           </>
-        ) : (
+        ) : mode === "signup" ? (
           <form onSubmit={submit} className="mt-2 flex flex-col gap-3">
             <h2 style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}>
               Create your account
@@ -160,6 +172,40 @@ function Welcome() {
             >
               Continue
             </Button>
+            <p className="mt-1 text-center text-sm" style={{ color: "#6B7A90" }}>
+              Have an account?{" "}
+              <button type="button" onClick={() => setMode("signin")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                Sign in
+              </button>
+            </p>
+          </form>
+        ) : (
+          <form onSubmit={submitSignin} className="mt-2 flex flex-col gap-3">
+            <h2 style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}>
+              Welcome back
+            </h2>
+            <p className="-mt-1 text-sm" style={{ color: "#6B7A90" }}>Sign in to continue your movement journey.</p>
+            <div className="space-y-1.5">
+              <Label htmlFor="se">Email</Label>
+              <Input id="se" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 rounded-xl" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="sp">Password</Label>
+              <Input id="sp" type="password" value={pw} onChange={(e) => setPw(e.target.value)} required minLength={6} className="h-11 rounded-xl" />
+            </div>
+            <Button
+              type="submit"
+              style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
+              className="mt-2 h-12 w-full rounded-2xl text-base font-semibold text-white hover:opacity-95"
+            >
+              Sign in
+            </Button>
+            <p className="mt-1 text-center text-sm" style={{ color: "#6B7A90" }}>
+              New here?{" "}
+              <button type="button" onClick={() => setMode("signup")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                Create an account
+              </button>
+            </p>
           </form>
         )}
 
