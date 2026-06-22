@@ -389,6 +389,6 @@ function scoreSamples(testId: string, samples: any[]): TestResult {
       return { id: testId, name, score: scoreFromRange(maxR, 160, 30), metric: Math.round(maxR) };
     }
     case "wrist_rom": return { id: testId, name, score: 2, notes: "Self-reported guidance applies" };
-    default: return { id: testId, name, score: 2 };
+    default: return { id: testId, name, score: 1, valid: false };
   }
 }
