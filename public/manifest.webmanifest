@@ -1,0 +1,18 @@
+{
+  "name": "SmartyMove",
+  "short_name": "SmartyMove",
+  "description": "Know how you move. Move smarter.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#E7ECEC",
+  "theme_color": "#1f8fb0",
+  "icons": [
+    {
+      "src": "/__l5e/assets-v1/96e554d0-a8d8-4890-8280-4c595e2d844e/favicon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
