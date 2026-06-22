@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { getPoseLandmarker, PL } from "@/lib/pose";
 import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, scoreFromRange, TEST_GUIDES } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
-import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward } from "lucide-react";
+import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X } from "lucide-react";
 
 export const Route = createFileRoute("/app/screen/run")({ component: Runner });
 
@@ -42,6 +42,11 @@ function Runner() {
   const [results, setResults] = useState<TestResult[]>([]);
   const samplesRef = useRef<any[]>([]);
   const finishHandlerRef = useRef<((skipped?: boolean) => void) | null>(null);
+  const [paused, setPaused] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
+  const [restartKey, setRestartKey] = useState(0);
+  const pausedRef = useRef(false);
+  useEffect(() => { pausedRef.current = paused || showInstructions; }, [paused, showInstructions]);
 
   useEffect(() => { if (u) setSeq(buildSequence(u.questionnaire?.joints ?? [])); }, [u]);
 
@@ -114,7 +119,12 @@ function Runner() {
     samplesRef.current = [];
     setCountdown(test.duration);
     setElapsed(0);
-    const sampleId = setInterval(() => { if (latestLandmarksRef.current) samplesRef.current.push(latestLandmarksRef.current); }, 100);
+    setPaused(false);
+    setShowInstructions(false);
+    const sampleId = setInterval(() => {
+      if (pausedRef.current) return;
+      if (latestLandmarksRef.current) samplesRef.current.push(latestLandmarksRef.current);
+    }, 100);
     let done = false;
     const finish = (skipped = false) => {
       if (done) return;
@@ -131,6 +141,7 @@ function Runner() {
     };
     finishHandlerRef.current = finish;
     const tickId = setInterval(() => {
+      if (pausedRef.current) return;
       setElapsed(e => e + 1);
       setCountdown(c => {
         if (c <= 1) { finish(false); return 0; }
@@ -139,7 +150,7 @@ function Runner() {
     }, 1000);
     return () => { clearInterval(tickId); clearInterval(sampleId); finishHandlerRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, idx]);
+  }, [phase, idx, restartKey]);
 
   function finalize(allResults: TestResult[]) {
     if (!u) return;
