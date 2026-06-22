@@ -12,6 +12,9 @@ export interface Questionnaire {
   canJump: boolean;
   recentInjury: boolean;
   redFlags: boolean;
+  numbness?: boolean;
+  nightPain?: boolean;
+  unexplainedSymptoms?: boolean;
   joints: Joint[];
   disclaimerAccepted: boolean;
 }
@@ -49,6 +52,9 @@ export interface User {
   programDays: ProgramDay[];
   streak: number;
   firstRetestDone: boolean;
+  programStartDate?: string;
+  nextRetestDate?: string;
+  phaseOverride?: "restore" | "build" | "perform";
 }
 
 const KEY = "smartymove.user";
@@ -110,6 +116,7 @@ export function createUser(name: string, email: string, age: number): User {
     id: crypto.randomUUID(), name, email, age,
     createdAt: new Date().toISOString(),
     premium: false, sessions: [], programDays: [], streak: 0, firstRetestDone: false,
+    programStartDate: new Date().toISOString(),
   };
   setUser(u);
   return u;
