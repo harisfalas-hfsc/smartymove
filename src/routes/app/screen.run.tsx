@@ -48,6 +48,8 @@ function Runner() {
   const [idx, setIdx] = useState(0);
   const [countdown, setCountdown] = useState(0);
   const [poseReady, setPoseReady] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [statusMsg, setStatusMsg] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<TestResult[]>([]);
   const samplesRef = useRef<any[]>([]);
@@ -56,14 +58,21 @@ function Runner() {
 
   async function start() {
     setError(null);
+    setStarting(true);
+    setStatusMsg("Requesting camera permission...");
     try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error("Your browser doesn't support camera access. Try Chrome or Safari.");
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 720, height: 1280 }, audio: false });
       if (!videoRef.current) return;
       videoRef.current.srcObject = stream;
       await videoRef.current.play();
+      setPhase("preview");
+      setStatusMsg("Loading pose detection model...");
       const lm = await getPoseLandmarker();
       setPoseReady(true);
-      setPhase("preview");
+      setStatusMsg("");
       const tick = () => {
         if (!videoRef.current || !canvasRef.current) return;
         const v = videoRef.current; const c = canvasRef.current;
@@ -89,7 +98,17 @@ function Runner() {
         rafRef.current = requestAnimationFrame(tick);
       };
       rafRef.current = requestAnimationFrame(tick);
-    } catch (e: any) { setError(e?.message ?? "Could not start camera."); }
+    } catch (e: any) {
+      const name = e?.name ?? "";
+      let msg = e?.message ?? "Could not start camera.";
+      if (name === "NotAllowedError") msg = "Camera permission was denied. Enable it in your browser settings and try again.";
+      else if (name === "NotFoundError") msg = "No camera found on this device.";
+      else if (name === "NotReadableError") msg = "Camera is in use by another app. Close it and try again.";
+      setError(msg);
+      setStatusMsg("");
+    } finally {
+      setStarting(false);
+    }
   }
 
   useEffect(() => () => {
@@ -175,7 +194,10 @@ function Runner() {
               <div className="text-lg font-bold">Position yourself in frame</div>
               <p className="mt-1 text-sm opacity-85">Stand 6–8 feet back so your full body fits inside the silhouette guide.</p>
               {error && <div className="mt-3 flex items-center gap-2 rounded-xl bg-destructive/30 p-2 text-xs"><AlertTriangle className="h-4 w-4" />{error}</div>}
-              <button onClick={start} className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-semibold">Enable camera</button>
+              <button onClick={start} disabled={starting} className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-semibold disabled:opacity-60">
+                {starting ? (statusMsg || "Starting...") : "Enable camera"}
+              </button>
+              {starting && statusMsg && <p className="mt-2 text-[11px] opacity-70">{statusMsg}</p>}
             </div>
           )}
           {phase === "preview" && cur && (
@@ -183,7 +205,7 @@ function Runner() {
               <div className="text-xs font-semibold uppercase tracking-widest opacity-80">Next up</div>
               <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
               <p className="mt-2 text-sm opacity-90">{cur.instruction}</p>
-              <p className="mt-2 text-[11px] opacity-60">{poseReady ? "Pose detection active" : "Loading pose model..."}</p>
+              <p className="mt-2 text-[11px] opacity-60">{poseReady ? "Pose detection active" : (statusMsg || "Loading pose model...")}</p>
               <button onClick={() => setPhase("running")} disabled={!poseReady} className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-semibold disabled:opacity-50">Start test</button>
             </div>
           )}
