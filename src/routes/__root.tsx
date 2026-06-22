@@ -87,8 +87,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "SmartyMove — Move Smarter - Live Better" },
       { name: "twitter:description", content: "Find out what's really holding your body back — then fix it in 5 minutes a day." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/Fy27R5a9e7PCz8kHPorHQclmEY32/social-images/social-1782121997982-396a927b-17c3-4a5e-a67e-da31d2c5e5f7.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/Fy27R5a9e7PCz8kHPorHQclmEY32/social-images/social-1782121997982-396a927b-17c3-4a5e-a67e-da31d2c5e5f7.webp" },
+      { property: "og:image", content: "https://smartymove.com/__l5e/assets-v1/55cc1cbc-55bc-4e27-b23e-f04ea9e5e5b4/smartymove-social.png" },
+      { name: "twitter:image", content: "https://smartymove.com/__l5e/assets-v1/55cc1cbc-55bc-4e27-b23e-f04ea9e5e5b4/smartymove-social.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
