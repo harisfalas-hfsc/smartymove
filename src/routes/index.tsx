@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createUser, getUser } from "@/lib/store";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -61,10 +63,14 @@ function Welcome() {
           style={{ top: 14, width: 90, height: 5, borderRadius: 3, background: "rgba(20,33,58,0.15)" }}
         />
 
+        <div className="mt-7">
+          <SiteHeader onSignIn={() => setMode("signup")} />
+        </div>
+
         {mode === "intro" ? (
           <>
             <div
-              className="mt-7 flex items-center gap-2"
+              className="flex items-center gap-2"
               style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "#0E7C86", fontWeight: 600 }}
             >
               <span
