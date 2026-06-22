@@ -25,7 +25,7 @@ import { Route as AppScreenRouteImport } from './routes/app/screen'
 import { Route as AppProgressRouteImport } from './routes/app/progress'
 import { Route as AppProgramRouteImport } from './routes/app/program'
 import { Route as AppProfileRouteImport } from './routes/app/profile'
-import { Route as AdminExercisesRouteImport } from './routes/admin/exercises'
+import { Route as AdminExercisesRouteImport } from './routes/admin.exercises'
 import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
 
 const TermsRoute = TermsRouteImport.update({
