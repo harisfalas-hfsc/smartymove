@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { getPoseLandmarker, PL } from "@/lib/pose";
 import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, scoreFromRange, TEST_GUIDES } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
-import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward } from "lucide-react";
+import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X } from "lucide-react";
 
 export const Route = createFileRoute("/app/screen/run")({ component: Runner });
 
@@ -42,6 +42,11 @@ function Runner() {
   const [results, setResults] = useState<TestResult[]>([]);
   const samplesRef = useRef<any[]>([]);
   const finishHandlerRef = useRef<((skipped?: boolean) => void) | null>(null);
+  const [paused, setPaused] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
+  const [restartKey, setRestartKey] = useState(0);
+  const pausedRef = useRef(false);
+  useEffect(() => { pausedRef.current = paused || showInstructions; }, [paused, showInstructions]);
 
   useEffect(() => { if (u) setSeq(buildSequence(u.questionnaire?.joints ?? [])); }, [u]);
 
@@ -114,7 +119,12 @@ function Runner() {
     samplesRef.current = [];
     setCountdown(test.duration);
     setElapsed(0);
-    const sampleId = setInterval(() => { if (latestLandmarksRef.current) samplesRef.current.push(latestLandmarksRef.current); }, 100);
+    setPaused(false);
+    setShowInstructions(false);
+    const sampleId = setInterval(() => {
+      if (pausedRef.current) return;
+      if (latestLandmarksRef.current) samplesRef.current.push(latestLandmarksRef.current);
+    }, 100);
     let done = false;
     const finish = (skipped = false) => {
       if (done) return;
@@ -131,6 +141,7 @@ function Runner() {
     };
     finishHandlerRef.current = finish;
     const tickId = setInterval(() => {
+      if (pausedRef.current) return;
       setElapsed(e => e + 1);
       setCountdown(c => {
         if (c <= 1) { finish(false); return 0; }
@@ -139,7 +150,7 @@ function Runner() {
     }, 1000);
     return () => { clearInterval(tickId); clearInterval(sampleId); finishHandlerRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, idx]);
+  }, [phase, idx, restartKey]);
 
   function finalize(allResults: TestResult[]) {
     if (!u) return;
@@ -273,29 +284,97 @@ function Runner() {
       </div>
       {phase === "running" && cur && (
         <div className="shrink-0 border-t border-white/10 bg-black p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          <div className="mx-auto flex max-w-[720px] items-center gap-3">
-            <div className="min-w-0 flex-1">
-              <div className="text-[10px] font-semibold uppercase tracking-widest text-white/60">In progress</div>
-              <div className="truncate text-base font-extrabold text-white">{cur.name}</div>
+          <div className="mx-auto max-w-[720px] space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] font-semibold uppercase tracking-widest text-white/60">
+                  {paused || showInstructions ? "Paused" : "In progress"} · Test {idx + 1}/{seq.length}
+                </div>
+                <div className="truncate text-base font-extrabold text-white">{cur.name}</div>
+              </div>
+              <div className="w-12 text-center text-4xl font-extrabold tabular-nums brand-text">{countdown}</div>
+              <button
+                onClick={() => finishHandlerRef.current?.(false)}
+                disabled={elapsed < 2}
+                className="flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-full brand-gradient px-4 text-sm font-bold text-primary-foreground disabled:opacity-50"
+              >
+                <CheckCircle2 className="h-5 w-5" /> Done
+              </button>
             </div>
-            <div className="w-12 text-center text-4xl font-extrabold tabular-nums brand-text">{countdown}</div>
-            <button
-              onClick={() => finishHandlerRef.current?.(true)}
-              aria-label="Skip test"
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/15 text-white"
-            >
-              <SkipForward className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => finishHandlerRef.current?.(false)}
-              disabled={elapsed < 3}
-              className="flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-full brand-gradient px-4 text-sm font-bold text-primary-foreground disabled:opacity-50"
-            >
-              <CheckCircle2 className="h-5 w-5" /> {elapsed < 3 ? `${3 - elapsed}s` : "Done"}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowInstructions(true)}
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-white/15 text-xs font-semibold text-white"
+              >
+                <BookOpen className="h-4 w-4" /> Instructions
+              </button>
+              <button
+                onClick={() => setPaused(p => !p)}
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-white/15 text-xs font-semibold text-white"
+              >
+                {paused ? <><Play className="h-4 w-4" /> Resume</> : <><Pause className="h-4 w-4" /> Pause</>}
+              </button>
+              <button
+                onClick={() => setRestartKey(k => k + 1)}
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-white/15 text-xs font-semibold text-white"
+              >
+                <RotateCcw className="h-4 w-4" /> Restart
+              </button>
+              <button
+                onClick={() => finishHandlerRef.current?.(true)}
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-white/15 text-xs font-semibold text-white"
+              >
+                <SkipForward className="h-4 w-4" /> Skip
+              </button>
+            </div>
           </div>
         </div>
       )}
+      {phase === "running" && cur && showInstructions && (() => {
+        const g = TEST_GUIDES[cur.id];
+        return (
+          <div className="absolute inset-0 z-20 flex items-end bg-black/60 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <div className="mx-auto max-h-[80vh] w-full max-w-[720px] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Test {idx + 1} of {seq.length} · Paused</div>
+                  <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
+                </div>
+                <button onClick={() => setShowInstructions(false)} aria-label="Close" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              {g && (
+                <>
+                  <div className="mt-4">
+                    <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Set up</div>
+                    <ul className="mt-1 space-y-1 text-sm">
+                      {g.setup.map((s, i) => <li key={i} className="flex gap-2"><span className="text-primary">•</span>{s}</li>)}
+                    </ul>
+                  </div>
+                  <div className="mt-4">
+                    <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Do this</div>
+                    <ol className="mt-1 space-y-1 text-sm">
+                      {g.steps.map((s, i) => <li key={i} className="flex gap-2"><span className="font-bold text-primary">{i + 1}.</span>{s}</li>)}
+                    </ol>
+                  </div>
+                  {g.mistakes.length > 0 && (
+                    <div className="mt-4">
+                      <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-warning"><AlertCircle className="h-3 w-3" />Common mistakes</div>
+                      <ul className="mt-1 space-y-1 text-sm">
+                        {g.mistakes.map((s, i) => <li key={i} className="flex gap-2"><span className="text-warning">×</span>{s}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              )}
+              <button onClick={() => setShowInstructions(false)} className="mt-5 h-12 w-full rounded-2xl brand-gradient text-base font-semibold text-primary-foreground">
+                Resume test
+              </button>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
