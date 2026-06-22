@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { getPoseLandmarker, PL } from "@/lib/pose";
 import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, scoreFromRange, TEST_GUIDES } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
-import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, Info, AlertCircle, SkipForward } from "lucide-react";
+import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward } from "lucide-react";
 
 export const Route = createFileRoute("/app/screen/run")({ component: Runner });
 
