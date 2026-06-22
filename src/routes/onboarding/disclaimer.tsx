@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { updateUser } from "@/lib/store";
+import { getUser, updateOnboardingDraft, updateUser } from "@/lib/store";
 
 export const Route = createFileRoute("/onboarding/disclaimer")({ component: Page });
 
@@ -10,7 +10,9 @@ function Page() {
   const navigate = useNavigate();
   const [ok, setOk] = useState(false);
   function next() {
-    updateUser(u => ({ ...u, questionnaire: { ...(u.questionnaire!), disclaimerAccepted: true } }));
+    const user = getUser();
+    if (user) updateUser(u => ({ ...u, questionnaire: { ...(u.questionnaire!), disclaimerAccepted: true } }));
+    else updateOnboardingDraft(draft => ({ ...draft, questionnaire: { ...(draft.questionnaire!), disclaimerAccepted: true } }));
     navigate({ to: "/onboarding/goal" });
   }
   return (

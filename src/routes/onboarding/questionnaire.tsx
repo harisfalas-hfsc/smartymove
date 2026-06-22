@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { type Pain, updateUser, getUser } from "@/lib/store";
+import { type Pain, updateOnboardingDraft, updateUser, getOnboardingDraft, getUser } from "@/lib/store";
 
 export const Route = createFileRoute("/onboarding/questionnaire")({ component: Page });
 
@@ -16,7 +16,7 @@ const PAINS: { v: Pain; label: string; tint: string }[] = [
 
 function Page() {
   const navigate = useNavigate();
-  const existing = getUser()?.questionnaire;
+  const existing = getUser()?.questionnaire ?? getOnboardingDraft().questionnaire;
   const [pain, setPain] = useState<Pain>(existing?.pain ?? "none");
   const [walk, setWalk] = useState(existing?.canWalk ?? true);
   const [run, setRun] = useState(existing?.canRun ?? true);
@@ -25,15 +25,15 @@ function Page() {
   const [flags, setFlags] = useState(existing?.redFlags ?? false);
 
   function next() {
-    updateUser(u => ({
-      ...u,
-      questionnaire: {
-        pain, canWalk: walk, canRun: run, canJump: jump,
-        recentInjury: injury, redFlags: flags,
-        joints: u.questionnaire?.joints ?? [],
-        disclaimerAccepted: u.questionnaire?.disclaimerAccepted ?? false,
-      },
-    }));
+    const questionnaire = {
+      pain, canWalk: walk, canRun: run, canJump: jump,
+      recentInjury: injury, redFlags: flags,
+      joints: existing?.joints ?? [],
+      disclaimerAccepted: existing?.disclaimerAccepted ?? false,
+    };
+    const user = getUser();
+    if (user) updateUser(u => ({ ...u, questionnaire }));
+    else updateOnboardingDraft({ questionnaire });
     navigate({ to: "/onboarding/joints" });
   }
 
