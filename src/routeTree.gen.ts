@@ -18,6 +18,7 @@ import { Route as OnboardingJointsRouteImport } from './routes/onboarding/joints
 import { Route as OnboardingGoalRouteImport } from './routes/onboarding/goal'
 import { Route as OnboardingDisclaimerRouteImport } from './routes/onboarding/disclaimer'
 import { Route as AppScreenRouteImport } from './routes/app/screen'
+import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
 
 const OnboardingRouteRoute = OnboardingRouteRouteImport.update({
   id: '/onboarding',
@@ -64,39 +65,47 @@ const AppScreenRoute = AppScreenRouteImport.update({
   path: '/screen',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppScreenRunRoute = AppScreenRunRouteImport.update({
+  id: '/run',
+  path: '/run',
+  getParentRoute: () => AppScreenRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
   '/onboarding': typeof OnboardingRouteRouteWithChildren
-  '/app/screen': typeof AppScreenRoute
+  '/app/screen': typeof AppScreenRouteWithChildren
   '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
   '/onboarding/goal': typeof OnboardingGoalRoute
   '/onboarding/joints': typeof OnboardingJointsRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
   '/app/': typeof AppIndexRoute
+  '/app/screen/run': typeof AppScreenRunRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRouteRouteWithChildren
-  '/app/screen': typeof AppScreenRoute
+  '/app/screen': typeof AppScreenRouteWithChildren
   '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
   '/onboarding/goal': typeof OnboardingGoalRoute
   '/onboarding/joints': typeof OnboardingJointsRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
   '/app': typeof AppIndexRoute
+  '/app/screen/run': typeof AppScreenRunRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
   '/onboarding': typeof OnboardingRouteRouteWithChildren
-  '/app/screen': typeof AppScreenRoute
+  '/app/screen': typeof AppScreenRouteWithChildren
   '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
   '/onboarding/goal': typeof OnboardingGoalRoute
   '/onboarding/joints': typeof OnboardingJointsRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
   '/app/': typeof AppIndexRoute
+  '/app/screen/run': typeof AppScreenRunRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/onboarding/joints'
     | '/onboarding/questionnaire'
     | '/app/'
+    | '/app/screen/run'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/onboarding/joints'
     | '/onboarding/questionnaire'
     | '/app'
+    | '/app/screen/run'
   id:
     | '__root__'
     | '/'
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/onboarding/joints'
     | '/onboarding/questionnaire'
     | '/app/'
+    | '/app/screen/run'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -204,16 +216,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppScreenRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/app/screen/run': {
+      id: '/app/screen/run'
+      path: '/run'
+      fullPath: '/app/screen/run'
+      preLoaderRoute: typeof AppScreenRunRouteImport
+      parentRoute: typeof AppScreenRoute
+    }
   }
 }
 
+interface AppScreenRouteChildren {
+  AppScreenRunRoute: typeof AppScreenRunRoute
+}
+
+const AppScreenRouteChildren: AppScreenRouteChildren = {
+  AppScreenRunRoute: AppScreenRunRoute,
+}
+
+const AppScreenRouteWithChildren = AppScreenRoute._addFileChildren(
+  AppScreenRouteChildren,
+)
+
 interface AppRouteRouteChildren {
-  AppScreenRoute: typeof AppScreenRoute
+  AppScreenRoute: typeof AppScreenRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
-  AppScreenRoute: AppScreenRoute,
+  AppScreenRoute: AppScreenRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
 }
 
