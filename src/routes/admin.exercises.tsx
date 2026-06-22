@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Upload, Image as ImageIcon, Database, Search, FileDown, Wrench } from "lucide-react";
+import { isAdminEmail } from "@/lib/admin";
+import { getUser } from "@/lib/store";
 
 export const Route = createFileRoute("/admin/exercises")({ component: AdminExercises });
 
@@ -26,9 +28,25 @@ function AdminExercises() {
   const [pass, setPass] = useState("");
 
   useEffect(() => {
-    if (typeof window !== "undefined" && localStorage.getItem(PASS_KEY) === ADMIN_PASS) {
+    if (typeof window === "undefined") return;
+    if (localStorage.getItem(PASS_KEY) === ADMIN_PASS) {
       setAuthed(true);
+      return;
     }
+    // Auto-unlock for admin emails (local profile)
+    const local = getUser();
+    if (isAdminEmail(local?.email)) {
+      localStorage.setItem(PASS_KEY, ADMIN_PASS);
+      setAuthed(true);
+      return;
+    }
+    // Auto-unlock for admin emails (Lovable Cloud session)
+    supabase.auth.getUser().then(({ data }) => {
+      if (isAdminEmail(data.user?.email)) {
+        localStorage.setItem(PASS_KEY, ADMIN_PASS);
+        setAuthed(true);
+      }
+    });
   }, []);
 
   if (!authed) {

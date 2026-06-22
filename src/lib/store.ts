@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { isAdminEmail } from "./admin";
 
 export type Joint = "ankle" | "knee" | "hip" | "back" | "shoulder" | "elbow" | "wrist" | "none";
 export type Pain = "none" | "mild" | "moderate" | "severe";
@@ -99,6 +100,9 @@ export function useUser() {
     window.addEventListener("storage", f);
     return () => { window.removeEventListener("smartymove:user", f); window.removeEventListener("storage", f); };
   }, []);
+  if (u && isAdminEmail(u.email) && !u.premium) {
+    return { ...u, premium: true };
+  }
   return u;
 }
 export function createUser(name: string, email: string, age: number): User {
