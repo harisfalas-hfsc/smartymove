@@ -91,7 +91,7 @@ export function clearOnboardingDraft() {
   localStorage.removeItem(DRAFT_KEY);
 }
 export function useUser() {
-  const [u, setU] = useState<User | null>(() => getUser());
+  const [u, setU] = useState<User | null>(null);
   useEffect(() => {
     setU(getUser());
     const f = () => setU(getUser());
