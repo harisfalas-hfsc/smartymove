@@ -310,7 +310,8 @@ function Manager() {
 
   const filtered = rows.filter((r) => {
     const q = search.toLowerCase();
-    return !q || r.name.toLowerCase().includes(q) || (r.target ?? "").toLowerCase().includes(q) || (r.body_part ?? "").toLowerCase().includes(q);
+    const matchesSearch = !q || r.id.toLowerCase().includes(q) || r.name.toLowerCase().includes(q) || (r.target ?? "").toLowerCase().includes(q) || (r.body_part ?? "").toLowerCase().includes(q);
+    return matchesSearch && (!showMissingOnly || !r.gif_url);
   });
   const withGif = rows.filter((r) => !!r.gif_url).length;
 
@@ -341,7 +342,15 @@ function Manager() {
 
         <Card title="2 · Upload GIFs (bulk)">
           <input ref={gifRef} type="file" accept="image/gif" multiple onChange={handleGIFs} disabled={gifBusy} className="text-sm" />
-          <p className="mt-2 text-xs text-muted-foreground">Pick all your <code>.gif</code> files at once — files already uploaded are skipped automatically, so it's safe to re-select the whole folder. Uploads run 5 in parallel with retries.</p>
+          <p className="mt-2 text-xs text-muted-foreground">Pick the whole GIF folder again in one selection. Already uploaded files are skipped automatically; only missing files upload.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={repairExistingLinks} disabled={gifBusy} className="rounded-xl">
+              <Wrench className="mr-2 h-4 w-4" /> Repair existing GIF links
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={downloadMissingList} disabled={loading || rows.length === 0} className="rounded-xl">
+              <FileDown className="mr-2 h-4 w-4" /> Download missing list
+            </Button>
+          </div>
           {gifBusy || gifStatus ? (
             <div className="mt-3 space-y-2">
               <Progress value={gifProgress} />
@@ -355,6 +364,9 @@ function Manager() {
         <div className="flex items-center gap-2">
           <Search className="h-4 w-4 text-muted-foreground" />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name, target, body part" className="h-10 rounded-xl" />
+          <Button type="button" variant={showMissingOnly ? "default" : "outline"} size="sm" onClick={() => setShowMissingOnly((v) => !v)} className="h-10 rounded-xl whitespace-nowrap">
+            Missing only
+          </Button>
           <span className="ml-auto text-xs text-muted-foreground">{filtered.length} shown</span>
         </div>
         <div className="mt-3 max-h-[420px] overflow-auto rounded-2xl border border-border">
