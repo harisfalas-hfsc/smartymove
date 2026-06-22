@@ -39,8 +39,8 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
-  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-display: "Nunito", system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: "Nunito", system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 :root {
