@@ -28,5 +28,5 @@ export function pickRoutine(goal: Goal | undefined, joints: Joint[]): Exercise[]
     return { e, s };
   });
   scored.sort((a,b) => b.s - a.s);
-  return scored.slice(0, 5).map(x => x.e);
+  return scored.slice(0, 8).map(x => x.e);
 }
