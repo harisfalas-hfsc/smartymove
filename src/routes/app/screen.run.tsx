@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { getPoseLandmarker, PL } from "@/lib/pose";
-import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, scoreFromRange } from "@/lib/movement";
+import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, scoreFromRange, TEST_GUIDES } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
-import { ChevronLeft, Camera, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, Info, AlertCircle } from "lucide-react";
+import { MovementDemo } from "@/components/MovementDemo";
 
 export const Route = createFileRoute("/app/screen/run")({ component: Runner });
 
@@ -19,20 +20,7 @@ function buildSequence(joints: Joint[]): TestDef[] {
 }
 
 function instructionFor(id: string): string {
-  return ({
-    squat: "Stand tall, feet shoulder-width. Squat down as deep as comfortable for 3 reps.",
-    hinge: "Feet hip-width. Push hips back, hinge forward, keep spine long. 3 reps.",
-    balance: "Stand on your right leg, then your left. Hold 5 seconds each.",
-    lunge: "Step into a lunge, hold briefly, return. Both sides.",
-    overhead: "Reach both arms overhead, then rotate side to side.",
-    ankle_df: "Half-kneel, drive front knee over toes without lifting heel.",
-    knee_sld: "Slowly step down off a low step on one leg, then the other.",
-    hip_abd: "Stand on one leg, lift other leg out to the side. Hold control.",
-    bridge_hold: "Lie on back, knees bent, drive hips up and hold the bridge.",
-    wall_slide: "Back to wall, slide forearms up and down.",
-    elbow_rom: "Bend and straighten elbows fully, slowly.",
-    wrist_rom: "Hands forward, flex and extend wrists through full range.",
-  } as Record<string,string>)[id] ?? "Follow the on-screen guide.";
+  return TEST_GUIDES[id]?.what ?? "Follow the on-screen guide.";
 }
 
 function Runner() {
@@ -43,7 +31,7 @@ function Runner() {
   const rafRef = useRef<number>(0);
   const latestLandmarksRef = useRef<any[] | null>(null);
 
-  const [phase, setPhase] = useState<"setup" | "preview" | "running" | "done">("setup");
+  const [phase, setPhase] = useState<"setup" | "preview" | "intro" | "running" | "done">("setup");
   const [seq, setSeq] = useState<TestDef[]>([]);
   const [idx, setIdx] = useState(0);
   const [countdown, setCountdown] = useState(0);
@@ -64,7 +52,9 @@ function Runner() {
       if (!navigator.mediaDevices?.getUserMedia) {
         throw new Error("Your browser doesn't support camera access. Try Chrome or Safari.");
       }
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 720, height: 1280 }, audio: false });
+      // No forced resolution — let the browser pick its native size so the
+      // preview isn't aggressively cropped/zoomed on phones.
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
       if (!videoRef.current) return;
       videoRef.current.srcObject = stream;
       await videoRef.current.play();
@@ -165,9 +155,9 @@ function Runner() {
 
   return (
     <div className="relative flex h-full min-h-[100dvh] flex-col bg-black text-white">
-      <div className="relative flex-1 overflow-hidden">
-        <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover [transform:scaleX(-1)]" />
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full object-cover [transform:scaleX(-1)]" />
+      <div className="relative flex-1 overflow-hidden bg-black">
+        <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-contain [transform:scaleX(-1)]" />
+        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full object-contain [transform:scaleX(-1)]" />
         {(phase === "setup" || phase === "preview") && (
           <svg viewBox="0 0 200 400" className="pointer-events-none absolute inset-0 m-auto h-[80%] w-auto opacity-30">
             <path d="M100 30 a18 18 0 1 1 0.1 0 M82 70 h36 v90 l-16 70 v100 l-10 30 M118 70 v90 l16 70 v100 l10 30 M82 80 l-30 70 M118 80 l30 70" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" />
@@ -204,11 +194,58 @@ function Runner() {
             <div className="rounded-3xl bg-white/10 p-5 backdrop-blur-xl">
               <div className="text-xs font-semibold uppercase tracking-widest opacity-80">Next up</div>
               <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
-              <p className="mt-2 text-sm opacity-90">{cur.instruction}</p>
+              <p className="mt-2 text-sm opacity-90">{TEST_GUIDES[cur.id]?.what ?? cur.instruction}</p>
               <p className="mt-2 text-[11px] opacity-60">{poseReady ? "Pose detection active" : (statusMsg || "Loading pose model...")}</p>
-              <button onClick={() => setPhase("running")} disabled={!poseReady} className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-semibold disabled:opacity-50">Start test</button>
+              <button onClick={() => setPhase("intro")} disabled={!poseReady} className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-semibold disabled:opacity-50">Show me how</button>
             </div>
           )}
+          {phase === "intro" && cur && (() => {
+            const g = TEST_GUIDES[cur.id];
+            return (
+              <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
+                <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Test {idx + 1} of {seq.length} · {g?.reps ?? "10 sec"}</div>
+                <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
+                <p className="mt-1 text-sm text-muted-foreground">{g?.what ?? cur.instruction}</p>
+                <div className="mt-3 grid h-44 w-full place-items-center rounded-2xl bg-accent/40">
+                  <MovementDemo testId={cur.id} className="h-40 w-40 text-primary" />
+                </div>
+                {g?.why && (
+                  <div className="mt-3 flex gap-2 rounded-xl bg-accent/40 p-3 text-xs">
+                    <Info className="h-4 w-4 shrink-0 text-primary" />
+                    <span><strong>Why this test:</strong> {g.why}</span>
+                  </div>
+                )}
+                {g && (
+                  <>
+                    <div className="mt-4">
+                      <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Set up</div>
+                      <ul className="mt-1 space-y-1 text-sm">
+                        {g.setup.map((s, i) => <li key={i} className="flex gap-2"><span className="text-primary">•</span>{s}</li>)}
+                      </ul>
+                    </div>
+                    <div className="mt-4">
+                      <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Do this</div>
+                      <ol className="mt-1 space-y-1 text-sm">
+                        {g.steps.map((s, i) => <li key={i} className="flex gap-2"><span className="font-bold text-primary">{i + 1}.</span>{s}</li>)}
+                      </ol>
+                    </div>
+                    {g.mistakes.length > 0 && (
+                      <div className="mt-4">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-warning"><AlertCircle className="h-3 w-3" />Common mistakes</div>
+                        <ul className="mt-1 space-y-1 text-sm">
+                          {g.mistakes.map((s, i) => <li key={i} className="flex gap-2"><span className="text-warning">×</span>{s}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                  </>
+                )}
+                <div className="mt-5 flex gap-2">
+                  <button onClick={() => setPhase("preview")} className="h-12 flex-1 rounded-2xl bg-secondary text-sm font-semibold text-foreground">Back</button>
+                  <button onClick={() => setPhase("running")} className="h-12 flex-[2] rounded-2xl brand-gradient text-base font-semibold text-primary-foreground">I'm ready · Start</button>
+                </div>
+              </div>
+            );
+          })()}
           {phase === "running" && cur && (
             <div className="rounded-3xl bg-white/10 p-5 backdrop-blur-xl">
               <div className="flex items-center justify-between">

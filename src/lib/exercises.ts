@@ -250,12 +250,15 @@ export function useMicroRoutine(goal: Goal | undefined, joints: Joint[]) {
   const programStart = u?.programStartDate ?? u?.createdAt ?? new Date().toISOString();
   const phaseOverride = u?.phaseOverride;
   const dateISO = new Date().toISOString().slice(0, 10);
+  const latest = u?.sessions?.[u.sessions.length - 1];
+  const sessionSub = latest?.sub;
+  const sessionKey = latest?.date ?? "no-session";
   return useQuery({
-    queryKey: ["corrective-routine", userId, goal ?? "none", jointsKey, dateISO, phaseOverride ?? "auto"],
+    queryKey: ["corrective-routine", userId, goal ?? "none", jointsKey, dateISO, phaseOverride ?? "auto", sessionKey],
     queryFn: async () => {
       const library = await fetchLibrary();
       const built = buildCorrectiveRoutine(
-        { userId, goal, joints, programStartDate: programStart, dateISO, phaseOverride },
+        { userId, goal, joints, programStartDate: programStart, dateISO, phaseOverride, sessionSub },
         library,
       );
       const items: RoutineItem[] = built.picks.map(pickToRoutineItem);
