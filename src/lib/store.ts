@@ -64,6 +64,8 @@ export interface User {
   premium: boolean;
   sessions: ScreenSession[];
   programDays: ProgramDay[];
+  /** 1-based day indices of the current 2-week program that have been marked completed. */
+  programCompletedDays?: number[];
   streak: number;
   firstRetestDone: boolean;
   programStartDate?: string;
