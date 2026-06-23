@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Activity, Dumbbell, LineChart, User } from "lucide-react";
+import { Home, Activity, Dumbbell, LineChart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
@@ -7,7 +7,6 @@ const tabs = [
   { to: "/app/screen", label: "Screen", icon: Activity, exact: false, iconClass: "text-blue-500" },
   { to: "/app/program", label: "Program", icon: Dumbbell, exact: false, iconClass: "text-orange-500" },
   { to: "/app/progress", label: "Progress", icon: LineChart, exact: false, iconClass: "text-emerald-500" },
-  { to: "/app/profile", label: "Profile", icon: User, exact: false, iconClass: "text-purple-500" },
 ] as const;
 
 export function BottomTabs() {
