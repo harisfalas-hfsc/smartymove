@@ -3,19 +3,20 @@ import { useState } from "react";
 import { useUser } from "@/lib/store";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
-import { Activity, ArrowRight, Flame, Calendar, Lock, Loader2 } from "lucide-react";
-import { useMicroRoutine, useCurrentPhase } from "@/lib/exercises";
+import { Activity, ArrowRight, Flame, Calendar, CheckCircle2, Dumbbell, Moon } from "lucide-react";
+import { useCurrentPhase } from "@/lib/exercises";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
 import { evaluateProgress } from "@/lib/corrective/progression";
 import { getOngoingTrack } from "@/lib/corrective/phase";
+import { useProgramStatus, isTrainingDay, TRAINING_DAY_INDICES, PROGRAM_SESSIONS } from "@/lib/program";
 
 export const Route = createFileRoute("/app/")({ component: Home });
 
 function Home() {
   const u = useUser();
   const [openId, setOpenId] = useState<string | null>(null);
-  const { data: routine = [], isLoading } = useMicroRoutine(u?.goal, u?.questionnaire?.joints ?? []);
   const phase = useCurrentPhase();
+  const status = useProgramStatus();
   if (!u) return null;
   const latest = u.sessions[u.sessions.length - 1];
   const daysSince = latest ? Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000) : null;
@@ -122,41 +123,7 @@ function Home() {
           </div>
         )}
 
-        <section>
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-base font-bold">Today's Workout</h3>
-            <Link to="/app/program" className="text-xs font-semibold text-primary">Open</Link>
-          </div>
-          <div className="space-y-2">
-            {isLoading && (
-              <div className="grid place-items-center rounded-2xl bg-card p-6 shadow-card">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </div>
-            )}
-            {!isLoading && routine.length === 0 && (
-              <div className="rounded-2xl bg-card p-4 text-sm text-muted-foreground shadow-card">
-                No exercises found in the library yet.
-              </div>
-            )}
-            {routine.slice(0, 7).map((e, i) => {
-              const locked = !u.premium && i > 0;
-              return (
-                <button
-                  key={e.id}
-                  onClick={() => { if (!locked) setOpenId(e.id); }}
-                  className={`flex w-full items-center gap-3 rounded-2xl bg-card p-3 text-left shadow-card transition active:scale-[0.98] ${locked ? "opacity-60" : ""}`}
-                >
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl brand-gradient-soft text-xl">{e.emoji}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold capitalize">{e.name}</div>
-                    <div className="truncate text-xs text-muted-foreground">{e.durationSec}s • {e.description}</div>
-                  </div>
-                  {locked && <Lock className="h-4 w-4 text-muted-foreground" />}
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        {latest && status && <ProgramCta status={status} />}
 
         {latest && (
           <section>
@@ -173,5 +140,79 @@ function Home() {
       </div>
       <ExerciseSheet exerciseId={openId} onClose={() => setOpenId(null)} />
     </div>
+  );
+}
+
+function ProgramCta({ status }: { status: NonNullable<ReturnType<typeof useProgramStatus>> }) {
+  // Today's day index within the 2-week program (1-based). Outside range → program closed.
+  const start = new Date(status.startDate);
+  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const dayIndex = Math.floor((today - startDay) / 86400000) + 1;
+  const inProgram = dayIndex >= 1 && dayIndex <= 14;
+  const training = inProgram && isTrainingDay(dayIndex);
+  const sessionNumber = training ? TRAINING_DAY_INDICES.indexOf(dayIndex) + 1 : null;
+  const done = inProgram && status.completedDays.includes(dayIndex);
+
+  if (status.locked) {
+    return (
+      <Link to="/app/screen" className="block rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft">
+        <div className="text-xs font-semibold uppercase tracking-widest opacity-85">Program complete</div>
+        <div className="mt-1 text-lg font-extrabold">Rescan to unlock your next program</div>
+        <div className="mt-2 flex items-center gap-1 text-sm font-semibold opacity-95">Start Movement Screen <ArrowRight className="h-4 w-4" /></div>
+      </Link>
+    );
+  }
+
+  if (!inProgram) {
+    return (
+      <Link to="/app/program" className="block rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft">
+        <div className="text-xs font-semibold uppercase tracking-widest opacity-85">Your 2-week program</div>
+        <div className="mt-1 text-lg font-extrabold">Open your training program</div>
+        <div className="mt-2 flex items-center gap-1 text-sm font-semibold opacity-95">Start improving your movement <ArrowRight className="h-4 w-4" /></div>
+      </Link>
+    );
+  }
+
+  if (!training) {
+    return (
+      <Link to="/app/program" className="block rounded-3xl bg-card p-5 shadow-card">
+        <div className="flex items-center gap-3">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl brand-gradient-soft"><Moon className="h-5 w-5 text-primary" /></span>
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Today · Day {dayIndex}</div>
+            <div className="text-base font-extrabold">Rest day</div>
+            <div className="text-xs text-muted-foreground">{status.completedDays.length} / {PROGRAM_SESSIONS} sessions done</div>
+          </div>
+          <ArrowRight className="h-5 w-5 text-primary" />
+        </div>
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      to="/app/program"
+      className={`block rounded-3xl p-5 shadow-soft ${done ? "bg-card shadow-card" : "brand-gradient text-primary-foreground"}`}
+    >
+      <div className="flex items-center gap-3">
+        <span className={`grid h-12 w-12 place-items-center rounded-2xl ${done ? "brand-gradient-soft text-primary" : "bg-white/20 text-white"}`}>
+          {done ? <CheckCircle2 className="h-6 w-6" /> : <Dumbbell className="h-6 w-6" />}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className={`text-[10px] font-bold uppercase tracking-widest ${done ? "text-muted-foreground" : "opacity-85"}`}>
+            Today · Session {sessionNumber} / {PROGRAM_SESSIONS}
+          </div>
+          <div className="text-base font-extrabold">
+            {done ? "Completed — great work!" : "Start today's training"}
+          </div>
+          <div className={`text-xs ${done ? "text-muted-foreground" : "opacity-90"}`}>
+            {status.completedDays.length} / {PROGRAM_SESSIONS} sessions done · {status.daysRemaining} day{status.daysRemaining === 1 ? "" : "s"} left
+          </div>
+        </div>
+        <ArrowRight className={`h-5 w-5 ${done ? "text-primary" : ""}`} />
+      </div>
+    </Link>
   );
 }
