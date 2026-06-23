@@ -168,7 +168,9 @@ function Runner() {
       sessions: [...prev.sessions, session],
       firstRetestDone: prev.firstRetestDone || wasReTest,
       nextRetestDate: nextRetest,
-      programStartDate: prev.programStartDate ?? prev.createdAt,
+      // A new scan resets the 2-week training program.
+      programStartDate: new Date().toISOString(),
+      programCompletedDays: [],
     }));
     setPhase("done");
     setTimeout(() => navigate({ to: "/app/progress" }), 1200);
