@@ -53,7 +53,7 @@ function Welcome() {
       const u = await signUpWithEmailProfile(name, email, Number(age), pw);
       const draft = getOnboardingDraft();
       clearOnboardingDraft();
-      navigate({ to: (u.questionnaire || draft.questionnaire) && (u.goal || draft.goal) ? "/app" : "/onboarding/questionnaire" });
+      navigate({ to: (u.questionnaire || draft.questionnaire) && (u.goal || draft.goal) ? "/app" : "/onboarding/parq" });
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Account creation failed. Try again.");
     } finally {
@@ -68,7 +68,7 @@ function Welcome() {
     setSubmitting(true);
     try {
       const u = await signInWithEmailProfile(email, pw);
-      navigate({ to: u.questionnaire && u.goal ? "/app" : "/onboarding/questionnaire" });
+      navigate({ to: u.questionnaire && u.goal ? "/app" : "/onboarding/parq" });
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Sign in failed. Check your email and password.");
     } finally {
@@ -150,7 +150,7 @@ function Welcome() {
             </div>
 
             <button
-              onClick={() => navigate({ to: "/onboarding/questionnaire" })}
+              onClick={() => navigate({ to: "/onboarding/parq" })}
               style={{
                 display: "block", width: "100%", textAlign: "center",
                 background: "#FF6B4A", color: "#fff",
