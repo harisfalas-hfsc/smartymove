@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, LogOut } from "lucide-react";
-import { useUser, setUser } from "@/lib/store";
+import { ChevronLeft } from "lucide-react";
+import { useUser } from "@/lib/store";
 
 type Props = {
   onSignIn?: () => void;
@@ -22,8 +22,6 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
   };
   const handleSignIn = () => onSignIn ? onSignIn() : window.location.assign("/?auth=signin");
   const handleSignUp = () => onSignUp ? onSignUp() : window.location.assign("/?auth=signup");
-  const handleSignOut = () => { setUser(null); navigate({ to: "/" }); };
-
   return (
     <header
       className="sticky top-0 z-30 w-full bg-background"
@@ -53,24 +51,14 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
         </div>
         <div className="flex items-center gap-2">
           {user ? (
-            <>
-              <Link
-                to="/app/profile"
-                aria-label="Profile"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary bg-primary text-xs font-bold text-primary-foreground"
-                style={{ textDecoration: "none" }}
-              >
-                {user.name.slice(0,1).toUpperCase()}
-              </Link>
-              <button
-                type="button"
-                onClick={handleSignOut}
-                aria-label="Sign out"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            </>
+            <Link
+              to="/app/profile"
+              aria-label="Profile"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary bg-primary text-xs font-bold text-primary-foreground"
+              style={{ textDecoration: "none" }}
+            >
+              {user.name.slice(0,1).toUpperCase()}
+            </Link>
           ) : (
             <>
               <button

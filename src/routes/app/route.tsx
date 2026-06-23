@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { BottomTabs } from "@/components/BottomTabs";
 import { DesktopProfile } from "@/components/DesktopProfile";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 import { getUser, restoreUserFromBackend } from "@/lib/store";
 
 export const Route = createFileRoute("/app")({ component: AppLayout });
@@ -25,7 +26,10 @@ function AppLayout() {
       <div className="lg:hidden flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
         {!isScreenRun && <SiteHeader />}
         <div className={`mx-auto flex w-full flex-1 flex-col bg-background ${isScreenRun ? "max-w-none" : "max-w-[440px]"}`}>
-          <div className={`flex-1 overflow-y-auto ${isScreenRun ? "pb-0" : "pb-24"}`}><Outlet /></div>
+          <div className={`flex-1 overflow-y-auto ${isScreenRun ? "pb-0" : "pb-24"}`}>
+            <Outlet />
+            {!isScreenRun && <SiteFooter />}
+          </div>
           {!isScreenRun && <BottomTabs />}
         </div>
       </div>
