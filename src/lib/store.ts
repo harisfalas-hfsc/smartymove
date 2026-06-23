@@ -6,6 +6,17 @@ export type Joint = "ankle" | "knee" | "hip" | "back" | "shoulder" | "elbow" | "
 export type Pain = "none" | "mild" | "moderate" | "severe";
 export type Goal = "reduce_pain" | "prevent_injury" | "start_sport" | "perform_better" | "feel_better";
 
+export interface ParqAnswers {
+  heartCondition: boolean;
+  chestPainActivity: boolean;
+  chestPainRest: boolean;
+  balanceLoss: boolean;
+  boneJoint: boolean;
+  bpMedication: boolean;
+  otherReason: boolean;
+  acknowledgedWarning: boolean;
+}
+
 export interface Questionnaire {
   pain: Pain;
   canWalk: boolean;
@@ -58,6 +69,7 @@ export interface User {
   programStartDate?: string;
   nextRetestDate?: string;
   phaseOverride?: "restore" | "build" | "perform";
+  parq?: ParqAnswers;
 }
 
 const KEY = "smartymove.user";
@@ -67,6 +79,7 @@ const PENDING_PROFILE_KEY = "smartymove.pendingProfile";
 export interface OnboardingDraft {
   questionnaire?: Questionnaire;
   goal?: Goal;
+  parq?: ParqAnswers;
 }
 
 export function getUser(): User | null {
