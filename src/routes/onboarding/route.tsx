@@ -23,7 +23,7 @@ function OnboardingLayout() {
     else navigate({ to: "/onboarding/disclaimer" });
   }
   return (
-    <div className="flex min-h-[100dvh] w-full flex-col" className="bg-background text-foreground">
+    <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
       <SiteHeader showBack onBack={goBack} />
       <main className="mx-auto w-full max-w-[440px] px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-4">
         <div className="mb-4">
