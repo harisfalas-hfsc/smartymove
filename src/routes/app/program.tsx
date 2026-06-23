@@ -232,6 +232,20 @@ function DaySheet({
   const u = useUser();
   if (dayIndex == null) return null;
   const done = status.completedDays.includes(dayIndex);
+  const programStart = new Date(status.startDate);
+  const programStartDay = new Date(programStart.getFullYear(), programStart.getMonth(), programStart.getDate()).getTime();
+  const currentDate = new Date();
+  const currentDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()).getTime();
+  const todayIndex = Math.floor((currentDay - programStartDay) / 86400000) + 1;
+  const isToday = dayIndex === todayIndex;
+  const isMissed = dayIndex < todayIndex;
+  const workoutTitle = done
+    ? "Completed workout"
+    : isToday
+      ? "Today's workout"
+      : isMissed
+        ? "Missed workout"
+        : `Day ${dayIndex} workout`;
   const visible = u?.premium ? routine : routine.slice(0, 3);
 
   return (
@@ -245,7 +259,7 @@ function DaySheet({
                 {formatProgramDayDate(status.startDate, dayIndex)} · Day {dayIndex} / {PROGRAM_LENGTH_DAYS}
               </div>
               <div className="mt-0.5 text-xl font-extrabold">
-                {done ? "Completed workout" : "Today's workout"}
+                {workoutTitle}
               </div>
             </div>
             <button onClick={onClose} aria-label="Close" className="grid h-9 w-9 place-items-center rounded-full bg-white/20 text-white">×</button>
