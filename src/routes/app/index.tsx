@@ -142,3 +142,77 @@ function Home() {
     </div>
   );
 }
+
+function ProgramCta({ status }: { status: NonNullable<ReturnType<typeof useProgramStatus>> }) {
+  // Today's day index within the 2-week program (1-based). Outside range → program closed.
+  const start = new Date(status.startDate);
+  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const dayIndex = Math.floor((today - startDay) / 86400000) + 1;
+  const inProgram = dayIndex >= 1 && dayIndex <= 14;
+  const training = inProgram && isTrainingDay(dayIndex);
+  const sessionNumber = training ? TRAINING_DAY_INDICES.indexOf(dayIndex) + 1 : null;
+  const done = inProgram && status.completedDays.includes(dayIndex);
+
+  if (status.locked) {
+    return (
+      <Link to="/app/screen" className="block rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft">
+        <div className="text-xs font-semibold uppercase tracking-widest opacity-85">Program complete</div>
+        <div className="mt-1 text-lg font-extrabold">Rescan to unlock your next program</div>
+        <div className="mt-2 flex items-center gap-1 text-sm font-semibold opacity-95">Start Movement Screen <ArrowRight className="h-4 w-4" /></div>
+      </Link>
+    );
+  }
+
+  if (!inProgram) {
+    return (
+      <Link to="/app/program" className="block rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft">
+        <div className="text-xs font-semibold uppercase tracking-widest opacity-85">Your 2-week program</div>
+        <div className="mt-1 text-lg font-extrabold">Open your training program</div>
+        <div className="mt-2 flex items-center gap-1 text-sm font-semibold opacity-95">Start improving your movement <ArrowRight className="h-4 w-4" /></div>
+      </Link>
+    );
+  }
+
+  if (!training) {
+    return (
+      <Link to="/app/program" className="block rounded-3xl bg-card p-5 shadow-card">
+        <div className="flex items-center gap-3">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl brand-gradient-soft"><Moon className="h-5 w-5 text-primary" /></span>
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Today · Day {dayIndex}</div>
+            <div className="text-base font-extrabold">Rest day</div>
+            <div className="text-xs text-muted-foreground">{status.completedDays.length} / {PROGRAM_SESSIONS} sessions done</div>
+          </div>
+          <ArrowRight className="h-5 w-5 text-primary" />
+        </div>
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      to="/app/program"
+      className={`block rounded-3xl p-5 shadow-soft ${done ? "bg-card shadow-card" : "brand-gradient text-primary-foreground"}`}
+    >
+      <div className="flex items-center gap-3">
+        <span className={`grid h-12 w-12 place-items-center rounded-2xl ${done ? "brand-gradient-soft text-primary" : "bg-white/20 text-white"}`}>
+          {done ? <CheckCircle2 className="h-6 w-6" /> : <Dumbbell className="h-6 w-6" />}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className={`text-[10px] font-bold uppercase tracking-widest ${done ? "text-muted-foreground" : "opacity-85"}`}>
+            Today · Session {sessionNumber} / {PROGRAM_SESSIONS}
+          </div>
+          <div className="text-base font-extrabold">
+            {done ? "Completed — great work!" : "Start today's training"}
+          </div>
+          <div className={`text-xs ${done ? "text-muted-foreground" : "opacity-90"}`}>
+            {status.completedDays.length} / {PROGRAM_SESSIONS} sessions done · {status.daysRemaining} day{status.daysRemaining === 1 ? "" : "s"} left
+          </div>
+        </div>
+        <ArrowRight className={`h-5 w-5 ${done ? "text-primary" : ""}`} />
+      </div>
+    </Link>
+  );
+}
