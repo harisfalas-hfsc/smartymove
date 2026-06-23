@@ -53,7 +53,7 @@ function AdminExercises() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-[100dvh] w-full flex-col" style={{ background: "#E7ECEC", color: "#14213A" }}>
+    <div className="flex min-h-[100dvh] w-full flex-col" className="bg-background text-foreground">
       <SiteHeader />
       <main className="mx-auto w-full max-w-[920px] px-5 pb-12 pt-6">{children}</main>
     </div>
