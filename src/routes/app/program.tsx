@@ -204,8 +204,8 @@ function DaySheet({
   onOpenExercise: (id: string) => void;
   readOnly?: boolean;
 }) {
-  if (dayIndex == null) return null;
   const u = useUser();
+  if (dayIndex == null) return null;
   const sessionNumber = TRAINING_DAY_INDICES.indexOf(dayIndex) + 1;
   const done = status.completedDays.includes(dayIndex);
   const visible = u?.premium ? routine : routine.slice(0, 3);
