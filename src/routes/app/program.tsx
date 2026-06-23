@@ -14,7 +14,7 @@ import {
   formatProgramDayDate,
 } from "@/lib/program";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
-import { Camera, ArrowRight, CheckCircle2, Circle, Lock, RotateCcw, Info, Crown } from "lucide-react";
+import { Camera, ArrowRight, CheckCircle2, Circle, Lock, RotateCcw, Info, Crown, AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/app/program")({ component: Program });
 
@@ -91,7 +91,7 @@ function Program() {
           {phase ? phase.label : "Training Program"}
         </h1>
         <p className="mt-1 text-sm opacity-90">
-          {status.completedDays.length} / {PROGRAM_SESSIONS} sessions done · {status.daysRemaining} day{status.daysRemaining === 1 ? "" : "s"} left
+          {status.completedDays.length} / {PROGRAM_SESSIONS} days done · {status.daysRemaining} day{status.daysRemaining === 1 ? "" : "s"} left
         </p>
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/25">
           <div
@@ -146,37 +146,62 @@ function ProgramOverview({
 }) {
   const days = Array.from({ length: PROGRAM_LENGTH_DAYS }, (_, i) => i + 1);
   const completed = new Set(status.completedDays);
+  // Today's day-index within the program (1-based). Past, today, future drive colors.
+  const start = new Date(status.startDate);
+  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const todayIndex = Math.floor((today - startDay) / 86400000) + 1;
   return (
     <section>
       <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">2-week schedule</h3>
       <div className="grid grid-cols-2 gap-2.5">
         {days.map((d) => {
-          const training = isTrainingDay(d);
           const done = completed.has(d);
-          const sessionNumber = training ? TRAINING_DAY_INDICES.indexOf(d) + 1 : null;
+          const isToday = d === todayIndex;
+          const missed = !done && d < todayIndex;
+          const upcoming = !done && d > todayIndex;
+          // Tile styling — keep brand colors. Green = done, brand = today, amber = missed, soft = upcoming.
+          const tileClass = done
+            ? "bg-success/10 ring-2 ring-success"
+            : isToday
+              ? "brand-gradient text-primary-foreground"
+              : missed
+                ? "bg-warning/10 ring-1 ring-warning/50"
+                : "bg-card";
+          const badgeClass = done
+            ? "bg-success text-white"
+            : isToday
+              ? "bg-white/25 text-white"
+              : missed
+                ? "bg-warning/20 text-warning"
+                : "brand-gradient-soft text-primary";
+          const dateClass = isToday
+            ? "text-white/85"
+            : missed
+              ? "text-warning"
+              : "text-muted-foreground";
+          const labelClass = isToday ? "text-white" : "";
+          let label = `Day ${d}`;
+          if (done) label = "Completed";
+          else if (isToday) label = "Today's workout";
+          else if (missed) label = "Missed — do it now";
+          else if (upcoming) label = `Day ${d}`;
           return (
             <button
               key={d}
-              disabled={!training || routine.length === 0}
-              onClick={() => training && onSelectDay(d)}
-              className={`flex items-center gap-3 rounded-2xl p-3 text-left shadow-card transition-all ${
-                training ? "bg-card active:scale-[0.99]" : "bg-secondary/60"
-              } ${done ? "ring-2 ring-primary" : ""} disabled:opacity-60`}
+              disabled={routine.length === 0}
+              onClick={() => onSelectDay(d)}
+              className={`flex items-center gap-3 rounded-2xl p-3 text-left shadow-card transition-all active:scale-[0.99] disabled:opacity-60 ${tileClass}`}
             >
-              <span
-                className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl text-sm font-extrabold ${
-                  done ? "brand-gradient text-primary-foreground" : training ? "brand-gradient-soft text-primary" : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {done ? <CheckCircle2 className="h-5 w-5" /> : training ? sessionNumber : "·"}
+              <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl text-sm font-extrabold ${badgeClass}`}>
+                {done ? <CheckCircle2 className="h-5 w-5" /> : missed ? <AlertCircle className="h-5 w-5" /> : d}
               </span>
               <div className="min-w-0 flex-1">
-                <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <div className={`text-[11px] font-semibold uppercase tracking-widest ${dateClass}`}>
                   {formatProgramDayDate(status.startDate, d)}
                 </div>
-                <div className="truncate text-sm font-semibold">
-                  {training ? `Session ${sessionNumber}` : "Rest day"}
-                </div>
+                <div className={`truncate text-sm font-semibold ${labelClass}`}>{label}</div>
               </div>
             </button>
           );
@@ -206,7 +231,6 @@ function DaySheet({
 }) {
   const u = useUser();
   if (dayIndex == null) return null;
-  const sessionNumber = TRAINING_DAY_INDICES.indexOf(dayIndex) + 1;
   const done = status.completedDays.includes(dayIndex);
   const visible = u?.premium ? routine : routine.slice(0, 3);
 
@@ -218,13 +242,19 @@ function DaySheet({
           <div className="flex items-center justify-between">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-widest opacity-85">
-                {formatProgramDayDate(status.startDate, dayIndex)} · Session {sessionNumber} / {PROGRAM_SESSIONS}
+                {formatProgramDayDate(status.startDate, dayIndex)} · Day {dayIndex} / {PROGRAM_LENGTH_DAYS}
               </div>
-              <div className="mt-0.5 text-xl font-extrabold">Training Session {sessionNumber}</div>
+              <div className="mt-0.5 text-xl font-extrabold">
+                {done ? "Completed workout" : "Today's workout"}
+              </div>
             </div>
             <button onClick={onClose} aria-label="Close" className="grid h-9 w-9 place-items-center rounded-full bg-white/20 text-white">×</button>
           </div>
-          <p className="mt-2 text-xs opacity-90">Reps & sets — no timer. Rest 60-90s between sets.</p>
+          {done && (
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">
+              <CheckCircle2 className="h-3.5 w-3.5" /> Done — great work!
+            </p>
+          )}
         </header>
 
         <div className="flex-1 space-y-2.5 overflow-y-auto p-4">
