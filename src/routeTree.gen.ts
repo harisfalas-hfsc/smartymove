@@ -18,6 +18,7 @@ import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as OnboardingQuestionnaireRouteImport } from './routes/onboarding/questionnaire'
+import { Route as OnboardingParqRouteImport } from './routes/onboarding/parq'
 import { Route as OnboardingJointsRouteImport } from './routes/onboarding/joints'
 import { Route as OnboardingGoalRouteImport } from './routes/onboarding/goal'
 import { Route as OnboardingDisclaimerRouteImport } from './routes/onboarding/disclaimer'
@@ -72,6 +73,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const OnboardingQuestionnaireRoute = OnboardingQuestionnaireRouteImport.update({
   id: '/questionnaire',
   path: '/questionnaire',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
+const OnboardingParqRoute = OnboardingParqRouteImport.update({
+  id: '/parq',
+  path: '/parq',
   getParentRoute: () => OnboardingRouteRoute,
 } as any)
 const OnboardingJointsRoute = OnboardingJointsRouteImport.update({
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
   '/onboarding/goal': typeof OnboardingGoalRoute
   '/onboarding/joints': typeof OnboardingJointsRoute
+  '/onboarding/parq': typeof OnboardingParqRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
@@ -160,6 +167,7 @@ export interface FileRoutesByTo {
   '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
   '/onboarding/goal': typeof OnboardingGoalRoute
   '/onboarding/joints': typeof OnboardingJointsRoute
+  '/onboarding/parq': typeof OnboardingParqRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
   '/app': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
@@ -182,6 +190,7 @@ export interface FileRoutesById {
   '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
   '/onboarding/goal': typeof OnboardingGoalRoute
   '/onboarding/joints': typeof OnboardingJointsRoute
+  '/onboarding/parq': typeof OnboardingParqRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
@@ -205,6 +214,7 @@ export interface FileRouteTypes {
     | '/onboarding/disclaimer'
     | '/onboarding/goal'
     | '/onboarding/joints'
+    | '/onboarding/parq'
     | '/onboarding/questionnaire'
     | '/app/'
     | '/app/screen/run'
@@ -224,6 +234,7 @@ export interface FileRouteTypes {
     | '/onboarding/disclaimer'
     | '/onboarding/goal'
     | '/onboarding/joints'
+    | '/onboarding/parq'
     | '/onboarding/questionnaire'
     | '/app'
     | '/app/screen/run'
@@ -245,6 +256,7 @@ export interface FileRouteTypes {
     | '/onboarding/disclaimer'
     | '/onboarding/goal'
     | '/onboarding/joints'
+    | '/onboarding/parq'
     | '/onboarding/questionnaire'
     | '/app/'
     | '/app/screen/run'
@@ -325,6 +337,13 @@ declare module '@tanstack/react-router' {
       path: '/questionnaire'
       fullPath: '/onboarding/questionnaire'
       preLoaderRoute: typeof OnboardingQuestionnaireRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
+    '/onboarding/parq': {
+      id: '/onboarding/parq'
+      path: '/parq'
+      fullPath: '/onboarding/parq'
+      preLoaderRoute: typeof OnboardingParqRouteImport
       parentRoute: typeof OnboardingRouteRoute
     }
     '/onboarding/joints': {
@@ -438,6 +457,7 @@ interface OnboardingRouteRouteChildren {
   OnboardingDisclaimerRoute: typeof OnboardingDisclaimerRoute
   OnboardingGoalRoute: typeof OnboardingGoalRoute
   OnboardingJointsRoute: typeof OnboardingJointsRoute
+  OnboardingParqRoute: typeof OnboardingParqRoute
   OnboardingQuestionnaireRoute: typeof OnboardingQuestionnaireRoute
 }
 
@@ -445,6 +465,7 @@ const OnboardingRouteRouteChildren: OnboardingRouteRouteChildren = {
   OnboardingDisclaimerRoute: OnboardingDisclaimerRoute,
   OnboardingGoalRoute: OnboardingGoalRoute,
   OnboardingJointsRoute: OnboardingJointsRoute,
+  OnboardingParqRoute: OnboardingParqRoute,
   OnboardingQuestionnaireRoute: OnboardingQuestionnaireRoute,
 }
 
