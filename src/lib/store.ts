@@ -166,11 +166,13 @@ function makeUser(id: string, name: string, email: string, age: number, existing
     premium: existing?.premium ?? false,
     sessions: existing?.sessions ?? [],
     programDays: existing?.programDays ?? [],
+    programCompletedDays: existing?.programCompletedDays ?? [],
     streak: existing?.streak ?? 0,
     firstRetestDone: existing?.firstRetestDone ?? false,
     programStartDate: existing?.programStartDate ?? new Date().toISOString(),
     nextRetestDate: existing?.nextRetestDate,
     phaseOverride: existing?.phaseOverride,
+    parq: existing?.parq,
   };
 }
 

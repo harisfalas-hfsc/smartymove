@@ -8,10 +8,10 @@ import type { Joint } from "./store";
 
 /** Length of a single training program in calendar days. */
 export const PROGRAM_LENGTH_DAYS = 14;
-/** Number of training sessions inside a single program. */
-export const PROGRAM_SESSIONS = 8;
-/** Day-of-program indices (1-based) that are training days. Others are rest. */
-export const TRAINING_DAY_INDICES = [1, 2, 4, 5, 7, 8, 10, 12];
+/** Number of training sessions inside a single program. Every day is a training day. */
+export const PROGRAM_SESSIONS = 14;
+/** Day-of-program indices (1-based) that are training days. Every day trains. */
+export const TRAINING_DAY_INDICES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
 export interface SetsReps {
   sets: number;
@@ -164,5 +164,5 @@ export function formatProgramDayDate(startISO: string, dayIndex: number): string
 }
 
 export function isTrainingDay(dayIndex: number): boolean {
-  return TRAINING_DAY_INDICES.includes(dayIndex);
+  return dayIndex >= 1 && dayIndex <= PROGRAM_LENGTH_DAYS;
 }
