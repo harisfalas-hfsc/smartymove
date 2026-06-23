@@ -5,6 +5,7 @@
  */
 
 import type { Category } from "./libraries";
+import type { Goal } from "../store";
 
 export type Phase = "restore" | "build" | "perform";
 
@@ -60,4 +61,44 @@ export function getPhaseInfo(startISO: string, override?: Phase): PhaseInfo {
     ratios: PHASE_RATIOS[phase],
     slotCounts: PHASE_SLOTS_7[phase],
   };
+}
+
+/**
+ * Stage 4 — Ongoing Training Programs. After ~12 weeks the user is
+ * substantially out of corrective territory and graduates onto a
+ * goal-driven ongoing track. Drawn from the same library, just framed
+ * as ongoing training (Maintain & Perform ratios continue).
+ */
+export interface OngoingTrack {
+  active: boolean;
+  label: string;
+  description: string;
+  weekIndex: number;
+}
+
+export function getOngoingTrack(startISO: string, goal: Goal | undefined): OngoingTrack {
+  const weekIndex = weeksSince(startISO);
+  const active = weekIndex >= 12;
+  let label = "Mobility Maintenance Program";
+  let description = "Light, broad rotation to keep you moving well across all areas.";
+  switch (goal) {
+    case "perform_better":
+    case "prevent_injury":
+      label = "General Strength Program";
+      description = "Ongoing full-body strength and stability work to keep building.";
+      break;
+    case "start_sport":
+      label = "Runner Prep Program";
+      description = "Running-relevant capacity: calves, glutes, hips, single-leg control.";
+      break;
+    case "feel_better":
+      label = "Mobility Maintenance Program";
+      description = "Light, broad rotation across all areas — keeps you feeling good.";
+      break;
+    case "reduce_pain":
+      label = "Resilience Program";
+      description = "Conservative continued work to keep your flagged areas strong.";
+      break;
+  }
+  return { active, label, description, weekIndex };
 }
