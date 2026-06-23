@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
 const STEPS = [
   { path: "/onboarding/parq", label: "Health check" },
@@ -36,6 +37,7 @@ function OnboardingLayout() {
         </div>
         <Outlet />
       </main>
+      <SiteFooter />
     </div>
   );
 }
