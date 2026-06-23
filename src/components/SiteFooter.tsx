@@ -1,26 +1,50 @@
 import { Link } from "@tanstack/react-router";
+import { Facebook, Instagram, Youtube } from "lucide-react";
+
+const socialClass =
+  "p-2 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors";
 
 export function SiteFooter() {
-  const linkStyle: React.CSSProperties = {
-    color: "#6B7A90",
-    textDecoration: "none",
-    fontSize: 12,
-  };
   return (
-    <footer
-      className="flex flex-col items-center gap-2"
-      style={{ padding: "22px 4px 4px", borderTop: "1px solid #D9E0E2", marginTop: 18 }}
-    >
-      <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-        <Link to="/terms" style={linkStyle}>Terms &amp; Conditions</Link>
-        <span style={{ color: "#D9E0E2" }}>·</span>
-        <Link to="/privacy" style={linkStyle}>Privacy Policy</Link>
-        <span style={{ color: "#D9E0E2" }}>·</span>
-        <Link to="/disclaimer" style={linkStyle}>Disclaimer</Link>
-      </nav>
-      <p style={{ fontSize: 11, color: "#94A3B8", margin: 0 }}>
-        © {new Date().getFullYear()} SmartyMove · Part of the Smarty family
-      </p>
+    <footer className="bg-background mt-auto py-8 px-4">
+      <div className="container mx-auto max-w-7xl">
+        <div className="flex flex-col items-center gap-6">
+          <div className="flex items-center gap-4">
+            <a href="#" aria-label="Facebook" className={socialClass}>
+              <Facebook className="h-5 w-5" />
+            </a>
+            <a href="#" aria-label="Instagram" className={socialClass}>
+              <Instagram className="h-5 w-5" />
+            </a>
+            <a href="#" aria-label="TikTok" className={socialClass}>
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+              </svg>
+            </a>
+            <a href="#" aria-label="YouTube" className={socialClass}>
+              <Youtube className="h-5 w-5" />
+            </a>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 md:gap-4 text-sm text-muted-foreground">
+            <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-primary transition-colors">
+              <span className="md:hidden">T&amp;Cs</span>
+              <span className="hidden md:inline">Terms of Service</span>
+            </Link>
+            <Link to="/disclaimer" className="hover:text-primary transition-colors">Disclaimer</Link>
+          </div>
+
+          <div className="text-center text-sm text-muted-foreground">
+            <p>
+              © {new Date().getFullYear()}{" "}
+              <span className="text-primary font-semibold">SmartyMove</span>
+              <span className="hidden md:inline"> — Know how you move. Move smarter.</span>
+            </p>
+            <p className="md:hidden whitespace-nowrap">Know how you move. Move smarter.</p>
+          </div>
+        </div>
+      </div>
     </footer>
   );
 }

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Activity, ChevronLeft, LogOut } from "lucide-react";
+import { ChevronLeft, LogOut } from "lucide-react";
 import { useUser, setUser } from "@/lib/store";
 
 type Props = {
@@ -26,126 +26,70 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
 
   return (
     <header
-      className="sticky top-0 z-30 flex w-full items-center justify-between"
-      style={{
-        paddingLeft: 18,
-        paddingRight: 18,
-        paddingTop: "max(12px, env(safe-area-inset-top))",
-        paddingBottom: 12,
-        background: "rgba(231,236,236,0.85)",
-        backdropFilter: "saturate(180%) blur(12px)",
-        WebkitBackdropFilter: "saturate(180%) blur(12px)",
-        borderBottom: "1px solid rgba(20,33,58,0.06)",
-      }}
+      className="sticky top-0 z-30 w-full bg-background"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
-      <div className="flex items-center gap-2">
-        {(showBack || onBack) && (
-          <button
-            type="button"
-            onClick={handleBack}
-            aria-label="Go back"
-            className="grid place-items-center"
-            style={{
-              width: 34, height: 34, borderRadius: 12,
-              background: "#fff", border: "1px solid #D9E0E2",
-              color: "#14213A", cursor: "pointer",
-            }}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-        )}
-        <Link
-        to="/"
-        className="flex items-center gap-2"
-        style={{
-          fontWeight: 800,
-          fontSize: 17,
-          letterSpacing: 0,
-          color: "#14213A",
-          textDecoration: "none",
-        }}
-      >
-        <span
-          className="grid place-items-center"
-          style={{
-            width: 30,
-            height: 30,
-            borderRadius: 9,
-            background: "linear-gradient(160deg,#0E7C86,#1f6fa8)",
-            color: "#fff",
-          }}
-        >
-          <Activity className="h-4 w-4" />
-        </span>
-        SmartyMove
-        </Link>
-      </div>
-
-      <div className="flex items-center gap-2">
-        {user ? (
-          <>
-            <Link
-              to="/app/profile"
-              aria-label="Profile"
-              className="grid place-items-center"
-              style={{
-                width: 34, height: 34, borderRadius: 999,
-                background: "linear-gradient(160deg,#0E7C86,#1f6fa8)",
-                color: "#fff", fontWeight: 800, fontSize: 13, textDecoration: "none",
-              }}
-            >
-              {user.name.slice(0,1).toUpperCase()}
-            </Link>
+      <div className="flex h-11 items-center justify-between gap-2 px-3">
+        <div className="flex items-center gap-2">
+          {(showBack || onBack) && (
             <button
               type="button"
-              onClick={handleSignOut}
-              aria-label="Sign out"
-              className="grid place-items-center"
-              style={{
-                width: 34, height: 34, borderRadius: 12,
-                background: "#fff", border: "1px solid #D9E0E2",
-                color: "#14213A", cursor: "pointer",
-              }}
+              onClick={handleBack}
+              aria-label="Go back"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
             >
-              <LogOut className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4" />
             </button>
-          </>
-        ) : (
-          <>
-            <button
-          type="button"
-          onClick={handleSignIn}
-          style={{
-            background: "transparent",
-            border: "none",
-            color: "#14213A",
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: "pointer",
-            padding: "8px 6px",
-          }}
-        >
-          Sign in
-        </button>
-        <button
-          type="button"
-          onClick={handleSignUp}
-          style={{
-            background: "linear-gradient(160deg,#0E7C86,#1f6fa8)",
-            border: "none",
-            color: "#fff",
-            borderRadius: 999,
-            padding: "8px 14px",
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: "pointer",
-            boxShadow: "0 6px 14px -6px rgba(31,111,168,0.55)",
-          }}
-        >
-          Sign up
-        </button>
-          </>
-        )}
+          )}
+          <Link
+            to="/"
+            aria-label="SmartyMove home"
+            className="text-lg font-extrabold tracking-tight leading-none"
+            style={{ textDecoration: "none" }}
+          >
+            <span className="text-primary">SMARTY</span>
+            <span className="text-green-500">MOVE</span>
+          </Link>
+        </div>
+        <div className="flex items-center gap-2">
+          {user ? (
+            <>
+              <Link
+                to="/app/profile"
+                aria-label="Profile"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary bg-primary text-xs font-bold text-primary-foreground"
+                style={{ textDecoration: "none" }}
+              >
+                {user.name.slice(0,1).toUpperCase()}
+              </Link>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                aria-label="Sign out"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleSignIn}
+                className="inline-flex h-7 items-center justify-center rounded-full px-3 text-xs font-semibold text-foreground/80 hover:text-primary"
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                onClick={handleSignUp}
+                className="inline-flex h-7 items-center justify-center rounded-full border-2 border-primary px-3 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+              >
+                Sign up
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );

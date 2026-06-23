@@ -80,7 +80,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "SmartyMove — Move Smarter - Live Better" },
       { name: "description", content: "Find out what's really holding your body back — then fix it in 5 minutes a day." },
       { name: "author", content: "SmartyMove" },
-      { name: "theme-color", content: "#1f8fb0" },
+      { name: "theme-color", content: "#38bdf8" },
       { property: "og:title", content: "SmartyMove — Move Smarter - Live Better" },
       { property: "og:description", content: "Find out what's really holding your body back — then fix it in 5 minutes a day." },
       { property: "og:type", content: "website" },
@@ -91,9 +91,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:image", content: "https://smartymove.com/__l5e/assets-v1/55cc1cbc-55bc-4e27-b23e-f04ea9e5e5b4/smartymove-social.png" },
     ],
     links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "icon", type: "image/png", href: "/__l5e/assets-v1/96e554d0-a8d8-4890-8280-4c595e2d844e/favicon.png" },
       { rel: "apple-touch-icon", href: "/__l5e/assets-v1/96e554d0-a8d8-4890-8280-4c595e2d844e/favicon.png" },

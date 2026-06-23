@@ -79,7 +79,7 @@ function Welcome() {
   return (
     <div
       className="flex min-h-[100dvh] w-full flex-col"
-      style={{ background: "#E7ECEC", color: "#14213A" }}
+     
     >
       <SiteHeader
         onSignIn={() => setMode("signin")}

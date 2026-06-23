@@ -1,34 +1,48 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Activity, Dumbbell, LineChart, User } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const tabs = [
-  { to: "/app", label: "Home", icon: Home, exact: true },
-  { to: "/app/screen", label: "Screen", icon: Activity, exact: false },
-  { to: "/app/program", label: "Program", icon: Dumbbell, exact: false },
-  { to: "/app/progress", label: "Progress", icon: LineChart, exact: false },
-  { to: "/app/profile", label: "Profile", icon: User, exact: false },
+  { to: "/app", label: "Home", icon: Home, exact: true, iconClass: "text-primary" },
+  { to: "/app/screen", label: "Screen", icon: Activity, exact: false, iconClass: "text-blue-500" },
+  { to: "/app/program", label: "Program", icon: Dumbbell, exact: false, iconClass: "text-orange-500" },
+  { to: "/app/progress", label: "Progress", icon: LineChart, exact: false, iconClass: "text-emerald-500" },
+  { to: "/app/profile", label: "Profile", icon: User, exact: false, iconClass: "text-purple-500" },
 ] as const;
 
 export function BottomTabs() {
   const pathname = useRouterState({ select: s => s.location.pathname });
   return (
-    <nav className="sticky bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-      <ul className="grid grid-cols-5 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2">
+    <nav
+      className="sticky bottom-0 z-40 border-t border-primary/20 bg-background/95 backdrop-blur-md"
+      style={{
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        boxShadow: "0 -4px 16px -4px hsl(195 82% 55% / 0.15)",
+      }}
+      aria-label="Mobile navigation bar"
+    >
+      <div className="flex h-16 items-stretch justify-between gap-0.5 px-1">
         {tabs.map(t => {
           const active = t.exact ? pathname === t.to : pathname.startsWith(t.to);
           const Icon = t.icon;
           return (
-            <li key={t.to}>
-              <Link to={t.to} className="flex flex-col items-center gap-1 py-1.5">
-                <span className={`grid h-9 w-12 place-items-center rounded-2xl transition-all ${active ? "brand-gradient text-primary-foreground shadow-soft" : "text-muted-foreground"}`}>
-                  <Icon className="h-5 w-5" />
-                </span>
-                <span className={`text-[10px] font-medium ${active ? "text-foreground" : "text-muted-foreground"}`}>{t.label}</span>
-              </Link>
-            </li>
+            <Link
+              key={t.to}
+              to={t.to}
+              aria-label={t.label}
+              className={cn(
+                "flex flex-1 flex-col items-center justify-center gap-0.5 rounded-lg py-1 transition-all duration-150 active:scale-95",
+                active ? "text-primary" : "text-foreground/75 hover:text-primary",
+              )}
+            >
+              <span className={cn("flex h-9 w-9 items-center justify-center rounded-full bg-primary/10", t.iconClass)}>
+                <Icon className="h-5 w-5" />
+              </span>
+              <span className="text-[10px] font-medium leading-none">{t.label}</span>
+            </Link>
           );
         })}
-      </ul>
+      </div>
     </nav>
   );
 }
