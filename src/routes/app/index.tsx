@@ -6,6 +6,8 @@ import { SubScoreBar } from "@/components/SubScoreBar";
 import { Activity, ArrowRight, Flame, Calendar, Lock, Loader2 } from "lucide-react";
 import { useMicroRoutine, useCurrentPhase } from "@/lib/exercises";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
+import { evaluateProgress } from "@/lib/corrective/progression";
+import { getOngoingTrack } from "@/lib/corrective/phase";
 
 export const Route = createFileRoute("/app/")({ component: Home });
 
@@ -19,6 +21,8 @@ function Home() {
   const daysSince = latest ? Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000) : null;
   const daysUntilRetest = latest ? Math.max(0, 14 - (daysSince ?? 0)) : null;
   const retestDue = latest != null && (daysSince ?? 0) >= 14;
+  const progression = evaluateProgress(u.sessions);
+  const ongoing = getOngoingTrack(u.programStartDate ?? u.createdAt, u.goal);
 
   return (
     <div className="pb-6">
@@ -75,6 +79,20 @@ function Home() {
             </div>
             <ArrowRight className="h-5 w-5" />
           </Link>
+        )}
+        {progression && progression.status !== "first" && (
+          <div className={`rounded-3xl p-4 shadow-card ${progression.status === "improved" ? "bg-success/15 ring-1 ring-success/40" : progression.status === "stalled" ? "bg-warning/15 ring-1 ring-warning/40" : "bg-card"}`}>
+            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Latest re-test</div>
+            <div className="mt-0.5 text-base font-extrabold">{progression.headline}</div>
+            <p className="mt-1 text-xs text-muted-foreground">{progression.detail}</p>
+          </div>
+        )}
+        {ongoing.active && (
+          <div className="rounded-3xl brand-gradient-soft p-4 shadow-card">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-primary">Ongoing program</div>
+            <div className="mt-0.5 text-base font-extrabold">{ongoing.label}</div>
+            <p className="mt-1 text-xs text-muted-foreground">{ongoing.description}</p>
+          </div>
         )}
         {!latest ? (
           <Link to="/app/screen" className="block rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft">
