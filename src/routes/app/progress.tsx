@@ -1,14 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useUser } from "@/lib/store";
+import { useScanDecision } from "@/lib/program";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
-import { Calendar, TrendingUp, Share2, Lock, AlertCircle } from "lucide-react";
+import { Calendar, TrendingUp, Share2, Lock, AlertCircle, Target } from "lucide-react";
 
 export const Route = createFileRoute("/app/progress")({ component: Progress });
 
 function Progress() {
   const u = useUser();
+  const decision = useScanDecision();
   if (!u) return null;
   const sessions = u.sessions;
   const latest = sessions[sessions.length - 1];
@@ -78,6 +80,42 @@ function Progress() {
               <SubScoreBar label="Movement Quality" value={latest.sub.quality} />
               <SubScoreBar label="Strength Capacity" value={latest.sub.strength} />
             </div>
+          </div>
+        )}
+        {decision && decision.focuses.length > 0 && (
+          <div className="rounded-3xl bg-card p-5 shadow-card">
+            <div className="mb-2 flex items-center gap-2">
+              <Target className="h-4 w-4 text-primary" />
+              <h3 className="text-base font-bold">Root-cause insights</h3>
+            </div>
+            <p className="mb-3 text-[11px] text-muted-foreground">
+              We grouped your test findings into shared root causes instead of treating each failed test as a separate problem. Your program targets the {decision.focuses.length === 1 ? "cause below" : "two causes below"}.
+            </p>
+            <ul className="space-y-3">
+              {decision.focuses.map((f) => (
+                <li key={f.id} className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-sm font-bold text-primary">{f.label}</div>
+                    {f.isCluster && (
+                      <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                        Cluster · {f.signals.length} signals
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-xs text-foreground/80">{f.rationale}</p>
+                </li>
+              ))}
+            </ul>
+            {decision.otherFindings.length > 0 && (
+              <div className="mt-3 border-t border-border pt-3">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Also noted (lower priority)</div>
+                <ul className="mt-1.5 space-y-1">
+                  {decision.otherFindings.map((line, i) => (
+                    <li key={i} className="text-[11px] text-muted-foreground">• {line}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
         {latest && latest.tests.length > 0 && (
