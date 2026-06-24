@@ -621,6 +621,102 @@ function asym(a: number, b: number): number {
   return Math.round(Math.abs(a - b));
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Compensation helpers — geometric checks layered on top of the primary metric
+// per test. Each helper is documented inline. The scoring rule is two-step:
+//   1. compute the primary metric and a provisional score
+//   2. run the relevant compensation checks; if any fire, the score is capped
+//      (Pass → Borderline) or fully invalidated, and a plain-language note is
+//      attached to the result so the corrective program targets the real
+//      issue, not the masked one.
+// Foot arch collapse and toe rotation are intentionally NOT detected —
+// MediaPipe body-pose landmarks aren't reliable for those (documented blind
+// spot, not a bug).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Cap a score so it never exceeds `max` (e.g. cap a Pass at Borderline). */
+function cap(score: 1 | 2 | 3, max: 1 | 2 | 3): 1 | 2 | 3 {
+  return (score > max ? max : score) as 1 | 2 | 3;
+}
+
+/** Average y of a landmark over the first `n` frames — the "rest" baseline. */
+function baselineY(samples: Frame[], id: number, n = 5): number {
+  const take = Math.min(n, samples.length);
+  let sum = 0, count = 0;
+  for (let i = 0; i < take; i++) {
+    const p = samples[i][id];
+    if (p) { sum += p.y; count++; }
+  }
+  return count ? sum / count : 0;
+}
+
+/** Fraction of frames where an ankle (heel proxy) rose above baseline by `eps`
+ *  in normalized image-y. y is image-y-down → "rise" = current y < baseline. */
+function heelRiseFraction(samples: Frame[], ankleId: number, eps = 0.02): number {
+  const base = baselineY(samples, ankleId);
+  if (!base) return 0;
+  let rise = 0;
+  for (const s of samples) {
+    const p = s[ankleId];
+    if (p && base - p.y > eps) rise++;
+  }
+  return rise / samples.length;
+}
+
+/** Angle (deg) of the line between two landmarks vs horizontal, in [0, 90]. */
+function lineTiltAngle(a: LM, b: LM): number {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  if (Math.abs(dx) < 0.0001 && Math.abs(dy) < 0.0001) return 0;
+  return Math.abs(Math.atan2(dy, dx) * 180 / Math.PI);
+}
+
+/** Shoulder-line lateral tilt (deg) — for trunk-lean / lateral-tilt checks. */
+function shoulderTilt(s: Frame): number {
+  const a = lineTiltAngle(s[PL.LEFT_SHOULDER], s[PL.RIGHT_SHOULDER]);
+  // Normalize so 0° = level (line is horizontal), >0 = tilted.
+  return Math.min(a, 180 - a);
+}
+
+/** Hip-line lateral tilt (deg). Used for pelvic drop & hip-hike detection. */
+function hipTilt(s: Frame): number {
+  const a = lineTiltAngle(s[PL.LEFT_HIP], s[PL.RIGHT_HIP]);
+  return Math.min(a, 180 - a);
+}
+
+/**
+ * Spine-curve angle: angle(NOSE, midShoulder, midHip). With a neutral spine
+ * these three points are roughly collinear → ~180°. Upper-back rounding
+ * brings the head forward of the shoulder-hip line, dropping the angle.
+ */
+function spineCurveAngle(s: Frame): number {
+  const nose = s[PL.NOSE];
+  const mS: LM = { x: (s[PL.LEFT_SHOULDER].x + s[PL.RIGHT_SHOULDER].x) / 2, y: (s[PL.LEFT_SHOULDER].y + s[PL.RIGHT_SHOULDER].y) / 2 };
+  const mH: LM = { x: (s[PL.LEFT_HIP].x + s[PL.RIGHT_HIP].x) / 2, y: (s[PL.LEFT_HIP].y + s[PL.RIGHT_HIP].y) / 2 };
+  if (!nose) return 180;
+  return angle(nose, mS, mH);
+}
+
+/**
+ * Shoulder→ear vertical separation (normalized). Smaller = shoulder is closer
+ * to the ear (shrugged up). Returns mean of both sides if both ears visible.
+ */
+function shoulderEarGap(s: Frame): number {
+  const lE = s[PL.LEFT_EAR], rE = s[PL.RIGHT_EAR];
+  const lS = s[PL.LEFT_SHOULDER], rS = s[PL.RIGHT_SHOULDER];
+  const gaps: number[] = [];
+  if (lE && lS) gaps.push(lS.y - lE.y);
+  if (rE && rS) gaps.push(rS.y - rE.y);
+  return gaps.length ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 0;
+}
+
+/** Std-dev of a landmark's x or y over the time series. */
+function landmarkStd(samples: Frame[], id: number, axis: "x" | "y"): number {
+  const vals = samples.map(s => s[id]?.[axis]).filter((v): v is number => typeof v === "number");
+  if (vals.length < 2) return 0;
+  const m = vals.reduce((a, b) => a + b, 0) / vals.length;
+  return Math.sqrt(vals.reduce((a, b) => a + (b - m) ** 2, 0) / vals.length);
+}
+
 function scoreSamples(testId: string, rawSamples: Frame[], duration: number): TestResult {
   const name = lookupName(testId);
   const expectedFrames = Math.max(1, Math.floor(duration * 10)); // sampler @ 100ms
