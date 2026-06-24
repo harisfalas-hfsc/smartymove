@@ -1,20 +1,129 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { getPoseLandmarker, PL } from "@/lib/pose";
-import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, scoreFromRange, TEST_GUIDES } from "@/lib/movement";
+import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
+import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
-import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X } from "lucide-react";
+import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal } from "lucide-react";
 
 export const Route = createFileRoute("/app/screen/run")({ component: Runner });
 
-type TestDef = { id: string; name: string; duration: number; instruction: string; conditional?: boolean };
+type TestDef = { id: string; name: string; duration: number; instruction: string; conditional?: boolean; cameraView: "front" | "side" };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REFERENCE_RANGES — v1 founder-supplied thresholds based on standard movement
+// screening norms. Single source of truth; revisit once we have real user data.
+// All angles are joint angles in degrees as produced by `angle()` from
+// movement.ts (180° = straight limb / fully extended). Where the reference is
+// phrased as a clinical angle from vertical or as "X° of flexion", the
+// conversion to the joint-angle convention is noted inline.
+// ─────────────────────────────────────────────────────────────────────────────
+const REFERENCE_RANGES = {
+  // Min knee joint angle reached during squat descent.
+  // Pass ≤100° (≥parallel), borderline 100–120°, fail >120°.
+  squat: { passMax: 100, borderlineMax: 120 },
+
+  // Min trunk joint angle (shoulder-hip-knee) at bottom of hinge.
+  // Forward-lean from vertical = 180 − joint angle.
+  // Pass lean 40–60° → joint 120–140°. Borderline lean 25–40 or 60–75
+  // → joint 105–120 or 140–155. Fail lean <25 or >75 → joint <105 or >155.
+  hinge: { passJointMin: 120, passJointMax: 140, borderlineJointMin: 105, borderlineJointMax: 155 },
+
+  // Max pelvic-drop angle (deg) observed during the 10s single-leg hold.
+  // Pass <5°, borderline 5–10°, fail >10° or balance lost.
+  balance: { passMaxDrop: 5, borderlineMaxDrop: 10 },
+
+  // Min front-knee joint angle at bottom of lunge.
+  // Pass 80–100°, borderline 100–120°, fail >120° or medial collapse.
+  lunge: { passMin: 80, passMax: 100, borderlineMax: 120 },
+
+  // Max shoulder joint angle (hip-shoulder-elbow) reached overhead.
+  // Pass ≥160° without lumbar arch, borderline 140–160°, fail <140°
+  // or full range only with lumbar compensation.
+  overhead: { passMin: 160, borderlineMin: 140 },
+
+  // Ankle dorsiflexion measured as joint angle between tibia (knee→ankle)
+  // and ground-horizontal. Tibia-from-vertical lean = 90 − measured.
+  // Pass DF ≥35° → measured ≤55°. Borderline 25–35° → 55–65°.
+  // Fail <25° → >65°.
+  ankle_df: { passMaxMeasured: 55, borderlineMaxMeasured: 65 },
+
+  // Max hip abduction angle (leg-from-vertical) before compensation.
+  // Pass 30–45° clean, borderline 20–30° or compensation 30–45°,
+  // fail <20° or early compensation.
+  hip_abd: { passMin: 30, passMax: 45, borderlineMin: 20 },
+
+  // Glute bridge: target 30–45s hold at neutral hips. Our scan window is 10s
+  // so this is a proxy — hip-y stability and absence of mid-window sag.
+  // TODO: extend test duration to a true endurance timer before publishing v2.
+  bridge_hold: { passMaxSway: 0.012, borderlineMaxSway: 0.025, sagDeltaFail: 0.04 },
+
+  // Wall slide max arm elevation (hip-shoulder-elbow joint angle) with wall
+  // contact maintained. Pass ≥150°, borderline 120–150°, fail <120°.
+  wall_slide: { passMin: 150, borderlineMin: 120 },
+
+  // Elbow active flexion-extension range. Need ≥135° of total ROM and full
+  // extension within 5° of straight (joint ≥175°). Borderline range ≥110°.
+  elbow_rom: { passRange: 135, passExtension: 175, borderlineRange: 110, borderlineExtension: 165 },
+
+  // Knee single-leg step-down — uses the same min-knee thresholds as lunge.
+  knee_sld: { passMin: 80, passMax: 100, borderlineMax: 120 },
+} as const;
+
+const VISIBILITY_THRESHOLD = 0.6;
+const SMOOTH_WINDOW = 5;
+const MIN_VALID_FRAME_RATIO = 0.7;
+
+const TEST_CAMERA_VIEW: Record<string, "front" | "side"> = {
+  squat: "side",
+  hinge: "side",
+  balance: "front",
+  lunge: "side",
+  overhead: "front",
+  ankle_df: "side",
+  knee_sld: "front",
+  hip_abd: "front",
+  bridge_hold: "side",
+  wall_slide: "side",
+  elbow_rom: "front",
+};
+
+// Landmarks required for a frame to count toward the score of each test.
+const TEST_LANDMARKS: Record<string, number[]> = {
+  squat:       [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_ANKLE],
+  hinge:       [PL.LEFT_SHOULDER, PL.LEFT_HIP, PL.LEFT_KNEE, PL.RIGHT_SHOULDER, PL.RIGHT_HIP, PL.RIGHT_KNEE],
+  balance:     [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER],
+  lunge:       [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_ANKLE],
+  overhead:    [PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_HIP, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_HIP],
+  ankle_df:    [PL.LEFT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_KNEE, PL.RIGHT_ANKLE],
+  knee_sld:    [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_ANKLE],
+  hip_abd:     [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER],
+  bridge_hold: [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_KNEE, PL.RIGHT_KNEE],
+  wall_slide:  [PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_HIP, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_HIP],
+  elbow_rom:   [PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_WRIST, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_WRIST],
+};
 
 function buildSequence(joints: Joint[]): TestDef[] {
-  const core: TestDef[] = CORE_TESTS.map(t => ({ id: t.id, name: t.name, duration: t.duration, instruction: instructionFor(t.id) }));
-  const cond: TestDef[] = joints.filter(j => j !== "none").slice(0, 2).map(j => {
-    const c = CONDITIONAL_TESTS[j as keyof typeof CONDITIONAL_TESTS];
-    return { id: c.id, name: c.name, duration: 10, instruction: instructionFor(c.id), conditional: true };
-  });
+  const core: TestDef[] = CORE_TESTS.map(t => ({
+    id: t.id, name: t.name, duration: t.duration,
+    instruction: instructionFor(t.id),
+    cameraView: TEST_CAMERA_VIEW[t.id] ?? "front",
+  }));
+  // Wrist test is intentionally excluded from v1 scoring — flagged "Coming
+  // soon" because the wrist landmarks are too small on camera for a reliable
+  // flexion/extension angle on phones. If the user picked wrist as a flagged
+  // joint, we still run their other selected joint's add-on (if any).
+  const cond: TestDef[] = joints
+    .filter(j => j !== "none" && j !== "wrist")
+    .slice(0, 2)
+    .map(j => {
+      const c = CONDITIONAL_TESTS[j as keyof typeof CONDITIONAL_TESTS];
+      return {
+        id: c.id, name: c.name, duration: 10,
+        instruction: instructionFor(c.id),
+        conditional: true,
+        cameraView: TEST_CAMERA_VIEW[c.id] ?? "front",
+      };
+    });
   return [...core, ...cond];
 }
 
@@ -48,6 +157,11 @@ function Runner() {
   const pausedRef = useRef(false);
   useEffect(() => { pausedRef.current = paused || showInstructions; }, [paused, showInstructions]);
 
+  // Detection-latency tracking so we can downgrade the model if the device
+  // is too slow to keep up with the "full" landmarker.
+  const frameTimesRef = useRef<number[]>([]);
+  const fallbackCheckedRef = useRef(false);
+
   useEffect(() => { if (u) setSeq(buildSequence(u.questionnaire?.joints ?? [])); }, [u]);
 
   async function start() {
@@ -65,7 +179,7 @@ function Runner() {
       videoRef.current.srcObject = stream;
       await videoRef.current.play();
       setStatusMsg("Loading pose detection model...");
-      const lm = await getPoseLandmarker();
+      let lm = await getPoseLandmarker();
       setPoseReady(true);
       setStatusMsg("");
       setPhase("intro");
@@ -75,8 +189,22 @@ function Runner() {
         if (v.readyState >= 2) {
           c.width = v.videoWidth; c.height = v.videoHeight;
           const ctx = c.getContext("2d")!;
-          const t = performance.now();
-          const res = lm.detectForVideo(v, t);
+          const t0 = performance.now();
+          const res = lm.detectForVideo(v, t0);
+          const dt = performance.now() - t0;
+          // Track recent per-frame detection latency for adaptive model fallback.
+          const buf = frameTimesRef.current;
+          buf.push(dt);
+          if (buf.length > 60) buf.shift();
+          if (!fallbackCheckedRef.current && buf.length >= 30) {
+            const avg = buf.reduce((a, b) => a + b, 0) / buf.length;
+            fallbackCheckedRef.current = true;
+            void maybeFallbackToLite(avg).then(async (tier) => {
+              if (tier === "lite") {
+                lm = await getPoseLandmarker();
+              }
+            });
+          }
           ctx.clearRect(0, 0, c.width, c.height);
           if (res.landmarks?.[0]) {
             const pts = res.landmarks[0];
@@ -131,8 +259,8 @@ function Runner() {
       done = true;
       clearInterval(tickId); clearInterval(sampleId);
       const score: TestResult = skipped
-        ? { id: test.id, name: test.name, score: 1, notes: "Skipped", valid: false }
-        : scoreSamples(test.id, samplesRef.current);
+        ? { id: test.id, name: test.name, score: 1, notes: "Skipped", valid: false, cameraView: test.cameraView }
+        : { ...scoreSamples(test.id, samplesRef.current, test.duration), cameraView: test.cameraView };
       setResults(r => [...r, score]);
       setTimeout(() => {
         if (idx + 1 >= seq.length) finalize([...results, score]);
@@ -223,6 +351,12 @@ function Runner() {
               <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
                 <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Test {idx + 1} of {seq.length} · {g?.reps ?? "10 sec"}</div>
                 <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
+                <div className="mt-3 flex items-center gap-2 rounded-2xl bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">
+                  {cur.cameraView === "side"
+                    ? <><RotateCw className="h-4 w-4" /> Camera position: <span className="font-extrabold">Side view</span></>
+                    : <><MoveHorizontal className="h-4 w-4" /> Camera position: <span className="font-extrabold">Front view</span></>}
+                  <span className="ml-auto text-[11px] font-medium text-primary/80">{cur.cameraView === "side" ? "stand sideways to the camera" : "face the camera straight on"}</span>
+                </div>
                 {g && (
                   <>
                     <div className="mt-4">
@@ -381,83 +515,390 @@ function Runner() {
   );
 }
 
-function scoreSamples(testId: string, samples: any[]): TestResult {
-  const name = ({ ...Object.fromEntries(CORE_TESTS.map(t => [t.id, t.name])),
-    ...Object.fromEntries(Object.values(CONDITIONAL_TESTS).map(t => [t.id, t.name])) } as Record<string,string>)[testId] ?? testId;
-  // Need enough frames with a detected pose to score anything.
-  if (samples.length < 15) {
-    return { id: testId, name, score: 1, notes: "No pose detected — make sure your full body is in frame", valid: false };
+// ─────────────────────────────────────────────────────────────────────────────
+// Scoring engine — fully deterministic, on-device geometry. No frames or
+// landmarks ever leave the browser. No LLM / AI Gateway is consulted for
+// scoring or "second opinion". All results below are reproducible from the
+// captured pose samples + REFERENCE_RANGES above.
+// ─────────────────────────────────────────────────────────────────────────────
+
+type LM = { x: number; y: number; z?: number; visibility?: number };
+type Frame = LM[];
+
+function lookupName(testId: string): string {
+  const map: Record<string, string> = {
+    ...Object.fromEntries(CORE_TESTS.map(t => [t.id, t.name])),
+    ...Object.fromEntries(Object.values(CONDITIONAL_TESTS).map(t => [t.id, t.name])),
+  };
+  return map[testId] ?? testId;
+}
+
+function frameValid(s: Frame, ids: number[]): boolean {
+  for (const i of ids) {
+    const p = s[i];
+    if (!p) return false;
+    if ((p.visibility ?? 1) < VISIBILITY_THRESHOLD) return false;
   }
-  // Detect actual movement by summing frame-to-frame displacement of major joints.
-  const joints = [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_WRIST, PL.RIGHT_WRIST];
-  let motion = 0;
-  for (let i = 1; i < samples.length; i++) {
-    for (const j of joints) {
-      const a = samples[i - 1][j]; const b = samples[i][j];
-      if (!a || !b) continue;
-      motion += Math.hypot(a.x - b.x, a.y - b.y);
+  return true;
+}
+
+/**
+ * Apply a centered moving-average (window = SMOOTH_WINDOW) to each requested
+ * landmark across the time series. Reduces frame-to-frame jitter before any
+ * geometric metric is derived.
+ */
+function smoothSamples(samples: Frame[], ids: number[]): Frame[] {
+  const N = samples.length;
+  if (N === 0) return samples;
+  const W = Math.min(SMOOTH_WINDOW, N);
+  const half = Math.floor(W / 2);
+  const out: Frame[] = samples.map(s => s.slice());
+  for (const i of ids) {
+    for (let t = 0; t < N; t++) {
+      const lo = Math.max(0, t - half);
+      const hi = Math.min(N, t + half + 1);
+      let sx = 0, sy = 0, sv = 0, n = 0;
+      for (let k = lo; k < hi; k++) {
+        const p = samples[k][i];
+        if (!p) continue;
+        sx += p.x; sy += p.y; sv += p.visibility ?? 1; n++;
+      }
+      if (n) out[t][i] = { x: sx / n, y: sy / n, visibility: sv / n };
     }
   }
-  const motionPerFrame = motion / Math.max(1, samples.length - 1);
-  // "Stillness" tests (balance, bridge_hold) intentionally don't need movement.
-  const stillnessTest = testId === "balance" || testId === "bridge_hold";
-  if (!stillnessTest && motionPerFrame < 0.015) {
-    return { id: testId, name, score: 1, notes: "No movement detected during the test", valid: false };
+  return out;
+}
+
+function notEnoughClearFrames(testId: string, name: string, ratio: number): TestResult {
+  return {
+    id: testId, name, score: 1, valid: false, frameValidRatio: ratio,
+    notes: "Couldn't get a clear reading, let's retry this test",
+  };
+}
+
+function bucketScoreMaxOrEqual(value: number, passMin: number, borderlineMin: number): 1 | 2 | 3 {
+  if (value >= passMin) return 3;
+  if (value >= borderlineMin) return 2;
+  return 1;
+}
+
+function bucketScoreMaxOrLess(value: number, passMax: number, borderlineMax: number): 1 | 2 | 3 {
+  if (value <= passMax) return 3;
+  if (value <= borderlineMax) return 2;
+  return 1;
+}
+
+function bucketScoreRange(value: number, passMin: number, passMax: number, borderlineMin: number, borderlineMax: number): 1 | 2 | 3 {
+  if (value >= passMin && value <= passMax) return 3;
+  if (value >= borderlineMin && value <= borderlineMax) return 2;
+  return 1;
+}
+
+/**
+ * Hip abduction angle (deg) for one side: angle between the hip→knee vector
+ * and gravity-down. 0° = leg hangs straight under the hip; ~30° = abducted.
+ * Image coords use y-down, so vertical-down vector is (0, +1).
+ */
+function abductionAngle(hip: LM, knee: LM): number {
+  const dx = knee.x - hip.x;
+  const dy = knee.y - hip.y;
+  return Math.atan2(Math.abs(dx), Math.max(0.0001, dy)) * 180 / Math.PI;
+}
+
+/** Trunk lean from vertical in degrees (mid-shoulder to mid-hip vector). */
+function trunkLeanAngle(s: Frame): number {
+  const lS = s[PL.LEFT_SHOULDER], rS = s[PL.RIGHT_SHOULDER];
+  const lH = s[PL.LEFT_HIP], rH = s[PL.RIGHT_HIP];
+  if (!lS || !rS || !lH || !rH) return 0;
+  const sx = (lS.x + rS.x) / 2, sy = (lS.y + rS.y) / 2;
+  const hx = (lH.x + rH.x) / 2, hy = (lH.y + rH.y) / 2;
+  const dx = sx - hx;
+  const dy = sy - hy; // shoulders should be above hips → negative
+  return Math.atan2(Math.abs(dx), Math.max(0.0001, Math.abs(dy))) * 180 / Math.PI;
+}
+
+function asym(a: number, b: number): number {
+  return Math.round(Math.abs(a - b));
+}
+
+function scoreSamples(testId: string, rawSamples: Frame[], duration: number): TestResult {
+  const name = lookupName(testId);
+  const expectedFrames = Math.max(1, Math.floor(duration * 10)); // sampler @ 100ms
+
+  if (rawSamples.length < 10) {
+    return notEnoughClearFrames(testId, name, 0);
   }
+
+  const relevant = TEST_LANDMARKS[testId] ?? [];
+  // Visibility / validity gate — drop frames where any required landmark
+  // is occluded or low-confidence.
+  const validFrames = rawSamples.filter(s => frameValid(s, relevant));
+  const validRatio = validFrames.length / expectedFrames;
+  if (validRatio < MIN_VALID_FRAME_RATIO) {
+    return notEnoughClearFrames(testId, name, Math.round(validRatio * 100) / 100);
+  }
+
+  // Smooth landmark coordinates before any angle math.
+  const samples = smoothSamples(validFrames, relevant);
+
   switch (testId) {
     case "squat": {
-      let minA = 180;
+      // Track min knee angle per side across descent; detect knee valgus by
+      // checking whether knee.x deviates inward of ankle.x at any frame where
+      // the knee is meaningfully bent (joint angle < 150°).
+      let minL = 180, minR = 180;
+      let valgusLFrames = 0, valgusRFrames = 0, descentFrames = 0;
       for (const s of samples) {
         const la = angle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE]);
         const ra = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE], s[PL.RIGHT_ANKLE]);
-        const a = (la + ra) / 2; if (a > 0) minA = Math.min(minA, a);
+        if (la > 0) minL = Math.min(minL, la);
+        if (ra > 0) minR = Math.min(minR, ra);
+        const inDescent = la < 150 || ra < 150;
+        if (inDescent) {
+          descentFrames++;
+          // Camera is mirrored on screen but landmark coords are in image
+          // space. "Inward" = knee.x between the two ankles' midpoint and the
+          // ankle on the same side.
+          const midAnkleX = (s[PL.LEFT_ANKLE].x + s[PL.RIGHT_ANKLE].x) / 2;
+          // Left ankle is on the right side of the image when user faces
+          // camera, but we don't care which side is which — only relative.
+          if (Math.sign(s[PL.LEFT_KNEE].x - midAnkleX) !== Math.sign(s[PL.LEFT_ANKLE].x - midAnkleX)) valgusLFrames++;
+          if (Math.sign(s[PL.RIGHT_KNEE].x - midAnkleX) !== Math.sign(s[PL.RIGHT_ANKLE].x - midAnkleX)) valgusRFrames++;
+        }
       }
-      return { id: testId, name, score: scoreFromRange(minA, 95, 25), metric: Math.round(minA), notes: `Min knee angle ${Math.round(minA)}°` };
+      const r = REFERENCE_RANGES.squat;
+      const minA = Math.min(minL, minR);
+      const score = bucketScoreMaxOrLess(minA, r.passMax, r.borderlineMax);
+      const comps: string[] = [];
+      const valgusRatioL = descentFrames ? valgusLFrames / descentFrames : 0;
+      const valgusRatioR = descentFrames ? valgusRFrames / descentFrames : 0;
+      if (valgusRatioL > 0.25) comps.push("Left knee valgus (knee drifts inward)");
+      if (valgusRatioR > 0.25) comps.push("Right knee valgus (knee drifts inward)");
+      const downgrade: 1 | 2 | 3 = comps.length && score === 3 ? 2 : score;
+      return {
+        id: testId, name, score: downgrade,
+        metric: Math.round(minA),
+        left: Math.round(minL), right: Math.round(minR),
+        asymmetry: asym(minL, minR),
+        compensations: comps.length ? comps : undefined,
+        frameValidRatio: Math.round(validRatio * 100) / 100,
+        notes: `Min knee angle L ${Math.round(minL)}° / R ${Math.round(minR)}° · asym ${asym(minL, minR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
+      };
     }
     case "hinge": {
-      let minT = 180;
-      for (const s of samples) { const a = angle(s[PL.LEFT_SHOULDER], s[PL.LEFT_HIP], s[PL.LEFT_KNEE]); if (a > 0) minT = Math.min(minT, a); }
-      return { id: testId, name, score: scoreFromRange(minT, 110, 25), metric: Math.round(minT) };
+      let minL = 180, minR = 180;
+      for (const s of samples) {
+        const al = angle(s[PL.LEFT_SHOULDER], s[PL.LEFT_HIP], s[PL.LEFT_KNEE]);
+        const ar = angle(s[PL.RIGHT_SHOULDER], s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE]);
+        if (al > 0) minL = Math.min(minL, al);
+        if (ar > 0) minR = Math.min(minR, ar);
+      }
+      const r = REFERENCE_RANGES.hinge;
+      const minT = Math.min(minL, minR);
+      const score = bucketScoreRange(minT, r.passJointMin, r.passJointMax, r.borderlineJointMin, r.borderlineJointMax);
+      const leanDeg = Math.round(180 - minT);
+      return {
+        id: testId, name, score,
+        metric: leanDeg,
+        left: Math.round(180 - minL), right: Math.round(180 - minR),
+        asymmetry: asym(minL, minR),
+        frameValidRatio: Math.round(validRatio * 100) / 100,
+        notes: `Forward lean ~${leanDeg}° (L ${Math.round(180 - minL)}° / R ${Math.round(180 - minR)}°)`,
+      };
     }
     case "balance": {
-      const ys = samples.map(s => (s[PL.LEFT_HIP].y + s[PL.RIGHT_HIP].y) / 2);
-      const mean = ys.reduce((a,b)=>a+b,0)/ys.length;
-      const std = Math.sqrt(ys.reduce((a,b)=>a+(b-mean)**2,0)/ys.length);
-      const score: 1|2|3 = std < 0.01 ? 3 : std < 0.025 ? 2 : 1;
-      return { id: testId, name, score, metric: Math.round(std*1000)/10 };
+      // Pelvic-drop angle: deviation of the hip line from horizontal.
+      const angles: number[] = [];
+      for (const s of samples) {
+        const lH = s[PL.LEFT_HIP], rH = s[PL.RIGHT_HIP];
+        const dy = rH.y - lH.y, dx = rH.x - lH.x;
+        angles.push(Math.atan2(dy, dx) * 180 / Math.PI);
+      }
+      const baseline = angles.slice(0, Math.min(5, angles.length)).reduce((a, b) => a + b, 0) / Math.min(5, angles.length);
+      let maxDrop = 0;
+      for (const a of angles) maxDrop = Math.max(maxDrop, Math.abs(a - baseline));
+      const r = REFERENCE_RANGES.balance;
+      const score = bucketScoreMaxOrLess(maxDrop, r.passMaxDrop, r.borderlineMaxDrop);
+      const heldFull = validRatio >= 0.95;
+      const finalScore: 1 | 2 | 3 = heldFull ? score : (score === 3 ? 2 : 1);
+      return {
+        id: testId, name, score: finalScore,
+        metric: Math.round(maxDrop * 10) / 10,
+        frameValidRatio: Math.round(validRatio * 100) / 100,
+        notes: `Max pelvic drop ${Math.round(maxDrop * 10) / 10}°${heldFull ? "" : " · balance lost before 10 s"}`,
+      };
     }
     case "lunge":
     case "knee_sld": {
-      let minK = 180;
-      for (const s of samples) { const a = angle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE]); if (a > 0) minK = Math.min(minK, a); }
-      return { id: testId, name, score: scoreFromRange(minK, 95, 30), metric: Math.round(minK) };
+      let minL = 180, minR = 180;
+      // Track valgus by frame, same convention as squat.
+      let valgusLFrames = 0, valgusRFrames = 0, descentFrames = 0;
+      for (const s of samples) {
+        const al = angle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE]);
+        const ar = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE], s[PL.RIGHT_ANKLE]);
+        if (al > 0) minL = Math.min(minL, al);
+        if (ar > 0) minR = Math.min(minR, ar);
+        if (al < 160 || ar < 160) {
+          descentFrames++;
+          const midAnkleX = (s[PL.LEFT_ANKLE].x + s[PL.RIGHT_ANKLE].x) / 2;
+          if (Math.sign(s[PL.LEFT_KNEE].x - midAnkleX) !== Math.sign(s[PL.LEFT_ANKLE].x - midAnkleX)) valgusLFrames++;
+          if (Math.sign(s[PL.RIGHT_KNEE].x - midAnkleX) !== Math.sign(s[PL.RIGHT_ANKLE].x - midAnkleX)) valgusRFrames++;
+        }
+      }
+      const r = testId === "knee_sld" ? REFERENCE_RANGES.knee_sld : REFERENCE_RANGES.lunge;
+      const minK = Math.min(minL, minR);
+      let score = bucketScoreRange(minK, r.passMin, r.passMax, r.passMin - 0.0001, r.borderlineMax);
+      if (minK > r.borderlineMax) score = 1;
+      const comps: string[] = [];
+      if (descentFrames && valgusLFrames / descentFrames > 0.25) comps.push("Left knee medial deviation");
+      if (descentFrames && valgusRFrames / descentFrames > 0.25) comps.push("Right knee medial deviation");
+      if (comps.length && score === 3) score = 2;
+      if (comps.length && score === 1) {/* keep 1 */}
+      return {
+        id: testId, name, score,
+        metric: Math.round(minK),
+        left: Math.round(minL), right: Math.round(minR),
+        asymmetry: asym(minL, minR),
+        compensations: comps.length ? comps : undefined,
+        frameValidRatio: Math.round(validRatio * 100) / 100,
+        notes: `Min knee angle L ${Math.round(minL)}° / R ${Math.round(minR)}° · asym ${asym(minL, minR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
+      };
     }
     case "overhead":
     case "wall_slide": {
-      let maxArm = 0;
-      for (const s of samples) { const a = angle(s[PL.LEFT_HIP], s[PL.LEFT_SHOULDER], s[PL.LEFT_ELBOW]); if (a > maxArm) maxArm = a; }
-      const score: 1|2|3 = maxArm > 160 ? 3 : maxArm > 130 ? 2 : 1;
-      return { id: testId, name, score, metric: Math.round(maxArm) };
+      // Max shoulder-flexion joint angle per side + compensation check
+      // (lumbar arch ~ trunk lean > 10° during peak overhead reach).
+      let maxL = 0, maxR = 0;
+      let archFrames = 0, peakFrames = 0;
+      for (const s of samples) {
+        const al = angle(s[PL.LEFT_HIP], s[PL.LEFT_SHOULDER], s[PL.LEFT_ELBOW]);
+        const ar = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_SHOULDER], s[PL.RIGHT_ELBOW]);
+        if (al > maxL) maxL = al;
+        if (ar > maxR) maxR = ar;
+        if (al > 140 || ar > 140) {
+          peakFrames++;
+          if (trunkLeanAngle(s) > 10) archFrames++;
+        }
+      }
+      const r = testId === "wall_slide" ? REFERENCE_RANGES.wall_slide : REFERENCE_RANGES.overhead;
+      const maxArm = Math.max(maxL, maxR);
+      let score = bucketScoreMaxOrEqual(maxArm, r.passMin, r.borderlineMin);
+      const comps: string[] = [];
+      if (peakFrames && archFrames / peakFrames > 0.3) comps.push("Lumbar/spinal compensation at end range");
+      if (comps.length && score === 3) score = 2;
+      return {
+        id: testId, name, score,
+        metric: Math.round(maxArm),
+        left: Math.round(maxL), right: Math.round(maxR),
+        asymmetry: asym(maxL, maxR),
+        compensations: comps.length ? comps : undefined,
+        frameValidRatio: Math.round(validRatio * 100) / 100,
+        notes: `Max arm angle L ${Math.round(maxL)}° / R ${Math.round(maxR)}° · asym ${asym(maxL, maxR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
+      };
     }
     case "ankle_df": {
-      let minA = 180;
-      for (const s of samples) { const a = angle(s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE], { x: s[PL.LEFT_ANKLE].x + 0.1, y: s[PL.LEFT_ANKLE].y }); if (a > 0) minA = Math.min(minA, a); }
-      return { id: testId, name, score: scoreFromRange(minA, 80, 20), metric: Math.round(minA) };
+      // Joint angle between tibia (knee→ankle) and ground-horizontal.
+      // Lower measured angle = more dorsiflexion (tibia leans further forward).
+      let minL = 180, minR = 180;
+      for (const s of samples) {
+        const al = angle(s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE], { x: s[PL.LEFT_ANKLE].x + 0.1, y: s[PL.LEFT_ANKLE].y });
+        const ar = angle(s[PL.RIGHT_KNEE], s[PL.RIGHT_ANKLE], { x: s[PL.RIGHT_ANKLE].x + 0.1, y: s[PL.RIGHT_ANKLE].y });
+        if (al > 0) minL = Math.min(minL, al);
+        if (ar > 0) minR = Math.min(minR, ar);
+      }
+      const r = REFERENCE_RANGES.ankle_df;
+      const minA = Math.min(minL, minR);
+      const score = bucketScoreMaxOrLess(minA, r.passMaxMeasured, r.borderlineMaxMeasured);
+      const dfDeg = Math.round(90 - minA);
+      return {
+        id: testId, name, score,
+        metric: dfDeg,
+        left: Math.round(90 - minL), right: Math.round(90 - minR),
+        asymmetry: asym(minL, minR),
+        frameValidRatio: Math.round(validRatio * 100) / 100,
+        notes: `Dorsiflexion L ${Math.round(90 - minL)}° / R ${Math.round(90 - minR)}° · asym ${asym(minL, minR)}°`,
+      };
     }
-    case "hip_abd":
+    case "hip_abd": {
+      let maxL = 0, maxR = 0;
+      let trunkLeanFrames = 0, abductFrames = 0;
+      for (const s of samples) {
+        const al = abductionAngle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE]);
+        const ar = abductionAngle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE]);
+        if (al > maxL) maxL = al;
+        if (ar > maxR) maxR = ar;
+        if (al > 10 || ar > 10) {
+          abductFrames++;
+          if (trunkLeanAngle(s) > 8) trunkLeanFrames++;
+        }
+      }
+      const r = REFERENCE_RANGES.hip_abd;
+      const maxA = Math.max(maxL, maxR);
+      let score = bucketScoreRange(maxA, r.passMin, r.passMax, r.borderlineMin, r.passMax);
+      if (maxA < r.borderlineMin) score = 1;
+      const comps: string[] = [];
+      if (abductFrames && trunkLeanFrames / abductFrames > 0.3) comps.push("Trunk lean compensation");
+      if (comps.length && score === 3) score = 2;
+      return {
+        id: testId, name, score,
+        metric: Math.round(maxA),
+        left: Math.round(maxL), right: Math.round(maxR),
+        asymmetry: asym(maxL, maxR),
+        compensations: comps.length ? comps : undefined,
+        frameValidRatio: Math.round(validRatio * 100) / 100,
+        notes: `Abduction L ${Math.round(maxL)}° / R ${Math.round(maxR)}° · asym ${asym(maxL, maxR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
+      };
+    }
     case "bridge_hold": {
+      // Hold-quality proxy: low hip-y variance AND no late sag (compare first
+      // vs last third of the window). Reference target hold is 30–45 s — this
+      // 10-s window is a v1 proxy; flagged in REFERENCE_RANGES.bridge_hold.
       const ys = samples.map(s => (s[PL.LEFT_HIP].y + s[PL.RIGHT_HIP].y) / 2);
-      const mean = ys.reduce((a,b)=>a+b,0)/ys.length;
-      const std = Math.sqrt(ys.reduce((a,b)=>a+(b-mean)**2,0)/ys.length);
-      const score: 1|2|3 = std < 0.012 ? 3 : std < 0.03 ? 2 : 1;
-      return { id: testId, name, score, metric: Math.round(std*1000)/10 };
+      const mean = ys.reduce((a, b) => a + b, 0) / ys.length;
+      const std = Math.sqrt(ys.reduce((a, b) => a + (b - mean) ** 2, 0) / ys.length);
+      const third = Math.max(1, Math.floor(ys.length / 3));
+      const firstAvg = ys.slice(0, third).reduce((a, b) => a + b, 0) / third;
+      const lastAvg = ys.slice(-third).reduce((a, b) => a + b, 0) / third;
+      const sagDelta = lastAvg - firstAvg; // positive y-delta = hips dropped
+      const r = REFERENCE_RANGES.bridge_hold;
+      let score: 1 | 2 | 3 = std < r.passMaxSway ? 3 : std < r.borderlineMaxSway ? 2 : 1;
+      const comps: string[] = [];
+      if (sagDelta > r.sagDeltaFail) { comps.push("Hip sag during hold"); score = 1; }
+      return {
+        id: testId, name, score,
+        metric: Math.round(std * 1000) / 10,
+        compensations: comps.length ? comps : undefined,
+        frameValidRatio: Math.round(validRatio * 100) / 100,
+        notes: `Sway ${(std * 100).toFixed(1)} · sag Δ ${(sagDelta * 100).toFixed(1)}${comps.length ? " · " + comps.join("; ") : ""}`,
+      };
     }
     case "elbow_rom": {
-      let maxR = 0;
-      for (const s of samples) { const a = angle(s[PL.LEFT_SHOULDER], s[PL.LEFT_ELBOW], s[PL.LEFT_WRIST]); if (a > maxR) maxR = a; }
-      return { id: testId, name, score: scoreFromRange(maxR, 160, 30), metric: Math.round(maxR) };
+      let maxL = 0, maxR = 0, minL = 180, minR = 180;
+      for (const s of samples) {
+        const al = angle(s[PL.LEFT_SHOULDER], s[PL.LEFT_ELBOW], s[PL.LEFT_WRIST]);
+        const ar = angle(s[PL.RIGHT_SHOULDER], s[PL.RIGHT_ELBOW], s[PL.RIGHT_WRIST]);
+        if (al > 0) { maxL = Math.max(maxL, al); minL = Math.min(minL, al); }
+        if (ar > 0) { maxR = Math.max(maxR, ar); minR = Math.min(minR, ar); }
+      }
+      const r = REFERENCE_RANGES.elbow_rom;
+      const rangeL = maxL - minL, rangeR = maxR - minR;
+      const rangeMax = Math.max(rangeL, rangeR);
+      const extension = Math.max(maxL, maxR);
+      let score: 1 | 2 | 3 = 1;
+      if (rangeMax >= r.passRange && extension >= r.passExtension) score = 3;
+      else if (rangeMax >= r.borderlineRange && extension >= r.borderlineExtension) score = 2;
+      return {
+        id: testId, name, score,
+        metric: Math.round(rangeMax),
+        left: Math.round(rangeL), right: Math.round(rangeR),
+        asymmetry: asym(rangeL, rangeR),
+        frameValidRatio: Math.round(validRatio * 100) / 100,
+        notes: `ROM L ${Math.round(rangeL)}° / R ${Math.round(rangeR)}° · ext ${Math.round(extension)}°`,
+      };
     }
-    case "wrist_rom": return { id: testId, name, score: 2, notes: "Self-reported guidance applies" };
-    default: return { id: testId, name, score: 1, valid: false };
+    // wrist_rom intentionally omitted — surfaced as "Coming soon" by being
+    // excluded from buildSequence(). Defensive default in case it appears.
+    default:
+      return { id: testId, name, score: 1, valid: false, notes: "Test not available in v1" };
   }
 }

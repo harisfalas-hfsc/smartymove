@@ -3,7 +3,7 @@ import { useUser } from "@/lib/store";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
-import { Calendar, TrendingUp, Share2, Lock } from "lucide-react";
+import { Calendar, TrendingUp, Share2, Lock, AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/app/progress")({ component: Progress });
 
@@ -78,6 +78,55 @@ function Progress() {
               <SubScoreBar label="Movement Quality" value={latest.sub.quality} />
               <SubScoreBar label="Strength Capacity" value={latest.sub.strength} />
             </div>
+          </div>
+        )}
+        {latest && latest.tests.length > 0 && (
+          <div className="rounded-3xl bg-card p-5 shadow-card">
+            <h3 className="mb-3 text-base font-bold">Per-test breakdown</h3>
+            <ul className="space-y-2">
+              {latest.tests.map((t, i) => {
+                const bilateral = t.left != null && t.right != null;
+                const flag = (t.asymmetry ?? 0) >= 10;
+                return (
+                  <li key={i} className="rounded-2xl border border-border bg-background/60 p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold">{t.name}</div>
+                        {t.cameraView && (
+                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t.cameraView} view</div>
+                        )}
+                      </div>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${
+                        t.valid === false ? "bg-muted text-muted-foreground" :
+                        t.score === 3 ? "bg-success/20 text-success" :
+                        t.score === 2 ? "bg-warning/20 text-warning" : "bg-destructive/20 text-destructive"
+                      }`}>
+                        {t.valid === false ? "No reading" : t.score === 3 ? "Pass" : t.score === 2 ? "Borderline" : "Fail"}
+                      </span>
+                    </div>
+                    {bilateral && (
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                        <span>L <strong className="text-foreground">{t.left}°</strong></span>
+                        <span>R <strong className="text-foreground">{t.right}°</strong></span>
+                        <span className={flag ? "text-warning font-semibold" : ""}>Asymmetry {t.asymmetry}°</span>
+                      </div>
+                    )}
+                    {t.compensations && t.compensations.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {t.compensations.map((c, ci) => (
+                          <span key={ci} className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-semibold text-warning">
+                            <AlertCircle className="h-3 w-3" /> {c}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {t.valid === false && t.notes && (
+                      <div className="mt-1.5 text-[11px] text-muted-foreground">{t.notes}</div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         )}
         <div className="rounded-3xl bg-card p-5 shadow-card">
