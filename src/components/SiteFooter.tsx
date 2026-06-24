@@ -10,10 +10,22 @@ export function SiteFooter() {
       <div className="container mx-auto max-w-7xl">
         <div className="flex flex-col items-center gap-6">
           <div className="flex items-center gap-4">
-            <a href="#" aria-label="Facebook" className={socialClass}>
+            <a
+              href="https://www.facebook.com/share/1BNn6zb2SJ/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+              className={socialClass}
+            >
               <Facebook className="h-5 w-5" />
             </a>
-            <a href="#" aria-label="Instagram" className={socialClass}>
+            <a
+              href="https://www.instagram.com/thesmartymove"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className={socialClass}
+            >
               <Instagram className="h-5 w-5" />
             </a>
             <a href="#" aria-label="TikTok" className={socialClass}>
