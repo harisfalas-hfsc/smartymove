@@ -371,7 +371,7 @@ function extractSignals(tests: TestResult[]): Signal[] {
       // Default to ankle mobility regardless — per founder spec, that's the
       // most likely driver. We still flag hip stability as a secondary
       // signal if knee valgus appeared during the test.
-      if (t.score < 3 || t.valid === false) {
+      if (t.score < 3 || (t as TestResult).valid === false) {
         signals.push({ testId: t.id, testName: t.name, focusId: "ankle_restriction", severity: sev, detail: "Limited ankle dorsiflexion" });
       }
       if (valgus) signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: "borderline", detail: valgus });
