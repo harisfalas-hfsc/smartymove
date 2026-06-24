@@ -744,6 +744,8 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number): Te
       // the knee is meaningfully bent (joint angle < 150°).
       let minL = 180, minR = 180;
       let valgusLFrames = 0, valgusRFrames = 0, descentFrames = 0;
+      let trunkCollapseFrames = 0;
+      let deepestTrunkAngle = 180; // shoulder-hip-knee at the bottom
       for (const s of samples) {
         const la = angle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE]);
         const ra = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE], s[PL.RIGHT_ANKLE]);
@@ -760,19 +762,37 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number): Te
           // camera, but we don't care which side is which — only relative.
           if (Math.sign(s[PL.LEFT_KNEE].x - midAnkleX) !== Math.sign(s[PL.LEFT_ANKLE].x - midAnkleX)) valgusLFrames++;
           if (Math.sign(s[PL.RIGHT_KNEE].x - midAnkleX) !== Math.sign(s[PL.RIGHT_ANKLE].x - midAnkleX)) valgusRFrames++;
+          // Trunk collapse at the bottom of the squat = severe forward lean,
+          // shoulder-hip-knee angle drops well below standing (~180°).
+          const trunkL = angle(s[PL.LEFT_SHOULDER], s[PL.LEFT_HIP], s[PL.LEFT_KNEE]);
+          const trunkR = angle(s[PL.RIGHT_SHOULDER], s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE]);
+          const trunkMin = Math.min(trunkL || 180, trunkR || 180);
+          if (trunkMin < deepestTrunkAngle) deepestTrunkAngle = trunkMin;
+          if (trunkMin < 90) trunkCollapseFrames++;
         }
       }
+      // Heel-rise check uses the un-smoothed validFrames to keep micro-rises
+      // detectable.
+      const heelRiseL = heelRiseFraction(samples, PL.LEFT_ANKLE);
+      const heelRiseR = heelRiseFraction(samples, PL.RIGHT_ANKLE);
       const r = REFERENCE_RANGES.squat;
       const minA = Math.min(minL, minR);
-      const score = bucketScoreMaxOrLess(minA, r.passMax, r.borderlineMax);
+      let score = bucketScoreMaxOrLess(minA, r.passMax, r.borderlineMax);
       const comps: string[] = [];
       const valgusRatioL = descentFrames ? valgusLFrames / descentFrames : 0;
       const valgusRatioR = descentFrames ? valgusRFrames / descentFrames : 0;
-      if (valgusRatioL > 0.25) comps.push("Left knee valgus (knee drifts inward)");
-      if (valgusRatioR > 0.25) comps.push("Right knee valgus (knee drifts inward)");
-      const downgrade: 1 | 2 | 3 = comps.length && score === 3 ? 2 : score;
+      if (valgusRatioL > 0.25) { comps.push("Left knee drifts inward (valgus) — that mobility came from instability, not real range"); score = cap(score, 2); }
+      if (valgusRatioR > 0.25) { comps.push("Right knee drifts inward (valgus) — that mobility came from instability, not real range"); score = cap(score, 2); }
+      if (heelRiseL > 0.15 || heelRiseR > 0.15) {
+        comps.push("Heels lifted off the floor — depth was bought with limited ankle mobility, not real squat range");
+        score = cap(score, 2);
+      }
+      if (descentFrames && trunkCollapseFrames / descentFrames > 0.2) {
+        comps.push("Trunk collapsed forward at the bottom — the spine compensated for tight ankles/hips");
+        score = cap(score, 2);
+      }
       return {
-        id: testId, name, score: downgrade,
+        id: testId, name, score,
         metric: Math.round(minA),
         left: Math.round(minL), right: Math.round(minR),
         asymmetry: asym(minL, minR),
@@ -782,46 +802,99 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number): Te
       };
     }
     case "hinge": {
-      let minL = 180, minR = 180;
+      // Primary metric = true hip-joint angle (trunk line to thigh line),
+      // tracked per side. Compensation pass separates trunk forward lean that
+      // came from the *spine rounding* (head moves forward of the
+      // shoulder-hip line) from real hip rotation, and also catches the
+      // "turned into a squat" pattern where the knees bend substantially.
+      let hipMinL = 180, hipMinR = 180;
+      let kneeMinL = 180, kneeMinR = 180;
+      let spineMin = 180;
+      const spineBaselineN = Math.min(5, samples.length);
+      let spineBase = 0, baseCount = 0;
+      for (let i = 0; i < spineBaselineN; i++) {
+        const sc = spineCurveAngle(samples[i]);
+        if (sc > 0) { spineBase += sc; baseCount++; }
+      }
+      spineBase = baseCount ? spineBase / baseCount : 180;
+
       for (const s of samples) {
         const al = angle(s[PL.LEFT_SHOULDER], s[PL.LEFT_HIP], s[PL.LEFT_KNEE]);
         const ar = angle(s[PL.RIGHT_SHOULDER], s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE]);
-        if (al > 0) minL = Math.min(minL, al);
-        if (ar > 0) minR = Math.min(minR, ar);
+        if (al > 0) hipMinL = Math.min(hipMinL, al);
+        if (ar > 0) hipMinR = Math.min(hipMinR, ar);
+        const kl = angle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE]);
+        const kr = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE], s[PL.RIGHT_ANKLE]);
+        if (kl > 0) kneeMinL = Math.min(kneeMinL, kl);
+        if (kr > 0) kneeMinR = Math.min(kneeMinR, kr);
+        const sc = spineCurveAngle(s);
+        if (sc > 0) spineMin = Math.min(spineMin, sc);
       }
       const r = REFERENCE_RANGES.hinge;
-      const minT = Math.min(minL, minR);
-      const score = bucketScoreRange(minT, r.passJointMin, r.passJointMax, r.borderlineJointMin, r.borderlineJointMax);
-      const leanDeg = Math.round(180 - minT);
+      const minHip = Math.min(hipMinL, hipMinR);
+      let score = bucketScoreRange(minHip, r.passJointMin, r.passJointMax, r.borderlineJointMin, r.borderlineJointMax);
+      const leanDeg = Math.round(180 - minHip);
+      const spineLoss = Math.max(0, spineBase - spineMin); // bigger = more rounding
+      const kneeFlex = 180 - Math.min(kneeMinL, kneeMinR); // 0 = stayed straight
+      const comps: string[] = [];
+      // SPINE ROUNDING — the marquee compensation. If spine angle dropped
+      // significantly from its standing baseline (>15°), the forward lean was
+      // bought from the upper back, not the hip joint. Fail the test.
+      if (spineLoss > 15) {
+        comps.push("Your back rounded to get there — the lean came from the spine, not the hip joint. Score reflects the spine compensation, not the trunk angle.");
+        score = 1;
+      } else if (spineLoss > 8) {
+        comps.push("Some spine rounding contributed to the forward lean — the hip joint did not do all the work");
+        score = cap(score, 2);
+      }
+      // KNEE BEND — if the user squatted instead of hinged (>30° knee flexion),
+      // the hip mobility reading is invalid.
+      if (kneeFlex > 30) {
+        comps.push("Knees bent substantially — this became a squat, not a hinge, so the hip mobility reading isn't reliable");
+        score = 1;
+      }
       return {
         id: testId, name, score,
         metric: leanDeg,
-        left: Math.round(180 - minL), right: Math.round(180 - minR),
-        asymmetry: asym(minL, minR),
+        left: Math.round(180 - hipMinL), right: Math.round(180 - hipMinR),
+        asymmetry: asym(hipMinL, hipMinR),
+        compensations: comps.length ? comps : undefined,
         frameValidRatio: Math.round(validRatio * 100) / 100,
-        notes: `Forward lean ~${leanDeg}° (L ${Math.round(180 - minL)}° / R ${Math.round(180 - minR)}°)`,
+        notes: `Hip lean L ${Math.round(180 - hipMinL)}° / R ${Math.round(180 - hipMinR)}° · spine Δ ${Math.round(spineLoss)}° · knee flex ${Math.round(kneeFlex)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
       };
     }
     case "balance": {
       // Pelvic-drop angle: deviation of the hip line from horizontal.
       const angles: number[] = [];
+      const shoulderTilts: number[] = [];
       for (const s of samples) {
         const lH = s[PL.LEFT_HIP], rH = s[PL.RIGHT_HIP];
         const dy = rH.y - lH.y, dx = rH.x - lH.x;
         angles.push(Math.atan2(dy, dx) * 180 / Math.PI);
+        shoulderTilts.push(shoulderTilt(s));
       }
       const baseline = angles.slice(0, Math.min(5, angles.length)).reduce((a, b) => a + b, 0) / Math.min(5, angles.length);
       let maxDrop = 0;
       for (const a of angles) maxDrop = Math.max(maxDrop, Math.abs(a - baseline));
+      const baselineShoulder = shoulderTilts.slice(0, Math.min(5, shoulderTilts.length)).reduce((a, b) => a + b, 0) / Math.min(5, shoulderTilts.length);
+      let maxShoulderLean = 0;
+      for (const t of shoulderTilts) maxShoulderLean = Math.max(maxShoulderLean, Math.abs(t - baselineShoulder));
+      // Trunk lean that "masks" pelvic drop counts as if the pelvis dropped —
+      // combine them so the score can't be saved by leaning the torso.
+      const effectiveDrop = Math.max(maxDrop, maxShoulderLean, maxDrop + maxShoulderLean - 2);
       const r = REFERENCE_RANGES.balance;
-      const score = bucketScoreMaxOrLess(maxDrop, r.passMaxDrop, r.borderlineMaxDrop);
+      let score = bucketScoreMaxOrLess(effectiveDrop, r.passMaxDrop, r.borderlineMaxDrop);
       const heldFull = validRatio >= 0.95;
-      const finalScore: 1 | 2 | 3 = heldFull ? score : (score === 3 ? 2 : 1);
+      if (!heldFull) score = score === 3 ? 2 : 1;
+      const comps: string[] = [];
+      if (maxShoulderLean > 5) comps.push("Trunk leaned sideways over the standing leg to mask pelvic drop — the hip didn't actually stay level");
+      const finalScore: 1 | 2 | 3 = score;
       return {
         id: testId, name, score: finalScore,
-        metric: Math.round(maxDrop * 10) / 10,
+        metric: Math.round(effectiveDrop * 10) / 10,
+        compensations: comps.length ? comps : undefined,
         frameValidRatio: Math.round(validRatio * 100) / 100,
-        notes: `Max pelvic drop ${Math.round(maxDrop * 10) / 10}°${heldFull ? "" : " · balance lost before 10 s"}`,
+        notes: `Pelvic drop ${Math.round(maxDrop * 10) / 10}° · trunk lean ${Math.round(maxShoulderLean * 10) / 10}°${heldFull ? "" : " · balance lost before 10 s"}${comps.length ? " · " + comps.join("; ") : ""}`,
       };
     }
     case "lunge":
@@ -829,6 +902,9 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number): Te
       let minL = 180, minR = 180;
       // Track valgus by frame, same convention as squat.
       let valgusLFrames = 0, valgusRFrames = 0, descentFrames = 0;
+      // Shoulder & hip line orientation baselines for rotation detection.
+      const shoulderLens: number[] = [];
+      const hipLens: number[] = [];
       for (const s of samples) {
         const al = angle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE]);
         const ar = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE], s[PL.RIGHT_ANKLE]);
@@ -840,16 +916,31 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number): Te
           if (Math.sign(s[PL.LEFT_KNEE].x - midAnkleX) !== Math.sign(s[PL.LEFT_ANKLE].x - midAnkleX)) valgusLFrames++;
           if (Math.sign(s[PL.RIGHT_KNEE].x - midAnkleX) !== Math.sign(s[PL.RIGHT_ANKLE].x - midAnkleX)) valgusRFrames++;
         }
+        const sLen = Math.hypot(s[PL.LEFT_SHOULDER].x - s[PL.RIGHT_SHOULDER].x, s[PL.LEFT_SHOULDER].y - s[PL.RIGHT_SHOULDER].y);
+        const hLen = Math.hypot(s[PL.LEFT_HIP].x - s[PL.RIGHT_HIP].x, s[PL.LEFT_HIP].y - s[PL.RIGHT_HIP].y);
+        shoulderLens.push(sLen);
+        hipLens.push(hLen);
       }
+      // Lunge is shot from the side — shoulder/hip "widths" should stay short
+      // and consistent. A sudden growth means the user rotated toward the
+      // camera to fake reach.
+      const sBase = shoulderLens.slice(0, 5).reduce((a, b) => a + b, 0) / Math.min(5, shoulderLens.length);
+      const hBase = hipLens.slice(0, 5).reduce((a, b) => a + b, 0) / Math.min(5, hipLens.length);
+      const sMax = Math.max(...shoulderLens);
+      const hMax = Math.max(...hipLens);
+      const shoulderRotation = sBase > 0.01 ? (sMax - sBase) / sBase : 0; // fractional growth
+      const hipRotation = hBase > 0.01 ? (hMax - hBase) / hBase : 0;
+      const heelRiseL = heelRiseFraction(samples, PL.LEFT_ANKLE);
+      const heelRiseR = heelRiseFraction(samples, PL.RIGHT_ANKLE);
       const r = testId === "knee_sld" ? REFERENCE_RANGES.knee_sld : REFERENCE_RANGES.lunge;
       const minK = Math.min(minL, minR);
       let score = bucketScoreRange(minK, r.passMin, r.passMax, r.passMin - 0.0001, r.borderlineMax);
       if (minK > r.borderlineMax) score = 1;
       const comps: string[] = [];
-      if (descentFrames && valgusLFrames / descentFrames > 0.25) comps.push("Left knee medial deviation");
-      if (descentFrames && valgusRFrames / descentFrames > 0.25) comps.push("Right knee medial deviation");
-      if (comps.length && score === 3) score = 2;
-      if (comps.length && score === 1) {/* keep 1 */}
+      if (descentFrames && valgusLFrames / descentFrames > 0.25) { comps.push("Left front knee drifted inward (valgus)"); score = cap(score, 2); }
+      if (descentFrames && valgusRFrames / descentFrames > 0.25) { comps.push("Right front knee drifted inward (valgus)"); score = cap(score, 2); }
+      if (heelRiseL > 0.15 || heelRiseR > 0.15) { comps.push("Front heel lifted — depth was bought from limited ankle mobility, not real range"); score = cap(score, 2); }
+      if (shoulderRotation > 0.4 || hipRotation > 0.4) { comps.push("You rotated your torso/hips toward the camera to reach further — that invalidates the depth reading"); score = cap(score, 2); }
       return {
         id: testId, name, score,
         metric: Math.round(minK),
@@ -866,6 +957,17 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number): Te
       // (lumbar arch ~ trunk lean > 10° during peak overhead reach).
       let maxL = 0, maxR = 0;
       let archFrames = 0, peakFrames = 0;
+      // Shoulder shrug baseline (shoulder.y - ear.y at rest). When the user
+      // shrugs, shoulder rises toward the ear and this gap shrinks.
+      const shoulderEarBase = (() => {
+        let s = 0, n = 0;
+        for (let i = 0; i < Math.min(5, samples.length); i++) {
+          const g = shoulderEarGap(samples[i]);
+          if (g > 0) { s += g; n++; }
+        }
+        return n ? s / n : 0;
+      })();
+      let minShoulderEarGap = shoulderEarBase || 1;
       for (const s of samples) {
         const al = angle(s[PL.LEFT_HIP], s[PL.LEFT_SHOULDER], s[PL.LEFT_ELBOW]);
         const ar = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_SHOULDER], s[PL.RIGHT_ELBOW]);
@@ -874,14 +976,23 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number): Te
         if (al > 140 || ar > 140) {
           peakFrames++;
           if (trunkLeanAngle(s) > 10) archFrames++;
+          const g = shoulderEarGap(s);
+          if (g > 0 && g < minShoulderEarGap) minShoulderEarGap = g;
         }
       }
+      const shrugLoss = shoulderEarBase > 0 ? (shoulderEarBase - minShoulderEarGap) / shoulderEarBase : 0;
       const r = testId === "wall_slide" ? REFERENCE_RANGES.wall_slide : REFERENCE_RANGES.overhead;
       const maxArm = Math.max(maxL, maxR);
       let score = bucketScoreMaxOrEqual(maxArm, r.passMin, r.borderlineMin);
       const comps: string[] = [];
-      if (peakFrames && archFrames / peakFrames > 0.3) comps.push("Lumbar/spinal compensation at end range");
-      if (comps.length && score === 3) score = 2;
+      if (peakFrames && archFrames / peakFrames > 0.3) {
+        comps.push("Lower back arched to get the arms overhead — the range came from the spine, not the shoulder");
+        score = cap(score, 2);
+      }
+      if (shrugLoss > 0.35) {
+        comps.push("Shoulders shrugged up toward the ears — that's upper-trap compensation, not true shoulder mobility");
+        score = cap(score, 2);
+      }
       return {
         id: testId, name, score,
         metric: Math.round(maxArm),
@@ -895,54 +1006,94 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number): Te
     case "ankle_df": {
       // Joint angle between tibia (knee→ankle) and ground-horizontal.
       // Lower measured angle = more dorsiflexion (tibia leans further forward).
+      // Heel-lift fully invalidates this test per founder spec.
+      const heelRiseL = heelRiseFraction(samples, PL.LEFT_ANKLE, 0.015);
+      const heelRiseR = heelRiseFraction(samples, PL.RIGHT_ANKLE, 0.015);
+      if (heelRiseL > 0.1 || heelRiseR > 0.1) {
+        return {
+          id: testId, name, score: 1, valid: false,
+          frameValidRatio: Math.round(validRatio * 100) / 100,
+          compensations: ["Heel came off the floor — this test is only meaningful with a flat heel"],
+          notes: "Couldn't get a clear reading, keep your heel flat and retry",
+        };
+      }
       let minL = 180, minR = 180;
+      let valgusLFrames = 0, valgusRFrames = 0, descentFrames = 0;
       for (const s of samples) {
         const al = angle(s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE], { x: s[PL.LEFT_ANKLE].x + 0.1, y: s[PL.LEFT_ANKLE].y });
         const ar = angle(s[PL.RIGHT_KNEE], s[PL.RIGHT_ANKLE], { x: s[PL.RIGHT_ANKLE].x + 0.1, y: s[PL.RIGHT_ANKLE].y });
         if (al > 0) minL = Math.min(minL, al);
         if (ar > 0) minR = Math.min(minR, ar);
+        // Valgus: knee drifts inward of the ankle on the active side.
+        descentFrames++;
+        const midAnkleX = (s[PL.LEFT_ANKLE].x + s[PL.RIGHT_ANKLE].x) / 2;
+        if (Math.sign(s[PL.LEFT_KNEE].x - midAnkleX) !== Math.sign(s[PL.LEFT_ANKLE].x - midAnkleX)) valgusLFrames++;
+        if (Math.sign(s[PL.RIGHT_KNEE].x - midAnkleX) !== Math.sign(s[PL.RIGHT_ANKLE].x - midAnkleX)) valgusRFrames++;
       }
       const r = REFERENCE_RANGES.ankle_df;
       const minA = Math.min(minL, minR);
-      const score = bucketScoreMaxOrLess(minA, r.passMaxMeasured, r.borderlineMaxMeasured);
+      let score = bucketScoreMaxOrLess(minA, r.passMaxMeasured, r.borderlineMaxMeasured);
       const dfDeg = Math.round(90 - minA);
+      const comps: string[] = [];
+      if (descentFrames && valgusLFrames / descentFrames > 0.3) { comps.push("Left knee collapsed inward to fake forward travel — not true ankle range"); score = cap(score, 2); }
+      if (descentFrames && valgusRFrames / descentFrames > 0.3) { comps.push("Right knee collapsed inward to fake forward travel — not true ankle range"); score = cap(score, 2); }
       return {
         id: testId, name, score,
         metric: dfDeg,
         left: Math.round(90 - minL), right: Math.round(90 - minR),
         asymmetry: asym(minL, minR),
+        compensations: comps.length ? comps : undefined,
         frameValidRatio: Math.round(validRatio * 100) / 100,
-        notes: `Dorsiflexion L ${Math.round(90 - minL)}° / R ${Math.round(90 - minR)}° · asym ${asym(minL, minR)}°`,
+        notes: `Dorsiflexion L ${Math.round(90 - minL)}° / R ${Math.round(90 - minR)}° · asym ${asym(minL, minR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
       };
     }
     case "hip_abd": {
       let maxL = 0, maxR = 0;
+      // Hip-hike: pelvis tilts up on the lifting side. We track the abduction
+      // angle achieved BEFORE hip-hike begins, not the final leg height.
+      const hipTiltBase = (() => {
+        let s = 0, n = 0;
+        for (let i = 0; i < Math.min(5, samples.length); i++) {
+          const t = hipTilt(samples[i]); s += t; n++;
+        }
+        return n ? s / n : 0;
+      })();
+      let preHikeMaxL = 0, preHikeMaxR = 0;
+      let hipHikeDetected = false;
       let trunkLeanFrames = 0, abductFrames = 0;
       for (const s of samples) {
         const al = abductionAngle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE]);
         const ar = abductionAngle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE]);
         if (al > maxL) maxL = al;
         if (ar > maxR) maxR = ar;
+        const hike = Math.abs(hipTilt(s) - hipTiltBase);
+        if (hike < 4) {
+          if (al > preHikeMaxL) preHikeMaxL = al;
+          if (ar > preHikeMaxR) preHikeMaxR = ar;
+        } else {
+          hipHikeDetected = true;
+        }
         if (al > 10 || ar > 10) {
           abductFrames++;
           if (trunkLeanAngle(s) > 8) trunkLeanFrames++;
         }
       }
       const r = REFERENCE_RANGES.hip_abd;
-      const maxA = Math.max(maxL, maxR);
-      let score = bucketScoreRange(maxA, r.passMin, r.passMax, r.borderlineMin, r.passMax);
-      if (maxA < r.borderlineMin) score = 1;
+      // Score reflects pre-hike range, per founder spec.
+      const scoreAngle = Math.max(preHikeMaxL, preHikeMaxR);
+      let score = bucketScoreRange(scoreAngle, r.passMin, r.passMax, r.borderlineMin, r.passMax);
+      if (scoreAngle < r.borderlineMin) score = 1;
       const comps: string[] = [];
-      if (abductFrames && trunkLeanFrames / abductFrames > 0.3) comps.push("Trunk lean compensation");
-      if (comps.length && score === 3) score = 2;
+      if (hipHikeDetected) comps.push("Pelvis hiked up on the lifting side — score reflects the angle before the hip-hike started, not the final leg height");
+      if (abductFrames && trunkLeanFrames / abductFrames > 0.3) { comps.push("Trunk leaned away from the lifting leg to help it rise — that extra height doesn't count"); score = cap(score, 2); }
       return {
         id: testId, name, score,
-        metric: Math.round(maxA),
-        left: Math.round(maxL), right: Math.round(maxR),
-        asymmetry: asym(maxL, maxR),
+        metric: Math.round(scoreAngle),
+        left: Math.round(preHikeMaxL), right: Math.round(preHikeMaxR),
+        asymmetry: asym(preHikeMaxL, preHikeMaxR),
         compensations: comps.length ? comps : undefined,
         frameValidRatio: Math.round(validRatio * 100) / 100,
-        notes: `Abduction L ${Math.round(maxL)}° / R ${Math.round(maxR)}° · asym ${asym(maxL, maxR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
+        notes: `Pre-hike abduction L ${Math.round(preHikeMaxL)}° / R ${Math.round(preHikeMaxR)}° · final L ${Math.round(maxL)}° / R ${Math.round(maxR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
       };
     }
     case "bridge_hold": {
@@ -956,16 +1107,37 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number): Te
       const firstAvg = ys.slice(0, third).reduce((a, b) => a + b, 0) / third;
       const lastAvg = ys.slice(-third).reduce((a, b) => a + b, 0) / third;
       const sagDelta = lastAvg - firstAvg; // positive y-delta = hips dropped
+      // Lumbar hyperextension proxy: in a clean bridge, hip lies on the
+      // shoulder→knee line. If hip.y is much *above* (smaller y than) that
+      // line, the lumbar spine is over-extending instead of the glutes
+      // driving the lift. Sample at the lowest-y (highest-hip) frame.
+      let maxLumbar = 0;
+      for (const s of samples) {
+        const sx = (s[PL.LEFT_SHOULDER].x + s[PL.RIGHT_SHOULDER].x) / 2;
+        const sy = (s[PL.LEFT_SHOULDER].y + s[PL.RIGHT_SHOULDER].y) / 2;
+        const kx = (s[PL.LEFT_KNEE].x + s[PL.RIGHT_KNEE].x) / 2;
+        const ky = (s[PL.LEFT_KNEE].y + s[PL.RIGHT_KNEE].y) / 2;
+        const hx = (s[PL.LEFT_HIP].x + s[PL.RIGHT_HIP].x) / 2;
+        const hy = (s[PL.LEFT_HIP].y + s[PL.RIGHT_HIP].y) / 2;
+        if (Math.abs(kx - sx) < 0.001) continue;
+        const expectedY = sy + (ky - sy) * (hx - sx) / (kx - sx);
+        const above = expectedY - hy; // positive = hip above shoulder-knee line
+        if (above > maxLumbar) maxLumbar = above;
+      }
       const r = REFERENCE_RANGES.bridge_hold;
       let score: 1 | 2 | 3 = std < r.passMaxSway ? 3 : std < r.borderlineMaxSway ? 2 : 1;
       const comps: string[] = [];
       if (sagDelta > r.sagDeltaFail) { comps.push("Hip sag during hold"); score = 1; }
+      if (maxLumbar > 0.04) {
+        comps.push("Lower back arched (lumbar hyperextension) — the lift came from the spine, not from glute drive");
+        score = cap(score, 2);
+      }
       return {
         id: testId, name, score,
         metric: Math.round(std * 1000) / 10,
         compensations: comps.length ? comps : undefined,
         frameValidRatio: Math.round(validRatio * 100) / 100,
-        notes: `Sway ${(std * 100).toFixed(1)} · sag Δ ${(sagDelta * 100).toFixed(1)}${comps.length ? " · " + comps.join("; ") : ""}`,
+        notes: `Sway ${(std * 100).toFixed(1)} · sag Δ ${(sagDelta * 100).toFixed(1)} · lumbar ${(maxLumbar * 100).toFixed(1)}${comps.length ? " · " + comps.join("; ") : ""}`,
       };
     }
     case "elbow_rom": {
@@ -975,6 +1147,22 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number): Te
         const ar = angle(s[PL.RIGHT_SHOULDER], s[PL.RIGHT_ELBOW], s[PL.RIGHT_WRIST]);
         if (al > 0) { maxL = Math.max(maxL, al); minL = Math.min(minL, al); }
         if (ar > 0) { maxR = Math.max(maxR, ar); minR = Math.min(minR, ar); }
+      }
+      // Shoulder substitution — if the upper arm wandered during the test,
+      // the elbow joint wasn't isolated and the angle reading is unreliable.
+      const shoulderStd = Math.max(
+        landmarkStd(samples, PL.LEFT_SHOULDER, "x"),
+        landmarkStd(samples, PL.LEFT_SHOULDER, "y"),
+        landmarkStd(samples, PL.RIGHT_SHOULDER, "x"),
+        landmarkStd(samples, PL.RIGHT_SHOULDER, "y"),
+      );
+      if (shoulderStd > 0.04) {
+        return {
+          id: testId, name, score: 1, valid: false,
+          frameValidRatio: Math.round(validRatio * 100) / 100,
+          compensations: ["Shoulder moved during the test — keep your upper arm pinned to your side so the elbow is the only joint moving, then retry"],
+          notes: "Couldn't get a clear reading — the upper arm wasn't kept still",
+        };
       }
       const r = REFERENCE_RANGES.elbow_rom;
       const rangeL = maxL - minL, rangeR = maxR - minR;
