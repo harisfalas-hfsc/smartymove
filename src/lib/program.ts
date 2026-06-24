@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getUser, updateUser, useUser } from "./store";
 import { supabase } from "@/integrations/supabase/client";
 import { buildCorrectiveRoutine, pickToRoutineItem } from "./corrective/engine";
+import { analyzeScan, buildPicksFromDecision, focusPickToRoutineItem, type ScanDecision } from "./corrective/decision";
 import type { LibraryExercise, RoutineItem } from "./exercises";
 import type { Joint } from "./store";
 
@@ -133,8 +134,9 @@ export function useProgramRoutine() {
   const phaseOverride = u?.phaseOverride;
   const latest = u?.sessions?.[u.sessions.length - 1];
   const sessionSub = latest?.sub;
+  const sessionKey = latest?.date ?? "no-session";
   return useQuery({
-    queryKey: ["program-routine", userId, goal ?? "none", jointsKey, programStart, phaseOverride ?? "auto"],
+    queryKey: ["program-routine", userId, goal ?? "none", jointsKey, programStart, phaseOverride ?? "auto", sessionKey],
     queryFn: async () => {
       const library = await fetchLibrary();
       const built = buildCorrectiveRoutine(
@@ -150,8 +152,22 @@ export function useProgramRoutine() {
         },
         library,
       );
-      const items: RoutineItem[] = built.picks.map(pickToRoutineItem);
-      return { items: await attachSignedUrls(items), phase: built.phase };
+      // Failure-mode-driven selection when we have scan results — otherwise
+      // fall back to the area-based engine (questionnaire only).
+      let decision: ScanDecision | null = null;
+      let items: RoutineItem[];
+      if (latest && latest.tests.length > 0) {
+        decision = analyzeScan(latest.tests, joints, goal);
+        const focusPicks = buildPicksFromDecision(decision, library);
+        if (focusPicks.length > 0) {
+          items = focusPicks.map(focusPickToRoutineItem);
+        } else {
+          items = built.picks.map(pickToRoutineItem);
+        }
+      } else {
+        items = built.picks.map(pickToRoutineItem);
+      }
+      return { items: await attachSignedUrls(items), phase: built.phase, decision };
     },
     staleTime: 30 * 60 * 1000,
   });
