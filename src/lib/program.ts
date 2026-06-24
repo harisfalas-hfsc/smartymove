@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getUser, updateUser, useUser } from "./store";
 import { supabase } from "@/integrations/supabase/client";
 import { buildCorrectiveRoutine, pickToRoutineItem } from "./corrective/engine";
+import { analyzeScan, buildPicksFromDecision, focusPickToRoutineItem, type ScanDecision } from "./corrective/decision";
 import type { LibraryExercise, RoutineItem } from "./exercises";
 import type { Joint } from "./store";
 
@@ -133,8 +134,9 @@ export function useProgramRoutine() {
   const phaseOverride = u?.phaseOverride;
   const latest = u?.sessions?.[u.sessions.length - 1];
   const sessionSub = latest?.sub;
+  const sessionKey = latest?.date ?? "no-session";
   return useQuery({
-    queryKey: ["program-routine", userId, goal ?? "none", jointsKey, programStart, phaseOverride ?? "auto"],
+    queryKey: ["program-routine", userId, goal ?? "none", jointsKey, programStart, phaseOverride ?? "auto", sessionKey],
     queryFn: async () => {
       const library = await fetchLibrary();
       const built = buildCorrectiveRoutine(
@@ -150,8 +152,22 @@ export function useProgramRoutine() {
         },
         library,
       );
-      const items: RoutineItem[] = built.picks.map(pickToRoutineItem);
-      return { items: await attachSignedUrls(items), phase: built.phase };
+      // Failure-mode-driven selection when we have scan results — otherwise
+      // fall back to the area-based engine (questionnaire only).
+      let decision: ScanDecision | null = null;
+      let items: RoutineItem[];
+      if (latest && latest.tests.length > 0) {
+        decision = analyzeScan(latest.tests, joints, goal);
+        const focusPicks = buildPicksFromDecision(decision, library);
+        if (focusPicks.length > 0) {
+          items = focusPicks.map(focusPickToRoutineItem);
+        } else {
+          items = built.picks.map(pickToRoutineItem);
+        }
+      } else {
+        items = built.picks.map(pickToRoutineItem);
+      }
+      return { items: await attachSignedUrls(items), phase: built.phase, decision };
     },
     staleTime: 30 * 60 * 1000,
   });
@@ -165,4 +181,21 @@ export function formatProgramDayDate(startISO: string, dayIndex: number): string
 
 export function isTrainingDay(dayIndex: number): boolean {
   return dayIndex >= 1 && dayIndex <= PROGRAM_LENGTH_DAYS;
+}
+
+/**
+ * Sync hook returning the cluster/priority decision for the user's latest
+ * Movement Screen — used by the results / progress screen to render
+ * root-cause insights instead of raw per-test failures.
+ */
+export function useScanDecision(): ScanDecision | null {
+  const u = useUser();
+  return useMemo(() => {
+    if (!u) return null;
+    const latest = u.sessions?.[u.sessions.length - 1];
+    if (!latest || latest.tests.length === 0) return null;
+    const joints = (u.questionnaire?.joints ?? []) as Joint[];
+    return analyzeScan(latest.tests, joints, u.goal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [u?.sessions?.length, u?.goal, (u?.questionnaire?.joints ?? []).join(",")]);
 }
