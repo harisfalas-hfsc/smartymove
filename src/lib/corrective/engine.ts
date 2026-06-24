@@ -295,6 +295,20 @@ export function pickToRoutineItem(p: ResolvedPick) {
   };
 }
 
+/**
+ * Resolve a single curated canonical name to the best matching library row.
+ * Exposed so the failure-mode-specific decision engine can build picks
+ * directly from focus templates without duplicating the scoring logic.
+ */
+export function resolveCanonical(
+  area: Area,
+  canonical: string,
+  library: LibraryExercise[],
+  used: Set<string>,
+): LibraryExercise | null {
+  return bestRow(area, canonical, library, used);
+}
+
 function titleCase(s: string): string {
   return s.replace(/\b\w/g, (c) => c.toUpperCase());
 }
