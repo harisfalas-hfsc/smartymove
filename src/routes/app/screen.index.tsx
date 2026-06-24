@@ -2,15 +2,28 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useUser } from "@/lib/store";
 import { CORE_TESTS, CONDITIONAL_TESTS } from "@/lib/movement";
 import { Play, Info, ChevronRight } from "lucide-react";
+import { usePaywall, gate } from "@/lib/paywall";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app/screen/")({ component: ScreenIndex });
 
 function ScreenIndex() {
   const u = useUser();
+  const navigate = useNavigate();
+  const { requirePremium } = usePaywall();
   if (!u) return null;
   const joints = (u.questionnaire?.joints ?? []).filter(j => j !== "none");
   const addOns = joints.slice(0, 2).map(j => CONDITIONAL_TESTS[j as keyof typeof CONDITIONAL_TESTS]);
   const last = u.sessions[u.sessions.length - 1];
+  // First screen is always free so the user can experience the product. Re-tests require Premium.
+  const requiresPremium = !!last;
+  function startScreen(e: React.MouseEvent) {
+    if (!requiresPremium) return; // allow free first screen
+    e.preventDefault();
+    if (gate(u!.premium, requirePremium, "Re-tests & rescans")) {
+      navigate({ to: "/app/screen/run" });
+    }
+  }
 
   return (
     <div className="space-y-5 pb-6">
@@ -57,7 +70,7 @@ function ScreenIndex() {
           </section>
         )}
 
-        <Link to="/app/screen/run" className="flex items-center justify-center gap-2 rounded-2xl brand-gradient p-4 font-bold text-primary-foreground shadow-soft">
+        <Link to="/app/screen/run" onClick={startScreen} className="flex items-center justify-center gap-2 rounded-2xl brand-gradient p-4 font-bold text-primary-foreground shadow-soft">
           <Play className="h-5 w-5" /> {last ? "Run re-test" : "Start screen"}
         </Link>
 
