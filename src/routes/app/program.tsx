@@ -177,11 +177,13 @@ function ProgramOverview({
                 ? "bg-warning/20 text-warning"
                 : "brand-gradient-soft text-primary";
           const dateClass = isToday
-            ? "text-white/85"
+            ? done
+              ? "text-success"
+              : "text-white/85"
             : missed
               ? "text-warning"
               : "text-muted-foreground";
-          const labelClass = isToday ? "text-white" : "";
+          const labelClass = isToday && !done ? "text-white" : "";
           let label = `Day ${d}`;
           if (done) label = "Completed";
           else if (isToday) label = "Today's workout";
