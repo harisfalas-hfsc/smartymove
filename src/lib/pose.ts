@@ -76,6 +76,8 @@ export async function maybeFallbackToLite(avgFrameMs: number, thresholdMs = 50):
 }
 
 export const PL = {
+  NOSE: 0,
+  LEFT_EAR: 7, RIGHT_EAR: 8,
   LEFT_SHOULDER: 11, RIGHT_SHOULDER: 12,
   LEFT_ELBOW: 13, RIGHT_ELBOW: 14,
   LEFT_WRIST: 15, RIGHT_WRIST: 16,
