@@ -29,7 +29,7 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
           <strong>Last updated:</strong> {lastUpdated} ·{" "}
           <strong>Operator:</strong> SmartyMove (smartymove.com), part of the Smarty family ·{" "}
           <strong>Contact:</strong>{" "}
-          <a href="mailto:hello@smartymove.com" style={{ color: "#0E7C86", fontWeight: 600 }}>hello@smartymove.com</a>
+          <a href="mailto:smartymove@outlook.com" style={{ color: "#0E7C86", fontWeight: 600 }}>smartymove@outlook.com</a>
         </div>
 
         <article

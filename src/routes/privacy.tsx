@@ -107,7 +107,7 @@ function Privacy() {
       </ul>
       <div className="note">
         To exercise these rights, use the controls in your profile settings or email{" "}
-        <a href="mailto:hello@smartymove.com">hello@smartymove.com</a>. We respond within 30 days.
+        <a href="mailto:smartymove@outlook.com">smartymove@outlook.com</a>. We respond within 30 days.
       </div>
 
       <h2>7. Security Measures</h2>
@@ -134,7 +134,7 @@ function Privacy() {
         SmartyMove is intended for users aged 18 and over. Users between 13 and 18 may only use SmartyMove
         with parental or guardian supervision and consent. We do not knowingly collect data from children
         under 13. If you believe we have, contact us at{" "}
-        <a href="mailto:hello@smartymove.com">hello@smartymove.com</a> and we will delete it.
+        <a href="mailto:smartymove@outlook.com">smartymove@outlook.com</a> and we will delete it.
       </p>
 
       <h2>10. International Transfers</h2>
@@ -152,7 +152,7 @@ function Privacy() {
       <h2>12. Contact</h2>
       <p>
         Data Controller: <strong>SmartyMove</strong> (smartymove.com). For privacy questions or to exercise
-        your rights, contact <a href="mailto:hello@smartymove.com">hello@smartymove.com</a>.
+        your rights, contact <a href="mailto:smartymove@outlook.com">smartymove@outlook.com</a>.
       </p>
     </LegalLayout>
   );

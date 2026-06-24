@@ -72,7 +72,7 @@ function Terms() {
         <li>You are responsible for maintaining the confidentiality of your login credentials.</li>
         <li>You agree not to share your account with others.</li>
         <li>You are responsible for all activity that occurs under your account.</li>
-        <li>Any unauthorized use of your account must be reported to us immediately at hello@smartymove.com.</li>
+        <li>Any unauthorized use of your account must be reported to us immediately at smartymove@outlook.com.</li>
       </ul>
 
       <h2>5. Subscription &amp; Payments</h2>
@@ -200,7 +200,7 @@ function Terms() {
       <h2>17. Contact</h2>
       <p>
         For questions about these Terms, contact us at{" "}
-        <a href="mailto:hello@smartymove.com">hello@smartymove.com</a>.
+        <a href="mailto:smartymove@outlook.com">smartymove@outlook.com</a>.
       </p>
     </LegalLayout>
   );
