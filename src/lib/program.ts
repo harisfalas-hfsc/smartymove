@@ -182,3 +182,20 @@ export function formatProgramDayDate(startISO: string, dayIndex: number): string
 export function isTrainingDay(dayIndex: number): boolean {
   return dayIndex >= 1 && dayIndex <= PROGRAM_LENGTH_DAYS;
 }
+
+/**
+ * Sync hook returning the cluster/priority decision for the user's latest
+ * Movement Screen — used by the results / progress screen to render
+ * root-cause insights instead of raw per-test failures.
+ */
+export function useScanDecision(): ScanDecision | null {
+  const u = useUser();
+  return useMemo(() => {
+    if (!u) return null;
+    const latest = u.sessions?.[u.sessions.length - 1];
+    if (!latest || latest.tests.length === 0) return null;
+    const joints = (u.questionnaire?.joints ?? []) as Joint[];
+    return analyzeScan(latest.tests, joints, u.goal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [u?.sessions?.length, u?.goal, (u?.questionnaire?.joints ?? []).join(",")]);
+}
