@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -162,6 +162,14 @@ function Welcome() {
             >
               Get started
             </button>
+            <div className="mb-3 text-center">
+              <Link
+                to="/about"
+                style={{ color: "#0E7C86", fontWeight: 700, fontSize: 14, textDecoration: "none", borderBottom: "1.5px solid rgba(14,124,134,0.35)", paddingBottom: 1 }}
+              >
+                About SmartyMove
+              </Link>
+            </div>
             <div className="text-center" style={{ fontSize: 13.5, color: "#6B7A90" }}>
               Already have an account?{" "}
               <button onClick={() => setMode("signin")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
@@ -245,15 +253,16 @@ function Welcome() {
 
         <style>{`
           .sm-scanline{
-            position:absolute; left:14px; right:14px; height:2px;
-            background:linear-gradient(90deg, transparent, #4FB286, transparent);
-            box-shadow:0 0 14px 2px rgba(79,178,134,0.7);
-            top:18px; animation: sm-sweep 2.6s ease-in-out infinite;
+            position:absolute; left:14px; right:14px; height:3px;
+            background:linear-gradient(90deg, transparent, #4FB286 20%, #7CFFB8 50%, #4FB286 80%, transparent);
+            box-shadow:0 0 18px 3px rgba(79,178,134,0.85), 0 0 40px 6px rgba(79,178,134,0.35);
+            top:18px; animation: sm-sweep 2.2s ease-in-out infinite;
+            border-radius:2px;
           }
           @keyframes sm-sweep{
-            0%{ top:18px; opacity:.9 }
-            50%{ top:calc(100% - 22px); opacity:.5 }
-            100%{ top:18px; opacity:.9 }
+            0%{ top:18px; opacity:.95 }
+            50%{ top:calc(100% - 22px); opacity:1 }
+            100%{ top:18px; opacity:.95 }
           }
           @media (prefers-reduced-motion: reduce){ .sm-scanline{ animation:none; top:50% } }
         `}</style>
