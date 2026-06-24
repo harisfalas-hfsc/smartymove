@@ -40,6 +40,17 @@ export interface TestResult {
   notes?: string;
   /** False when the camera couldn't reliably score this test (no pose, no motion, skipped). */
   valid?: boolean;
+  /** Bilateral tests: per-side primary metric (joint angle / sway etc.). */
+  left?: number;
+  right?: number;
+  /** Absolute difference between sides for bilateral tests. */
+  asymmetry?: number;
+  /** Required camera orientation used during this test. */
+  cameraView?: "front" | "side";
+  /** Compensation patterns detected across the movement window (e.g. "knee valgus"). */
+  compensations?: string[];
+  /** Fraction of captured frames that passed the visibility threshold. */
+  frameValidRatio?: number;
 }
 
 export interface ScreenSession {
