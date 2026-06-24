@@ -1,20 +1,129 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { getPoseLandmarker, PL } from "@/lib/pose";
-import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, scoreFromRange, TEST_GUIDES } from "@/lib/movement";
+import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
+import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
-import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X } from "lucide-react";
+import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal } from "lucide-react";
 
 export const Route = createFileRoute("/app/screen/run")({ component: Runner });
 
-type TestDef = { id: string; name: string; duration: number; instruction: string; conditional?: boolean };
+type TestDef = { id: string; name: string; duration: number; instruction: string; conditional?: boolean; cameraView: "front" | "side" };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REFERENCE_RANGES — v1 founder-supplied thresholds based on standard movement
+// screening norms. Single source of truth; revisit once we have real user data.
+// All angles are joint angles in degrees as produced by `angle()` from
+// movement.ts (180° = straight limb / fully extended). Where the reference is
+// phrased as a clinical angle from vertical or as "X° of flexion", the
+// conversion to the joint-angle convention is noted inline.
+// ─────────────────────────────────────────────────────────────────────────────
+const REFERENCE_RANGES = {
+  // Min knee joint angle reached during squat descent.
+  // Pass ≤100° (≥parallel), borderline 100–120°, fail >120°.
+  squat: { passMax: 100, borderlineMax: 120 },
+
+  // Min trunk joint angle (shoulder-hip-knee) at bottom of hinge.
+  // Forward-lean from vertical = 180 − joint angle.
+  // Pass lean 40–60° → joint 120–140°. Borderline lean 25–40 or 60–75
+  // → joint 105–120 or 140–155. Fail lean <25 or >75 → joint <105 or >155.
+  hinge: { passJointMin: 120, passJointMax: 140, borderlineJointMin: 105, borderlineJointMax: 155 },
+
+  // Max pelvic-drop angle (deg) observed during the 10s single-leg hold.
+  // Pass <5°, borderline 5–10°, fail >10° or balance lost.
+  balance: { passMaxDrop: 5, borderlineMaxDrop: 10 },
+
+  // Min front-knee joint angle at bottom of lunge.
+  // Pass 80–100°, borderline 100–120°, fail >120° or medial collapse.
+  lunge: { passMin: 80, passMax: 100, borderlineMax: 120 },
+
+  // Max shoulder joint angle (hip-shoulder-elbow) reached overhead.
+  // Pass ≥160° without lumbar arch, borderline 140–160°, fail <140°
+  // or full range only with lumbar compensation.
+  overhead: { passMin: 160, borderlineMin: 140 },
+
+  // Ankle dorsiflexion measured as joint angle between tibia (knee→ankle)
+  // and ground-horizontal. Tibia-from-vertical lean = 90 − measured.
+  // Pass DF ≥35° → measured ≤55°. Borderline 25–35° → 55–65°.
+  // Fail <25° → >65°.
+  ankle_df: { passMaxMeasured: 55, borderlineMaxMeasured: 65 },
+
+  // Max hip abduction angle (leg-from-vertical) before compensation.
+  // Pass 30–45° clean, borderline 20–30° or compensation 30–45°,
+  // fail <20° or early compensation.
+  hip_abd: { passMin: 30, passMax: 45, borderlineMin: 20 },
+
+  // Glute bridge: target 30–45s hold at neutral hips. Our scan window is 10s
+  // so this is a proxy — hip-y stability and absence of mid-window sag.
+  // TODO: extend test duration to a true endurance timer before publishing v2.
+  bridge_hold: { passMaxSway: 0.012, borderlineMaxSway: 0.025, sagDeltaFail: 0.04 },
+
+  // Wall slide max arm elevation (hip-shoulder-elbow joint angle) with wall
+  // contact maintained. Pass ≥150°, borderline 120–150°, fail <120°.
+  wall_slide: { passMin: 150, borderlineMin: 120 },
+
+  // Elbow active flexion-extension range. Need ≥135° of total ROM and full
+  // extension within 5° of straight (joint ≥175°). Borderline range ≥110°.
+  elbow_rom: { passRange: 135, passExtension: 175, borderlineRange: 110, borderlineExtension: 165 },
+
+  // Knee single-leg step-down — uses the same min-knee thresholds as lunge.
+  knee_sld: { passMin: 80, passMax: 100, borderlineMax: 120 },
+} as const;
+
+const VISIBILITY_THRESHOLD = 0.6;
+const SMOOTH_WINDOW = 5;
+const MIN_VALID_FRAME_RATIO = 0.7;
+
+const TEST_CAMERA_VIEW: Record<string, "front" | "side"> = {
+  squat: "side",
+  hinge: "side",
+  balance: "front",
+  lunge: "side",
+  overhead: "front",
+  ankle_df: "side",
+  knee_sld: "front",
+  hip_abd: "front",
+  bridge_hold: "side",
+  wall_slide: "side",
+  elbow_rom: "front",
+};
+
+// Landmarks required for a frame to count toward the score of each test.
+const TEST_LANDMARKS: Record<string, number[]> = {
+  squat:       [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_ANKLE],
+  hinge:       [PL.LEFT_SHOULDER, PL.LEFT_HIP, PL.LEFT_KNEE, PL.RIGHT_SHOULDER, PL.RIGHT_HIP, PL.RIGHT_KNEE],
+  balance:     [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER],
+  lunge:       [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_ANKLE],
+  overhead:    [PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_HIP, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_HIP],
+  ankle_df:    [PL.LEFT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_KNEE, PL.RIGHT_ANKLE],
+  knee_sld:    [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_ANKLE],
+  hip_abd:     [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER],
+  bridge_hold: [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_KNEE, PL.RIGHT_KNEE],
+  wall_slide:  [PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_HIP, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_HIP],
+  elbow_rom:   [PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_WRIST, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_WRIST],
+};
 
 function buildSequence(joints: Joint[]): TestDef[] {
-  const core: TestDef[] = CORE_TESTS.map(t => ({ id: t.id, name: t.name, duration: t.duration, instruction: instructionFor(t.id) }));
-  const cond: TestDef[] = joints.filter(j => j !== "none").slice(0, 2).map(j => {
-    const c = CONDITIONAL_TESTS[j as keyof typeof CONDITIONAL_TESTS];
-    return { id: c.id, name: c.name, duration: 10, instruction: instructionFor(c.id), conditional: true };
-  });
+  const core: TestDef[] = CORE_TESTS.map(t => ({
+    id: t.id, name: t.name, duration: t.duration,
+    instruction: instructionFor(t.id),
+    cameraView: TEST_CAMERA_VIEW[t.id] ?? "front",
+  }));
+  // Wrist test is intentionally excluded from v1 scoring — flagged "Coming
+  // soon" because the wrist landmarks are too small on camera for a reliable
+  // flexion/extension angle on phones. If the user picked wrist as a flagged
+  // joint, we still run their other selected joint's add-on (if any).
+  const cond: TestDef[] = joints
+    .filter(j => j !== "none" && j !== "wrist")
+    .slice(0, 2)
+    .map(j => {
+      const c = CONDITIONAL_TESTS[j as keyof typeof CONDITIONAL_TESTS];
+      return {
+        id: c.id, name: c.name, duration: 10,
+        instruction: instructionFor(c.id),
+        conditional: true,
+        cameraView: TEST_CAMERA_VIEW[c.id] ?? "front",
+      };
+    });
   return [...core, ...cond];
 }
 
@@ -48,6 +157,11 @@ function Runner() {
   const pausedRef = useRef(false);
   useEffect(() => { pausedRef.current = paused || showInstructions; }, [paused, showInstructions]);
 
+  // Detection-latency tracking so we can downgrade the model if the device
+  // is too slow to keep up with the "full" landmarker.
+  const frameTimesRef = useRef<number[]>([]);
+  const fallbackCheckedRef = useRef(false);
+
   useEffect(() => { if (u) setSeq(buildSequence(u.questionnaire?.joints ?? [])); }, [u]);
 
   async function start() {
@@ -65,7 +179,7 @@ function Runner() {
       videoRef.current.srcObject = stream;
       await videoRef.current.play();
       setStatusMsg("Loading pose detection model...");
-      const lm = await getPoseLandmarker();
+      let lm = await getPoseLandmarker();
       setPoseReady(true);
       setStatusMsg("");
       setPhase("intro");
@@ -75,8 +189,22 @@ function Runner() {
         if (v.readyState >= 2) {
           c.width = v.videoWidth; c.height = v.videoHeight;
           const ctx = c.getContext("2d")!;
-          const t = performance.now();
-          const res = lm.detectForVideo(v, t);
+          const t0 = performance.now();
+          const res = lm.detectForVideo(v, t0);
+          const dt = performance.now() - t0;
+          // Track recent per-frame detection latency for adaptive model fallback.
+          const buf = frameTimesRef.current;
+          buf.push(dt);
+          if (buf.length > 60) buf.shift();
+          if (!fallbackCheckedRef.current && buf.length >= 30) {
+            const avg = buf.reduce((a, b) => a + b, 0) / buf.length;
+            fallbackCheckedRef.current = true;
+            void maybeFallbackToLite(avg).then(async (tier) => {
+              if (tier === "lite") {
+                lm = await getPoseLandmarker();
+              }
+            });
+          }
           ctx.clearRect(0, 0, c.width, c.height);
           if (res.landmarks?.[0]) {
             const pts = res.landmarks[0];
@@ -131,8 +259,8 @@ function Runner() {
       done = true;
       clearInterval(tickId); clearInterval(sampleId);
       const score: TestResult = skipped
-        ? { id: test.id, name: test.name, score: 1, notes: "Skipped", valid: false }
-        : scoreSamples(test.id, samplesRef.current);
+        ? { id: test.id, name: test.name, score: 1, notes: "Skipped", valid: false, cameraView: test.cameraView }
+        : { ...scoreSamples(test.id, samplesRef.current, test.duration), cameraView: test.cameraView };
       setResults(r => [...r, score]);
       setTimeout(() => {
         if (idx + 1 >= seq.length) finalize([...results, score]);
