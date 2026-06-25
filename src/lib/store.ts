@@ -279,6 +279,14 @@ export async function signOutUser() {
   setUser(null);
 }
 
+export function clearLocalAccountData() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(KEY);
+  localStorage.removeItem(DRAFT_KEY);
+  localStorage.removeItem(PENDING_PROFILE_KEY);
+  window.dispatchEvent(new Event("smartymove:user"));
+}
+
 function setPendingProfile(user: Partial<User>) {
   if (typeof window === "undefined") return;
   localStorage.setItem(PENDING_PROFILE_KEY, JSON.stringify(user));
