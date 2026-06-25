@@ -20,6 +20,7 @@ import { Route as OnboardingRouteRouteImport } from './routes/onboarding/route'
 import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as PremiumReturnRouteImport } from './routes/premium.return'
 import { Route as OnboardingQuestionnaireRouteImport } from './routes/onboarding/questionnaire'
 import { Route as OnboardingParqRouteImport } from './routes/onboarding/parq'
 import { Route as OnboardingJointsRouteImport } from './routes/onboarding/joints'
@@ -88,6 +89,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRouteRoute,
+} as any)
+const PremiumReturnRoute = PremiumReturnRouteImport.update({
+  id: '/return',
+  path: '/return',
+  getParentRoute: () => PremiumRoute,
 } as any)
 const OnboardingQuestionnaireRoute = OnboardingQuestionnaireRouteImport.update({
   id: '/questionnaire',
@@ -164,7 +170,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
-  '/premium': typeof PremiumRoute
+  '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/admin/exercises': typeof AdminExercisesRoute
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/joints': typeof OnboardingJointsRoute
   '/onboarding/parq': typeof OnboardingParqRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
+  '/premium/return': typeof PremiumReturnRoute
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/': typeof AppScreenIndexRoute
@@ -189,7 +196,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
-  '/premium': typeof PremiumRoute
+  '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/admin/exercises': typeof AdminExercisesRoute
@@ -201,6 +208,7 @@ export interface FileRoutesByTo {
   '/onboarding/joints': typeof OnboardingJointsRoute
   '/onboarding/parq': typeof OnboardingParqRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
+  '/premium/return': typeof PremiumReturnRoute
   '/app': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen': typeof AppScreenIndexRoute
@@ -215,7 +223,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
-  '/premium': typeof PremiumRoute
+  '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/admin/exercises': typeof AdminExercisesRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/onboarding/joints': typeof OnboardingJointsRoute
   '/onboarding/parq': typeof OnboardingParqRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
+  '/premium/return': typeof PremiumReturnRoute
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/': typeof AppScreenIndexRoute
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
     | '/onboarding/joints'
     | '/onboarding/parq'
     | '/onboarding/questionnaire'
+    | '/premium/return'
     | '/app/'
     | '/app/screen/run'
     | '/app/screen/'
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
     | '/onboarding/joints'
     | '/onboarding/parq'
     | '/onboarding/questionnaire'
+    | '/premium/return'
     | '/app'
     | '/app/screen/run'
     | '/app/screen'
@@ -306,6 +317,7 @@ export interface FileRouteTypes {
     | '/onboarding/joints'
     | '/onboarding/parq'
     | '/onboarding/questionnaire'
+    | '/premium/return'
     | '/app/'
     | '/app/screen/run'
     | '/app/screen/'
@@ -320,7 +332,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DesktopRoute: typeof DesktopRoute
   DisclaimerRoute: typeof DisclaimerRoute
-  PremiumRoute: typeof PremiumRoute
+  PremiumRoute: typeof PremiumRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   AdminExercisesRoute: typeof AdminExercisesRoute
@@ -405,6 +417,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRouteRoute
+    }
+    '/premium/return': {
+      id: '/premium/return'
+      path: '/return'
+      fullPath: '/premium/return'
+      preLoaderRoute: typeof PremiumReturnRouteImport
+      parentRoute: typeof PremiumRoute
     }
     '/onboarding/questionnaire': {
       id: '/onboarding/questionnaire'
@@ -554,6 +573,17 @@ const OnboardingRouteRouteWithChildren = OnboardingRouteRoute._addFileChildren(
   OnboardingRouteRouteChildren,
 )
 
+interface PremiumRouteChildren {
+  PremiumReturnRoute: typeof PremiumReturnRoute
+}
+
+const PremiumRouteChildren: PremiumRouteChildren = {
+  PremiumReturnRoute: PremiumReturnRoute,
+}
+
+const PremiumRouteWithChildren =
+  PremiumRoute._addFileChildren(PremiumRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRouteRoute: AppRouteRouteWithChildren,
@@ -562,7 +592,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DesktopRoute: DesktopRoute,
   DisclaimerRoute: DisclaimerRoute,
-  PremiumRoute: PremiumRoute,
+  PremiumRoute: PremiumRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   AdminExercisesRoute: AdminExercisesRoute,
