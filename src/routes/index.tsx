@@ -221,7 +221,7 @@ function Welcome() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="p">Password</Label>
-              <Input id="p" type="password" value={pw} onChange={(e) => setPw(e.target.value)} required minLength={6} className="h-11 rounded-xl" />
+              <PasswordField id="p" value={pw} onChange={setPw} show={showPw} onToggle={() => setShowPw((s) => !s)} />
             </div>
             <Button
               type="submit"
@@ -239,7 +239,7 @@ function Welcome() {
               </button>
             </p>
           </form>
-        ) : (
+        ) : mode === "signin" ? (
           <form onSubmit={submitSignin} className="mt-2 flex flex-col gap-3">
             <h2 style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}>
               Welcome back
@@ -250,8 +250,17 @@ function Welcome() {
               <Input id="se" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 rounded-xl" />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="sp">Password</Label>
-              <Input id="sp" type="password" value={pw} onChange={(e) => setPw(e.target.value)} required minLength={6} className="h-11 rounded-xl" />
+              <div className="flex items-center justify-between">
+                <Label htmlFor="sp">Password</Label>
+                <button
+                  type="button"
+                  onClick={() => { setAuthError(""); setResetSent(false); setMode("forgot"); }}
+                  style={{ color: "#0E7C86", fontWeight: 700, fontSize: 13, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                >
+                  Forgot password?
+                </button>
+              </div>
+              <PasswordField id="sp" value={pw} onChange={setPw} show={showPw} onToggle={() => setShowPw((s) => !s)} />
             </div>
             <Button
               type="submit"
@@ -266,6 +275,39 @@ function Welcome() {
               New here?{" "}
               <button type="button" onClick={() => setMode("signup")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                 Create an account
+              </button>
+            </p>
+          </form>
+        ) : (
+          <form onSubmit={submitForgot} className="mt-2 flex flex-col gap-3">
+            <h2 style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}>
+              Reset your password
+            </h2>
+            <p className="-mt-1 text-sm" style={{ color: "#6B7A90" }}>
+              Enter your account email. We'll send you a link to set a new password.
+            </p>
+            <div className="space-y-1.5">
+              <Label htmlFor="fe">Email</Label>
+              <Input id="fe" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 rounded-xl" />
+            </div>
+            <Button
+              type="submit"
+              disabled={submitting || resetSent}
+              style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
+              className="mt-2 h-12 w-full rounded-2xl text-base font-semibold text-white hover:opacity-95"
+            >
+              {resetSent ? "Email sent ✓" : submitting ? "Sending..." : "Send reset link"}
+            </Button>
+            {resetSent && (
+              <p className="text-center text-sm" style={{ color: "#0E7C86" }}>
+                Check your inbox (and spam folder) for the reset link.
+              </p>
+            )}
+            {authError && <p className="text-center text-sm font-semibold text-destructive">{authError}</p>}
+            <p className="mt-1 text-center text-sm" style={{ color: "#6B7A90" }}>
+              Remembered it?{" "}
+              <button type="button" onClick={() => { setAuthError(""); setResetSent(false); setMode("signin"); }} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                Back to sign in
               </button>
             </p>
           </form>
@@ -310,3 +352,28 @@ const pillStyle: React.CSSProperties = {
   color: "#3B4A63", display: "inline-flex",
   alignItems: "center", gap: 6,
 };
+
+function PasswordField({ id, value, onChange, show, onToggle }: { id: string; value: string; onChange: (v: string) => void; show: boolean; onToggle: () => void }) {
+  return (
+    <div className="relative">
+      <Input
+        id={id}
+        type={show ? "text" : "password"}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required
+        minLength={6}
+        className="h-11 rounded-xl pr-11"
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-label={show ? "Hide password" : "Show password"}
+        className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+        tabIndex={-1}
+      >
+        {show ? <EyeOff size={18} /> : <Eye size={18} />}
+      </button>
+    </div>
+  );
+}
