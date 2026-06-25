@@ -34,6 +34,7 @@ import { Route as AdminExercisesRouteImport } from './routes/admin.exercises'
 import { Route as AppScreenIndexRouteImport } from './routes/app/screen.index'
 import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicAdminSyncPremiumRouteImport } from './routes/api/public/admin/sync-premium'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -161,6 +162,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicAdminSyncPremiumRoute =
+  ApiPublicAdminSyncPremiumRouteImport.update({
+    id: '/api/public/admin/sync-premium',
+    path: '/api/public/admin/sync-premium',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/': typeof AppScreenIndexRoute
+  '/api/public/admin/sync-premium': typeof ApiPublicAdminSyncPremiumRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -212,6 +220,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen': typeof AppScreenIndexRoute
+  '/api/public/admin/sync-premium': typeof ApiPublicAdminSyncPremiumRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -240,6 +249,7 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/': typeof AppScreenIndexRoute
+  '/api/public/admin/sync-premium': typeof ApiPublicAdminSyncPremiumRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -269,6 +279,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/screen/run'
     | '/app/screen/'
+    | '/api/public/admin/sync-premium'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -294,6 +305,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/screen/run'
     | '/app/screen'
+    | '/api/public/admin/sync-premium'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -321,6 +333,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/screen/run'
     | '/app/screen/'
+    | '/api/public/admin/sync-premium'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -336,6 +349,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   AdminExercisesRoute: typeof AdminExercisesRoute
+  ApiPublicAdminSyncPremiumRoute: typeof ApiPublicAdminSyncPremiumRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -516,6 +530,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/admin/sync-premium': {
+      id: '/api/public/admin/sync-premium'
+      path: '/api/public/admin/sync-premium'
+      fullPath: '/api/public/admin/sync-premium'
+      preLoaderRoute: typeof ApiPublicAdminSyncPremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -596,6 +617,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   AdminExercisesRoute: AdminExercisesRoute,
+  ApiPublicAdminSyncPremiumRoute: ApiPublicAdminSyncPremiumRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
