@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
@@ -39,6 +40,11 @@ import { Route as ApiPublicAdminSyncPremiumRouteImport } from './routes/api/publ
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/disclaimer': typeof DisclaimerRoute
   '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/app/profile': typeof AppProfileRoute
@@ -206,6 +213,7 @@ export interface FileRoutesByTo {
   '/disclaimer': typeof DisclaimerRoute
   '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/app/profile': typeof AppProfileRoute
@@ -234,6 +242,7 @@ export interface FileRoutesById {
   '/disclaimer': typeof DisclaimerRoute
   '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/app/profile': typeof AppProfileRoute
@@ -264,6 +273,7 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/premium'
     | '/privacy'
+    | '/reset-password'
     | '/terms'
     | '/admin/exercises'
     | '/app/profile'
@@ -291,6 +301,7 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/premium'
     | '/privacy'
+    | '/reset-password'
     | '/terms'
     | '/admin/exercises'
     | '/app/profile'
@@ -318,6 +329,7 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/premium'
     | '/privacy'
+    | '/reset-password'
     | '/terms'
     | '/admin/exercises'
     | '/app/profile'
@@ -347,6 +359,7 @@ export interface RootRouteChildren {
   DisclaimerRoute: typeof DisclaimerRoute
   PremiumRoute: typeof PremiumRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   TermsRoute: typeof TermsRoute
   AdminExercisesRoute: typeof AdminExercisesRoute
   ApiPublicAdminSyncPremiumRoute: typeof ApiPublicAdminSyncPremiumRoute
@@ -360,6 +373,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -615,6 +635,7 @@ const rootRouteChildren: RootRouteChildren = {
   DisclaimerRoute: DisclaimerRoute,
   PremiumRoute: PremiumRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   TermsRoute: TermsRoute,
   AdminExercisesRoute: AdminExercisesRoute,
   ApiPublicAdminSyncPremiumRoute: ApiPublicAdminSyncPremiumRoute,
