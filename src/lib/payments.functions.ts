@@ -268,12 +268,13 @@ export const cancelPremiumSubscription = createServerFn({ method: "POST" })
       } else {
         const resolvedCustomerId =
           customerId ?? (typeof updated.customer === "string" ? updated.customer : undefined);
+        if (!resolvedCustomerId) return { error: "Could not resolve billing customer." };
         const catalog = getSubscriptionCatalogInfo(updated);
         await supabaseAdmin.from("subscriptions").upsert(
           {
             user_id: userId,
             stripe_subscription_id: subscriptionId,
-            ...(resolvedCustomerId && { stripe_customer_id: resolvedCustomerId }),
+            stripe_customer_id: resolvedCustomerId,
             price_id: catalog.priceId,
             product_id: catalog.productId,
             status: updated.status,
