@@ -132,7 +132,9 @@ export const cancelPremiumSubscription = createServerFn({ method: "POST" })
     try {
       const stripe = createStripeClient(data.environment);
       const updated = await stripe.subscriptions.update(sub.stripe_subscription_id as string, { cancel_at_period_end: true });
-      const periodEnd = updated.current_period_end ? new Date(updated.current_period_end * 1000).toISOString() : (sub.current_period_end as string | null) ?? null;
+      const updatedSubscription = updated as any;
+      const rawPeriodEnd = updatedSubscription.current_period_end ?? updatedSubscription.items?.data?.[0]?.current_period_end;
+      const periodEnd = rawPeriodEnd ? new Date(rawPeriodEnd * 1000).toISOString() : (sub.current_period_end as string | null) ?? null;
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       await supabaseAdmin
         .from("subscriptions")

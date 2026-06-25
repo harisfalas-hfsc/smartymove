@@ -92,7 +92,7 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
     setAccountLoading("export");
     setAccountMessage(null);
     try {
-      const res = await exportData();
+      const res = await exportData({ data: {} });
       if ("error" in res) throw new Error(res.error);
       downloadJson(`smartymove-data-${new Date().toISOString().slice(0, 10)}.json`, res.data);
       setAccountMessage("Your data export has downloaded.");
@@ -106,7 +106,7 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
     setAccountLoading("delete");
     setAccountMessage(null);
     try {
-      const res = await deleteAccount();
+      const res = await deleteAccount({ data: {} });
       if ("error" in res) throw new Error(res.error);
       clearLocalAccountData();
       await signOutUser().catch(() => undefined);

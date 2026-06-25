@@ -114,7 +114,7 @@ function DesktopProfileInner() {
     setLoading("export");
     setMessage(null);
     try {
-      const result = await exportData();
+      const result = await exportData({ data: {} });
       if ("error" in result) throw new Error(result.error);
       downloadJson(`smartymove-data-${new Date().toISOString().slice(0, 10)}.json`, result.data);
       setMessage("Your data export has downloaded.");
@@ -129,7 +129,7 @@ function DesktopProfileInner() {
     setLoading("delete");
     setMessage(null);
     try {
-      const result = await deleteAccount();
+      const result = await deleteAccount({ data: {} });
       if ("error" in result) throw new Error(result.error);
       clearLocalAccountData();
       await signOutUser().catch(() => undefined);

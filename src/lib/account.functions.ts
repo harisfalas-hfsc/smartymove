@@ -10,8 +10,8 @@ type AccountExportResult =
           id: string;
           email: string | null;
         };
-        profile: unknown;
-        subscriptions: unknown[];
+        profile: JsonValue;
+        subscriptions: JsonValue[];
         notes: string[];
       };
     }
@@ -20,6 +20,12 @@ type AccountExportResult =
 type DeleteAccountResult =
   | { ok: true; canceledSubscriptions: number }
   | { error: string };
+
+type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[];
+
+function toJsonValue(value: unknown): JsonValue {
+  return JSON.parse(JSON.stringify(value ?? null)) as JsonValue;
+}
 
 async function cancelKnownSubscriptions(subscriptions: Array<{ stripe_subscription_id: string; environment: StripeEnv; status?: string | null }>) {
   let canceled = 0;
@@ -38,6 +44,7 @@ async function cancelKnownSubscriptions(subscriptions: Array<{ stripe_subscripti
 
 export const exportAccountData = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
+  .inputValidator(() => ({}))
   .handler(async ({ context }): Promise<AccountExportResult> => {
     try {
       const { supabase, userId, claims } = context;
@@ -59,8 +66,8 @@ export const exportAccountData = createServerFn({ method: "POST" })
             id: userId,
             email: typeof claims?.email === "string" ? claims.email : profile?.email ?? null,
           },
-          profile: profile ?? null,
-          subscriptions: subscriptions ?? [],
+          profile: toJsonValue(profile),
+          subscriptions: toJsonValue(subscriptions ?? []) as JsonValue[],
           notes: [
             "Raw camera video is not included because SmartyMove processes movement screens on your device and does not store video frames.",
             "Payment card numbers are not included because payments are handled by Stripe and SmartyMove does not store full card details.",
@@ -74,6 +81,7 @@ export const exportAccountData = createServerFn({ method: "POST" })
 
 export const deleteAccountAndData = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
+  .inputValidator(() => ({}))
   .handler(async ({ context }): Promise<DeleteAccountResult> => {
     try {
       const { supabase, userId } = context;
