@@ -1,15 +1,22 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { cancelPremiumSubscription, createBillingPortalSession } from "@/lib/payments.functions";
-import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
-import { getStripeEnvironment } from "@/lib/stripe";
-import { useUserPremium } from "@/lib/useUserPremium";
-import { clearLocalAccountData, updateUser, signOutUser, type User } from "@/lib/store";
-import { Bell, Crown, Download, Loader2, LogOut, Settings2, ShieldAlert, Target, MapPin, Monitor, Save, Trash2, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  Bell,
+  Crown,
+  Download,
+  Loader2,
+  LogOut,
+  MapPin,
+  Monitor,
+  Save,
+  Settings2,
+  ShieldAlert,
+  Target,
+  Trash2,
+  X,
+} from "lucide-react";
+import { useState } from "react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,8 +28,21 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
+import { cancelPremiumSubscription, createBillingPortalSession } from "@/lib/payments.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
+import { clearLocalAccountData, updateUser, signOutUser, type User } from "@/lib/store";
+import { useUserPremium } from "@/lib/useUserPremium";
 
 export const Route = createFileRoute("/app/profile")({ component: Profile });
+
+type PortalResult = { url: string } | { error: string };
+type CancelResult = { ok: true; currentPeriodEnd: string | null } | { error: string };
+type ExportResult = { data: unknown } | { error: string };
+type DeleteResult = { ok: true; canceledSubscriptions: number } | { error: string };
 
 function Profile() {
   const u = useUserPremium();
@@ -63,13 +83,15 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
     setPortalError(null);
     const portalWindow = window.open("about:blank", "_blank");
     try {
-      const res = await openPortal({ data: { environment: getStripeEnvironment(), returnUrl: window.location.href } });
+      const res = (await openPortal({
+        data: { environment: getStripeEnvironment(), returnUrl: window.location.href },
+      })) as PortalResult;
       if ("error" in res) throw new Error(res.error);
       if (portalWindow) portalWindow.location.href = res.url;
       else window.location.assign(res.url);
-    } catch (e: any) {
+    } catch (e) {
       portalWindow?.close();
-      setPortalError(e?.message ?? "Could not open billing portal");
+      setPortalError(e instanceof Error ? e.message : "Could not open billing portal");
     } finally {
       setPortalLoading(false);
     }
@@ -78,12 +100,14 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
     setCancelLoading(true);
     setPortalError(null);
     try {
-      const res = await cancelSubscription({ data: { environment: getStripeEnvironment() } });
+      const res = (await cancelSubscription({ data: { environment: getStripeEnvironment() } })) as CancelResult;
       if ("error" in res) throw new Error(res.error);
-      const date = res.currentPeriodEnd ? new Date(res.currentPeriodEnd).toLocaleDateString() : "the end of the paid period";
+      const date = res.currentPeriodEnd
+        ? new Date(res.currentPeriodEnd).toLocaleDateString()
+        : "the end of the paid period";
       setPortalError(`Cancellation scheduled. Premium stays active until ${date}.`);
-    } catch (e: any) {
-      setPortalError(e?.message ?? "Could not cancel subscription");
+    } catch (e) {
+      setPortalError(e instanceof Error ? e.message : "Could not cancel subscription");
     } finally {
       setCancelLoading(false);
     }
@@ -92,12 +116,12 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
     setAccountLoading("export");
     setAccountMessage(null);
     try {
-      const res = await exportData({ data: {} });
+      const res = (await exportData({ data: {} })) as ExportResult;
       if ("error" in res) throw new Error(res.error);
       downloadJson(`smartymove-data-${new Date().toISOString().slice(0, 10)}.json`, res.data);
       setAccountMessage("Your data export has downloaded.");
-    } catch (e: any) {
-      setAccountMessage(e?.message ?? "Could not download your data");
+    } catch (e) {
+      setAccountMessage(e instanceof Error ? e.message : "Could not download your data");
     } finally {
       setAccountLoading(null);
     }
@@ -106,13 +130,13 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
     setAccountLoading("delete");
     setAccountMessage(null);
     try {
-      const res = await deleteAccount({ data: {} });
+      const res = (await deleteAccount({ data: {} })) as DeleteResult;
       if ("error" in res) throw new Error(res.error);
       clearLocalAccountData();
       await signOutUser().catch(() => undefined);
       navigate({ to: "/", replace: true });
-    } catch (e: any) {
-      setAccountMessage(e?.message ?? "Could not delete your account");
+    } catch (e) {
+      setAccountMessage(e instanceof Error ? e.message : "Could not delete your account");
     } finally {
       setAccountLoading(null);
     }
@@ -135,7 +159,9 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
     <div className="pb-6">
       <header className="brand-gradient-strong px-5 pb-7 pt-7 text-primary-foreground">
         <div className="flex items-center gap-4">
-          <div className="grid h-16 w-16 place-items-center rounded-3xl bg-white/15 text-2xl font-extrabold backdrop-blur">{u.name.slice(0,1).toUpperCase()}</div>
+          <div className="grid h-16 w-16 place-items-center rounded-3xl bg-white/15 text-2xl font-extrabold backdrop-blur">
+            {u.name.slice(0, 1).toUpperCase()}
+          </div>
           <div className="min-w-0">
             <div className="truncate text-xl font-extrabold">{u.name}</div>
             <div className="truncate text-sm opacity-85">{u.email}</div>
@@ -145,10 +171,22 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
       </header>
       <div className="-mt-4 space-y-3 rounded-t-[2rem] bg-background px-5 pt-5">
         <Row icon={Target} label="Goal" value={u.goal ?? "—"} onClick={() => navigate({ to: "/onboarding/goal" })} />
-        <Row icon={MapPin} label="Joint focus" value={(u.questionnaire?.joints ?? []).join(", ") || "—"} onClick={() => navigate({ to: "/onboarding/joints" })} />
+        <Row
+          icon={MapPin}
+          label="Joint focus"
+          value={(u.questionnaire?.joints ?? []).join(", ") || "—"}
+          onClick={() => navigate({ to: "/onboarding/joints" })}
+        />
         <Row icon={Bell} label="Notifications" value="Daily reminder" />
         <Row icon={Settings2} label="Account settings" value="Edit profile" onClick={openEditor} />
-        <Row icon={Monitor} label="Desktop view" value="Open" onClick={() => { window.location.href = "/desktop"; }} />
+        <Row
+          icon={Monitor}
+          label="Desktop view"
+          value="Open"
+          onClick={() => {
+            window.location.href = "/desktop";
+          }}
+        />
         {editing && (
           <section className="rounded-3xl bg-card p-5 shadow-card">
             <div className="mb-4 flex items-center justify-between gap-3">
@@ -156,32 +194,64 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
                 <h2 className="text-base font-extrabold">Edit profile</h2>
                 <p className="text-xs text-muted-foreground">Your email is managed by your account sign-in.</p>
               </div>
-              <button type="button" onClick={() => setEditing(false)} aria-label="Close profile editor" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-secondary text-foreground">
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                aria-label="Close profile editor"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-secondary text-foreground"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="profile-name">Name</Label>
-                <Input id="profile-name" value={name} onChange={(e) => setName(e.target.value)} className="h-12 rounded-2xl bg-background" />
+                <Input
+                  id="profile-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="h-12 rounded-2xl bg-background"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="profile-age">Age</Label>
-                <Input id="profile-age" inputMode="numeric" type="number" min={12} max={100} value={age} onChange={(e) => setAge(e.target.value)} className="h-12 rounded-2xl bg-background" />
+                <Input
+                  id="profile-age"
+                  inputMode="numeric"
+                  type="number"
+                  min={12}
+                  max={100}
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  className="h-12 rounded-2xl bg-background"
+                />
               </div>
-              <Button onClick={saveProfile} disabled={!name.trim()} className="h-12 w-full rounded-2xl brand-gradient text-base font-semibold shadow-soft">
+              <Button
+                onClick={saveProfile}
+                disabled={!name.trim()}
+                className="h-12 w-full rounded-2xl brand-gradient text-base font-semibold shadow-soft"
+              >
                 <Save className="h-4 w-4" /> Save profile
               </Button>
             </div>
           </section>
         )}
-        {saved && <div className="rounded-2xl bg-success/10 p-3 text-center text-sm font-semibold text-foreground">Profile updated</div>}
+        {saved && (
+          <div className="rounded-2xl bg-success/10 p-3 text-center text-sm font-semibold text-foreground">
+            Profile updated
+          </div>
+        )}
         {!u.premium ? (
           <div className="rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft">
             <Crown className="h-5 w-5" />
             <div className="mt-1 text-base font-extrabold">Go Premium · €4.99/mo</div>
             <p className="text-sm opacity-90">Daily routines, re-tests, joint tests, Movement Age, Future Projection.</p>
-            <button onClick={() => navigate({ to: "/premium" })} className="mt-3 h-11 w-full rounded-2xl bg-white font-semibold text-primary">Upgrade</button>
+            <button
+              onClick={() => navigate({ to: "/premium" })}
+              className="mt-3 h-11 w-full rounded-2xl bg-white font-semibold text-primary"
+            >
+              Upgrade
+            </button>
           </div>
         ) : (
           <div className="rounded-3xl bg-card p-5 shadow-card">
@@ -190,17 +260,28 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
                 <div className="font-bold">Premium active</div>
                 <div className="text-xs text-muted-foreground">€4.99/mo · cancel anytime</div>
               </div>
-              <button onClick={manageSubscription} disabled={portalLoading} className="rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60">
+              <button
+                onClick={manageSubscription}
+                disabled={portalLoading}
+                className="rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+              >
                 {portalLoading ? "Opening…" : "Manage"}
               </button>
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
-              <button onClick={manageSubscription} disabled={portalLoading} className="rounded-xl bg-secondary px-3 py-2 text-xs font-semibold text-foreground disabled:opacity-60">
+              <button
+                onClick={manageSubscription}
+                disabled={portalLoading}
+                className="rounded-xl bg-secondary px-3 py-2 text-xs font-semibold text-foreground disabled:opacity-60"
+              >
                 {portalLoading ? "Opening…" : "Billing portal"}
               </button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <button disabled={cancelLoading} className="rounded-xl border border-destructive/25 bg-background px-3 py-2 text-xs font-semibold text-destructive disabled:opacity-60">
+                  <button
+                    disabled={cancelLoading}
+                    className="rounded-xl border border-destructive/25 bg-background px-3 py-2 text-xs font-semibold text-destructive disabled:opacity-60"
+                  >
                     {cancelLoading ? "Canceling…" : "Cancel plan"}
                   </button>
                 </AlertDialogTrigger>
@@ -213,50 +294,91 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Keep Premium</AlertDialogCancel>
-                    <AlertDialogAction onClick={cancelAtPeriodEnd} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Cancel plan</AlertDialogAction>
+                    <AlertDialogAction
+                      onClick={cancelAtPeriodEnd}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Cancel plan
+                    </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
             </div>
             {portalError && <div className="mt-2 text-xs text-foreground">{portalError}</div>}
-            <p className="mt-3 text-xs text-muted-foreground">Update your card, download invoices, manage billing, or cancel anytime.</p>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Update your card, download invoices, manage billing, or cancel anytime.
+            </p>
           </div>
         )}
         <div className="rounded-3xl bg-card p-5 shadow-card">
           <div className="flex items-start gap-3">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl brand-gradient-soft text-primary"><ShieldAlert className="h-5 w-5" /></span>
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl brand-gradient-soft text-primary">
+              <ShieldAlert className="h-5 w-5" />
+            </span>
             <div>
               <div className="font-bold">Your data</div>
-              <p className="mt-1 text-xs text-muted-foreground">Download your account data or permanently delete your account and app data.</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Download your account data or permanently delete your account and app data.
+              </p>
             </div>
           </div>
           <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <Button onClick={downloadAccountData} disabled={!!accountLoading} variant="secondary" className="h-11 rounded-2xl font-semibold">
-              {accountLoading === "export" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Download data
+            <Button
+              onClick={downloadAccountData}
+              disabled={!!accountLoading}
+              variant="secondary"
+              className="h-11 rounded-2xl font-semibold"
+            >
+              {accountLoading === "export" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              Download data
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button disabled={!!accountLoading} variant="destructive" className="h-11 rounded-2xl font-semibold">
-                  {accountLoading === "delete" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />} Delete account
+                  {accountLoading === "delete" ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                  Delete account
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent className="mx-4 max-w-[360px] rounded-3xl">
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete your account?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This permanently removes your SmartyMove profile, screening history, scores, and training data. Active subscriptions are set to stop renewing.
+                    This permanently removes your SmartyMove profile, screening history, scores, and training
+                    data. Active subscriptions are set to stop renewing.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Keep account</AlertDialogCancel>
-                  <AlertDialogAction onClick={deleteEntireAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete account</AlertDialogAction>
+                  <AlertDialogAction
+                    onClick={deleteEntireAccount}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Delete account
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </div>
-          {accountMessage && <div className="mt-3 rounded-2xl bg-secondary p-3 text-xs font-semibold text-foreground">{accountMessage}</div>}
+          {accountMessage && (
+            <div className="mt-3 rounded-2xl bg-secondary p-3 text-xs font-semibold text-foreground">
+              {accountMessage}
+            </div>
+          )}
         </div>
-        <button onClick={() => { void signOutUser().finally(() => navigate({ to: "/" })); }} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-secondary p-3 font-semibold text-foreground">
+        <button
+          onClick={() => {
+            void signOutUser().finally(() => navigate({ to: "/" }));
+          }}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-secondary p-3 font-semibold text-foreground"
+        >
           <LogOut className="h-4 w-4" /> Sign out
         </button>
       </div>
@@ -264,10 +386,22 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
   );
 }
 
-function Row({ icon: Icon, label, value, onClick }: { icon: any; label: string; value: string; onClick?: () => void }) {
+function Row({
+  icon: Icon,
+  label,
+  value,
+  onClick,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  onClick?: () => void;
+}) {
   return (
     <button onClick={onClick} className="flex w-full items-center gap-3 rounded-2xl bg-card p-4 text-left shadow-card">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl brand-gradient-soft text-primary"><Icon className="h-5 w-5" /></span>
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl brand-gradient-soft text-primary">
+        <Icon className="h-5 w-5" />
+      </span>
       <div className="min-w-0 flex-1">
         <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{label}</div>
         <div className="truncate font-semibold capitalize">{value.replace(/_/g, " ")}</div>
