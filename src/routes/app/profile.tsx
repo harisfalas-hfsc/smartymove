@@ -1,5 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { createBillingPortalSession } from "@/lib/payments.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
 import { useUser, updateUser, signOutUser, type User } from "@/lib/store";
 import { Bell, Crown, LogOut, Settings2, Target, MapPin, Monitor, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +23,22 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
   const [name, setName] = useState(u.name);
   const [age, setAge] = useState(String(u.age));
   const [saved, setSaved] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
+  const [portalError, setPortalError] = useState<string | null>(null);
+  const openPortal = useServerFn(createBillingPortalSession);
+  async function manageSubscription() {
+    setPortalLoading(true);
+    setPortalError(null);
+    try {
+      const res = await openPortal({ data: { environment: getStripeEnvironment(), returnUrl: window.location.href } });
+      if ("error" in res) throw new Error(res.error);
+      window.open(res.url, "_blank", "noopener,noreferrer");
+    } catch (e: any) {
+      setPortalError(e?.message ?? "Could not open billing portal");
+    } finally {
+      setPortalLoading(false);
+    }
+  }
   function openEditor() {
     setName(u.name);
     setAge(String(u.age));
@@ -93,8 +112,12 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
                 <div className="font-bold">Premium active</div>
                 <div className="text-xs text-muted-foreground">€4.99/mo · cancel anytime</div>
               </div>
-              <button onClick={() => updateUser({ premium: false })} className="rounded-xl bg-secondary px-3 py-1.5 text-xs font-semibold">Manage</button>
+              <button onClick={manageSubscription} disabled={portalLoading} className="rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60">
+                {portalLoading ? "Opening…" : "Manage"}
+              </button>
             </div>
+            {portalError && <div className="mt-2 text-xs text-destructive">{portalError}</div>}
+            <p className="mt-3 text-xs text-muted-foreground">Update your card, download invoices, or cancel — opens your secure billing portal.</p>
           </div>
         )}
         <button onClick={() => { void signOutUser().finally(() => navigate({ to: "/" })); }} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-secondary p-3 font-semibold text-foreground">
