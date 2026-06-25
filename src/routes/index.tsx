@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { clearOnboardingDraft, getOnboardingDraft, getUser, restoreUserFromBackend, signInWithEmailProfile, signUpWithEmailProfile } from "@/lib/store";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { supabase } from "@/integrations/supabase/client";
+import { Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,13 +24,15 @@ export const Route = createFileRoute("/")({
 
 function Welcome() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"intro" | "signup" | "signin">("intro");
+  const [mode, setMode] = useState<"intro" | "signup" | "signin" | "forgot">("intro");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [age, setAge] = useState<number | "">("");
   const [pw, setPw] = useState("");
   const [authError, setAuthError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   useEffect(() => {
     const requestedMode = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("auth") : null;
@@ -71,6 +75,24 @@ function Welcome() {
       navigate({ to: u.questionnaire && u.goal ? "/app" : "/onboarding/parq" });
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Sign in failed. Check your email and password.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function submitForgot(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email) return;
+    setAuthError("");
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setResetSent(true);
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Couldn't send reset email.");
     } finally {
       setSubmitting(false);
     }
