@@ -110,9 +110,13 @@ async function findLatestManagedSubscription(
     limit: 20,
     expand: ["data.items.data.price"],
   });
-  return subscriptions.data.find((subscription) =>
-    BILLING_MANAGED_STATUSES.includes(subscription.status),
-  ) ?? subscriptions.data.find((subscription) => subscription.status === "canceled") ?? null;
+  return (
+    subscriptions.data.find((subscription) =>
+      BILLING_MANAGED_STATUSES.includes(subscription.status),
+    ) ??
+    subscriptions.data.find((subscription) => subscription.status === "canceled") ??
+    null
+  );
 }
 
 function getPeriodEnd(subscription: StripeSubscriptionWithPeriod, fallback?: string | null) {
@@ -125,7 +129,11 @@ function getSubscriptionCatalogInfo(subscription: Stripe.Subscription) {
   const price = subscription.items.data[0]?.price;
   const product = price?.product;
   return {
-    priceId: price?.lookup_key ?? price?.metadata?.lovable_external_id ?? price?.id ?? "smartymove_premium_monthly",
+    priceId:
+      price?.lookup_key ??
+      price?.metadata?.lovable_external_id ??
+      price?.id ??
+      "smartymove_premium_monthly",
     productId: typeof product === "string" ? product : (product?.id ?? "smartymove_premium"),
   };
 }
@@ -231,21 +239,27 @@ export const cancelPremiumSubscription = createServerFn({ method: "POST" })
         const email =
           (profile?.email as string | null | undefined) ??
           (typeof context.claims?.email === "string" ? context.claims.email : undefined);
-        customerId = await resolveExistingCustomer(stripe, { userId, email }) ?? undefined;
+        customerId = (await resolveExistingCustomer(stripe, { userId, email })) ?? undefined;
         if (customerId) {
           const found = await findLatestManagedSubscription(stripe, customerId);
           subscriptionId = found?.id;
           fallbackCurrentPeriodEnd = found
             ? getPeriodEnd(found as StripeSubscriptionWithPeriod, null)
             : null;
-          if (found?.status && ["canceled", "incomplete_expired", "unpaid"].includes(found.status)) {
+          if (
+            found?.status &&
+            ["canceled", "incomplete_expired", "unpaid"].includes(found.status)
+          ) {
             return { ok: true, currentPeriodEnd: fallbackCurrentPeriodEnd };
           }
         }
       }
 
       if (!subscriptionId) return { error: "No active billing subscription found." };
-      if (sub?.status && ["canceled", "incomplete_expired", "unpaid"].includes(sub.status as string)) {
+      if (
+        sub?.status &&
+        ["canceled", "incomplete_expired", "unpaid"].includes(sub.status as string)
+      ) {
         return { ok: true, currentPeriodEnd: fallbackCurrentPeriodEnd };
       }
 
