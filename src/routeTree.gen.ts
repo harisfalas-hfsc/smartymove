@@ -20,6 +20,7 @@ import { Route as OnboardingRouteRouteImport } from './routes/onboarding/route'
 import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as PremiumReturnRouteImport } from './routes/premium.return'
 import { Route as OnboardingQuestionnaireRouteImport } from './routes/onboarding/questionnaire'
 import { Route as OnboardingParqRouteImport } from './routes/onboarding/parq'
 import { Route as OnboardingJointsRouteImport } from './routes/onboarding/joints'
@@ -32,6 +33,7 @@ import { Route as AppProfileRouteImport } from './routes/app/profile'
 import { Route as AdminExercisesRouteImport } from './routes/admin.exercises'
 import { Route as AppScreenIndexRouteImport } from './routes/app/screen.index'
 import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -87,6 +89,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRouteRoute,
+} as any)
+const PremiumReturnRoute = PremiumReturnRouteImport.update({
+  id: '/return',
+  path: '/return',
+  getParentRoute: () => PremiumRoute,
 } as any)
 const OnboardingQuestionnaireRoute = OnboardingQuestionnaireRouteImport.update({
   id: '/questionnaire',
@@ -148,6 +155,12 @@ const AppScreenRunRoute = AppScreenRunRouteImport.update({
   path: '/run',
   getParentRoute: () => AppScreenRoute,
 } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -157,7 +170,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
-  '/premium': typeof PremiumRoute
+  '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/admin/exercises': typeof AdminExercisesRoute
@@ -170,9 +183,11 @@ export interface FileRoutesByFullPath {
   '/onboarding/joints': typeof OnboardingJointsRoute
   '/onboarding/parq': typeof OnboardingParqRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
+  '/premium/return': typeof PremiumReturnRoute
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/': typeof AppScreenIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -181,7 +196,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
-  '/premium': typeof PremiumRoute
+  '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/admin/exercises': typeof AdminExercisesRoute
@@ -193,9 +208,11 @@ export interface FileRoutesByTo {
   '/onboarding/joints': typeof OnboardingJointsRoute
   '/onboarding/parq': typeof OnboardingParqRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
+  '/premium/return': typeof PremiumReturnRoute
   '/app': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen': typeof AppScreenIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -206,7 +223,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
-  '/premium': typeof PremiumRoute
+  '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/admin/exercises': typeof AdminExercisesRoute
@@ -219,9 +236,11 @@ export interface FileRoutesById {
   '/onboarding/joints': typeof OnboardingJointsRoute
   '/onboarding/parq': typeof OnboardingParqRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
+  '/premium/return': typeof PremiumReturnRoute
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/': typeof AppScreenIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -246,9 +265,11 @@ export interface FileRouteTypes {
     | '/onboarding/joints'
     | '/onboarding/parq'
     | '/onboarding/questionnaire'
+    | '/premium/return'
     | '/app/'
     | '/app/screen/run'
     | '/app/screen/'
+    | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -269,9 +290,11 @@ export interface FileRouteTypes {
     | '/onboarding/joints'
     | '/onboarding/parq'
     | '/onboarding/questionnaire'
+    | '/premium/return'
     | '/app'
     | '/app/screen/run'
     | '/app/screen'
+    | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
@@ -294,9 +317,11 @@ export interface FileRouteTypes {
     | '/onboarding/joints'
     | '/onboarding/parq'
     | '/onboarding/questionnaire'
+    | '/premium/return'
     | '/app/'
     | '/app/screen/run'
     | '/app/screen/'
+    | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -307,10 +332,11 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DesktopRoute: typeof DesktopRoute
   DisclaimerRoute: typeof DisclaimerRoute
-  PremiumRoute: typeof PremiumRoute
+  PremiumRoute: typeof PremiumRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   AdminExercisesRoute: typeof AdminExercisesRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -391,6 +417,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRouteRoute
+    }
+    '/premium/return': {
+      id: '/premium/return'
+      path: '/return'
+      fullPath: '/premium/return'
+      preLoaderRoute: typeof PremiumReturnRouteImport
+      parentRoute: typeof PremiumRoute
     }
     '/onboarding/questionnaire': {
       id: '/onboarding/questionnaire'
@@ -476,6 +509,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppScreenRunRouteImport
       parentRoute: typeof AppScreenRoute
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -533,6 +573,17 @@ const OnboardingRouteRouteWithChildren = OnboardingRouteRoute._addFileChildren(
   OnboardingRouteRouteChildren,
 )
 
+interface PremiumRouteChildren {
+  PremiumReturnRoute: typeof PremiumReturnRoute
+}
+
+const PremiumRouteChildren: PremiumRouteChildren = {
+  PremiumReturnRoute: PremiumReturnRoute,
+}
+
+const PremiumRouteWithChildren =
+  PremiumRoute._addFileChildren(PremiumRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRouteRoute: AppRouteRouteWithChildren,
@@ -541,10 +592,11 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DesktopRoute: DesktopRoute,
   DisclaimerRoute: DisclaimerRoute,
-  PremiumRoute: PremiumRoute,
+  PremiumRoute: PremiumRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   AdminExercisesRoute: AdminExercisesRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

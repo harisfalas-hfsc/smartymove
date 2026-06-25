@@ -1,7 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Crown, Check, Camera, Dumbbell, LineChart, RotateCcw, Sparkles, Zap } from "lucide-react";
+import { Crown, Check, Camera, Dumbbell, LineChart, RotateCcw, Sparkles, Zap, X, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
+import { useUserPremium } from "@/lib/useUserPremium";
+import { createBillingPortalSession } from "@/lib/payments.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
 
 export const Route = createFileRoute("/premium")({
   head: () => ({
@@ -18,9 +23,40 @@ export const Route = createFileRoute("/premium")({
 });
 
 function Premium() {
+  const u = useUserPremium();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
+  const isTestMode = (import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN as string | undefined)?.startsWith("pk_test_");
+
+  function handleUpgrade() {
+    if (!u) { window.location.href = "/"; return; }
+    setCheckoutOpen(true);
+  }
+
+  async function handleManage() {
+    if (!u) return;
+    setPortalLoading(true);
+    try {
+      const result = await createBillingPortalSession({
+        data: { environment: getStripeEnvironment(), returnUrl: `${window.location.origin}/premium` },
+      });
+      if ("error" in result) throw new Error(result.error);
+      window.open(result.url, "_blank");
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Could not open billing portal");
+    } finally {
+      setPortalLoading(false);
+    }
+  }
+
   return (
     <div className="flex min-h-[100dvh] w-full flex-col" style={{ background: "#E7ECEC", color: "#14213A" }}>
       <SiteHeader showBack />
+      {isTestMode && (
+        <div className="w-full border-b text-center text-xs" style={{ background: "#FFF4E5", borderColor: "#F5C99B", color: "#7A4B00", padding: "8px 12px" }}>
+          Test mode — use card <strong>4242 4242 4242 4242</strong>, any future date, any CVC.
+        </div>
+      )}
       <main className="mx-auto w-full max-w-[760px] px-5 pb-8 pt-5">
         <div
           className="relative overflow-hidden"
@@ -36,14 +72,27 @@ function Premium() {
           <p style={{ fontSize: 15, lineHeight: 1.55, opacity: 0.95, margin: 0 }}>
             Less than a coffee. Your personalized movement program, every day, evolving with your body.
           </p>
-          <button
-            type="button"
-            className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold"
-            style={{ background: "#FF6B4A", color: "#fff", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
-            onClick={() => alert("Payments are coming soon — checkout will be enabled shortly.")}
-          >
-            <Crown className="h-4 w-4" /> Upgrade to Premium
-          </button>
+          {u?.premium ? (
+            <button
+              type="button"
+              onClick={handleManage}
+              disabled={portalLoading}
+              className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold"
+              style={{ background: "#7CFFB8", color: "#0A3D2A", boxShadow: "0 14px 24px -10px rgba(124,255,184,0.55)" }}
+            >
+              {portalLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
+              {portalLoading ? "Opening..." : "Manage subscription"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold"
+              style={{ background: "#FF6B4A", color: "#fff", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
+              onClick={handleUpgrade}
+            >
+              <Crown className="h-4 w-4" /> Upgrade to Premium
+            </button>
+          )}
           <p className="mt-2 text-center text-[11px]" style={{ opacity: 0.85 }}>Cancel anytime. No commitment.</p>
         </div>
 
@@ -85,14 +134,16 @@ function Premium() {
         </section>
 
         <div className="mt-5 text-center">
-          <button
-            type="button"
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-7 font-bold text-white"
-            style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
-            onClick={() => alert("Payments are coming soon — checkout will be enabled shortly.")}
-          >
-            <Crown className="h-4 w-4" /> Upgrade to Premium · €4.99/mo
-          </button>
+          {!u?.premium && (
+            <button
+              type="button"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-7 font-bold text-white"
+              style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
+              onClick={handleUpgrade}
+            >
+              <Crown className="h-4 w-4" /> Upgrade to Premium · €4.99/mo
+            </button>
+          )}
           <div className="mt-3 text-[12px]" style={{ color: "#6B7A90" }}>
             Questions? <Link to="/contact" style={{ color: "#0E7C86", fontWeight: 600 }}>Contact us</Link>
           </div>
@@ -100,6 +151,23 @@ function Premium() {
 
         <SiteFooter />
       </main>
+      {checkoutOpen && u && (
+        <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-2 sm:p-4" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setCheckoutOpen(false)} />
+          <div className="relative w-full max-w-[640px] max-h-[92dvh] overflow-hidden rounded-2xl bg-white shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b" style={{ background: "#0E7C86", color: "#fff" }}>
+              <div className="flex items-center gap-2 font-semibold"><Crown className="h-4 w-4" /> SmartyMove Premium · €4.99/mo</div>
+              <button onClick={() => setCheckoutOpen(false)} aria-label="Close" className="grid h-8 w-8 place-items-center rounded-full bg-white/20"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="flex-1 overflow-auto">
+              <StripeEmbeddedCheckout
+                email={u.email}
+                returnUrl={`${window.location.origin}/premium/return?session_id={CHECKOUT_SESSION_ID}`}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

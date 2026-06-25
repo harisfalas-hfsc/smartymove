@@ -148,6 +148,7 @@ export function useUser() {
   }
   return u;
 }
+
 export function createUser(name: string, email: string, age: number): User {
   const u: User = {
     id: crypto.randomUUID(), name, email, age,
