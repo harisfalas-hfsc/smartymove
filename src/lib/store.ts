@@ -148,6 +148,19 @@ export function useUser() {
   }
   return u;
 }
+
+// Hook that augments useUser() with live subscription status from Stripe.
+// Use this in any UI that needs to know whether the user actually paid.
+export function useUserWithSubscription() {
+  // Lazy import to avoid circular deps at module load.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useSubscription } = require("@/lib/useSubscription") as typeof import("@/lib/useSubscription");
+  const u = useUser();
+  const { isActive } = useSubscription(u?.id);
+  if (!u) return u;
+  if (isActive && !u.premium) return { ...u, premium: true };
+  return u;
+}
 export function createUser(name: string, email: string, age: number): User {
   const u: User = {
     id: crypto.randomUUID(), name, email, age,
