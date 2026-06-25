@@ -38,12 +38,26 @@ export function useSubscription(userId?: string) {
         .maybeSingle();
       if (!cancelled) { setSub((data as SubRow | null) ?? null); setLoading(false); }
     }
-    refetch();
-    const ch = supabase
-      .channel(`sub:${userId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "subscriptions", filter: `user_id=eq.${userId}` }, () => refetch())
-      .subscribe();
-    return () => { cancelled = true; supabase.removeChannel(ch); };
+    void refetch();
+
+    const channelName = `sub:${userId}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
+    const ch = supabase.channel(channelName);
+
+    try {
+      ch.on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "subscriptions", filter: `user_id=eq.${userId}` },
+        () => { void refetch(); },
+      );
+      ch.subscribe();
+    } catch (error) {
+      console.warn("Subscription realtime listener could not start", error);
+    }
+
+    return () => {
+      cancelled = true;
+      void supabase.removeChannel(ch);
+    };
   }, [userId]);
 
   return { sub, isActive: isActiveSub(sub), loading };
