@@ -253,18 +253,19 @@ function Welcome() {
 
         <style>{`
           .sm-scanline{
-            position:absolute; left:14px; right:14px; height:3px;
+            position:absolute; left:14px; right:14px; height:3px; top:18px;
             background:linear-gradient(90deg, transparent, #4FB286 20%, #7CFFB8 50%, #4FB286 80%, transparent);
             box-shadow:0 0 18px 3px rgba(79,178,134,0.85), 0 0 40px 6px rgba(79,178,134,0.35);
-            top:18px; animation: sm-sweep 2.2s ease-in-out infinite;
             border-radius:2px;
+            will-change: transform;
+            transform: translate3d(0,0,0);
+            animation: sm-sweep 2.2s ease-in-out infinite;
           }
           @keyframes sm-sweep{
-            0%{ top:18px; opacity:.95 }
-            50%{ top:calc(100% - 22px); opacity:1 }
-            100%{ top:18px; opacity:.95 }
+            0%   { transform: translate3d(0, 0, 0); opacity:.95 }
+            50%  { transform: translate3d(0, 110px, 0); opacity:1 }
+            100% { transform: translate3d(0, 0, 0); opacity:.95 }
           }
-          @media (prefers-reduced-motion: reduce){ .sm-scanline{ animation:none; top:50% } }
         `}</style>
       </main>
     </div>
