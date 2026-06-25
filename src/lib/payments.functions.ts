@@ -1,10 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
+import type Stripe from "stripe";
+
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 
 type CheckoutResult = { clientSecret: string } | { error: string };
 type PortalResult = { url: string } | { error: string };
 type CancelSubscriptionResult = { ok: true; currentPeriodEnd: string | null } | { error: string };
+type EmbeddedCheckoutSessionParams = Stripe.Checkout.SessionCreateParams & { ui_mode: "embedded_page" };
+type StripeSubscriptionWithPeriod = {
+  current_period_end?: number | null;
+  items?: { data?: Array<{ current_period_end?: number | null }> };
+};
 
 async function resolveOrCreateCustomer(
   stripe: ReturnType<typeof createStripeClient>,
@@ -68,7 +75,7 @@ export const createPremiumCheckout = createServerFn({ method: "POST" })
         email: data.email,
         userId: context.userId,
       });
-      const session = await stripe.checkout.sessions.create({
+      const checkoutParams: EmbeddedCheckoutSessionParams = {
         line_items: [{ price: price.id, quantity: 1 }],
         mode: "subscription",
         ui_mode: "embedded_page",
@@ -76,7 +83,8 @@ export const createPremiumCheckout = createServerFn({ method: "POST" })
         customer: customerId,
         metadata: { userId: context.userId },
         subscription_data: { metadata: { userId: context.userId } },
-      } as any);
+      };
+      const session = await stripe.checkout.sessions.create(checkoutParams);
       return { clientSecret: session.client_secret ?? "" };
     } catch (error) {
       return { error: getStripeErrorMessage(error) };
@@ -146,7 +154,7 @@ export const cancelPremiumSubscription = createServerFn({ method: "POST" })
       const updated = await stripe.subscriptions.update(sub.stripe_subscription_id as string, {
         cancel_at_period_end: true,
       });
-      const updatedSubscription = updated as any;
+      const updatedSubscription = updated as StripeSubscriptionWithPeriod;
       const rawPeriodEnd =
         updatedSubscription.current_period_end ??
         updatedSubscription.items?.data?.[0]?.current_period_end;
