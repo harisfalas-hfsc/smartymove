@@ -31,6 +31,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
 import { cancelPremiumSubscription, createBillingPortalSession } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
@@ -66,31 +68,25 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
   const exportData = useServerFn(exportAccountData);
   const deleteAccount = useServerFn(deleteAccountAndData);
 
-  function downloadJson(filename: string, data: unknown) {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+  async function requireSession() {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw new Error("Please sign in again before managing billing or account data.");
   }
 
   async function manageSubscription() {
     setPortalLoading(true);
     setPortalError(null);
-    const portalWindow = window.open("about:blank", "_blank");
     try {
+      await requireSession();
       const res = (await openPortal({
         data: { environment: getStripeEnvironment(), returnUrl: window.location.href },
       })) as PortalResult;
       if ("error" in res) throw new Error(res.error);
+      const portalWindow = window.open(res.url, "_blank", "noopener,noreferrer");
       if (portalWindow) portalWindow.location.href = res.url;
       else window.location.assign(res.url);
+      setPortalError("Billing portal opened in a new tab. If nothing opened, allow pop-ups for this site.");
     } catch (e) {
-      portalWindow?.close();
       setPortalError(e instanceof Error ? e.message : "Could not open billing portal");
     } finally {
       setPortalLoading(false);
@@ -100,6 +96,7 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
     setCancelLoading(true);
     setPortalError(null);
     try {
+      await requireSession();
       const res = (await cancelSubscription({
         data: { environment: getStripeEnvironment() },
       })) as CancelResult;
@@ -118,10 +115,11 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
     setAccountLoading("export");
     setAccountMessage(null);
     try {
+      await requireSession();
       const res = (await exportData({ data: {} })) as ExportResult;
       if ("error" in res) throw new Error(res.error);
-      downloadJson(`smartymove-data-${new Date().toISOString().slice(0, 10)}.json`, res.data);
-      setAccountMessage("Your data export has downloaded.");
+      downloadAccountDataReport(res.data);
+      setAccountMessage("Your readable data report has downloaded.");
     } catch (e) {
       setAccountMessage(e instanceof Error ? e.message : "Could not download your data");
     } finally {
@@ -132,6 +130,7 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
     setAccountLoading("delete");
     setAccountMessage(null);
     try {
+      await requireSession();
       const res = (await deleteAccount({ data: {} })) as DeleteResult;
       if ("error" in res) throw new Error(res.error);
       clearLocalAccountData();
@@ -271,14 +270,14 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
             <div className="flex items-center justify-between">
               <div>
                 <div className="font-bold">Premium active</div>
-                <div className="text-xs text-muted-foreground">€4.99/mo · cancel anytime</div>
+                <div className="text-xs text-muted-foreground">Billing, invoices, card, cancellation</div>
               </div>
               <button
                 onClick={manageSubscription}
                 disabled={portalLoading}
                 className="rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
               >
-                {portalLoading ? "Opening…" : "Manage"}
+                {portalLoading ? "Opening…" : "Manage billing"}
               </button>
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
@@ -332,7 +331,7 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
             <div>
               <div className="font-bold">Your data</div>
               <p className="mt-1 text-xs text-muted-foreground">
-                Download your account data or permanently delete your account and app data.
+                Download a readable data report or permanently delete your account and app data.
               </p>
             </div>
           </div>
@@ -348,7 +347,7 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
               ) : (
                 <Download className="h-4 w-4" />
               )}
-              Download data
+              Download data report
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>

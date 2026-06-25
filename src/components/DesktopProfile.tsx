@@ -1,5 +1,21 @@
 import { useServerFn } from "@tanstack/react-start";
-import { Activity, Download, Loader2, LogOut, Smartphone, Trash2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import {
+  Activity,
+  ArrowRight,
+  CalendarDays,
+  Camera,
+  CreditCard,
+  Download,
+  Dumbbell,
+  Home,
+  LineChart as LineChartIcon,
+  Loader2,
+  LogOut,
+  Smartphone,
+  Trash2,
+  UserRound,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -27,6 +43,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
+import { supabase } from "@/integrations/supabase/client";
+import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
 import { cancelPremiumSubscription, createBillingPortalSession } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
@@ -94,31 +112,25 @@ function DesktopProfileInner() {
     setTimeout(() => setSaved(false), 1800);
   }
 
-  function downloadJson(filename: string, data: unknown) {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+  async function requireSession() {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw new Error("Please sign in again before managing billing or account data.");
   }
 
   async function manageSubscription() {
     setLoading("portal");
     setMessage(null);
-    const portalWindow = window.open("about:blank", "_blank");
     try {
+      await requireSession();
       const result = (await openPortal({
         data: { environment: getStripeEnvironment(), returnUrl: window.location.href },
       })) as PortalResult;
       if ("error" in result) throw new Error(result.error);
+      const portalWindow = window.open(result.url, "_blank", "noopener,noreferrer");
       if (portalWindow) portalWindow.location.href = result.url;
       else window.location.assign(result.url);
+      setMessage("Billing portal opened in a new tab. If nothing opened, allow pop-ups for this site.");
     } catch (e) {
-      portalWindow?.close();
       setMessage(e instanceof Error ? e.message : "Could not open billing portal");
     } finally {
       setLoading(null);
@@ -129,6 +141,7 @@ function DesktopProfileInner() {
     setLoading("cancel");
     setMessage(null);
     try {
+      await requireSession();
       const result = (await cancelSubscription({
         data: { environment: getStripeEnvironment() },
       })) as CancelResult;
@@ -148,10 +161,11 @@ function DesktopProfileInner() {
     setLoading("export");
     setMessage(null);
     try {
+      await requireSession();
       const result = (await exportData({ data: {} })) as ExportResult;
       if ("error" in result) throw new Error(result.error);
-      downloadJson(`smartymove-data-${new Date().toISOString().slice(0, 10)}.json`, result.data);
-      setMessage("Your data export has downloaded.");
+      downloadAccountDataReport(result.data);
+      setMessage("Your readable data report has downloaded.");
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Could not download your data");
     } finally {
@@ -163,6 +177,7 @@ function DesktopProfileInner() {
     setLoading("delete");
     setMessage(null);
     try {
+      await requireSession();
       const result = (await deleteAccount({ data: {} })) as DeleteResult;
       if ("error" in result) throw new Error(result.error);
       clearLocalAccountData();
@@ -185,15 +200,22 @@ function DesktopProfileInner() {
           <div className="flex-1">
             <div className="text-sm font-bold tracking-tight">SmartyMove</div>
             <div className="text-[11px] uppercase tracking-widest text-muted-foreground">
-              Account portal
+              Desktop dashboard
             </div>
           </div>
-          <a
-            href="/app"
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Desktop navigation">
+            <DesktopNavLink to="/desktop" icon={Home} label="Home" />
+            <DesktopNavLink to="/app/program" icon={Dumbbell} label="Program" />
+            <DesktopNavLink to="/app/progress" icon={LineChartIcon} label="Progress" />
+            <DesktopNavLink to="/app/screen" icon={Camera} label="Screen" />
+            <DesktopNavLink to="/app/profile" icon={UserRound} label="Account" />
+          </nav>
+          <Link
+            to="/app"
             className="hidden items-center gap-2 rounded-2xl bg-secondary px-3 py-2 text-sm font-semibold lg:inline-flex"
           >
-            <Smartphone className="h-4 w-4" /> Mobile app
-          </a>
+            <Smartphone className="h-4 w-4" /> App home
+          </Link>
           <button
             onClick={() => {
               void signOutUser().finally(() => {
@@ -208,6 +230,27 @@ function DesktopProfileInner() {
       </header>
       <main className="mx-auto grid max-w-6xl gap-6 px-8 py-8 lg:grid-cols-[1.2fr_1fr]">
         <section className="space-y-6">
+          <div className="rounded-3xl brand-gradient p-6 text-primary-foreground shadow-soft">
+            <div className="text-xs font-semibold uppercase tracking-widest opacity-85">
+              Welcome back, {u.name.split(" ")[0]}
+            </div>
+            <h1 className="mt-2 text-3xl font-extrabold">Your SmartyMove home</h1>
+            <p className="mt-2 max-w-2xl text-sm opacity-90">
+              Open your training program, review progress, rescan, or manage your account from one desktop dashboard.
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <ActionCard to="/app/program" icon={Dumbbell} label="Training program" value="Open today's work" />
+              <ActionCard to="/app/progress" icon={LineChartIcon} label="Progress" value={`${u.sessions.length} screen${u.sessions.length === 1 ? "" : "s"}`} />
+              <ActionCard to="/app/screen" icon={Camera} label="Movement Screen" value="Rescan / test" />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <StatCard icon={CalendarDays} label="Streak" value={u.streak || 0} />
+            <StatCard icon={Activity} label="Latest score" value={latest?.overall ?? "—"} />
+            <StatCard icon={Dumbbell} label="Completed days" value={(u.programCompletedDays ?? []).length} />
+          </div>
+
           <div className="rounded-3xl bg-card p-6 shadow-card">
             <h2 className="text-lg font-bold">Profile</h2>
             <p className="text-sm text-muted-foreground">
@@ -280,7 +323,7 @@ function DesktopProfileInner() {
                 <div className="font-bold">{u.premium ? "Premium" : "Free"}</div>
                 <div className="text-xs text-muted-foreground">
                   {u.premium
-                    ? "€4.99/mo · cancel anytime"
+                    ? "Manage billing, invoices, payment card, and cancellation"
                     : "Upgrade for daily routines, re-tests, joint tests, Movement Age, projections"}
                 </div>
               </div>
@@ -291,7 +334,7 @@ function DesktopProfileInner() {
                     disabled={loading === "portal"}
                     className="rounded-2xl"
                   >
-                    {loading === "portal" && <Loader2 className="h-4 w-4 animate-spin" />} Manage
+                    {loading === "portal" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />} Manage billing
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -345,7 +388,7 @@ function DesktopProfileInner() {
           <div className="rounded-3xl bg-card p-6 shadow-card">
             <h2 className="text-lg font-bold">Account data</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Download your SmartyMove data or permanently delete your account and app data.
+              Download a readable SmartyMove data report or permanently delete your account and app data.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <Button
@@ -359,7 +402,7 @@ function DesktopProfileInner() {
                 ) : (
                   <Download className="h-4 w-4" />
                 )}
-                Download data
+                Download data report
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -459,6 +502,67 @@ function DesktopProfileInner() {
           )}
         </aside>
       </main>
+    </div>
+  );
+}
+
+function DesktopNavLink({
+  to,
+  icon: Icon,
+  label,
+}: {
+  to: string;
+  icon: typeof Home;
+  label: string;
+}) {
+  return (
+    <Link
+      to={to}
+      className="inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold text-foreground hover:bg-secondary"
+      activeProps={{ className: "inline-flex items-center gap-2 rounded-2xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground" }}
+      activeOptions={{ exact: to === "/desktop" }}
+    >
+      <Icon className="h-4 w-4" /> {label}
+    </Link>
+  );
+}
+
+function ActionCard({
+  to,
+  icon: Icon,
+  label,
+  value,
+}: {
+  to: string;
+  icon: typeof Home;
+  label: string;
+  value: string;
+}) {
+  return (
+    <Link
+      to={to}
+      className="group rounded-2xl bg-white/15 p-4 text-primary-foreground backdrop-blur transition-transform hover:scale-[1.01]"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <Icon className="h-5 w-5" />
+        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+      </div>
+      <div className="mt-3 text-sm font-extrabold">{label}</div>
+      <div className="mt-0.5 text-xs opacity-85">{value}</div>
+    </Link>
+  );
+}
+
+function StatCard({ icon: Icon, label, value }: { icon: typeof Home; label: string; value: string | number }) {
+  return (
+    <div className="rounded-3xl bg-card p-5 shadow-card">
+      <div className="flex items-center justify-between gap-3">
+        <span className="grid h-10 w-10 place-items-center rounded-2xl brand-gradient-soft text-primary">
+          <Icon className="h-5 w-5" />
+        </span>
+        <div className="text-2xl font-extrabold brand-text">{value}</div>
+      </div>
+      <div className="mt-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">{label}</div>
     </div>
   );
 }
