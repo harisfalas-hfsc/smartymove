@@ -17,9 +17,7 @@ type AccountExportResult =
     }
   | { error: string };
 
-type DeleteAccountResult =
-  | { ok: true; canceledSubscriptions: number }
-  | { error: string };
+type DeleteAccountResult = { ok: true; canceledSubscriptions: number } | { error: string };
 
 type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[];
 
@@ -27,16 +25,31 @@ function toJsonValue(value: unknown): JsonValue {
   return JSON.parse(JSON.stringify(value ?? null)) as JsonValue;
 }
 
-async function cancelKnownSubscriptions(subscriptions: Array<{ stripe_subscription_id: string; environment: StripeEnv; status?: string | null }>) {
+async function cancelKnownSubscriptions(
+  subscriptions: Array<{
+    stripe_subscription_id: string;
+    environment: StripeEnv;
+    status?: string | null;
+  }>,
+) {
   let canceled = 0;
   for (const subscription of subscriptions) {
-    if (!subscription.stripe_subscription_id || !["active", "trialing", "past_due", "incomplete"].includes(subscription.status ?? "")) continue;
+    if (
+      !subscription.stripe_subscription_id ||
+      !["active", "trialing", "past_due", "incomplete"].includes(subscription.status ?? "")
+    )
+      continue;
     try {
       const stripe = createStripeClient(subscription.environment);
-      await stripe.subscriptions.update(subscription.stripe_subscription_id, { cancel_at_period_end: true });
+      await stripe.subscriptions.update(subscription.stripe_subscription_id, {
+        cancel_at_period_end: true,
+      });
       canceled += 1;
     } catch (error) {
-      console.error("Could not cancel subscription during account deletion", getStripeErrorMessage(error));
+      console.error(
+        "Could not cancel subscription during account deletion",
+        getStripeErrorMessage(error),
+      );
     }
   }
   return canceled;
@@ -48,11 +61,20 @@ export const exportAccountData = createServerFn({ method: "POST" })
   .handler(async ({ context }): Promise<AccountExportResult> => {
     try {
       const { supabase, userId, claims } = context;
-      const [{ data: profile, error: profileError }, { data: subscriptions, error: subscriptionError }] = await Promise.all([
-        supabase.from("profiles").select("id,email,name,age,app_user,created_at,updated_at").eq("id", userId).maybeSingle(),
+      const [
+        { data: profile, error: profileError },
+        { data: subscriptions, error: subscriptionError },
+      ] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id,email,name,age,app_user,created_at,updated_at")
+          .eq("id", userId)
+          .maybeSingle(),
         supabase
           .from("subscriptions")
-          .select("status,price_id,product_id,stripe_customer_id,stripe_subscription_id,environment,cancel_at_period_end,current_period_start,current_period_end,created_at,updated_at")
+          .select(
+            "status,price_id,product_id,stripe_customer_id,stripe_subscription_id,environment,cancel_at_period_end,current_period_start,current_period_end,created_at,updated_at",
+          )
           .eq("user_id", userId)
           .order("created_at", { ascending: false }),
       ]);
@@ -64,7 +86,7 @@ export const exportAccountData = createServerFn({ method: "POST" })
           exportedAt: new Date().toISOString(),
           account: {
             id: userId,
-            email: typeof claims?.email === "string" ? claims.email : profile?.email ?? null,
+            email: typeof claims?.email === "string" ? claims.email : (profile?.email ?? null),
           },
           profile: toJsonValue(profile),
           subscriptions: toJsonValue(subscriptions ?? []) as JsonValue[],
@@ -91,13 +113,28 @@ export const deleteAccountAndData = createServerFn({ method: "POST" })
         .eq("user_id", userId);
       if (subscriptionError) return { error: subscriptionError.message };
 
-      const normalizedSubscriptions = ((subscriptions ?? []) as Array<{ stripe_subscription_id: string; environment: string; status?: string | null }>)
-        .filter((subscription) => subscription.environment === "sandbox" || subscription.environment === "live")
-        .map((subscription) => ({ ...subscription, environment: subscription.environment as StripeEnv }));
+      const normalizedSubscriptions = (
+        (subscriptions ?? []) as Array<{
+          stripe_subscription_id: string;
+          environment: string;
+          status?: string | null;
+        }>
+      )
+        .filter(
+          (subscription) =>
+            subscription.environment === "sandbox" || subscription.environment === "live",
+        )
+        .map((subscription) => ({
+          ...subscription,
+          environment: subscription.environment as StripeEnv,
+        }));
       const canceledSubscriptions = await cancelKnownSubscriptions(normalizedSubscriptions);
 
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const deleteSubscriptions = await supabaseAdmin.from("subscriptions").delete().eq("user_id", userId);
+      const deleteSubscriptions = await supabaseAdmin
+        .from("subscriptions")
+        .delete()
+        .eq("user_id", userId);
       if (deleteSubscriptions.error) return { error: deleteSubscriptions.error.message };
 
       const deleteProfile = await supabaseAdmin.from("profiles").delete().eq("id", userId);

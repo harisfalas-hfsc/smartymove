@@ -50,7 +50,9 @@ export function DesktopProfile() {
       <div className="grid min-h-screen place-items-center bg-background p-8 text-center">
         <div>
           <h1 className="text-xl font-bold">SmartyMove</h1>
-          <p className="text-muted-foreground">Please sign in on your phone to view this account.</p>
+          <p className="text-muted-foreground">
+            Please sign in on your phone to view this account.
+          </p>
           <a
             href="/"
             className="mt-4 inline-block rounded-2xl brand-gradient px-5 py-2.5 text-sm font-semibold text-primary-foreground"
@@ -81,7 +83,10 @@ function DesktopProfileInner() {
   if (!u) return null;
 
   const latest = u.sessions[u.sessions.length - 1];
-  const data = u.sessions.map((session, index) => ({ name: `#${index + 1}`, score: session.overall }));
+  const data = u.sessions.map((session, index) => ({
+    name: `#${index + 1}`,
+    score: session.overall,
+  }));
 
   function save() {
     updateUser({ name, email, age, goal });
@@ -124,7 +129,9 @@ function DesktopProfileInner() {
     setLoading("cancel");
     setMessage(null);
     try {
-      const result = (await cancelSubscription({ data: { environment: getStripeEnvironment() } })) as CancelResult;
+      const result = (await cancelSubscription({
+        data: { environment: getStripeEnvironment() },
+      })) as CancelResult;
       if ("error" in result) throw new Error(result.error);
       const date = result.currentPeriodEnd
         ? new Date(result.currentPeriodEnd).toLocaleDateString()
@@ -177,7 +184,9 @@ function DesktopProfileInner() {
           </span>
           <div className="flex-1">
             <div className="text-sm font-bold tracking-tight">SmartyMove</div>
-            <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Account portal</div>
+            <div className="text-[11px] uppercase tracking-widest text-muted-foreground">
+              Account portal
+            </div>
           </div>
           <a
             href="/app"
@@ -239,7 +248,9 @@ function DesktopProfileInner() {
                 <Label>Goal</Label>
                 <select
                   value={goal ?? ""}
-                  onChange={(event) => setGoal((event.target.value || undefined) as Goal | undefined)}
+                  onChange={(event) =>
+                    setGoal((event.target.value || undefined) as Goal | undefined)
+                  }
                   className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm"
                 >
                   <option value="">—</option>
@@ -252,7 +263,10 @@ function DesktopProfileInner() {
               </div>
             </div>
             <div className="mt-5 flex items-center gap-3">
-              <Button onClick={save} className="h-11 rounded-2xl brand-gradient font-semibold shadow-soft">
+              <Button
+                onClick={save}
+                className="h-11 rounded-2xl brand-gradient font-semibold shadow-soft"
+              >
                 Save changes
               </Button>
               {saved && <span className="text-sm font-semibold text-success">Saved</span>}
@@ -272,21 +286,30 @@ function DesktopProfileInner() {
               </div>
               {u.premium ? (
                 <div className="flex flex-wrap justify-end gap-2">
-                  <Button onClick={manageSubscription} disabled={loading === "portal"} className="rounded-2xl">
+                  <Button
+                    onClick={manageSubscription}
+                    disabled={loading === "portal"}
+                    className="rounded-2xl"
+                  >
                     {loading === "portal" && <Loader2 className="h-4 w-4 animate-spin" />} Manage
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button disabled={loading === "cancel"} variant="destructive" className="rounded-2xl">
-                        {loading === "cancel" && <Loader2 className="h-4 w-4 animate-spin" />} Cancel
+                      <Button
+                        disabled={loading === "cancel"}
+                        variant="destructive"
+                        className="rounded-2xl"
+                      >
+                        {loading === "cancel" && <Loader2 className="h-4 w-4 animate-spin" />}{" "}
+                        Cancel
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent className="rounded-3xl">
                       <AlertDialogHeader>
                         <AlertDialogTitle>Cancel Premium?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Your subscription will stop renewing. You keep Premium until the end of the paid
-                          period.
+                          Your subscription will stop renewing. You keep Premium until the end of
+                          the paid period.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -340,7 +363,11 @@ function DesktopProfileInner() {
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button disabled={loading === "delete"} variant="destructive" className="rounded-2xl">
+                  <Button
+                    disabled={loading === "delete"}
+                    variant="destructive"
+                    className="rounded-2xl"
+                  >
                     {loading === "delete" ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
@@ -353,8 +380,8 @@ function DesktopProfileInner() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete your account?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This permanently removes your SmartyMove profile, screening history, scores, and training
-                      data. Active subscriptions are set to stop renewing.
+                      This permanently removes your SmartyMove profile, screening history, scores,
+                      and training data. Active subscriptions are set to stop renewing.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -376,7 +403,10 @@ function DesktopProfileInner() {
             <p className="mt-1 text-sm text-muted-foreground">
               {(u.questionnaire?.joints ?? []).join(", ") || "—"}
             </p>
-            <a href="/onboarding/joints" className="mt-3 inline-block text-sm font-semibold text-primary">
+            <a
+              href="/onboarding/joints"
+              className="mt-3 inline-block text-sm font-semibold text-primary"
+            >
               Update on mobile →
             </a>
           </div>
@@ -412,7 +442,9 @@ function DesktopProfileInner() {
                     <CartesianGrid stroke="oklch(0.92 0.012 220)" vertical={false} />
                     <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={11} />
                     <YAxis domain={[0, 100]} tickLine={false} axisLine={false} fontSize={11} />
-                    <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid oklch(0.92 0.012 220)" }} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 12, border: "1px solid oklch(0.92 0.012 220)" }}
+                    />
                     <Line
                       type="monotone"
                       dataKey="score"

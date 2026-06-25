@@ -42,7 +42,10 @@ async function resolveExistingCustomer(
   options: { email?: string | null; userId?: string },
 ): Promise<string | null> {
   if (options.userId && /^[a-zA-Z0-9_-]+$/.test(options.userId)) {
-    const found = await stripe.customers.search({ query: `metadata['userId']:'${options.userId}'`, limit: 1 });
+    const found = await stripe.customers.search({
+      query: `metadata['userId']:'${options.userId}'`,
+      limit: 1,
+    });
     if (found.data.length) return found.data[0].id;
   }
   if (options.email) {
@@ -61,7 +64,10 @@ export const createPremiumCheckout = createServerFn({ method: "POST" })
       const prices = await stripe.prices.list({ lookup_keys: ["smartymove_premium_monthly"] });
       if (!prices.data.length) throw new Error("Price not found");
       const price = prices.data[0];
-      const customerId = await resolveOrCreateCustomer(stripe, { email: data.email, userId: context.userId });
+      const customerId = await resolveOrCreateCustomer(stripe, {
+        email: data.email,
+        userId: context.userId,
+      });
       const session = await stripe.checkout.sessions.create({
         line_items: [{ price: price.id, quantity: 1 }],
         mode: "subscription",
@@ -84,22 +90,28 @@ export const createBillingPortalSession = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const [{ data: sub }, { data: profile }] = await Promise.all([
       supabase
-      .from("subscriptions")
-      .select("stripe_customer_id")
-      .eq("user_id", userId)
-      .eq("environment", data.environment)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+        .from("subscriptions")
+        .select("stripe_customer_id")
+        .eq("user_id", userId)
+        .eq("environment", data.environment)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
       supabase.from("profiles").select("email").eq("id", userId).maybeSingle(),
     ]);
     try {
       const stripe = createStripeClient(data.environment);
-      const customerId = sub?.stripe_customer_id as string | undefined ?? await resolveExistingCustomer(stripe, {
-        userId,
-        email: profile?.email as string | null | undefined,
-      });
-      if (!customerId) return { error: "No billing account found yet. If you just subscribed, wait a few seconds and try again." };
+      const customerId =
+        (sub?.stripe_customer_id as string | undefined) ??
+        (await resolveExistingCustomer(stripe, {
+          userId,
+          email: profile?.email as string | null | undefined,
+        }));
+      if (!customerId)
+        return {
+          error:
+            "No billing account found yet. If you just subscribed, wait a few seconds and try again.",
+        };
       const portal = await stripe.billingPortal.sessions.create({
         customer: customerId,
         ...(data.returnUrl && { return_url: data.returnUrl }),
@@ -131,14 +143,25 @@ export const cancelPremiumSubscription = createServerFn({ method: "POST" })
 
     try {
       const stripe = createStripeClient(data.environment);
-      const updated = await stripe.subscriptions.update(sub.stripe_subscription_id as string, { cancel_at_period_end: true });
+      const updated = await stripe.subscriptions.update(sub.stripe_subscription_id as string, {
+        cancel_at_period_end: true,
+      });
       const updatedSubscription = updated as any;
-      const rawPeriodEnd = updatedSubscription.current_period_end ?? updatedSubscription.items?.data?.[0]?.current_period_end;
-      const periodEnd = rawPeriodEnd ? new Date(rawPeriodEnd * 1000).toISOString() : (sub.current_period_end as string | null) ?? null;
+      const rawPeriodEnd =
+        updatedSubscription.current_period_end ??
+        updatedSubscription.items?.data?.[0]?.current_period_end;
+      const periodEnd = rawPeriodEnd
+        ? new Date(rawPeriodEnd * 1000).toISOString()
+        : ((sub.current_period_end as string | null) ?? null);
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       await supabaseAdmin
         .from("subscriptions")
-        .update({ cancel_at_period_end: true, current_period_end: periodEnd, status: updated.status, updated_at: new Date().toISOString() })
+        .update({
+          cancel_at_period_end: true,
+          current_period_end: periodEnd,
+          status: updated.status,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", sub.id as string);
       return { ok: true, currentPeriodEnd: periodEnd };
     } catch (error) {
