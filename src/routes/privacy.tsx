@@ -20,7 +20,7 @@ export const Route = createFileRoute("/privacy")({
 
 function Privacy() {
   return (
-    <LegalLayout title="Privacy Policy" icon={<Shield className="h-5 w-5" />} lastUpdated="January 2025">
+    <LegalLayout title="Privacy Policy" icon={<Shield className="h-5 w-5" />} lastUpdated="June 2026">
       <p>
         At <strong>SmartyMove</strong> (smartymove.com) we value your privacy and are committed to
         protecting your personal data. This Privacy Policy explains how SmartyMove collects, uses, stores,
@@ -79,7 +79,7 @@ function Privacy() {
       <ul>
         <li><strong>Stripe</strong> — payment processing (PCI DSS compliant).{" "}
           <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer">Stripe Privacy Policy</a></li>
-        <li><strong>Lovable Cloud (Supabase infrastructure)</strong> — database hosting and authentication (EU region).</li>
+        <li><strong>Lovable Cloud</strong> — database hosting and authentication.</li>
         <li><strong>MediaPipe (Google)</strong> — pose detection model that runs locally in your browser. No video data is transmitted to MediaPipe servers.</li>
         <li><strong>Email delivery provider</strong> — for transactional and (with consent) marketing emails.</li>
       </ul>
@@ -87,8 +87,8 @@ function Privacy() {
 
       <h2>5. Data Retention</h2>
       <ul>
-        <li><strong>Account data:</strong> retained while your account is active and for up to 30 days after a deletion request.</li>
-        <li><strong>Screening &amp; corrective program data:</strong> retained while your account is active.</li>
+        <li><strong>Account data:</strong> retained while your account is active and deleted when you delete your account, except where short operational backup windows or legal obligations apply.</li>
+        <li><strong>Screening &amp; corrective program data:</strong> retained while your account is active and deleted with your account.</li>
         <li><strong>Transaction records:</strong> retained for 7 years as required by tax law.</li>
         <li><strong>Marketing preferences:</strong> retained until you withdraw consent.</li>
         <li><strong>Anonymized analytics:</strong> may be retained beyond account deletion in fully anonymized form.</li>
@@ -98,15 +98,15 @@ function Privacy() {
       <ul>
         <li><strong>Right of Access (Art. 15):</strong> Request a copy of the personal data we hold about you.</li>
         <li><strong>Right to Rectification (Art. 16):</strong> Request correction of inaccurate data.</li>
-        <li><strong>Right to Erasure (Art. 17):</strong> Request deletion of your personal data via your profile settings.</li>
+        <li><strong>Right to Erasure (Art. 17):</strong> Delete your account and app data from your profile settings.</li>
         <li><strong>Right to Restrict Processing (Art. 18):</strong> Request limitation of how we process your data.</li>
-        <li><strong>Right to Data Portability (Art. 20):</strong> Receive your data in a structured, machine-readable format.</li>
+        <li><strong>Right to Data Portability (Art. 20):</strong> Download your account, screening, score, training, and subscription-status data in a structured, machine-readable JSON format from your profile settings.</li>
         <li><strong>Right to Object (Art. 21):</strong> Object to processing based on legitimate interests or direct marketing.</li>
         <li><strong>Right to Withdraw Consent (Art. 7):</strong> Withdraw consent at any time for consent-based processing.</li>
         <li><strong>Right to Lodge a Complaint:</strong> You may lodge a complaint with your local data protection authority.</li>
       </ul>
       <div className="note">
-        To exercise these rights, use the controls in your profile settings or email{" "}
+        To exercise these rights, use the Download data and Delete account controls in your profile settings or email{" "}
         <a href="mailto:smartymove@outlook.com">smartymove@outlook.com</a>. We respond within 30 days.
       </div>
 

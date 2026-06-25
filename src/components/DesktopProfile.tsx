@@ -1,17 +1,33 @@
-import { useUser, updateUser, setUser, type Goal } from "@/lib/store";
+import { clearLocalAccountData, signOutUser, updateUser, type Goal } from "@/lib/store";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
-import { Activity, LogOut, Smartphone } from "lucide-react";
+import { Activity, Download, Loader2, LogOut, Smartphone, Trash2 } from "lucide-react";
+import { useUserPremium } from "@/lib/useUserPremium";
+import { cancelPremiumSubscription, createBillingPortalSession } from "@/lib/payments.functions";
+import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export function DesktopProfile() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  const u = useUser();
+  const u = useUserPremium();
   if (!mounted) return null;
   if (!u) {
     return (
@@ -28,12 +44,18 @@ export function DesktopProfile() {
 }
 
 function DesktopProfileInner() {
-  const u = useUser();
+  const u = useUserPremium();
   const [name, setName] = useState(u?.name ?? "");
   const [email, setEmail] = useState(u?.email ?? "");
   const [age, setAge] = useState(u?.age ?? 30);
   const [goal, setGoal] = useState<Goal | undefined>(u?.goal);
   const [saved, setSaved] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<"portal" | "cancel" | "export" | "delete" | null>(null);
+  const openPortal = useServerFn(createBillingPortalSession);
+  const cancelSubscription = useServerFn(cancelPremiumSubscription);
+  const exportData = useServerFn(exportAccountData);
+  const deleteAccount = useServerFn(deleteAccountAndData);
   if (!u) return null;
   const latest = u.sessions[u.sessions.length - 1];
   const data = u.sessions.map((s, i) => ({ name: `#${i+1}`, score: s.overall }));
@@ -42,6 +64,81 @@ function DesktopProfileInner() {
     updateUser({ name, email, age, goal });
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
+  }
+
+  function downloadJson(filename: string, data: unknown) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function manageSubscription() {
+    setLoading("portal");
+    setMessage(null);
+    const portalWindow = window.open("about:blank", "_blank");
+    try {
+      const result = await openPortal({ data: { environment: getStripeEnvironment(), returnUrl: window.location.href } });
+      if ("error" in result) throw new Error(result.error);
+      if (portalWindow) portalWindow.location.href = result.url;
+      else window.location.assign(result.url);
+    } catch (e) {
+      portalWindow?.close();
+      setMessage(e instanceof Error ? e.message : "Could not open billing portal");
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  async function cancelPlan() {
+    setLoading("cancel");
+    setMessage(null);
+    try {
+      const result = await cancelSubscription({ data: { environment: getStripeEnvironment() } });
+      if ("error" in result) throw new Error(result.error);
+      const date = result.currentPeriodEnd ? new Date(result.currentPeriodEnd).toLocaleDateString() : "the end of the paid period";
+      setMessage(`Cancellation scheduled. Premium stays active until ${date}.`);
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Could not cancel subscription");
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  async function downloadAccountData() {
+    setLoading("export");
+    setMessage(null);
+    try {
+      const result = await exportData();
+      if ("error" in result) throw new Error(result.error);
+      downloadJson(`smartymove-data-${new Date().toISOString().slice(0, 10)}.json`, result.data);
+      setMessage("Your data export has downloaded.");
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Could not download your data");
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  async function deleteEntireAccount() {
+    setLoading("delete");
+    setMessage(null);
+    try {
+      const result = await deleteAccount();
+      if ("error" in result) throw new Error(result.error);
+      clearLocalAccountData();
+      await signOutUser().catch(() => undefined);
+      window.location.href = "/";
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Could not delete your account");
+    } finally {
+      setLoading(null);
+    }
   }
 
   return (
@@ -54,7 +151,7 @@ function DesktopProfileInner() {
             <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Account portal</div>
           </div>
           <a href="/app" className="hidden items-center gap-2 rounded-2xl bg-secondary px-3 py-2 text-sm font-semibold lg:inline-flex"><Smartphone className="h-4 w-4" /> Mobile app</a>
-          <button onClick={() => { setUser(null); window.location.href = "/"; }} className="inline-flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2 text-sm font-semibold"><LogOut className="h-4 w-4" /> Sign out</button>
+          <button onClick={() => { void signOutUser().finally(() => { window.location.href = "/"; }); }} className="inline-flex items-center gap-2 rounded-2xl bg-secondary px-3 py-2 text-sm font-semibold"><LogOut className="h-4 w-4" /> Sign out</button>
         </div>
       </header>
       <main className="mx-auto grid max-w-6xl gap-6 px-8 py-8 lg:grid-cols-[1.2fr_1fr]">
@@ -91,7 +188,60 @@ function DesktopProfileInner() {
                 <div className="font-bold">{u.premium ? "Premium" : "Free"}</div>
                 <div className="text-xs text-muted-foreground">{u.premium ? "€4.99/mo · cancel anytime" : "Upgrade for daily routines, re-tests, joint tests, Movement Age, projections"}</div>
               </div>
-              <Button onClick={() => updateUser({ premium: !u.premium })} className="rounded-2xl">{u.premium ? "Cancel" : "Upgrade"}</Button>
+              {u.premium ? (
+                <div className="flex flex-wrap justify-end gap-2">
+                  <Button onClick={manageSubscription} disabled={loading === "portal"} className="rounded-2xl">
+                    {loading === "portal" ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Manage
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button disabled={loading === "cancel"} variant="destructive" className="rounded-2xl">
+                        {loading === "cancel" ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Cancel
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="rounded-3xl">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Cancel Premium?</AlertDialogTitle>
+                        <AlertDialogDescription>Your subscription will stop renewing. You keep Premium until the end of the paid period.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Keep Premium</AlertDialogCancel>
+                        <AlertDialogAction onClick={cancelPlan} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Cancel plan</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              ) : (
+                <Button onClick={() => { window.location.href = "/premium"; }} className="rounded-2xl">Upgrade</Button>
+              )}
+            </div>
+            {message && <div className="mt-3 rounded-2xl bg-secondary p-3 text-sm font-semibold text-foreground">{message}</div>}
+          </div>
+
+          <div className="rounded-3xl bg-card p-6 shadow-card">
+            <h2 className="text-lg font-bold">Account data</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Download your SmartyMove data or permanently delete your account and app data.</p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Button onClick={downloadAccountData} disabled={loading === "export"} variant="secondary" className="rounded-2xl">
+                {loading === "export" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Download data
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button disabled={loading === "delete"} variant="destructive" className="rounded-2xl">
+                    {loading === "delete" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />} Delete account
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-3xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                    <AlertDialogDescription>This permanently removes your SmartyMove profile, screening history, scores, and training data. Active subscriptions are set to stop renewing.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Keep account</AlertDialogCancel>
+                    <AlertDialogAction onClick={deleteEntireAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete account</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
 

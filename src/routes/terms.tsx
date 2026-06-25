@@ -20,7 +20,7 @@ export const Route = createFileRoute("/terms")({
 
 function Terms() {
   return (
-    <LegalLayout title="Terms & Conditions" icon={<FileText className="h-5 w-5" />} lastUpdated="January 2025">
+    <LegalLayout title="Terms & Conditions" icon={<FileText className="h-5 w-5" />} lastUpdated="June 2026">
       <p>
         Welcome to <strong>SmartyMove</strong> (smartymove.com). By accessing or using our mobile-first
         movement diagnostic and corrective program, you agree to comply with and be bound by the following
@@ -81,6 +81,7 @@ function Terms() {
         <li>Payments are processed securely via Stripe, a PCI DSS compliant payment processor. We do not store full payment card details on our servers.</li>
         <li>All fees are stated in Euros (€) and, where applicable, include VAT.</li>
         <li>Subscription pricing, renewal terms, and trial details are presented at the point of purchase and form part of these Terms.</li>
+        <li>You can manage billing, download invoices, or cancel renewal from your account settings. Cancellation stops future renewals while keeping access until the end of the paid period, unless applicable law requires otherwise.</li>
       </ul>
 
       <h2>6. Refunds &amp; Withdrawal (EU Consumer Rights)</h2>
@@ -141,7 +142,7 @@ function Terms() {
       <h2>10. Third-Party Services</h2>
       <ul>
         <li><strong>Stripe:</strong> Processes all payments. Stripe&apos;s terms and privacy policy apply.</li>
-        <li><strong>Lovable Cloud (Supabase infrastructure):</strong> Hosts the database and authentication.</li>
+        <li><strong>Lovable Cloud:</strong> Hosts the database and authentication.</li>
         <li><strong>MediaPipe (on-device pose detection):</strong> Runs locally in your browser. No frames are sent to MediaPipe servers.</li>
       </ul>
       <p>
@@ -170,7 +171,9 @@ function Terms() {
       <h2>13. Account Deletion</h2>
       <ul>
         <li>You can delete your account at any time from your profile settings.</li>
-        <li>Account deletion permanently removes your profile, screening history, scores, and corrective program data after a short retention window.</li>
+        <li>Before deletion, you can download a machine-readable copy of your account data from profile settings.</li>
+        <li>Account deletion permanently removes your profile, screening history, scores, corrective program data, and locally stored app state, except where short operational backup windows or legal obligations apply.</li>
+        <li>If you have an active subscription, deleting your account sets it to stop renewing. You can also cancel renewal directly from account settings without deleting your account.</li>
         <li>Some records (e.g. transaction history) may be retained where required by tax or legal obligations.</li>
       </ul>
 

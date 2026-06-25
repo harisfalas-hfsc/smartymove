@@ -4,6 +4,7 @@ import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib
 
 type CheckoutResult = { clientSecret: string } | { error: string };
 type PortalResult = { url: string } | { error: string };
+type CancelSubscriptionResult = { ok: true; currentPeriodEnd: string | null } | { error: string };
 
 async function resolveOrCreateCustomer(
   stripe: ReturnType<typeof createStripeClient>,
@@ -36,6 +37,21 @@ async function resolveOrCreateCustomer(
   return created.id;
 }
 
+async function resolveExistingCustomer(
+  stripe: ReturnType<typeof createStripeClient>,
+  options: { email?: string | null; userId?: string },
+): Promise<string | null> {
+  if (options.userId && /^[a-zA-Z0-9_-]+$/.test(options.userId)) {
+    const found = await stripe.customers.search({ query: `metadata['userId']:'${options.userId}'`, limit: 1 });
+    if (found.data.length) return found.data[0].id;
+  }
+  if (options.email) {
+    const existing = await stripe.customers.list({ email: options.email, limit: 1 });
+    if (existing.data.length) return existing.data[0].id;
+  }
+  return null;
+}
+
 export const createPremiumCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { returnUrl: string; environment: StripeEnv; email?: string }) => data)
@@ -66,22 +82,63 @@ export const createBillingPortalSession = createServerFn({ method: "POST" })
   .inputValidator((data: { returnUrl?: string; environment: StripeEnv }) => data)
   .handler(async ({ data, context }): Promise<PortalResult> => {
     const { supabase, userId } = context;
-    const { data: sub } = await supabase
+    const [{ data: sub }, { data: profile }] = await Promise.all([
+      supabase
       .from("subscriptions")
       .select("stripe_customer_id")
       .eq("user_id", userId)
       .eq("environment", data.environment)
       .order("created_at", { ascending: false })
       .limit(1)
-      .maybeSingle();
-    if (!sub?.stripe_customer_id) return { error: "No subscription found" };
+      .maybeSingle(),
+      supabase.from("profiles").select("email").eq("id", userId).maybeSingle(),
+    ]);
     try {
       const stripe = createStripeClient(data.environment);
+      const customerId = sub?.stripe_customer_id as string | undefined ?? await resolveExistingCustomer(stripe, {
+        userId,
+        email: profile?.email as string | null | undefined,
+      });
+      if (!customerId) return { error: "No billing account found yet. If you just subscribed, wait a few seconds and try again." };
       const portal = await stripe.billingPortal.sessions.create({
-        customer: sub.stripe_customer_id as string,
+        customer: customerId,
         ...(data.returnUrl && { return_url: data.returnUrl }),
       });
       return { url: portal.url };
+    } catch (error) {
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
+
+export const cancelPremiumSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { environment: StripeEnv }) => data)
+  .handler(async ({ data, context }): Promise<CancelSubscriptionResult> => {
+    const { supabase, userId } = context;
+    const { data: sub, error: subError } = await supabase
+      .from("subscriptions")
+      .select("id,stripe_subscription_id,status,current_period_end")
+      .eq("user_id", userId)
+      .eq("environment", data.environment)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (subError) return { error: subError.message };
+    if (!sub?.stripe_subscription_id) return { error: "No active billing subscription found." };
+    if (["canceled", "incomplete_expired", "unpaid"].includes(sub.status as string)) {
+      return { ok: true, currentPeriodEnd: (sub.current_period_end as string | null) ?? null };
+    }
+
+    try {
+      const stripe = createStripeClient(data.environment);
+      const updated = await stripe.subscriptions.update(sub.stripe_subscription_id as string, { cancel_at_period_end: true });
+      const periodEnd = updated.current_period_end ? new Date(updated.current_period_end * 1000).toISOString() : (sub.current_period_end as string | null) ?? null;
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin
+        .from("subscriptions")
+        .update({ cancel_at_period_end: true, current_period_end: periodEnd, status: updated.status, updated_at: new Date().toISOString() })
+        .eq("id", sub.id as string);
+      return { ok: true, currentPeriodEnd: periodEnd };
     } catch (error) {
       return { error: getStripeErrorMessage(error) };
     }
