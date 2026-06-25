@@ -121,6 +121,15 @@ function getPeriodEnd(subscription: StripeSubscriptionWithPeriod, fallback?: str
   return rawPeriodEnd ? new Date(rawPeriodEnd * 1000).toISOString() : (fallback ?? null);
 }
 
+function getSubscriptionCatalogInfo(subscription: Stripe.Subscription) {
+  const price = subscription.items.data[0]?.price;
+  const product = price?.product;
+  return {
+    priceId: price?.lookup_key ?? price?.metadata?.lovable_external_id ?? price?.id ?? "smartymove_premium_monthly",
+    productId: typeof product === "string" ? product : (product?.id ?? "smartymove_premium"),
+  };
+}
+
 export const createPremiumCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { returnUrl: string; environment: StripeEnv; email?: string }) => data)
@@ -259,11 +268,14 @@ export const cancelPremiumSubscription = createServerFn({ method: "POST" })
       } else {
         const resolvedCustomerId =
           customerId ?? (typeof updated.customer === "string" ? updated.customer : undefined);
+        const catalog = getSubscriptionCatalogInfo(updated);
         await supabaseAdmin.from("subscriptions").upsert(
           {
             user_id: userId,
             stripe_subscription_id: subscriptionId,
             ...(resolvedCustomerId && { stripe_customer_id: resolvedCustomerId }),
+            price_id: catalog.priceId,
+            product_id: catalog.productId,
             status: updated.status,
             current_period_end: periodEnd,
             cancel_at_period_end: true,
