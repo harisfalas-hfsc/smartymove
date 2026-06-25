@@ -9,7 +9,7 @@ import {
   Download,
   Dumbbell,
   Home,
-  LineChart,
+  LineChart as LineChartIcon,
   Loader2,
   LogOut,
   Smartphone,
@@ -206,7 +206,7 @@ function DesktopProfileInner() {
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Desktop navigation">
             <DesktopNavLink to="/desktop" icon={Home} label="Home" />
             <DesktopNavLink to="/app/program" icon={Dumbbell} label="Program" />
-            <DesktopNavLink to="/app/progress" icon={LineChart} label="Progress" />
+            <DesktopNavLink to="/app/progress" icon={LineChartIcon} label="Progress" />
             <DesktopNavLink to="/app/screen" icon={Camera} label="Screen" />
             <DesktopNavLink to="/app/profile" icon={UserRound} label="Account" />
           </nav>
@@ -240,7 +240,7 @@ function DesktopProfileInner() {
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
               <ActionCard to="/app/program" icon={Dumbbell} label="Training program" value="Open today's work" />
-              <ActionCard to="/app/progress" icon={LineChart} label="Progress" value={`${u.sessions.length} screen${u.sessions.length === 1 ? "" : "s"}`} />
+              <ActionCard to="/app/progress" icon={LineChartIcon} label="Progress" value={`${u.sessions.length} screen${u.sessions.length === 1 ? "" : "s"}`} />
               <ActionCard to="/app/screen" icon={Camera} label="Movement Screen" value="Rescan / test" />
             </div>
           </div>
