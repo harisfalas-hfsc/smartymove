@@ -32,6 +32,7 @@ import { Route as AppProfileRouteImport } from './routes/app/profile'
 import { Route as AdminExercisesRouteImport } from './routes/admin.exercises'
 import { Route as AppScreenIndexRouteImport } from './routes/app/screen.index'
 import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -148,6 +149,12 @@ const AppScreenRunRoute = AppScreenRunRouteImport.update({
   path: '/run',
   getParentRoute: () => AppScreenRoute,
 } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -173,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/': typeof AppScreenIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -196,6 +204,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen': typeof AppScreenIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -222,6 +231,7 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/': typeof AppScreenIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/screen/run'
     | '/app/screen/'
+    | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/screen/run'
     | '/app/screen'
+    | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
@@ -297,6 +309,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/screen/run'
     | '/app/screen/'
+    | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -311,6 +324,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   AdminExercisesRoute: typeof AdminExercisesRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -476,6 +490,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppScreenRunRouteImport
       parentRoute: typeof AppScreenRoute
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -545,6 +566,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   AdminExercisesRoute: AdminExercisesRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
