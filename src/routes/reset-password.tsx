@@ -1,9 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Eye, EyeOff } from "lucide-react";
@@ -23,19 +22,33 @@ function ResetPassword() {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    // Supabase puts the recovery token in the URL hash; the client picks it up automatically.
-    const sub = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
+    let active = true;
+    let unsubscribe: (() => void) | undefined;
+
+    void import("@/integrations/supabase/client").then(({ supabase }) => {
+      if (!active) return;
+      // Recovery tokens arrive in the URL hash; load auth only after the route hydrates.
+      const sub = supabase.auth.onAuthStateChange((event) => {
+        if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
+      });
+      unsubscribe = () => sub.data.subscription.unsubscribe();
+      void supabase.auth.getSession().then(({ data }) => {
+        if (active && data.session) setReady(true);
+      });
     });
-    supabase.auth.getSession().then(({ data }) => { if (data.session) setReady(true); });
-    return () => { sub.data.subscription.unsubscribe(); };
+
+    return () => {
+      active = false;
+      unsubscribe?.();
+    };
   }, []);
 
-  async function submit(e: React.FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
     if (pw.length < 6) { setErr("Password must be at least 6 characters."); return; }
     setErr(""); setSubmitting(true);
     try {
+      const { supabase } = await import("@/integrations/supabase/client");
       const { error } = await supabase.auth.updateUser({ password: pw });
       if (error) throw error;
       setDone(true);
