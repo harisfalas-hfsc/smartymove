@@ -7,7 +7,9 @@ import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib
 type CheckoutResult = { clientSecret: string } | { error: string };
 type PortalResult = { url: string } | { error: string };
 type CancelSubscriptionResult = { ok: true; currentPeriodEnd: string | null } | { error: string };
-type EmbeddedCheckoutSessionParams = Stripe.Checkout.SessionCreateParams & { ui_mode: "embedded_page" };
+type EmbeddedCheckoutSessionParams = Stripe.Checkout.SessionCreateParams & {
+  ui_mode: "embedded_page";
+};
 type StripeSubscriptionWithPeriod = {
   current_period_end?: number | null;
   items?: { data?: Array<{ current_period_end?: number | null }> };
