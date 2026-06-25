@@ -15,7 +15,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, type ComponentType } from "react";
 
 import {
   AlertDialog,
@@ -392,7 +392,7 @@ function Row({
   value,
   onClick,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   label: string;
   value: string;
   onClick?: () => void;

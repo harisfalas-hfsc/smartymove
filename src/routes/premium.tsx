@@ -36,13 +36,16 @@ function Premium() {
   async function handleManage() {
     if (!u) return;
     setPortalLoading(true);
+    const portalWindow = window.open("about:blank", "_blank");
     try {
       const result = await createBillingPortalSession({
         data: { environment: getStripeEnvironment(), returnUrl: `${window.location.origin}/premium` },
       });
       if ("error" in result) throw new Error(result.error);
-      window.open(result.url, "_blank");
+      if (portalWindow) portalWindow.location.href = result.url;
+      else window.location.assign(result.url);
     } catch (e) {
+      portalWindow?.close();
       alert(e instanceof Error ? e.message : "Could not open billing portal");
     } finally {
       setPortalLoading(false);
