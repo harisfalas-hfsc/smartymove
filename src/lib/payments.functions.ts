@@ -226,7 +226,9 @@ export const cancelPremiumSubscription = createServerFn({ method: "POST" })
         if (customerId) {
           const found = await findLatestManagedSubscription(stripe, customerId);
           subscriptionId = found?.id;
-          fallbackCurrentPeriodEnd = getPeriodEnd(found as StripeSubscriptionWithPeriod | null ?? {}, null);
+          fallbackCurrentPeriodEnd = found
+            ? getPeriodEnd(found as StripeSubscriptionWithPeriod, null)
+            : null;
           if (found?.status && ["canceled", "incomplete_expired", "unpaid"].includes(found.status)) {
             return { ok: true, currentPeriodEnd: fallbackCurrentPeriodEnd };
           }
@@ -255,11 +257,13 @@ export const cancelPremiumSubscription = createServerFn({ method: "POST" })
           })
           .eq("id", sub.id as string);
       } else {
+        const resolvedCustomerId =
+          customerId ?? (typeof updated.customer === "string" ? updated.customer : undefined);
         await supabaseAdmin.from("subscriptions").upsert(
           {
             user_id: userId,
             stripe_subscription_id: subscriptionId,
-            stripe_customer_id: customerId ?? (typeof updated.customer === "string" ? updated.customer : null),
+            ...(resolvedCustomerId && { stripe_customer_id: resolvedCustomerId }),
             status: updated.status,
             current_period_end: periodEnd,
             cancel_at_period_end: true,
