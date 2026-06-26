@@ -14,6 +14,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as LearnRouteImport } from './routes/learn'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as DesktopRouteImport } from './routes/desktop'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -28,6 +29,7 @@ import { Route as OnboardingParqRouteImport } from './routes/onboarding/parq'
 import { Route as OnboardingJointsRouteImport } from './routes/onboarding/joints'
 import { Route as OnboardingGoalRouteImport } from './routes/onboarding/goal'
 import { Route as OnboardingDisclaimerRouteImport } from './routes/onboarding/disclaimer'
+import { Route as LearnSlugRouteImport } from './routes/learn.$slug'
 import { Route as AppScreenRouteImport } from './routes/app/screen'
 import { Route as AppProgressRouteImport } from './routes/app/progress'
 import { Route as AppProgramRouteImport } from './routes/app/program'
@@ -61,6 +63,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PremiumRoute = PremiumRouteImport.update({
   id: '/premium',
   path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DisclaimerRoute = DisclaimerRouteImport.update({
@@ -133,6 +140,11 @@ const OnboardingDisclaimerRoute = OnboardingDisclaimerRouteImport.update({
   path: '/disclaimer',
   getParentRoute: () => OnboardingRouteRoute,
 } as any)
+const LearnSlugRoute = LearnSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => LearnRoute,
+} as any)
 const AppScreenRoute = AppScreenRouteImport.update({
   id: '/screen',
   path: '/screen',
@@ -189,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
+  '/learn': typeof LearnRouteWithChildren
   '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -199,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/app/program': typeof AppProgramRoute
   '/app/progress': typeof AppProgressRoute
   '/app/screen': typeof AppScreenRouteWithChildren
+  '/learn/$slug': typeof LearnSlugRoute
   '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
   '/onboarding/goal': typeof OnboardingGoalRoute
   '/onboarding/joints': typeof OnboardingJointsRoute
@@ -218,6 +232,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
+  '/learn': typeof LearnRouteWithChildren
   '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -227,6 +242,7 @@ export interface FileRoutesByTo {
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
   '/app/progress': typeof AppProgressRoute
+  '/learn/$slug': typeof LearnSlugRoute
   '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
   '/onboarding/goal': typeof OnboardingGoalRoute
   '/onboarding/joints': typeof OnboardingJointsRoute
@@ -248,6 +264,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
+  '/learn': typeof LearnRouteWithChildren
   '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -258,6 +275,7 @@ export interface FileRoutesById {
   '/app/program': typeof AppProgramRoute
   '/app/progress': typeof AppProgressRoute
   '/app/screen': typeof AppScreenRouteWithChildren
+  '/learn/$slug': typeof LearnSlugRoute
   '/onboarding/disclaimer': typeof OnboardingDisclaimerRoute
   '/onboarding/goal': typeof OnboardingGoalRoute
   '/onboarding/joints': typeof OnboardingJointsRoute
@@ -280,6 +298,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/desktop'
     | '/disclaimer'
+    | '/learn'
     | '/premium'
     | '/privacy'
     | '/reset-password'
@@ -290,6 +309,7 @@ export interface FileRouteTypes {
     | '/app/program'
     | '/app/progress'
     | '/app/screen'
+    | '/learn/$slug'
     | '/onboarding/disclaimer'
     | '/onboarding/goal'
     | '/onboarding/joints'
@@ -309,6 +329,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/desktop'
     | '/disclaimer'
+    | '/learn'
     | '/premium'
     | '/privacy'
     | '/reset-password'
@@ -318,6 +339,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/program'
     | '/app/progress'
+    | '/learn/$slug'
     | '/onboarding/disclaimer'
     | '/onboarding/goal'
     | '/onboarding/joints'
@@ -338,6 +360,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/desktop'
     | '/disclaimer'
+    | '/learn'
     | '/premium'
     | '/privacy'
     | '/reset-password'
@@ -348,6 +371,7 @@ export interface FileRouteTypes {
     | '/app/program'
     | '/app/progress'
     | '/app/screen'
+    | '/learn/$slug'
     | '/onboarding/disclaimer'
     | '/onboarding/goal'
     | '/onboarding/joints'
@@ -369,6 +393,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DesktopRoute: typeof DesktopRoute
   DisclaimerRoute: typeof DisclaimerRoute
+  LearnRoute: typeof LearnRouteWithChildren
   PremiumRoute: typeof PremiumRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -414,6 +439,13 @@ declare module '@tanstack/react-router' {
       path: '/premium'
       fullPath: '/premium'
       preLoaderRoute: typeof PremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/disclaimer': {
@@ -513,6 +545,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/onboarding/disclaimer'
       preLoaderRoute: typeof OnboardingDisclaimerRouteImport
       parentRoute: typeof OnboardingRouteRoute
+    }
+    '/learn/$slug': {
+      id: '/learn/$slug'
+      path: '/$slug'
+      fullPath: '/learn/$slug'
+      preLoaderRoute: typeof LearnSlugRouteImport
+      parentRoute: typeof LearnRoute
     }
     '/app/screen': {
       id: '/app/screen'
@@ -634,6 +673,16 @@ const OnboardingRouteRouteWithChildren = OnboardingRouteRoute._addFileChildren(
   OnboardingRouteRouteChildren,
 )
 
+interface LearnRouteChildren {
+  LearnSlugRoute: typeof LearnSlugRoute
+}
+
+const LearnRouteChildren: LearnRouteChildren = {
+  LearnSlugRoute: LearnSlugRoute,
+}
+
+const LearnRouteWithChildren = LearnRoute._addFileChildren(LearnRouteChildren)
+
 interface PremiumRouteChildren {
   PremiumReturnRoute: typeof PremiumReturnRoute
 }
@@ -653,6 +702,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DesktopRoute: DesktopRoute,
   DisclaimerRoute: DisclaimerRoute,
+  LearnRoute: LearnRouteWithChildren,
   PremiumRoute: PremiumRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,

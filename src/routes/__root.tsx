@@ -100,6 +100,41 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "SmartyMove",
+          url: "https://smartymove.com",
+          logo: "https://smartymove.com/__l5e/assets-v1/96e554d0-a8d8-4890-8280-4c595e2d844e/favicon.png",
+          email: "smartymove@outlook.com",
+          parentOrganization: { "@type": "Organization", name: "Smarty" },
+          sameAs: ["https://smartygym.app"],
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "SmartyMove",
+          applicationCategory: "HealthApplication",
+          operatingSystem: "Web, iOS, Android",
+          description:
+            "Camera-based movement screening app. Get a Movement Score, Movement Age, and a personalized 5-minute daily corrective exercise program.",
+          url: "https://smartymove.com",
+          offers: {
+            "@type": "Offer",
+            price: "4.99",
+            priceCurrency: "EUR",
+            category: "subscription",
+          },
+          publisher: { "@type": "Organization", name: "SmartyMove" },
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,

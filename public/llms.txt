@@ -1,0 +1,48 @@
+# SmartyMove
+
+> SmartyMove is a camera-based movement screening and corrective exercise app. It turns a smartphone camera into a 5-minute functional movement test, produces a Movement Score (0–100) and a Movement Age, identifies the root cause of any failed test, and prescribes a short daily corrective program. Built by the Smarty team as a pocket movement coach for people who want to move better, prevent injury, and reduce pain — without booking a clinic visit.
+
+## What SmartyMove is
+
+SmartyMove is a mobile-first movement screening app and corrective exercise coach. Users perform a short series of guided movement tests (squat, hinge, single-leg balance, lunge, overhead reach, plus ankle, hip, shoulder, core and scapular sub-tests) in front of their phone camera. On-device pose detection scores each rep, flags compensations (heel rise, spine rounding, knee valgus, left/right asymmetry), and clusters failures into root causes (Ankle, Hip, Core, Scapular). The app then prescribes a personalized 14-day corrective training program in three phases — Foundation, Build, Maintain & Perform — built from a curated library of mobility, stability and strength exercises. The program rescans every 14 days and progresses automatically.
+
+## Who it's for
+
+- Desk workers with stiff hips, low back, or shoulders
+- Runners and lifters who want to keep their joints healthy
+- People recovering from minor knee, hip, ankle, low back, or shoulder issues who are cleared for general exercise
+- Anyone who wants an objective baseline of how they move and a short daily routine that actually targets their weakest link
+
+SmartyMove is a wellness and education tool. It is not a medical device, not a diagnosis, and not a replacement for a physiotherapist or physician.
+
+## How the movement screen works
+
+1. The user completes a PAR-Q-style readiness questionnaire and picks a goal.
+2. They prop up their phone and follow on-screen prompts for a short sequence of functional movement tests.
+3. On-device pose detection (no raw video uploaded) measures joint angles, range of motion, tempo, and compensations on each rep, comparing them to reference values for that movement.
+4. The Corrective Decision Engine clusters failures into at most two primary root causes (Ankle, Hip, Core, Scapular) so the program stays focused.
+5. The app outputs a Movement Score (0–100), a Movement Age (a motivational age estimate based on movement quality vs. chronological age), and a 14-day training plan.
+
+## Core differentiators
+
+- **Movement Score** — a single 0–100 score summarizing movement quality across all tests, so progress is measurable.
+- **Movement Age** — translates movement quality into an intuitive age number users can lower over time.
+- **Root-cause clustering** — instead of prescribing 10 random exercises, the engine identifies the 1–2 deficits that explain the most failures and trains those first.
+- **Compensation detection** — verifies that observed range of motion is real, not faked by heel lift, spine rounding, or shoulder shrugging.
+- **Curated exercise library** — exercises come from a vetted set across 7 areas (Ankle, Knee, Hip, Low Back, Shoulder, Elbow, Wrist) × 3 categories (Mobility, Stability, Strength); nothing is invented or cross-prescribed.
+- **On-device pose detection** — camera frames are processed locally; raw video is not uploaded.
+- **14-day rescan cycle** — the program automatically progresses through Foundation → Build → Maintain & Perform phases as the user retests.
+
+## Key pages
+
+- [Home](https://smartymove.com/): product overview and movement screen entry point
+- [About](https://smartymove.com/about): why SmartyMove exists, what it does, how it works, who it's for
+- [Premium](https://smartymove.com/premium): SmartyMove Premium subscription (€4.99/month) — full daily program, re-tests, Movement Age trajectory
+- [Contact](https://smartymove.com/contact): support and feedback
+- [Privacy](https://smartymove.com/privacy): privacy policy
+- [Terms](https://smartymove.com/terms): terms of service
+- [Disclaimer](https://smartymove.com/disclaimer): medical and safety disclaimer
+
+## Optional
+
+- [Learn — Movement guides](https://smartymove.com/learn): plain-language articles on functional movement screening, Movement Score, ankle mobility, and related topics
