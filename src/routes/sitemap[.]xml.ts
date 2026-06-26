@@ -22,6 +22,10 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/privacy", changefreq: "yearly", priority: "0.4" },
           { path: "/terms", changefreq: "yearly", priority: "0.4" },
           { path: "/disclaimer", changefreq: "yearly", priority: "0.4" },
+          { path: "/learn", changefreq: "weekly", priority: "0.7" },
+          { path: "/learn/what-is-a-movement-score", changefreq: "monthly", priority: "0.6" },
+          { path: "/learn/functional-movement-screening-explained", changefreq: "monthly", priority: "0.6" },
+          { path: "/learn/ankle-mobility-and-your-squat", changefreq: "monthly", priority: "0.6" },
         ];
 
         const today = new Date().toISOString().split("T")[0];
