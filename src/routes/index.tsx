@@ -248,6 +248,27 @@ function Welcome() {
                 Sign in
               </button>
             </div>
+
+            {/* FAQ — rendered for SEO/GEO; wrapped in FAQPage JSON-LD in head() */}
+            <section
+              aria-labelledby="faq-heading"
+              className="mt-8"
+              style={{ background: "#fff", border: "1px solid #E5EAEC", borderRadius: 18, padding: "20px 18px" }}
+            >
+              <h2 id="faq-heading" style={{ fontWeight: 800, fontSize: 20, color: "#14213A", margin: "0 0 12px" }}>
+                Frequently asked questions
+              </h2>
+              <div className="flex flex-col gap-3">
+                {HOME_FAQ.map((f) => (
+                  <details key={f.q} style={{ borderTop: "1px solid #EEF1F2", paddingTop: 10 }}>
+                    <summary style={{ fontWeight: 700, color: "#14213A", fontSize: 14.5, cursor: "pointer", listStyle: "none" }}>
+                      {f.q}
+                    </summary>
+                    <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.55, color: "#3B4A63" }}>{f.a}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
           </>
         ) : mode === "signup" ? (
           <form onSubmit={submit} className="mt-2 flex flex-col gap-3">
