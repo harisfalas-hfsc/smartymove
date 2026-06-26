@@ -14,6 +14,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as LearnRouteImport } from './routes/learn'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as DesktopRouteImport } from './routes/desktop'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -61,6 +62,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PremiumRoute = PremiumRouteImport.update({
   id: '/premium',
   path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DisclaimerRoute = DisclaimerRouteImport.update({
@@ -189,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
+  '/learn': typeof LearnRoute
   '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -218,6 +225,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
+  '/learn': typeof LearnRoute
   '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
+  '/learn': typeof LearnRoute
   '/premium': typeof PremiumRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -280,6 +289,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/desktop'
     | '/disclaimer'
+    | '/learn'
     | '/premium'
     | '/privacy'
     | '/reset-password'
@@ -309,6 +319,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/desktop'
     | '/disclaimer'
+    | '/learn'
     | '/premium'
     | '/privacy'
     | '/reset-password'
@@ -338,6 +349,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/desktop'
     | '/disclaimer'
+    | '/learn'
     | '/premium'
     | '/privacy'
     | '/reset-password'
@@ -369,6 +381,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DesktopRoute: typeof DesktopRoute
   DisclaimerRoute: typeof DisclaimerRoute
+  LearnRoute: typeof LearnRoute
   PremiumRoute: typeof PremiumRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -414,6 +427,13 @@ declare module '@tanstack/react-router' {
       path: '/premium'
       fullPath: '/premium'
       preLoaderRoute: typeof PremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/disclaimer': {
@@ -653,6 +673,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DesktopRoute: DesktopRoute,
   DisclaimerRoute: DisclaimerRoute,
+  LearnRoute: LearnRoute,
   PremiumRoute: PremiumRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
