@@ -146,7 +146,7 @@ function Article() {
           padding: "20px 22px",
         }}
       >
-        {a.body.map((b) => (
+        {a.body.map((b: { h: string; p: string }) => (
           <section key={b.h} style={{ marginBottom: 16 }}>
             <h2 style={{ fontWeight: 700, fontSize: 17, color: "#14213A", margin: "0 0 6px" }}>{b.h}</h2>
             <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: "#3B4A63" }}>{b.p}</p>
