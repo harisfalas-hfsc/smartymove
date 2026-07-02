@@ -81,7 +81,7 @@
 }
 
 .dark {
-  --background: oklch(0.18 0.03 235);
+  --background: oklch(1 0 0);
   --foreground: oklch(0.97 0.005 220);
   --card: oklch(0.23 0.035 235);
   --card-foreground: oklch(0.97 0.005 220);
@@ -107,7 +107,7 @@
   * { border-color: var(--color-border); }
   html, body { height: 100%; }
   body {
-    background-color: var(--color-background);
+    background-color: #ffffff;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
