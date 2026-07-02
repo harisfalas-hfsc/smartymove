@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Camera, Check, Loader2, X, Crown } from "lucide-react";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
@@ -26,6 +26,8 @@ export const Route = createFileRoute("/pricing")({
 
 function Pricing() {
   const u = useUser();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
   const isTestMode = (import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN as string | undefined)?.startsWith("pk_test_");
@@ -37,6 +39,38 @@ function Pricing() {
   });
   const grandfathered = !!access.data?.hasActiveSubscription;
   const credits = access.data?.credits ?? 0;
+
+  // After Stripe returns to /pricing?paid=1, poll scan credits until the webhook
+  // grants the credit, then auto-navigate to the scan page.
+  useEffect(() => {
+    if (!u) return;
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("paid") !== "1") return;
+
+    let cancelled = false;
+    let attempts = 0;
+    const tick = async () => {
+      attempts += 1;
+      await queryClient.invalidateQueries({ queryKey: ["scan-access"] });
+      const fresh = await queryClient.fetchQuery({
+        queryKey: ["scan-access", u.id],
+        queryFn: () => getScanAccess(),
+      });
+      if (cancelled) return;
+      if (fresh?.canScan) {
+        // Clean the ?paid=1 flag then send them to run the scan.
+        window.history.replaceState({}, "", "/pricing");
+        navigate({ to: "/app/screen" });
+        return;
+      }
+      if (attempts < 10) setTimeout(tick, 1500);
+    };
+    tick();
+    return () => { cancelled = true; };
+  }, [u, navigate, queryClient]);
+
+  const paidReturn = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("paid") === "1";
 
   function handleBuy() {
     if (!u) { window.location.href = "/"; return; }
