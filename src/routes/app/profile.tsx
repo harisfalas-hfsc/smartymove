@@ -2,7 +2,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Bell,
-  Crown,
   Download,
   Loader2,
   LogOut,
@@ -34,20 +33,15 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
-import { cancelPremiumSubscription, createBillingPortalSession } from "@/lib/payments.functions";
-import { getStripeEnvironment } from "@/lib/stripe";
-import { clearLocalAccountData, updateUser, signOutUser, type User } from "@/lib/store";
-import { useUserPremium } from "@/lib/useUserPremium";
+import { clearLocalAccountData, updateUser, signOutUser, useUser, type User } from "@/lib/store";
 
 export const Route = createFileRoute("/app/profile")({ component: Profile });
 
-type PortalResult = { url: string } | { error: string };
-type CancelResult = { ok: true; currentPeriodEnd: string | null } | { error: string };
 type ExportResult = { data: unknown } | { error: string };
 type DeleteResult = { ok: true; canceledSubscriptions: number } | { error: string };
 
 function Profile() {
-  const u = useUserPremium();
+  const u = useUser();
   const navigate = useNavigate();
   if (!u) return null;
   return <ProfileInner u={u} navigate={navigate} />;
@@ -58,58 +52,14 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
   const [name, setName] = useState(u.name);
   const [age, setAge] = useState(String(u.age));
   const [saved, setSaved] = useState(false);
-  const [portalLoading, setPortalLoading] = useState(false);
-  const [portalError, setPortalError] = useState<string | null>(null);
-  const [cancelLoading, setCancelLoading] = useState(false);
   const [accountLoading, setAccountLoading] = useState<"export" | "delete" | null>(null);
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
-  const openPortal = useServerFn(createBillingPortalSession);
-  const cancelSubscription = useServerFn(cancelPremiumSubscription);
   const exportData = useServerFn(exportAccountData);
   const deleteAccount = useServerFn(deleteAccountAndData);
 
   async function requireSession() {
     const { data } = await supabase.auth.getSession();
-    if (!data.session) throw new Error("Please sign in again before managing billing or account data.");
-  }
-
-  async function manageSubscription() {
-    setPortalLoading(true);
-    setPortalError(null);
-    try {
-      await requireSession();
-      const res = (await openPortal({
-        data: { environment: getStripeEnvironment(), returnUrl: window.location.href },
-      })) as PortalResult;
-      if ("error" in res) throw new Error(res.error);
-      const portalWindow = window.open(res.url, "_blank", "noopener,noreferrer");
-      if (portalWindow) portalWindow.location.href = res.url;
-      else window.location.assign(res.url);
-      setPortalError("Billing portal opened in a new tab. If nothing opened, allow pop-ups for this site.");
-    } catch (e) {
-      setPortalError(e instanceof Error ? e.message : "Could not open billing portal");
-    } finally {
-      setPortalLoading(false);
-    }
-  }
-  async function cancelAtPeriodEnd() {
-    setCancelLoading(true);
-    setPortalError(null);
-    try {
-      await requireSession();
-      const res = (await cancelSubscription({
-        data: { environment: getStripeEnvironment() },
-      })) as CancelResult;
-      if ("error" in res) throw new Error(res.error);
-      const date = res.currentPeriodEnd
-        ? new Date(res.currentPeriodEnd).toLocaleDateString()
-        : "the end of the paid period";
-      setPortalError(`Cancellation scheduled. Premium stays active until ${date}.`);
-    } catch (e) {
-      setPortalError(e instanceof Error ? e.message : "Could not cancel subscription");
-    } finally {
-      setCancelLoading(false);
-    }
+    if (!data.session) throw new Error("Please sign in again before managing your account data.");
   }
   async function downloadAccountData() {
     setAccountLoading("export");
@@ -166,9 +116,7 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
           <div className="min-w-0">
             <div className="truncate text-xl font-extrabold">{u.name}</div>
             <div className="truncate text-sm opacity-85">{u.email}</div>
-            <div className="text-xs opacity-75">
-              Age {u.age} · {u.premium ? "Premium" : "Free"}
-            </div>
+            <div className="text-xs opacity-75">Age {u.age}</div>
           </div>
         </div>
       </header>
@@ -249,78 +197,6 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
         {saved && (
           <div className="rounded-2xl bg-success/10 p-3 text-center text-sm font-semibold text-foreground">
             Profile updated
-          </div>
-        )}
-        {!u.premium ? (
-          <div className="rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft">
-            <Crown className="h-5 w-5" />
-            <div className="mt-1 text-base font-extrabold">Pay per scan · €3.99</div>
-            <p className="text-sm opacity-90">
-              One scan = a personalized 2-week training program you keep forever. Rescan anytime to progress.
-            </p>
-            <button
-              onClick={() => navigate({ to: "/pricing" })}
-              className="mt-3 h-11 w-full rounded-2xl bg-white font-semibold text-primary"
-            >
-              Buy a scan
-            </button>
-          </div>
-        ) : (
-          <div className="rounded-3xl bg-card p-5 shadow-card">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-bold">Premium active</div>
-                <div className="text-xs text-muted-foreground">Billing, invoices, card, cancellation</div>
-              </div>
-              <button
-                onClick={manageSubscription}
-                disabled={portalLoading}
-                className="rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
-              >
-                {portalLoading ? "Opening…" : "Manage billing"}
-              </button>
-            </div>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <button
-                onClick={manageSubscription}
-                disabled={portalLoading}
-                className="rounded-xl bg-secondary px-3 py-2 text-xs font-semibold text-foreground disabled:opacity-60"
-              >
-                {portalLoading ? "Opening…" : "Billing portal"}
-              </button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button
-                    disabled={cancelLoading}
-                    className="rounded-xl border border-destructive/25 bg-background px-3 py-2 text-xs font-semibold text-destructive disabled:opacity-60"
-                  >
-                    {cancelLoading ? "Canceling…" : "Cancel plan"}
-                  </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="mx-4 max-w-[360px] rounded-3xl">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Cancel Premium?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Your subscription will stop renewing. You keep Premium access until the end of
-                      the paid period.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Keep Premium</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={cancelAtPeriodEnd}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Cancel plan
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-            {portalError && <div className="mt-2 text-xs text-foreground">{portalError}</div>}
-            <p className="mt-3 text-xs text-muted-foreground">
-              Update your card, download invoices, manage billing, or cancel anytime.
-            </p>
           </div>
         )}
         <div className="rounded-3xl bg-card p-5 shadow-card">
