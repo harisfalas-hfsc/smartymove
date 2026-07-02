@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib/stripe.server";
 
-const IMAGE_URL = "https://smartymove.com/__l5e/assets-v1/58d509bd-4b38-474b-a04e-7eb0bf4df648/smartymove-pwa-512.png";
-
 async function sync(env: StripeEnv) {
   const stripe = createStripeClient(env);
   const prices = await stripe.prices.list({ lookup_keys: ["smartymove_premium_monthly"], expand: ["data.product"] });
