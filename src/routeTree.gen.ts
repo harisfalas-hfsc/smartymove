@@ -14,7 +14,6 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
-import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as DesktopRouteImport } from './routes/desktop'
@@ -66,11 +65,6 @@ const PricingRoute = PricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PremiumRoute = PremiumRouteImport.update({
-  id: '/premium',
-  path: '/premium',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LearnRoute = LearnRouteImport.update({
   id: '/learn',
   path: '/learn',
@@ -117,9 +111,9 @@ const AppIndexRoute = AppIndexRouteImport.update({
   getParentRoute: () => AppRouteRoute,
 } as any)
 const PremiumReturnRoute = PremiumReturnRouteImport.update({
-  id: '/return',
-  path: '/return',
-  getParentRoute: () => PremiumRoute,
+  id: '/premium/return',
+  path: '/premium/return',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingQuestionnaireRoute = OnboardingQuestionnaireRouteImport.update({
   id: '/questionnaire',
@@ -208,7 +202,6 @@ export interface FileRoutesByFullPath {
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
   '/learn': typeof LearnRouteWithChildren
-  '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -240,7 +233,6 @@ export interface FileRoutesByTo {
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
   '/learn': typeof LearnRouteWithChildren
-  '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -273,7 +265,6 @@ export interface FileRoutesById {
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
   '/learn': typeof LearnRouteWithChildren
-  '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -308,7 +299,6 @@ export interface FileRouteTypes {
     | '/desktop'
     | '/disclaimer'
     | '/learn'
-    | '/premium'
     | '/pricing'
     | '/privacy'
     | '/reset-password'
@@ -340,7 +330,6 @@ export interface FileRouteTypes {
     | '/desktop'
     | '/disclaimer'
     | '/learn'
-    | '/premium'
     | '/pricing'
     | '/privacy'
     | '/reset-password'
@@ -372,7 +361,6 @@ export interface FileRouteTypes {
     | '/desktop'
     | '/disclaimer'
     | '/learn'
-    | '/premium'
     | '/pricing'
     | '/privacy'
     | '/reset-password'
@@ -406,13 +394,13 @@ export interface RootRouteChildren {
   DesktopRoute: typeof DesktopRoute
   DisclaimerRoute: typeof DisclaimerRoute
   LearnRoute: typeof LearnRouteWithChildren
-  PremiumRoute: typeof PremiumRouteWithChildren
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   AdminExercisesRoute: typeof AdminExercisesRoute
+  PremiumReturnRoute: typeof PremiumReturnRoute
   ApiPublicAdminSyncPremiumRoute: typeof ApiPublicAdminSyncPremiumRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -452,13 +440,6 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/premium': {
-      id: '/premium'
-      path: '/premium'
-      fullPath: '/premium'
-      preLoaderRoute: typeof PremiumRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learn': {
@@ -526,10 +507,10 @@ declare module '@tanstack/react-router' {
     }
     '/premium/return': {
       id: '/premium/return'
-      path: '/return'
+      path: '/premium/return'
       fullPath: '/premium/return'
       preLoaderRoute: typeof PremiumReturnRouteImport
-      parentRoute: typeof PremiumRoute
+      parentRoute: typeof rootRouteImport
     }
     '/onboarding/questionnaire': {
       id: '/onboarding/questionnaire'
@@ -703,17 +684,6 @@ const LearnRouteChildren: LearnRouteChildren = {
 
 const LearnRouteWithChildren = LearnRoute._addFileChildren(LearnRouteChildren)
 
-interface PremiumRouteChildren {
-  PremiumReturnRoute: typeof PremiumReturnRoute
-}
-
-const PremiumRouteChildren: PremiumRouteChildren = {
-  PremiumReturnRoute: PremiumReturnRoute,
-}
-
-const PremiumRouteWithChildren =
-  PremiumRoute._addFileChildren(PremiumRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRouteRoute: AppRouteRouteWithChildren,
@@ -723,13 +693,13 @@ const rootRouteChildren: RootRouteChildren = {
   DesktopRoute: DesktopRoute,
   DisclaimerRoute: DisclaimerRoute,
   LearnRoute: LearnRouteWithChildren,
-  PremiumRoute: PremiumRouteWithChildren,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   AdminExercisesRoute: AdminExercisesRoute,
+  PremiumReturnRoute: PremiumReturnRoute,
   ApiPublicAdminSyncPremiumRoute: ApiPublicAdminSyncPremiumRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
