@@ -102,16 +102,18 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
 
 function NavDrawer({ onClose, isAuthed }: { onClose: () => void; isAuthed: boolean }) {
   const sections: { heading: string; items: { to: string; label: string; Icon: any }[] }[] = [
-    {
-      heading: "App",
-      items: [
-        { to: "/app", label: "Home", Icon: Home },
-        { to: "/app/screen", label: "Movement Screen", Icon: Activity },
-        { to: "/app/program", label: "Training Program", Icon: Dumbbell },
-        { to: "/app/progress", label: "Progress", Icon: LineChart },
-        ...(isAuthed ? [{ to: "/app/profile", label: "Profile", Icon: UserIcon }] : []),
-      ],
-    },
+    ...(isAuthed
+      ? [{
+          heading: "App",
+          items: [
+            { to: "/app", label: "Home", Icon: Home },
+            { to: "/app/screen", label: "Movement Screen", Icon: Activity },
+            { to: "/app/program", label: "Training Program", Icon: Dumbbell },
+            { to: "/app/progress", label: "Progress", Icon: LineChart },
+            { to: "/app/profile", label: "Profile", Icon: UserIcon },
+          ],
+        }]
+      : []),
     {
       heading: "SmartyMove",
       items: [
