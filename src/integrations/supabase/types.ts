@@ -70,6 +70,8 @@ export type Database = {
           email: string
           id: string
           name: string
+          scan_credits: number
+          scans_purchased: number
           updated_at: string
         }
         Insert: {
@@ -79,6 +81,8 @@ export type Database = {
           email: string
           id: string
           name: string
+          scan_credits?: number
+          scans_purchased?: number
           updated_at?: string
         }
         Update: {
@@ -88,6 +92,8 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+          scan_credits?: number
+          scans_purchased?: number
           updated_at?: string
         }
         Relationships: []
@@ -145,10 +151,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_scan_credit: { Args: { _user_id: string }; Returns: boolean }
+      grant_scan_credits: {
+        Args: { _credits: number; _user_id: string }
+        Returns: undefined
+      }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
       }
+      has_scan_access: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
