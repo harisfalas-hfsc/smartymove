@@ -115,7 +115,7 @@ function NavDrawer({ onClose, isAuthed }: { onClose: () => void; isAuthed: boole
     {
       heading: "SmartyMove",
       items: [
-        { to: "/premium", label: "SmartyMove Premium", Icon: Crown },
+        { to: "/pricing", label: "Pricing · €3.99/scan", Icon: Crown },
         { to: "/about", label: "About", Icon: Info },
         { to: "/contact", label: "Contact us", Icon: Mail },
       ],
