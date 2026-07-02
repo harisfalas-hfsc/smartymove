@@ -6,7 +6,7 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
   return (
     <div
       className="flex min-h-[100dvh] w-full flex-col"
-      style={{ background: "#E7ECEC", color: "#14213A" }}
+      style={{ background: "#ffffff", color: "#14213A" }}
     >
       <SiteHeader showBack />
       <main className="mx-auto w-full max-w-[760px] px-5 pb-8 pt-5">

@@ -90,7 +90,7 @@ function Privacy() {
           issues.
         </li>
         <li>Calculate your Movement Score, Movement Age, and progress over time.</li>
-        <li>Process payments and subscriptions via Stripe.</li>
+        <li>Process one-time scan payments via Stripe.</li>
         <li>
           Send transactional emails (account, security, billing) and, with consent, product updates.
         </li>
@@ -110,7 +110,7 @@ function Privacy() {
         </li>
         <li>
           <strong>Contractual necessity (Art. 6(1)(b)):</strong> Running the app, screens, scoring,
-          and your subscription.
+          and processing your scan purchases.
         </li>
         <li>
           <strong>Legal obligation (Art. 6(1)(c)):</strong> Tax and accounting records, fraud
@@ -194,7 +194,7 @@ function Privacy() {
         </li>
         <li>
           <strong>Right to Data Portability (Art. 20):</strong> Download your account, screening,
-          score, training, and subscription-status data in a structured, machine-readable JSON
+          score, training, and purchase-history data in a structured, machine-readable JSON
           format from your profile settings.
         </li>
         <li>
