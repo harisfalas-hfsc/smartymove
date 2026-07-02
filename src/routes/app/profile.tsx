@@ -33,8 +33,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
-import { clearLocalAccountData, updateUser, signOutUser, type User } from "@/lib/store";
-import { useUser } from "@/lib/store";
+import { clearLocalAccountData, updateUser, signOutUser, useUser, type User } from "@/lib/store";
 
 export const Route = createFileRoute("/app/profile")({ component: Profile });
 
