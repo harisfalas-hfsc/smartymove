@@ -1,6 +1,5 @@
 /** Emails that always get admin + premium access in the app. */
 export const ADMIN_EMAILS = [
-  "harispalas@gmail.com",
   "harisfalas@gmail.com",
 ];
 
