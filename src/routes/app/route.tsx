@@ -15,7 +15,10 @@ function AppLayout() {
   useEffect(() => {
     const u = getUser();
     void restoreUserFromBackend().then((restored) => {
-      if (!restored && !u) navigate({ to: "/" });
+      if (!restored) {
+        if (!u) navigate({ to: "/" });
+        return;
+      }
       else if (!restored.questionnaire || !restored.goal) navigate({ to: "/onboarding/questionnaire" });
     }).catch(() => navigate({ to: "/" }));
   }, [navigate]);
