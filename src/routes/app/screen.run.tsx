@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
 import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
@@ -141,7 +141,10 @@ function Runner() {
   const latestLandmarksRef = useRef<any[] | null>(null);
 
   const [phase, setPhase] = useState<"setup" | "intro" | "running" | "done" | "failed">("setup");
-  const [seq, setSeq] = useState<TestDef[]>([]);
+  const seq = useMemo(
+    () => buildSequence(u?.questionnaire?.joints ?? []),
+    [u?.questionnaire?.joints?.join("|")],
+  );
   const [idx, setIdx] = useState(0);
   const [countdown, setCountdown] = useState(0);
   const [elapsed, setElapsed] = useState(0);
@@ -163,8 +166,6 @@ function Runner() {
   // is too slow to keep up with the "full" landmarker.
   const frameTimesRef = useRef<number[]>([]);
   const fallbackCheckedRef = useRef(false);
-
-  useEffect(() => { if (u) setSeq(buildSequence(u.questionnaire?.joints ?? [])); }, [u]);
 
   async function start() {
     setError(null);
