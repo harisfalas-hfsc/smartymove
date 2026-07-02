@@ -254,15 +254,15 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
         {!u.premium ? (
           <div className="rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft">
             <Crown className="h-5 w-5" />
-            <div className="mt-1 text-base font-extrabold">Go Premium · €4.99/mo</div>
+            <div className="mt-1 text-base font-extrabold">Pay per scan · €3.99</div>
             <p className="text-sm opacity-90">
-              Daily routines, re-tests, joint tests, Movement Age, Future Projection.
+              One scan = a personalized 2-week training program you keep forever. Rescan anytime to progress.
             </p>
             <button
-              onClick={() => navigate({ to: "/premium" })}
+              onClick={() => navigate({ to: "/pricing" })}
               className="mt-3 h-11 w-full rounded-2xl bg-white font-semibold text-primary"
             >
-              Upgrade
+              Buy a scan
             </button>
           </div>
         ) : (

@@ -15,7 +15,7 @@ import {
 } from "@/lib/program";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
 import { Camera, ArrowRight, CheckCircle2, Circle, Lock, RotateCcw, Info, Crown, AlertCircle } from "lucide-react";
-import { usePaywall, gate } from "@/lib/paywall";
+// Program access is unlocked once the user has completed a scan — no paywall gating here.
 
 export const Route = createFileRoute("/app/program")({ component: Program });
 
@@ -25,7 +25,6 @@ function Program() {
   const { data, isLoading } = useProgramRoutine();
   const [openId, setOpenId] = useState<string | null>(null);
   const [activeDay, setActiveDay] = useState<number | null>(null);
-  const { requirePremium } = usePaywall();
 
   if (!u || !status) return null;
 
@@ -114,17 +113,15 @@ function Program() {
           <ProgramOverview
             status={status}
             routine={routine}
-            onSelectDay={(d) => { if (gate(u.premium, requirePremium, "Opening a workout")) setActiveDay(d); }}
+            onSelectDay={(d) => setActiveDay(d)}
           />
         )}
 
-        {!u.premium && (
-          <Link to="/premium" className="block rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft" style={{ textDecoration: "none" }}>
-            <Crown className="h-5 w-5" />
-            <div className="mt-1 text-base font-extrabold">Unlock the full program</div>
-            <p className="text-sm opacity-90">Premium unlocks all 7 exercises per session, full 2-week schedule, retests, and rescans. €4.99/mo.</p>
-          </Link>
-        )}
+        <Link to="/pricing" className="block rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft" style={{ textDecoration: "none" }}>
+          <Crown className="h-5 w-5" />
+          <div className="mt-1 text-base font-extrabold">Ready to progress?</div>
+          <p className="text-sm opacity-90">After 14 days, rescan for €3.99 to update your program based on your improvements.</p>
+        </Link>
       </div>
 
       <DaySheet
@@ -132,7 +129,7 @@ function Program() {
         onClose={() => setActiveDay(null)}
         routine={routine}
         status={status}
-        onOpenExercise={(id) => { if (gate(u.premium, requirePremium, "Exercise details")) setOpenId(id); }}
+        onOpenExercise={(id) => setOpenId(id)}
       />
       <ExerciseSheet exerciseId={openId} onClose={() => setOpenId(null)} />
     </div>

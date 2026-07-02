@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
 import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
+import { consumeScanCredit } from "@/lib/scans.functions";
 import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal } from "lucide-react";
 
 export const Route = createFileRoute("/app/screen/run")({ component: Runner });
@@ -280,12 +281,23 @@ function Runner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, idx, restartKey]);
 
-  function finalize(allResults: TestResult[]) {
+  async function finalize(allResults: TestResult[]) {
     if (!u) return;
     const validCount = allResults.filter(r => r.valid !== false).length;
     if (validCount < 3) {
       setPhase("failed");
       return;
+    }
+    // Consume one scan credit (grandfathered subscribers are skipped server-side).
+    try {
+      const res = await consumeScanCredit();
+      if (!res.ok) {
+        setPhase("failed");
+        setTimeout(() => navigate({ to: "/pricing" }), 800);
+        return;
+      }
+    } catch (e) {
+      console.error("consumeScanCredit failed", e);
     }
     const joints = (u.questionnaire?.joints ?? []).filter(j => j !== "none") as Joint[];
     const session = computeSession(allResults, joints, u.age);
@@ -296,8 +308,10 @@ function Runner() {
       sessions: [...prev.sessions, session],
       firstRetestDone: prev.firstRetestDone || wasReTest,
       nextRetestDate: nextRetest,
-      // A new scan resets the 2-week training program.
-      programStartDate: new Date().toISOString(),
+      // Rescans keep the original programStartDate so the phase (Foundation → Build → Perform)
+      // and progression continue evolving instead of resetting to week 0.
+      // The 14-day training cycle resets so the user has a fresh calendar.
+      programStartDate: wasReTest ? prev.programStartDate ?? new Date().toISOString() : new Date().toISOString(),
       programCompletedDays: [],
     }));
     setPhase("done");
