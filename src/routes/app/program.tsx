@@ -15,7 +15,7 @@ import {
 } from "@/lib/program";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
 import { Camera, ArrowRight, CheckCircle2, Circle, Lock, RotateCcw, Info, Crown, AlertCircle } from "lucide-react";
-import { usePaywall, gate } from "@/lib/paywall";
+// Program access is unlocked once the user has completed a scan — no paywall gating here.
 
 export const Route = createFileRoute("/app/program")({ component: Program });
 
@@ -25,7 +25,6 @@ function Program() {
   const { data, isLoading } = useProgramRoutine();
   const [openId, setOpenId] = useState<string | null>(null);
   const [activeDay, setActiveDay] = useState<number | null>(null);
-  const { requirePremium } = usePaywall();
 
   if (!u || !status) return null;
 
