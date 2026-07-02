@@ -50,7 +50,7 @@ function ScreenIndex() {
   );
 
   return (
-    <div className="space-y-4 px-5 pb-6 pt-4" style={{ background: "#E7ECEC" }}>
+    <div className="space-y-4 px-5 pb-6 pt-4" style={{ background: "#ffffff" }}>
       {/* HERO CARD */}
       <SmartyCard
         Icon={Camera}
