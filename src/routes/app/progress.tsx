@@ -5,14 +5,12 @@ import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { Calendar, TrendingUp, Share2, Lock, AlertCircle, Target } from "lucide-react";
-import { usePaywall, gate } from "@/lib/paywall";
 
 export const Route = createFileRoute("/app/progress")({ component: Progress });
 
 function Progress() {
   const u = useUser();
   const decision = useScanDecision();
-  const { requirePremium } = usePaywall();
   if (!u) return null;
   const sessions = u.sessions;
   const latest = sessions[sessions.length - 1];
@@ -58,7 +56,7 @@ function Progress() {
             <div className="mb-2 flex items-center justify-between">
               <h3 className="text-base font-bold">Score history</h3>
               <button
-                onClick={() => { if (!gate(u.premium, requirePremium, "Sharing your results")) return; /* TODO: share */ }}
+                onClick={() => { /* TODO: share */ }}
                 className="flex items-center gap-1 rounded-xl bg-secondary px-3 py-1.5 text-xs font-semibold"
               >
                 <Share2 className="h-3.5 w-3.5" /> Share
