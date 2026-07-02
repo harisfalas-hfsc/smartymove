@@ -5,63 +5,139 @@ import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib
 const BRAND_IMAGE_URL =
   "https://smartymove.com/__l5e/assets-v1/55cc1cbc-55bc-4e27-b23e-f04ea9e5e5b4/smartymove-social.png";
 
+const SCAN_LOOKUP_KEY = "smartymove_scan_single";
+const SCAN_PRODUCT_EXTERNAL_ID = "smartymove_scan";
+const LEGACY_PREMIUM_LOOKUP_KEYS = ["smartymove_premium_monthly", "premium_monthly"];
+
+async function archivePremiumCatalog(stripe: ReturnType<typeof createStripeClient>, results: Record<string, unknown>) {
+  const archivedProducts = new Set<string>();
+  const archivedPrices = new Set<string>();
+
+  for (const lookupKey of LEGACY_PREMIUM_LOOKUP_KEYS) {
+    const prices = await stripe.prices.list({ lookup_keys: [lookupKey], expand: ["data.product"], limit: 10 });
+    for (const price of prices.data) {
+      const productId = typeof price.product === "string" ? price.product : (price.product as any).id;
+      if (price.active) {
+        await stripe.prices.update(price.id, { active: false });
+        archivedPrices.add(price.id);
+      }
+      if (productId && !archivedProducts.has(productId)) {
+        await stripe.products.update(productId, {
+          active: false,
+          description:
+            "Legacy SmartyMove Premium. Replaced by pay-per-scan (€3.99). Existing subscribers keep access until their subscription ends.",
+          metadata: {
+            app: "smartymove",
+            plan: "legacy_premium_monthly",
+            status: "archived",
+            replaced_by: SCAN_PRODUCT_EXTERNAL_ID,
+          },
+        });
+        archivedProducts.add(productId);
+      }
+    }
+  }
+
+  // Catch manually created duplicates that may not have the expected lookup key.
+  const duplicateProducts = new Map<string, any>();
+  for (const query of [
+    "active:'true' AND name~'SmartyMove Premium'",
+    "active:'true' AND name~'Smart Move Premium'",
+    "active:'true' AND name~'Smart Remove Premium'",
+  ]) {
+    const products = await stripe.products.search({ query, limit: 20 });
+    for (const product of products.data) duplicateProducts.set(product.id, product);
+  }
+  for (const product of duplicateProducts.values()) {
+    await stripe.products.update(product.id, {
+      active: false,
+      description:
+        "Legacy SmartyMove Premium. Replaced by pay-per-scan (€3.99). Existing subscribers keep access until their subscription ends.",
+      metadata: {
+        ...product.metadata,
+        app: "smartymove",
+        status: "archived",
+        replaced_by: SCAN_PRODUCT_EXTERNAL_ID,
+      },
+    });
+    archivedProducts.add(product.id);
+    const prices = await stripe.prices.list({ product: product.id, active: true, limit: 20 });
+    for (const price of prices.data) {
+      await stripe.prices.update(price.id, { active: false });
+      archivedPrices.add(price.id);
+    }
+  }
+
+  results.premiumArchivedProducts = Array.from(archivedProducts);
+  results.premiumArchivedPrices = Array.from(archivedPrices);
+}
+
+async function ensureScanProduct(stripe: ReturnType<typeof createStripeClient>) {
+  const existingPrice = await stripe.prices.list({ lookup_keys: [SCAN_LOOKUP_KEY], expand: ["data.product"], limit: 1 });
+  if (existingPrice.data.length) {
+    const price = existingPrice.data[0];
+    const productId = typeof price.product === "string" ? price.product : (price.product as any).id;
+    const updated = await stripe.products.update(productId, {
+      active: true,
+      name: "SmartyMove Movement Scan",
+      description:
+        "One movement scan (€3.99) with a personalized 2-week corrective training program and permanent access to scan history and program results.",
+      images: [BRAND_IMAGE_URL],
+      tax_code: "txcd_10000000",
+      metadata: {
+        app: "smartymove",
+        type: "one_time_scan",
+        lovable_external_id: SCAN_PRODUCT_EXTERNAL_ID,
+        version: "v1",
+      },
+    });
+    if (!price.active) await stripe.prices.update(price.id, { active: true });
+    return { productId: updated.id, priceId: price.id, created: false };
+  }
+
+  const product = await stripe.products.create({
+    active: true,
+    name: "SmartyMove Movement Scan",
+    description:
+      "One movement scan (€3.99) with a personalized 2-week corrective training program and permanent access to scan history and program results.",
+    images: [BRAND_IMAGE_URL],
+    tax_code: "txcd_10000000",
+    metadata: {
+      app: "smartymove",
+      type: "one_time_scan",
+      lovable_external_id: SCAN_PRODUCT_EXTERNAL_ID,
+      version: "v1",
+    },
+  });
+  const price = await stripe.prices.create({
+    active: true,
+    currency: "eur",
+    unit_amount: 399,
+    product: product.id,
+    lookup_key: SCAN_LOOKUP_KEY,
+    metadata: {
+      app: "smartymove",
+      type: "one_time_scan",
+      lovable_external_id: SCAN_LOOKUP_KEY,
+    },
+  });
+  return { productId: product.id, priceId: price.id, created: true };
+}
+
 async function sync(env: StripeEnv) {
   const stripe = createStripeClient(env);
   const results: Record<string, unknown> = { env };
 
-  // 1) Archive the legacy subscription product (idempotent).
+  // 1) Archive all legacy subscription catalog entries (idempotent).
   try {
-    const premium = await stripe.prices.list({
-      lookup_keys: ["smartymove_premium_monthly"],
-      expand: ["data.product"],
-    });
-    if (premium.data.length) {
-      const price = premium.data[0];
-      const productId =
-        typeof price.product === "string" ? price.product : (price.product as any).id;
-      await stripe.products.update(productId, {
-        active: false,
-        description:
-          "Legacy SmartyMove Premium. Replaced by pay-per-scan (€3.99). Existing subscribers keep access until their subscription ends.",
-        metadata: {
-          app: "smartymove",
-          plan: "legacy_premium_monthly",
-          status: "archived",
-          replaced_by: "smartymove_scan",
-        },
-      });
-      if (price.active) await stripe.prices.update(price.id, { active: false });
-      results.premiumArchived = productId;
-    }
+    await archivePremiumCatalog(stripe, results);
   } catch (e) {
     results.premiumError = getStripeErrorMessage(e);
   }
 
-  // 2) Update the SmartyMove Scan product with brand image + description.
+  // 2) Create/update the SmartyMove Scan product and €3.99 one-time price.
   try {
-    const scan = await stripe.prices.list({
-      lookup_keys: ["smartymove_scan_single"],
-      expand: ["data.product"],
-    });
-    if (!scan.data.length) {
-      results.scanError = "Scan price not found";
-    } else {
-      const price = scan.data[0];
-      const productId =
-        typeof price.product === "string" ? price.product : (price.product as any).id;
-      const updated = await stripe.products.update(productId, {
-        name: "SmartyMove Movement Scan",
-        description:
-          "One AI-guided movement scan (€3.99). Includes a personalized 2-week corrective training program you keep forever. Rescan anytime to progress.",
-        images: [BRAND_IMAGE_URL],
-        metadata: {
-          app: "smartymove",
-          type: "one_time_scan",
-          version: "v1",
-        },
-      });
-      results.scanUpdated = updated.id;
-    }
+    results.scan = await ensureScanProduct(stripe);
   } catch (e) {
     results.scanError = getStripeErrorMessage(e);
   }
