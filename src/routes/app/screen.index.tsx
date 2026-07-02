@@ -10,15 +10,16 @@ export const Route = createFileRoute("/app/screen/")({ component: ScreenIndex })
 function ScreenIndex() {
   const u = useUser();
   const navigate = useNavigate();
+  const access = useQuery({
+    queryKey: ["scan-access", u?.id ?? "pending"],
+    queryFn: () => getScanAccess(),
+    enabled: !!u,
+    staleTime: 30_000,
+  });
   if (!u) return null;
   const joints = (u.questionnaire?.joints ?? []).filter(j => j !== "none");
   const addOns = joints.slice(0, 2).map(j => CONDITIONAL_TESTS[j as keyof typeof CONDITIONAL_TESTS]);
   const last = u.sessions[u.sessions.length - 1];
-  const access = useQuery({
-    queryKey: ["scan-access", u.id],
-    queryFn: () => getScanAccess(),
-    staleTime: 30_000,
-  });
   const canScan = access.data?.canScan ?? false;
   const credits = access.data?.credits ?? 0;
   const grandfathered = !!access.data?.hasActiveSubscription;
@@ -45,7 +46,7 @@ function ScreenIndex() {
           {access.isLoading ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Checking scan access…</div>
           ) : grandfathered ? (
-            <div className="text-sm"><strong>Premium member</strong> — unlimited scans until your subscription ends.</div>
+            <div className="text-sm"><strong>Scan access available</strong> — you can run your Movement Screen now.</div>
           ) : canScan ? (
             <div className="text-sm">You have <strong>{credits}</strong> scan{credits === 1 ? "" : "s"} available.</div>
           ) : (

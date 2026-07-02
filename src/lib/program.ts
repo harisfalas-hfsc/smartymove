@@ -51,7 +51,11 @@ export function getProgramStatus(): ProgramStatus | null {
   const u = getUser();
   if (!u) return null;
   const hasScan = u.sessions.length > 0;
-  const startISO = u.programStartDate ?? u.createdAt;
+  // A 14-day training cycle starts from the latest completed Movement Screen.
+  // `programStartDate` is kept for long-term phase progression, so using it
+  // here would hide the rescan warning when the latest scan is already due.
+  const latestScan = hasScan ? u.sessions[u.sessions.length - 1] : null;
+  const startISO = latestScan?.date ?? u.programStartDate ?? u.createdAt;
   const start = new Date(startISO);
   const end = new Date(start.getTime() + PROGRAM_LENGTH_DAYS * 86400000);
   const elapsed = Math.floor((Date.now() - start.getTime()) / 86400000);
@@ -76,12 +80,13 @@ export function getProgramStatus(): ProgramStatus | null {
 
 export function useProgramStatus(): ProgramStatus | null {
   const u = useUser();
+  const latestScanDate = u?.sessions?.[u.sessions.length - 1]?.date;
   return useMemo(() => {
     if (!u) return null;
     return getProgramStatus();
     // recompute when user object changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [u?.programStartDate, u?.programCompletedDays?.length, u?.sessions.length]);
+  }, [u?.programStartDate, latestScanDate, u?.programCompletedDays?.length, u?.sessions.length]);
 }
 
 export function markDayCompleted(dayIndex: number) {

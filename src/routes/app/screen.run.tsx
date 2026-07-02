@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
 import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
@@ -141,7 +141,10 @@ function Runner() {
   const latestLandmarksRef = useRef<any[] | null>(null);
 
   const [phase, setPhase] = useState<"setup" | "intro" | "running" | "done" | "failed">("setup");
-  const [seq, setSeq] = useState<TestDef[]>([]);
+  const seq = useMemo(
+    () => buildSequence(u?.questionnaire?.joints ?? []),
+    [u?.questionnaire?.joints?.join("|")],
+  );
   const [idx, setIdx] = useState(0);
   const [countdown, setCountdown] = useState(0);
   const [elapsed, setElapsed] = useState(0);
@@ -156,14 +159,13 @@ function Runner() {
   const [showInstructions, setShowInstructions] = useState(false);
   const [restartKey, setRestartKey] = useState(0);
   const pausedRef = useRef(false);
+  const activeTestKeyRef = useRef<string | null>(null);
   useEffect(() => { pausedRef.current = paused || showInstructions; }, [paused, showInstructions]);
 
   // Detection-latency tracking so we can downgrade the model if the device
   // is too slow to keep up with the "full" landmarker.
   const frameTimesRef = useRef<number[]>([]);
   const fallbackCheckedRef = useRef(false);
-
-  useEffect(() => { if (u) setSeq(buildSequence(u.questionnaire?.joints ?? [])); }, [u]);
 
   async function start() {
     setError(null);
@@ -245,6 +247,8 @@ function Runner() {
   useEffect(() => {
     if (phase !== "running") return;
     const test = seq[idx]; if (!test) return;
+    const activeKey = `${idx}:${restartKey}:${test.id}`;
+    activeTestKeyRef.current = activeKey;
     samplesRef.current = [];
     setCountdown(test.duration);
     setElapsed(0);
@@ -257,6 +261,7 @@ function Runner() {
     let done = false;
     const finish = (skipped = false) => {
       if (done) return;
+      if (activeTestKeyRef.current !== activeKey) return;
       done = true;
       clearInterval(tickId); clearInterval(sampleId);
       const score: TestResult = skipped
@@ -270,6 +275,7 @@ function Runner() {
     };
     finishHandlerRef.current = finish;
     const tickId = setInterval(() => {
+      if (activeTestKeyRef.current !== activeKey) return;
       if (pausedRef.current) return;
       setElapsed(e => e + 1);
       setCountdown(c => {
@@ -277,7 +283,7 @@ function Runner() {
         return c - 1;
       });
     }, 1000);
-    return () => { clearInterval(tickId); clearInterval(sampleId); finishHandlerRef.current = null; };
+    return () => { activeTestKeyRef.current = null; clearInterval(tickId); clearInterval(sampleId); finishHandlerRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, idx, restartKey]);
 

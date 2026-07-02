@@ -165,13 +165,7 @@ function ProgramCta({ status }: { status: NonNullable<ReturnType<typeof useProgr
   const done = inProgram && status.completedDays.includes(dayIndex);
 
   if (status.locked) {
-    return (
-      <Link to="/app/screen" className="block rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft">
-        <div className="text-xs font-semibold uppercase tracking-widest opacity-85">Program complete</div>
-        <div className="mt-1 text-lg font-extrabold">Rescan to unlock your next program</div>
-        <div className="mt-2 flex items-center gap-1 text-sm font-semibold opacity-95">Start Movement Screen <ArrowRight className="h-4 w-4" /></div>
-      </Link>
-    );
+    return null;
   }
 
   if (!inProgram) {
