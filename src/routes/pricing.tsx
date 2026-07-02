@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Camera, Loader2, X, Crown, ScanLine, Sparkles, Infinity as InfinityIcon, RefreshCw, ShoppingBag, Play, Calendar, TrendingUp } from "lucide-react";
+import { Camera, Loader2, X, Crown, ScanLine, Sparkles, Infinity as InfinityIcon, RefreshCw, ShoppingBag, Play, Calendar, TrendingUp, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -9,12 +9,14 @@ import { useUser } from "@/lib/store";
 import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
 import { createBillingPortalSession } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
       { title: "SmartyMove Pricing — €3.99 per Movement Scan" },
-      { name: "description", content: "Pay only when you scan. €3.99 per Movement Screen with a personalized 2-week training program you keep forever. Rescan anytime to progress." },
+      { name: "description", content: "Pay only when you scan. €3.99 per Movement Screen with a personalized 2-week training program you keep forever." },
       { property: "og:title", content: "SmartyMove — €3.99 per scan" },
       { property: "og:description", content: "Pay per scan. Keep your program forever. Rescan anytime to update your plan." },
       { property: "og:url", content: "https://smartymove.com/pricing" },
@@ -39,14 +41,11 @@ function Pricing() {
   const grandfathered = !!access.data?.hasActiveSubscription;
   const credits = access.data?.credits ?? 0;
 
-  // After Stripe returns to /pricing?paid=1, poll scan credits until the webhook
-  // grants the credit, then auto-navigate to the scan page.
   useEffect(() => {
     if (!u) return;
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("paid") !== "1") return;
-
     let cancelled = false;
     let attempts = 0;
     const tick = async () => {
@@ -58,7 +57,6 @@ function Pricing() {
       });
       if (cancelled) return;
       if (fresh?.canScan) {
-        // Clean the ?paid=1 flag then send them to run the scan.
         window.history.replaceState({}, "", "/pricing");
         navigate({ to: "/app/screen" });
         return;
@@ -92,73 +90,118 @@ function Pricing() {
     } finally { setPortalLoading(false); }
   }
 
+  const perks = [
+    { Icon: ScanLine, color: "text-blue-500", label: "Full Movement Screen — 5 core tests + add-ons" },
+    { Icon: Sparkles, color: "text-purple-500", label: "Movement Score & Movement Age" },
+    { Icon: Calendar, color: "text-orange-500", label: "Personalized 2-week training program" },
+    { Icon: InfinityIcon, color: "text-emerald-500", label: "Dashboard & history — kept forever" },
+    { Icon: RefreshCw, color: "text-cyan-500", label: "Rescan anytime to progress your plan" },
+    { Icon: CheckCircle2, color: "text-pink-500", label: "No subscription. No hidden fees." },
+  ];
+
+  const steps = [
+    { n: 1, Icon: ShoppingBag, color: "text-orange-500", title: "Buy a scan", body: `One-time €${SCAN_PRICE_EUR.toFixed(2)}. No subscription.` },
+    { n: 2, Icon: Camera, color: "text-blue-500", title: "Run your Movement Screen", body: "Phone or laptop camera. ~5 minutes." },
+    { n: 3, Icon: Calendar, color: "text-purple-500", title: "Follow your 2-week plan", body: "Mark sessions complete as you go." },
+    { n: 4, Icon: TrendingUp, color: "text-emerald-500", title: "Rescan & progress", body: "After 14 days, update your program." },
+  ];
+
   return (
-    <div className="flex min-h-[100dvh] w-full flex-col" style={{ background: "#E7ECEC", color: "#14213A" }}>
+    <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
       <SiteHeader showBack />
-      <main className="mx-auto w-full max-w-[760px] px-5 pb-8 pt-5">
+      <main className="mx-auto w-full max-w-[760px] px-4 pb-8 pt-4 space-y-6">
         {paidReturn && (
-          <div className="mb-4 flex items-center gap-2 rounded-2xl px-4 py-3 text-sm" style={{ background: "#E7F7EE", color: "#0E7C86", border: "1px solid #B7E4CB" }}>
+          <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Payment received — unlocking your scan and taking you to the Movement Screen…
+            Payment received — unlocking your scan…
           </div>
         )}
-        <div className="relative overflow-hidden" style={{ background: "linear-gradient(160deg,#0E7C86 0%, #1f6fa8 100%)", borderRadius: 22, padding: "26px 22px 28px", color: "#fff" }}>
-          <div className="flex items-center gap-2" style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", fontWeight: 700, opacity: 0.9 }}>
-            <Camera className="h-3.5 w-3.5" /> Pay per scan
-          </div>
-          <h1 style={{ fontWeight: 800, fontSize: 28, lineHeight: 1.15, letterSpacing: "-0.02em", margin: "10px 0 10px" }}>
-            One Movement Scan.<br />
-            <span style={{ color: "#7CFFB8" }}>€{SCAN_PRICE_EUR.toFixed(2)}.</span> No subscription.
-          </h1>
-          <p style={{ fontSize: 15, lineHeight: 1.55, opacity: 0.95, margin: 0 }}>
-            One scan = one full Movement Screen + a personalized 2-week training program. Keep your program, dashboard, and history forever. Rescan when you want to progress.
-          </p>
 
-          {grandfathered ? (
-            <div className="mt-4 rounded-2xl bg-white/10 p-4 text-sm">
-              <div className="flex items-center gap-2 font-semibold"><Crown className="h-4 w-4" /> You're on legacy Premium</div>
-              <div className="mt-1 opacity-90">Unlimited scans included until your subscription ends. After that, scans are €{SCAN_PRICE_EUR.toFixed(2)} each.</div>
-              <button type="button" onClick={handleManage} disabled={portalLoading} className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl font-bold" style={{ background: "#fff", color: "#14213A" }}>
-                {portalLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                {portalLoading ? "Opening…" : "Manage subscription"}
-              </button>
-            </div>
-          ) : (
-            <>
-              <button type="button" onClick={handleBuy} className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold" style={{ background: "#FF6B4A", color: "#fff", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}>
-                <Camera className="h-4 w-4" /> Buy one scan · €{SCAN_PRICE_EUR.toFixed(2)}
-              </button>
-              {u && (
-                <p className="mt-2 text-center text-[11px]" style={{ opacity: 0.85 }}>
-                  You have <strong>{credits}</strong> scan{credits === 1 ? "" : "s"} available.
-                </p>
+        <Card className="border-2 border-primary">
+          <CardContent className="p-6">
+            <div className="text-center space-y-3">
+              <Camera className="w-12 h-12 text-primary mx-auto" />
+              <h1 className="text-2xl font-bold text-foreground">
+                One Scan. <span className="text-primary">One Price.</span>
+              </h1>
+              <p className="text-4xl font-extrabold text-primary">€{SCAN_PRICE_EUR.toFixed(2)}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                No subscription. One-time payment for a full Movement Screen plus your personalized 2-week training program — yours to keep forever.
+              </p>
+              {grandfathered ? (
+                <div className="space-y-2 rounded-md bg-primary/5 p-3 text-sm">
+                  <div className="flex items-center justify-center gap-2 font-semibold text-primary">
+                    <Crown className="h-4 w-4" /> Legacy Premium — unlimited scans
+                  </div>
+                  <Button variant="outline" onClick={handleManage} disabled={portalLoading} className="w-full">
+                    {portalLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    {portalLoading ? "Opening…" : "Manage subscription"}
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Button size="lg" onClick={handleBuy} className="w-full">
+                    <Camera className="w-4 h-4 mr-2" /> Buy one scan · €{SCAN_PRICE_EUR.toFixed(2)}
+                  </Button>
+                  {u && (
+                    <p className="text-xs text-muted-foreground">
+                      You have <strong className="text-foreground">{credits}</strong> scan{credits === 1 ? "" : "s"} available.
+                    </p>
+                  )}
+                </>
               )}
-            </>
-          )}
-        </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <section className="mt-5">
-          <h2 className="px-1 text-[11px] font-bold uppercase tracking-widest" style={{ color: "#5A6B85" }}>What each scan gives you</h2>
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <Feature Icon={ScanLine} title="Full Movement Screen" body="5 core tests + targeted add-ons." tint="#0E7C86" bg="#E6F5F5" />
-            <Feature Icon={Sparkles} title="Score & Movement Age" body="With root-cause clustering." tint="#7A3EBA" bg="#F1E9FA" />
-            <Feature Icon={Calendar} title="2-Week Program" body="Personalized to your weak points." tint="#C2410C" bg="#FDECD8" />
-            <Feature Icon={InfinityIcon} title="Kept Forever" body="Dashboard & history never expire." tint="#0F766E" bg="#DCFCE7" />
-            <Feature Icon={RefreshCw} title="Rescan to Progress" body="Program evolves, no restart." tint="#1D4ED8" bg="#DBEAFE" full />
-          </div>
-        </section>
+        <Card className="border-2 border-primary">
+          <CardContent className="p-6">
+            <div className="text-center space-y-3">
+              <Sparkles className="w-12 h-12 text-primary mx-auto" />
+              <h2 className="text-2xl font-bold text-foreground">
+                What <span className="text-primary">Each Scan</span> Gives You
+              </h2>
+              <div className="space-y-3 text-left pt-2">
+                {perks.map(({ Icon, color, label }) => (
+                  <div key={label} className="flex items-center gap-3">
+                    <Icon className={`w-6 h-6 ${color} flex-shrink-0`} />
+                    <span className="text-sm font-semibold text-foreground">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <section className="mt-5">
-          <h2 className="px-1 text-[11px] font-bold uppercase tracking-widest" style={{ color: "#5A6B85" }}>How it works</h2>
-          <div className="mt-3 space-y-2.5">
-            <Step n={1} Icon={ShoppingBag} title="Buy a scan" body={`One-time €${SCAN_PRICE_EUR.toFixed(2)}. No subscription.`} tint="#FF6B4A" />
-            <Step n={2} Icon={Play} title="Run your Movement Screen" body="From your phone or laptop camera." tint="#0E7C86" />
-            <Step n={3} Icon={Calendar} title="Follow your 2-week plan" body="Mark sessions complete as you go." tint="#7A3EBA" />
-            <Step n={4} Icon={TrendingUp} title="Rescan & progress" body="After 14 days, update your program." tint="#1D4ED8" />
-          </div>
-        </section>
+        <Card className="border-2 border-primary">
+          <CardContent className="p-6">
+            <div className="text-center space-y-3">
+              <Play className="w-12 h-12 text-primary mx-auto" />
+              <h2 className="text-2xl font-bold text-foreground">
+                How <span className="text-primary">It Works</span>
+              </h2>
+              <div className="space-y-3 text-left pt-2">
+                {steps.map(({ n, Icon, color, title, body }) => (
+                  <div key={n} className="flex items-start gap-3">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 text-sm font-extrabold text-primary">
+                      {n}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Icon className={`w-4 h-4 ${color}`} />
+                        <span className="text-sm font-bold text-foreground">{title}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{body}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <SiteFooter />
       </main>
-      <SiteFooter />
 
       {checkoutOpen && u && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center p-3 sm:items-center" role="dialog" aria-modal="true">
@@ -174,33 +217,6 @@ function Pricing() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function Feature({ Icon, title, body, tint, bg, full }: { Icon: any; title: string; body: string; tint: string; bg: string; full?: boolean }) {
-  return (
-    <div className={`rounded-2xl bg-white p-4 shadow-sm ${full ? "col-span-2" : ""}`} style={{ border: "1px solid #E5EAEC" }}>
-      <div className="grid h-9 w-9 place-items-center rounded-xl" style={{ background: bg, color: tint }}>
-        <Icon className="h-4.5 w-4.5" strokeWidth={2.2} />
-      </div>
-      <div className="mt-2.5 text-sm font-bold" style={{ color: "#14213A" }}>{title}</div>
-      <div className="mt-0.5 text-xs leading-snug" style={{ color: "#5A6B85" }}>{body}</div>
-    </div>
-  );
-}
-
-function Step({ n, Icon, title, body, tint }: { n: number; Icon: any; title: string; body: string; tint: string }) {
-  return (
-    <div className="flex items-center gap-3 rounded-2xl bg-white p-3.5 shadow-sm" style={{ border: "1px solid #E5EAEC" }}>
-      <div className="relative grid h-11 w-11 shrink-0 place-items-center rounded-2xl" style={{ background: `${tint}14`, color: tint }}>
-        <Icon className="h-5 w-5" strokeWidth={2.2} />
-        <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full text-[10px] font-bold text-white" style={{ background: tint }}>{n}</span>
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-sm font-bold" style={{ color: "#14213A" }}>{title}</div>
-        <div className="text-xs" style={{ color: "#5A6B85" }}>{body}</div>
-      </div>
     </div>
   );
 }

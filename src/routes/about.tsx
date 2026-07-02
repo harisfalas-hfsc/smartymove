@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Camera, Activity, Target, ShieldCheck, Repeat } from "lucide-react";
+import { Sparkles, Camera, Activity, Target, ShieldCheck, Repeat, Compass, Users, Heart, GraduationCap, Dumbbell, Plane, Briefcase, Play, Search, Calendar, TrendingUp } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -18,126 +20,152 @@ export const Route = createFileRoute("/about")({
 });
 
 function About() {
+  const whatItDoes = [
+    { Icon: Camera, color: "text-blue-500", label: "Camera-based Movement Screen" },
+    { Icon: Activity, color: "text-emerald-500", label: "Movement Score & Movement Age" },
+    { Icon: Target, color: "text-orange-500", label: "Root-cause corrective program" },
+    { Icon: Repeat, color: "text-purple-500", label: "5 minutes a day, structured in phases" },
+    { Icon: Sparkles, color: "text-pink-500", label: "Compensation & asymmetry detection" },
+    { Icon: ShieldCheck, color: "text-cyan-500", label: "Private by design — on-device pose tracking" },
+  ];
+
+  const audience = [
+    { Icon: Briefcase, color: "text-blue-500", label: "Desk Workers" },
+    { Icon: Dumbbell, color: "text-orange-500", label: "Lifters" },
+    { Icon: Activity, color: "text-emerald-500", label: "Runners" },
+    { Icon: Heart, color: "text-pink-500", label: "Parents" },
+    { Icon: GraduationCap, color: "text-purple-500", label: "Beginners" },
+    { Icon: Plane, color: "text-cyan-500", label: "Travelers" },
+  ];
+
+  const howItWorks = [
+    { n: 1, Icon: Compass, color: "text-blue-500", title: "Set up", body: "Quick readiness questionnaire and goal." },
+    { n: 2, Icon: Camera, color: "text-orange-500", title: "Screen", body: "Prop your phone, follow the prompts, 5 short tests." },
+    { n: 3, Icon: Search, color: "text-purple-500", title: "See your results", body: "Score, Movement Age, and the real root cause." },
+    { n: 4, Icon: Play, color: "text-emerald-500", title: "Train", body: "Your 5-minute daily routine — mobility, stability, strength." },
+    { n: 5, Icon: TrendingUp, color: "text-cyan-500", title: "Rescan every 14 days", body: "Watch your score improve, your program evolve." },
+  ];
+
   return (
-    <div className="flex min-h-[100dvh] w-full flex-col" style={{ background: "#E7ECEC", color: "#14213A" }}>
+    <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
       <SiteHeader showBack />
-      <main className="mx-auto w-full max-w-[760px] px-5 pb-8 pt-5">
-        <div
-          className="relative overflow-hidden"
-          style={{
-            background: "linear-gradient(160deg,#0E7C86 0%, #1f6fa8 100%)",
-            borderRadius: 22,
-            padding: "26px 22px 28px",
-            color: "#fff",
-          }}
-        >
-          <div style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", fontWeight: 700, opacity: 0.85 }}>
-            About SmartyMove
-          </div>
-          <h1 style={{ fontWeight: 800, fontSize: 28, lineHeight: 1.15, letterSpacing: "-0.02em", margin: "10px 0 10px" }}>
-            Know how you move.<br />
-            <span style={{ color: "#7CFFB8" }}>Move smarter.</span>
-          </h1>
-          <p style={{ fontSize: 15, lineHeight: 1.55, opacity: 0.95, margin: 0 }}>
-            Your pocket movement coach — a camera-based screen plus a short daily routine built around what your body actually needs.
-          </p>
-        </div>
+      <main className="mx-auto w-full max-w-[760px] px-4 pb-8 pt-4 space-y-6">
+        {/* Hero card — mirrors SmartyGym "Your Gym Re-imagined" */}
+        <Card className="border-2 border-primary">
+          <CardContent className="p-6">
+            <div className="text-center space-y-4">
+              <Target className="w-12 h-12 text-primary mx-auto" />
+              <h1 className="text-2xl font-bold text-foreground">
+                Know How You Move. <span className="text-primary">Move Smarter.</span>
+              </h1>
+              <div className="space-y-3 text-left pt-1">
+                {whatItDoes.map(({ Icon, color, label }) => (
+                  <div key={label} className="flex items-center gap-3">
+                    <Icon className={`w-6 h-6 ${color} flex-shrink-0`} />
+                    <span className="text-sm font-semibold text-foreground">{label}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed pt-1">
+                Your pocket movement coach — a camera-based screen and a short daily routine built around what your body actually needs.
+              </p>
+              <Link to="/pricing">
+                <Button size="lg" className="w-full mt-2">Take a Movement Scan</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
 
-        <section
-          className="mt-4"
-          style={{ background: "#fff", border: "1px solid #E5EAEC", borderRadius: 22, padding: "22px 22px 24px", fontSize: 15, lineHeight: 1.65, color: "#3B4A63" }}
-        >
-          <h2 style={h2}>Why SmartyMove exists</h2>
-          <p>
-            Most people don't know how their body actually moves. They feel stiff, sore, or stuck — but they
-            don't know <strong>where</strong> the limit is, <strong>why</strong> it's there, or <strong>what</strong> to do about it.
-            Getting a real assessment usually means booking a physio, paying for a session, and waiting weeks
-            for a plan.
-          </p>
-          <p>
-            SmartyMove turns your phone camera into a movement screen. In about 5 minutes you get a clear
-            picture of how you move, where the weak links are, and a short daily routine that targets the
-            <strong> root cause</strong> — not just the symptoms.
-          </p>
+        {/* Why SmartyMove exists */}
+        <Card className="border-2 border-primary">
+          <CardContent className="p-6">
+            <div className="text-center space-y-3">
+              <Sparkles className="w-12 h-12 text-primary mx-auto" />
+              <h2 className="text-2xl font-bold text-foreground">
+                Why <span className="text-primary">SmartyMove</span> Exists
+              </h2>
+              <p className="text-sm text-muted-foreground leading-relaxed text-left">
+                Most people don't know how their body actually moves. They feel stiff, sore, or stuck —
+                but they don't know <strong className="text-foreground">where</strong> the limit is,{" "}
+                <strong className="text-foreground">why</strong> it's there, or{" "}
+                <strong className="text-foreground">what</strong> to do about it.
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed text-left">
+                SmartyMove turns your phone camera into a movement screen. In 5 minutes you get a clear
+                picture of how you move and a short daily routine that targets the{" "}
+                <strong className="text-primary">root cause</strong> — not just the symptoms.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-          <h2 style={h2}>What it does</h2>
-          <div className="mt-2 grid gap-3 sm:grid-cols-2">
-            <Feature icon={<Camera className="h-4 w-4" />} title="Camera-based screen">
-              Five core movement tests scored from your phone, on-device. No wearables, no clinic visit.
-            </Feature>
-            <Feature icon={<Activity className="h-4 w-4" />} title="Movement Score & Age">
-              An overall score plus a motivational Movement Age you can lower over time.
-            </Feature>
-            <Feature icon={<Target className="h-4 w-4" />} title="Root-cause program">
-              We cluster your findings and prioritize the issue that fixes the most things at once.
-            </Feature>
-            <Feature icon={<Repeat className="h-4 w-4" />} title="5 minutes a day">
-              Short corrective sessions in phases — Foundation, Build, Maintain & Perform.
-            </Feature>
-            <Feature icon={<Sparkles className="h-4 w-4" />} title="Compensation detection">
-              We check if your range was real — not faked by your lower back, shoulder, or heel lifting.
-            </Feature>
-            <Feature icon={<ShieldCheck className="h-4 w-4" />} title="Private by design">
-              Pose detection runs on your device. No raw video is uploaded to our servers.
-            </Feature>
-          </div>
+        {/* How it works */}
+        <Card className="border-2 border-primary">
+          <CardContent className="p-6">
+            <div className="text-center space-y-3">
+              <Play className="w-12 h-12 text-primary mx-auto" />
+              <h2 className="text-2xl font-bold text-foreground">
+                How <span className="text-primary">It Works</span>
+              </h2>
+              <div className="space-y-3 text-left pt-2">
+                {howItWorks.map(({ n, Icon, color, title, body }) => (
+                  <div key={n} className="flex items-start gap-3">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 text-sm font-extrabold text-primary">
+                      {n}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Icon className={`w-4 h-4 ${color}`} />
+                        <span className="text-sm font-bold text-foreground">{title}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{body}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          <h2 style={h2}>How it works</h2>
-          <ol style={{ margin: "0 0 12px", paddingLeft: 18 }}>
-            <li><strong>Set up.</strong> Quick readiness questionnaire and goal selection.</li>
-            <li><strong>Screen.</strong> Prop your phone, follow the prompts, do 5 short tests.</li>
-            <li><strong>See your results.</strong> Score, Movement Age, and the real root cause behind any failed tests.</li>
-            <li><strong>Train.</strong> Follow your 5-minute daily routine — mobility, stability, and strength in the right ratio for your phase.</li>
-            <li><strong>Retest every 14 days.</strong> Watch your score improve and your program evolve.</li>
-          </ol>
+        {/* Who it's for */}
+        <Card className="border-2 border-primary">
+          <CardContent className="p-6">
+            <div className="text-center space-y-4">
+              <Users className="w-12 h-12 text-primary mx-auto" />
+              <h2 className="text-2xl font-bold text-foreground">
+                Who <span className="text-primary">SmartyMove</span> Is For
+              </h2>
+              <div className="grid grid-cols-3 gap-3">
+                {audience.map(({ Icon, color, label }) => (
+                  <div key={label} className="flex flex-col items-center gap-1">
+                    <Icon className={`w-7 h-7 ${color}`} />
+                    <span className="text-xs font-bold text-foreground text-center leading-tight">{label}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Anyone who wants to move better — and is tired of generic routines that don't match their body.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-          <h2 style={h2}>Who it's for</h2>
-          <p>
-            Anyone who wants to move better — desk workers with stiff hips, lifters protecting their joints,
-            runners chasing efficiency, parents who want to keep up, or anyone who's tired of generic
-            stretching routines that don't match their actual body.
-          </p>
-          <p style={{ marginBottom: 0, color: "#6B7A90", fontSize: 13.5 }}>
-            SmartyMove is a wellness and education tool — not a medical device. See our{" "}
-            <Link to="/disclaimer" style={link}>disclaimer</Link> for the safety details.
-          </p>
-        </section>
-
-        <div className="mt-5 text-center">
-          <Link
-            to="/"
-            style={{
-              display: "inline-block",
-              background: "#FF6B4A", color: "#fff",
-              fontWeight: 700, fontSize: 15,
-              padding: "14px 26px", borderRadius: 16,
-              boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)",
-              textDecoration: "none",
-            }}
-          >
-            Take the Movement Screen
-          </Link>
-        </div>
+        {/* Safety */}
+        <Card className="border-2 border-primary">
+          <CardContent className="p-6">
+            <div className="text-center space-y-3">
+              <ShieldCheck className="w-12 h-12 text-emerald-500 mx-auto" />
+              <h2 className="text-xl font-bold text-foreground">Wellness Tool, Not Medical Advice</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                SmartyMove is an education and wellness product. It doesn't diagnose or treat medical conditions.
+                See our <Link to="/disclaimer" className="font-semibold text-primary hover:underline">disclaimer</Link> for details.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
         <SiteFooter />
       </main>
     </div>
   );
 }
-
-function Feature({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ background: "#F1F5F4", border: "1px solid #D9E0E2", borderRadius: 14, padding: "12px 14px" }}>
-      <div className="flex items-center gap-2" style={{ color: "#0E7C86", fontWeight: 700, fontSize: 14 }}>
-        <span className="grid place-items-center" style={{ width: 24, height: 24, borderRadius: 8, background: "#0E7C86", color: "#fff" }}>
-          {icon}
-        </span>
-        {title}
-      </div>
-      <div style={{ marginTop: 6, fontSize: 13.5, lineHeight: 1.5, color: "#3B4A63" }}>{children}</div>
-    </div>
-  );
-}
-
-const h2: React.CSSProperties = { fontWeight: 700, fontSize: 18, color: "#14213A", margin: "20px 0 8px" };
-const link: React.CSSProperties = { color: "#0E7C86", fontWeight: 600, textDecoration: "none" };
