@@ -9,7 +9,7 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
       style={{ background: "#ffffff", color: "#14213A" }}
     >
       <SiteHeader showBack />
-      <main className="mx-auto w-full max-w-[760px] px-5 pb-8 pt-5">
+      <main className="mx-auto w-full max-w-[760px] flex-1 px-5 pb-6 pt-5">
         <div className="flex items-center gap-3">
           <span
             className="grid place-items-center"
@@ -39,8 +39,6 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
           {children}
         </article>
 
-        <SiteFooter />
-
         <style>{`
           .legal-prose h2{ font-weight:700; font-size:18px; color:#14213A; margin:22px 0 8px; letter-spacing:0; }
           .legal-prose h2:first-child{ margin-top:0; }
@@ -56,6 +54,7 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
           .legal-prose .note{ background:#F1F5F4; border:1px solid #D9E0E2; border-radius:14px; padding:12px 14px; margin:14px 0; font-size:13.5px; }
         `}</style>
       </main>
+      <SiteFooter />
     </div>
   );
 }

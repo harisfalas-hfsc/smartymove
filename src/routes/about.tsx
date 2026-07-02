@@ -49,7 +49,7 @@ function About() {
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
       <SiteHeader showBack />
-      <main className="mx-auto w-full max-w-[760px] px-4 pb-8 pt-4 space-y-6">
+      <main className="mx-auto w-full max-w-[760px] flex-1 px-4 pb-6 pt-4 space-y-6">
         {/* Hero card — mirrors SmartyGym "Your Gym Re-imagined" */}
         <Card className="border-2 border-primary">
           <CardContent className="p-6">
@@ -164,8 +164,8 @@ function About() {
           </CardContent>
         </Card>
 
-        <SiteFooter />
       </main>
+      <SiteFooter />
     </div>
   );
 }

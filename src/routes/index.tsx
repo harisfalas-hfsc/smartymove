@@ -159,7 +159,7 @@ function Welcome() {
         onSignUp={() => setMode("signup")}
         onBack={mode === "intro" ? undefined : () => setMode("intro")}
       />
-      <main className="mx-auto w-full max-w-[420px] px-5 pb-8 pt-5">
+      <main className="mx-auto w-full max-w-[420px] flex-1 px-5 pb-6 pt-5">
 
         {mode === "intro" ? (
           <>
@@ -386,8 +386,6 @@ function Welcome() {
           </form>
         )}
 
-        <SiteFooter />
-
         <style>{`
           .sm-scanline{
             position:absolute; left:14px; right:14px; height:3px; top:18px;
@@ -405,6 +403,7 @@ function Welcome() {
           }
         `}</style>
       </main>
+      <SiteFooter />
     </div>
   );
 }

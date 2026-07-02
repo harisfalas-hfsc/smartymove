@@ -63,7 +63,7 @@ function ResetPassword() {
   return (
     <div className="flex min-h-[100dvh] w-full flex-col">
       <SiteHeader />
-      <main className="mx-auto w-full max-w-[420px] px-5 pb-8 pt-5">
+      <main className="mx-auto w-full max-w-[420px] flex-1 px-5 pb-6 pt-5">
         <h2 style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}>
           Set a new password
         </h2>
@@ -105,8 +105,8 @@ function ResetPassword() {
           </Button>
           {err && <p className="text-center text-sm font-semibold text-destructive">{err}</p>}
         </form>
-        <SiteFooter />
       </main>
+      <SiteFooter />
     </div>
   );
 }
