@@ -9,25 +9,21 @@ async function sync(env: StripeEnv) {
   if (!prices.data.length) return { env, error: "Price not found" };
   const price = prices.data[0];
   const productId = typeof price.product === "string" ? price.product : (price.product as any).id;
+  // Archive the legacy subscription product so no new subscribers can sign up.
+  // Existing subscriptions keep billing normally until they expire or cancel.
   const updated = await stripe.products.update(productId, {
-    name: "SmartyMove Premium",
-    description: "Daily corrective movement program, re-tests every 14 days, Movement Age trajectory, and all add-on joint assessments. €4.99/month. Cancel anytime.",
-    images: [IMAGE_URL],
-    url: "https://smartymove.com/premium",
-    statement_descriptor: "SMARTYMOVE PREM",
-    tax_code: "txcd_10103001",
+    active: false,
+    description: "Legacy SmartyMove Premium. Replaced by pay-per-scan (€3.99). Existing subscribers keep access until their subscription ends.",
     metadata: {
       app: "smartymove",
-      plan: "premium_monthly",
-      tier: "premium",
-      billing_cycle: "monthly",
-      currency: "EUR",
-      price_eur: "4.99",
-      website: "https://smartymove.com",
-      support_email: "smartymove@outlook.com",
+      plan: "legacy_premium_monthly",
+      status: "archived",
+      replaced_by: "smartymove_scan",
     },
   });
-  return { env, ok: true, productId: updated.id, name: updated.name, images: updated.images, metadata: updated.metadata };
+  // Also deactivate the recurring price to block new checkouts using the lookup key.
+  await stripe.prices.update(price.id, { active: false });
+  return { env, ok: true, archived: true, productId: updated.id };
 }
 
 export const Route = createFileRoute("/api/public/admin/sync-premium")({
