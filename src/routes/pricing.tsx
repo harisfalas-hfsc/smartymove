@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Camera, Check, Loader2, X, Crown } from "lucide-react";
+import { Camera, Loader2, X, Crown, ScanLine, Sparkles, Infinity as InfinityIcon, RefreshCw, ShoppingBag, Play, Calendar, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -30,7 +30,6 @@ function Pricing() {
   const queryClient = useQueryClient();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
-  const isTestMode = (import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN as string | undefined)?.startsWith("pk_test_");
   const access = useQuery({
     queryKey: ["scan-access", u?.id ?? "anon"],
     queryFn: () => getScanAccess(),
@@ -96,11 +95,6 @@ function Pricing() {
   return (
     <div className="flex min-h-[100dvh] w-full flex-col" style={{ background: "#E7ECEC", color: "#14213A" }}>
       <SiteHeader showBack />
-      {isTestMode && (
-        <div className="w-full border-b text-center text-xs" style={{ background: "#FFF4E5", borderColor: "#F5C99B", color: "#7A4B00", padding: "8px 12px" }}>
-          Test mode — use card <strong>4242 4242 4242 4242</strong>, any future date, any CVC.
-        </div>
-      )}
       <main className="mx-auto w-full max-w-[760px] px-5 pb-8 pt-5">
         {paidReturn && (
           <div className="mb-4 flex items-center gap-2 rounded-2xl px-4 py-3 text-sm" style={{ background: "#E7F7EE", color: "#0E7C86", border: "1px solid #B7E4CB" }}>
@@ -143,25 +137,25 @@ function Pricing() {
           )}
         </div>
 
-        <section className="mt-4 rounded-3xl bg-white p-6 shadow" style={{ border: "1px solid #E5EAEC" }}>
-          <h2 className="text-lg font-extrabold">What each scan gives you</h2>
-          <ul className="mt-3 space-y-2.5 text-sm" style={{ color: "#3B4A63", lineHeight: 1.55 }}>
-            <Li><strong>1 full Movement Screen</strong> — 5 core tests + targeted add-ons for your selected areas.</Li>
-            <Li><strong>Movement Score & Movement Age</strong> — with root-cause clustering.</Li>
-            <Li><strong>Personalized 2-week training program</strong> — updated based on your specific weak points.</Li>
-            <Li><strong>Kept forever in your account</strong> — dashboard, history, and program never expire.</Li>
-            <Li><strong>Rescan anytime</strong> — the next €{SCAN_PRICE_EUR.toFixed(2)} scan updates your program (progression, load, exercise swaps) rather than starting from zero.</Li>
-          </ul>
+        <section className="mt-5">
+          <h2 className="px-1 text-[11px] font-bold uppercase tracking-widest" style={{ color: "#5A6B85" }}>What each scan gives you</h2>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <Feature Icon={ScanLine} title="Full Movement Screen" body="5 core tests + targeted add-ons." tint="#0E7C86" bg="#E6F5F5" />
+            <Feature Icon={Sparkles} title="Score & Movement Age" body="With root-cause clustering." tint="#7A3EBA" bg="#F1E9FA" />
+            <Feature Icon={Calendar} title="2-Week Program" body="Personalized to your weak points." tint="#C2410C" bg="#FDECD8" />
+            <Feature Icon={InfinityIcon} title="Kept Forever" body="Dashboard & history never expire." tint="#0F766E" bg="#DCFCE7" />
+            <Feature Icon={RefreshCw} title="Rescan to Progress" body="Program evolves, no restart." tint="#1D4ED8" bg="#DBEAFE" full />
+          </div>
         </section>
 
-        <section className="mt-4 rounded-3xl bg-white p-6 shadow" style={{ border: "1px solid #E5EAEC" }}>
-          <h2 className="text-lg font-extrabold">How it works</h2>
-          <ol className="mt-3 space-y-2 text-sm" style={{ color: "#3B4A63", lineHeight: 1.55 }}>
-            <li>1. Buy a scan for €{SCAN_PRICE_EUR.toFixed(2)}.</li>
-            <li>2. Run your Movement Screen from your phone or laptop camera.</li>
-            <li>3. Follow your 2-week training program — mark sessions complete.</li>
-            <li>4. After 14 days you'll get a rescan reminder. Rescan (€{SCAN_PRICE_EUR.toFixed(2)}) to progress your program based on your improvements.</li>
-          </ol>
+        <section className="mt-5">
+          <h2 className="px-1 text-[11px] font-bold uppercase tracking-widest" style={{ color: "#5A6B85" }}>How it works</h2>
+          <div className="mt-3 space-y-2.5">
+            <Step n={1} Icon={ShoppingBag} title="Buy a scan" body={`One-time €${SCAN_PRICE_EUR.toFixed(2)}. No subscription.`} tint="#FF6B4A" />
+            <Step n={2} Icon={Play} title="Run your Movement Screen" body="From your phone or laptop camera." tint="#0E7C86" />
+            <Step n={3} Icon={Calendar} title="Follow your 2-week plan" body="Mark sessions complete as you go." tint="#7A3EBA" />
+            <Step n={4} Icon={TrendingUp} title="Rescan & progress" body="After 14 days, update your program." tint="#1D4ED8" />
+          </div>
         </section>
       </main>
       <SiteFooter />
@@ -184,6 +178,29 @@ function Pricing() {
   );
 }
 
-function Li({ children }: { children: React.ReactNode }) {
-  return <li className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: "#0E7C86" }} />{children}</li>;
+function Feature({ Icon, title, body, tint, bg, full }: { Icon: any; title: string; body: string; tint: string; bg: string; full?: boolean }) {
+  return (
+    <div className={`rounded-2xl bg-white p-4 shadow-sm ${full ? "col-span-2" : ""}`} style={{ border: "1px solid #E5EAEC" }}>
+      <div className="grid h-9 w-9 place-items-center rounded-xl" style={{ background: bg, color: tint }}>
+        <Icon className="h-4.5 w-4.5" strokeWidth={2.2} />
+      </div>
+      <div className="mt-2.5 text-sm font-bold" style={{ color: "#14213A" }}>{title}</div>
+      <div className="mt-0.5 text-xs leading-snug" style={{ color: "#5A6B85" }}>{body}</div>
+    </div>
+  );
+}
+
+function Step({ n, Icon, title, body, tint }: { n: number; Icon: any; title: string; body: string; tint: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl bg-white p-3.5 shadow-sm" style={{ border: "1px solid #E5EAEC" }}>
+      <div className="relative grid h-11 w-11 shrink-0 place-items-center rounded-2xl" style={{ background: `${tint}14`, color: tint }}>
+        <Icon className="h-5 w-5" strokeWidth={2.2} />
+        <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full text-[10px] font-bold text-white" style={{ background: tint }}>{n}</span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-bold" style={{ color: "#14213A" }}>{title}</div>
+        <div className="text-xs" style={{ color: "#5A6B85" }}>{body}</div>
+      </div>
+    </div>
+  );
 }
