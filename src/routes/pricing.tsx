@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Camera, Check, Loader2, X, Crown } from "lucide-react";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
@@ -26,6 +26,8 @@ export const Route = createFileRoute("/pricing")({
 
 function Pricing() {
   const u = useUser();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
   const isTestMode = (import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN as string | undefined)?.startsWith("pk_test_");
@@ -37,6 +39,38 @@ function Pricing() {
   });
   const grandfathered = !!access.data?.hasActiveSubscription;
   const credits = access.data?.credits ?? 0;
+
+  // After Stripe returns to /pricing?paid=1, poll scan credits until the webhook
+  // grants the credit, then auto-navigate to the scan page.
+  useEffect(() => {
+    if (!u) return;
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("paid") !== "1") return;
+
+    let cancelled = false;
+    let attempts = 0;
+    const tick = async () => {
+      attempts += 1;
+      await queryClient.invalidateQueries({ queryKey: ["scan-access"] });
+      const fresh = await queryClient.fetchQuery({
+        queryKey: ["scan-access", u.id],
+        queryFn: () => getScanAccess(),
+      });
+      if (cancelled) return;
+      if (fresh?.canScan) {
+        // Clean the ?paid=1 flag then send them to run the scan.
+        window.history.replaceState({}, "", "/pricing");
+        navigate({ to: "/app/screen" });
+        return;
+      }
+      if (attempts < 10) setTimeout(tick, 1500);
+    };
+    tick();
+    return () => { cancelled = true; };
+  }, [u, navigate, queryClient]);
+
+  const paidReturn = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("paid") === "1";
 
   function handleBuy() {
     if (!u) { window.location.href = "/"; return; }
@@ -68,6 +102,12 @@ function Pricing() {
         </div>
       )}
       <main className="mx-auto w-full max-w-[760px] px-5 pb-8 pt-5">
+        {paidReturn && (
+          <div className="mb-4 flex items-center gap-2 rounded-2xl px-4 py-3 text-sm" style={{ background: "#E7F7EE", color: "#0E7C86", border: "1px solid #B7E4CB" }}>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Payment received — unlocking your scan and taking you to the Movement Screen…
+          </div>
+        )}
         <div className="relative overflow-hidden" style={{ background: "linear-gradient(160deg,#0E7C86 0%, #1f6fa8 100%)", borderRadius: 22, padding: "26px 22px 28px", color: "#fff" }}>
           <div className="flex items-center gap-2" style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", fontWeight: 700, opacity: 0.9 }}>
             <Camera className="h-3.5 w-3.5" /> Pay per scan
