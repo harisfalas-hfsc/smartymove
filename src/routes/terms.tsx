@@ -104,12 +104,18 @@ function Terms() {
         </li>
       </ul>
 
-      <h2>5. Subscription &amp; Payments</h2>
+      <h2>5. Payments (Pay-Per-Scan)</h2>
       <ul>
         <li>
-          SmartyMove offers a free tier and one or more <strong>Premium</strong> subscription tiers
-          that unlock advanced features such as re-screens, expanded joint-specific tests, deeper
-          analytics, and longer corrective programs.
+          SmartyMove operates on a <strong>pay-per-scan</strong> model. There is no subscription
+          and no recurring billing. Each movement scan is purchased as a one-time payment
+          (currently €3.99 per scan).
+        </li>
+        <li>
+          Once purchased, a scan credit is added to your account. After running the scan, your
+          personalized training program is generated and remains available to you at no additional
+          cost. A new scan is only required when you want to re-measure your progress (recommended
+          every 14 days).
         </li>
         <li>
           Payments are processed securely via Stripe, a PCI DSS compliant payment processor. We do
@@ -117,13 +123,7 @@ function Terms() {
         </li>
         <li>All fees are stated in Euros (€) and, where applicable, include VAT.</li>
         <li>
-          Subscription pricing, renewal terms, and trial details are presented at the point of
-          purchase and form part of these Terms.
-        </li>
-        <li>
-          You can manage billing, download invoices, or cancel renewal from your account settings.
-          Cancellation stops future renewals while keeping access until the end of the paid period,
-          unless applicable law requires otherwise.
+          Pricing is displayed on the Pricing page and at checkout, and forms part of these Terms.
         </li>
       </ul>
 
@@ -131,17 +131,18 @@ function Terms() {
       <ul>
         <li>
           Under EU Directive 2011/83/EU, EU consumers ordinarily have a{" "}
-          <strong>14-day right of withdrawal</strong> for digital services that have not yet
-          started.
+          <strong>14-day right of withdrawal</strong> for digital services that have not yet been
+          consumed.
         </li>
         <li>
-          By starting to use premium SmartyMove content immediately after purchase, you expressly
-          request immediate performance and acknowledge that you waive your right of withdrawal once
-          the service has begun.
+          By running a movement scan after purchase, you expressly request immediate performance
+          and acknowledge that you waive your right of withdrawal for that scan credit once it has
+          been used.
         </li>
         <li>
-          No refunds will be provided once premium content has been accessed, except where required
-          by applicable law.
+          Unused scan credits may be refunded on request within 14 days of purchase. Once a scan
+          credit has been consumed (a scan has been finalized), no refund will be provided except
+          where required by applicable law.
         </li>
         <li>Your statutory consumer rights under EU and national law remain unaffected.</li>
       </ul>
@@ -242,7 +243,7 @@ function Terms() {
         <li>Reverse engineer, decompile, or attempt to extract the source code of SmartyMove.</li>
         <li>Use SmartyMove for any unlawful, harmful, or fraudulent purpose.</li>
         <li>Upload or transmit any malicious code or attempt to interfere with the service.</li>
-        <li>Resell, sublicense, or share access to your account or premium content.</li>
+        <li>Resell, sublicense, or share access to your account, scan credits, or generated program.</li>
         <li>Use SmartyMove to provide medical advice, diagnosis, or treatment to other people.</li>
       </ul>
 
@@ -268,8 +269,8 @@ function Terms() {
           or legal obligations apply.
         </li>
         <li>
-          If you have an active subscription, deleting your account sets it to stop renewing. You
-          can also cancel renewal directly from account settings without deleting your account.
+          Deleting your account also forfeits any unused scan credits. There are no subscriptions
+          to cancel.
         </li>
         <li>
           Some records (e.g. transaction history) may be retained where required by tax or legal
