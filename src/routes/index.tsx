@@ -159,7 +159,7 @@ function Welcome() {
         onSignUp={() => setMode("signup")}
         onBack={mode === "intro" ? undefined : () => setMode("intro")}
       />
-      <main className="mx-auto w-full max-w-[420px] px-5 pb-8 pt-5">
+      <main className="mx-auto w-full max-w-[420px] flex-1 px-5 pb-6 pt-5">
 
         {mode === "intro" ? (
           <>
