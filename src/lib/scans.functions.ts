@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
+import { isAdminEmail } from "@/lib/admin";
 
 export const SCAN_PRICE_ID = "smartymove_scan_single";
 export const SCAN_PRICE_EUR = 3.99;
@@ -50,6 +51,10 @@ export const getScanAccess = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ScanAccessResult> => {
     const { supabase, userId } = context;
+    const email = (context.claims as any)?.email as string | undefined;
+    if (isAdminEmail(email)) {
+      return { credits: 9999, scansPurchased: 0, hasActiveSubscription: true, canScan: true };
+    }
     const [{ data: profile }, { data: subs }] = await Promise.all([
       supabase.from("profiles").select("scan_credits,scans_purchased").eq("id", userId).maybeSingle(),
       supabase
@@ -80,6 +85,10 @@ export const consumeScanCredit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ConsumeResult> => {
     const { supabase, userId } = context;
+    const email = (context.claims as any)?.email as string | undefined;
+    if (isAdminEmail(email)) {
+      return { ok: true, credits: 9999 };
+    }
     const { data, error } = await (supabase as any).rpc("consume_scan_credit", { _user_id: userId });
     if (error) return { ok: false, credits: 0, error: error.message };
     const { data: profile } = await supabase.from("profiles").select("scan_credits").eq("id", userId).maybeSingle();
