@@ -14,9 +14,8 @@ function AppLayout() {
   const isScreenRun = location.pathname === "/app/screen/run";
   useEffect(() => {
     const u = getUser();
-    if (u?.questionnaire && u.goal) return;
     void restoreUserFromBackend().then((restored) => {
-      if (!restored) navigate({ to: "/" });
+      if (!restored && !u) navigate({ to: "/" });
       else if (!restored.questionnaire || !restored.goal) navigate({ to: "/onboarding/questionnaire" });
     }).catch(() => navigate({ to: "/" }));
   }, [navigate]);

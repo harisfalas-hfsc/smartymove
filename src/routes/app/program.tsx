@@ -57,13 +57,13 @@ function Program() {
       <div className="space-y-5 p-5 pb-8">
         <header className="brand-gradient-strong rounded-3xl p-6 text-primary-foreground shadow-soft">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest opacity-85">
-            <Lock className="h-3.5 w-3.5" /> Program complete
+            <Lock className="h-3.5 w-3.5" /> Time to rescan
           </div>
           <h1 className="mt-1 text-2xl font-extrabold">
-            {status.reason === "completed" ? "You finished all 8 sessions" : "Your 2-week program is over"}
+            Your program needs an update
           </h1>
           <p className="mt-2 text-sm opacity-90">
-            To unlock your next program, retake the Movement Screen. We'll re-evaluate your questionnaire and scan and build a fresh 2-week program around the new results.
+            Your 2-week cycle is complete. Rescan now to check your progress and build the next program around what your body needs today.
           </p>
           <Link to="/app/screen" className="mt-4 flex h-12 items-center justify-center gap-2 rounded-2xl bg-white font-semibold text-primary">
             Rescan to unlock next program <ArrowRight className="h-4 w-4" />
