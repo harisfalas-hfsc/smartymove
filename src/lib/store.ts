@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "./admin";
 
@@ -143,10 +143,12 @@ export function useUser() {
     window.addEventListener("storage", f);
     return () => { window.removeEventListener("smartymove:user", f); window.removeEventListener("storage", f); };
   }, []);
-  if (u && isAdminEmail(u.email) && !u.premium) {
-    return { ...u, premium: true };
-  }
-  return u;
+  return useMemo(() => {
+    if (u && isAdminEmail(u.email) && !u.premium) {
+      return { ...u, premium: true };
+    }
+    return u;
+  }, [u]);
 }
 
 export function createUser(name: string, email: string, age: number): User {
