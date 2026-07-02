@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { BottomTabs } from "@/components/BottomTabs";
 import { DesktopProfile } from "@/components/DesktopProfile";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -12,7 +12,10 @@ function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const isScreenRun = location.pathname === "/app/screen/run";
+  const restoredRef = useRef(false);
   useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
     const u = getUser();
     void restoreUserFromBackend().then((restored) => {
       if (!restored) {
