@@ -386,8 +386,6 @@ function Welcome() {
           </form>
         )}
 
-        <SiteFooter />
-
         <style>{`
           .sm-scanline{
             position:absolute; left:14px; right:14px; height:3px; top:18px;
@@ -405,6 +403,7 @@ function Welcome() {
           }
         `}</style>
       </main>
+      <SiteFooter />
     </div>
   );
 }
