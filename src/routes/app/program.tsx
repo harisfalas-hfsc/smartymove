@@ -15,7 +15,7 @@ import {
 } from "@/lib/program";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
 import { Camera, ArrowRight, CheckCircle2, Circle, Lock, RotateCcw, Info, AlertCircle, CalendarDays } from "lucide-react";
-import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
+import { SmartyCard } from "@/components/SmartyCard";
 import { Sparkles, Dumbbell, Flame, Target } from "lucide-react";
 // Program access is unlocked once the user has completed a scan — no paywall gating here.
 
