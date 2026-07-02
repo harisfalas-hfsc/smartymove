@@ -102,6 +102,12 @@ function Pricing() {
         </div>
       )}
       <main className="mx-auto w-full max-w-[760px] px-5 pb-8 pt-5">
+        {paidReturn && (
+          <div className="mb-4 flex items-center gap-2 rounded-2xl px-4 py-3 text-sm" style={{ background: "#E7F7EE", color: "#0E7C86", border: "1px solid #B7E4CB" }}>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Payment received — unlocking your scan and taking you to the Movement Screen…
+          </div>
+        )}
         <div className="relative overflow-hidden" style={{ background: "linear-gradient(160deg,#0E7C86 0%, #1f6fa8 100%)", borderRadius: 22, padding: "26px 22px 28px", color: "#fff" }}>
           <div className="flex items-center gap-2" style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", fontWeight: 700, opacity: 0.9 }}>
             <Camera className="h-3.5 w-3.5" /> Pay per scan
