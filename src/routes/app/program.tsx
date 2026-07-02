@@ -76,7 +76,9 @@ function Program() {
           </Link>
         </SmartyCard>
 
-        <ProgramOverview status={status} routine={routine} onSelectDay={setActiveDay} readOnly />
+        <SmartyCard Icon={CalendarDays} iconColor="#1D4ED8" iconBg="#DBEAFE" title="Your 2-week schedule" subtitle="View only — rescan to start a new program.">
+          <ProgramOverview status={status} routine={routine} onSelectDay={setActiveDay} readOnly />
+        </SmartyCard>
         <DaySheet
           dayIndex={activeDay}
           onClose={() => setActiveDay(null)}
