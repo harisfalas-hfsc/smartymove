@@ -156,6 +156,7 @@ function Runner() {
   const [showInstructions, setShowInstructions] = useState(false);
   const [restartKey, setRestartKey] = useState(0);
   const pausedRef = useRef(false);
+  const activeTestKeyRef = useRef<string | null>(null);
   useEffect(() => { pausedRef.current = paused || showInstructions; }, [paused, showInstructions]);
 
   // Detection-latency tracking so we can downgrade the model if the device
@@ -245,6 +246,8 @@ function Runner() {
   useEffect(() => {
     if (phase !== "running") return;
     const test = seq[idx]; if (!test) return;
+    const activeKey = `${idx}:${restartKey}:${test.id}`;
+    activeTestKeyRef.current = activeKey;
     samplesRef.current = [];
     setCountdown(test.duration);
     setElapsed(0);
@@ -257,6 +260,7 @@ function Runner() {
     let done = false;
     const finish = (skipped = false) => {
       if (done) return;
+      if (activeTestKeyRef.current !== activeKey) return;
       done = true;
       clearInterval(tickId); clearInterval(sampleId);
       const score: TestResult = skipped
@@ -270,6 +274,7 @@ function Runner() {
     };
     finishHandlerRef.current = finish;
     const tickId = setInterval(() => {
+      if (activeTestKeyRef.current !== activeKey) return;
       if (pausedRef.current) return;
       setElapsed(e => e + 1);
       setCountdown(c => {
@@ -277,7 +282,7 @@ function Runner() {
         return c - 1;
       });
     }, 1000);
-    return () => { clearInterval(tickId); clearInterval(sampleId); finishHandlerRef.current = null; };
+    return () => { activeTestKeyRef.current = null; clearInterval(tickId); clearInterval(sampleId); finishHandlerRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, idx, restartKey]);
 
