@@ -57,6 +57,24 @@ function Home() {
       </header>
 
       <div className="-mt-5 space-y-4 rounded-t-[2rem] bg-background px-5 pt-6">
+        {retestDue && (
+          <Link
+            to="/app/screen"
+            className="block rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft"
+            style={{ textDecoration: "none" }}
+          >
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest opacity-90">
+              <Calendar className="h-3.5 w-3.5" /> Time to rescan
+            </div>
+            <div className="mt-1 text-lg font-extrabold">Your program needs an update</div>
+            <p className="mt-1 text-sm opacity-95">
+              Your 2-week program is complete. Rescan now to measure your progress and unlock your next program.
+            </p>
+            <div className="mt-3 inline-flex items-center gap-1 text-sm font-semibold">
+              Start Movement Screen <ArrowRight className="h-4 w-4" />
+            </div>
+          </Link>
+        )}
         {phase && (
           <div className="rounded-3xl bg-card p-4 shadow-card">
             <div className="flex items-center justify-between">
@@ -71,15 +89,6 @@ function Home() {
               </div>
             </div>
           </div>
-        )}
-        {retestDue && (
-          <Link to="/app/screen" className="flex items-center justify-between rounded-3xl bg-warning/15 p-4 ring-1 ring-warning/40">
-            <div>
-              <div className="text-xs font-bold uppercase tracking-widest text-warning">Retest due</div>
-              <div className="text-sm font-semibold">Re-take your Movement Screen to update your plan.</div>
-            </div>
-            <ArrowRight className="h-5 w-5" />
-          </Link>
         )}
         {progression && progression.status !== "first" && (
           <div className={`rounded-3xl p-4 shadow-card ${progression.status === "improved" ? "bg-success/15 ring-1 ring-success/40" : progression.status === "stalled" ? "bg-warning/15 ring-1 ring-warning/40" : "bg-card"}`}>
