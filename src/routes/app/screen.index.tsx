@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useUser } from "@/lib/store";
 import { CORE_TESTS, CONDITIONAL_TESTS } from "@/lib/movement";
-import { Play, ChevronRight, Lock, Loader2, Camera, ShieldCheck, Smartphone, EyeOff, Ruler, Sparkles, Timer, HelpCircle, ListChecks } from "lucide-react";
+import { Play, Lock, Loader2, Camera, ShieldCheck, Smartphone, EyeOff, Ruler, Sparkles, Timer, HelpCircle, ListChecks } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
 import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
@@ -166,7 +166,3 @@ const SCREEN_FAQ = [
   { q: "What happens after the scan?", a: "You get a Movement Score, Movement Age, sub-scores, and a 2-week corrective program built from your weakest areas." },
   { q: "Is my video uploaded?", a: "No. Pose detection runs on your device. Only numeric scores and joint-angle summaries are saved to your account." },
 ];
-
-function _keep(_: unknown) {
-  return _;
-}
