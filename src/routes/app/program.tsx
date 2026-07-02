@@ -14,7 +14,7 @@ import {
   formatProgramDayDate,
 } from "@/lib/program";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
-import { Camera, ArrowRight, CheckCircle2, Circle, Lock, RotateCcw, Info, Crown, AlertCircle } from "lucide-react";
+import { Camera, ArrowRight, CheckCircle2, Circle, Lock, RotateCcw, Info, AlertCircle } from "lucide-react";
 // Program access is unlocked once the user has completed a scan — no paywall gating here.
 
 export const Route = createFileRoute("/app/program")({ component: Program });
