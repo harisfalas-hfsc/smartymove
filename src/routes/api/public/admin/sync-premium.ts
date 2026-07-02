@@ -39,7 +39,7 @@ async function archivePremiumCatalog(stripe: ReturnType<typeof createStripeClien
   }
 
   // Catch manually created duplicates that may not have the expected lookup key.
-  const duplicateProducts = new Map<string, Awaited<ReturnType<typeof stripe.products.search>>["data"][number]>();
+  const duplicateProducts = new Map<string, any>();
   for (const query of [
     "active:'true' AND name~'SmartyMove Premium'",
     "active:'true' AND name~'Smart Move Premium'",
