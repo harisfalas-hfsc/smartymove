@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useUser } from "@/lib/store";
 import { CORE_TESTS, CONDITIONAL_TESTS } from "@/lib/movement";
-import { Play, Info, ChevronRight, Lock, Loader2 } from "lucide-react";
+import { Play, Lock, Loader2, Camera, ShieldCheck, Smartphone, EyeOff, Ruler, Sparkles, Timer, HelpCircle, ListChecks } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
+import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
 
 export const Route = createFileRoute("/app/screen/")({ component: ScreenIndex });
 
@@ -29,88 +30,139 @@ function ScreenIndex() {
     navigate({ to: "/pricing" });
   }
 
+  const primaryCta = canScan ? (
+    <Link
+      to="/app/screen/run"
+      onClick={startScreen}
+      className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold text-white"
+      style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
+    >
+      <Play className="h-5 w-5" /> {last ? "Run re-scan" : "Start scan"}
+    </Link>
+  ) : (
+    <Link
+      to="/pricing"
+      className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold text-white"
+      style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
+    >
+      <Lock className="h-5 w-5" /> Buy a scan · €{SCAN_PRICE_EUR.toFixed(2)}
+    </Link>
+  );
+
   return (
-    <div className="space-y-5 pb-6">
-      <header className="brand-gradient-strong px-5 pb-7 pt-7 text-primary-foreground">
-        <div className="text-xs font-semibold uppercase tracking-widest opacity-80">Movement Screen</div>
-        <h1 className="mt-1 text-2xl font-extrabold">Camera-based assessment</h1>
-        <p className="mt-1 max-w-xs text-sm opacity-90">5 core tests + targeted add-ons for your selected areas. Stand 6–8 feet from the camera with your full body in frame.</p>
-      </header>
-
-      <div className="-mt-4 space-y-4 rounded-t-[2rem] bg-background px-5 pt-5">
-        <div className="rounded-2xl bg-accent p-3 text-sm text-accent-foreground">
-          <div className="flex items-start gap-2"><Info className="mt-0.5 h-4 w-4 shrink-0" /><span>The browser will ask for camera permission. Footage stays on your device — pose detection runs locally.</span></div>
-        </div>
-
-        <div className="rounded-2xl bg-card p-4 shadow-card">
+    <div className="space-y-4 px-5 pb-6 pt-4" style={{ background: "#E7ECEC" }}>
+      {/* HERO CARD */}
+      <SmartyCard
+        Icon={Camera}
+        iconColor="#0E7C86"
+        iconBg="#E6F5F5"
+        title="Movement Screen"
+        subtitle="A camera-based assessment. 5 core tests plus targeted add-ons — done in about 5 minutes from your phone or laptop."
+      >
+        <div className="mt-1 rounded-2xl p-3 text-center text-sm" style={{ background: "#F1F7F8", color: "#14213A" }}>
           {access.isLoading ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Checking scan access…</div>
+            <span className="inline-flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Checking scan access…</span>
           ) : grandfathered ? (
-            <div className="text-sm"><strong>Scan access available</strong> — you can run your Movement Screen now.</div>
+            <><span style={{ color: "#0E7C86" }}>✓</span> <strong>Unlimited scans</strong> included with your legacy plan.</>
           ) : canScan ? (
-            <div className="text-sm">You have <strong>{credits}</strong> scan{credits === 1 ? "" : "s"} available.</div>
+            <>✅ You have <strong>{credits}</strong> scan{credits === 1 ? "" : "s"} available.</>
           ) : (
-            <div className="text-sm">
-              <div className="font-semibold">No scans remaining</div>
-              <div className="mt-0.5 text-muted-foreground">Buy one Movement Scan for €{SCAN_PRICE_EUR.toFixed(2)} — includes a personalized 2-week training program you keep forever.</div>
-            </div>
+            <>💳 Buy one scan for <strong>€{SCAN_PRICE_EUR.toFixed(2)}</strong> — includes a 2-week program you keep forever.</>
           )}
         </div>
+        <div className="mt-4">{primaryCta}</div>
+      </SmartyCard>
 
-        <section>
-          <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">Core Tests · 5</h3>
-          <div className="space-y-2">
-            {CORE_TESTS.map((t, i) => (
-              <div key={t.id} className="flex items-center gap-3 rounded-2xl bg-card p-4 shadow-card">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl brand-gradient text-sm font-bold text-primary-foreground">{i+1}</span>
+      {/* HEALTH & SAFETY */}
+      <SmartyCard Icon={ShieldCheck} iconColor="#0F766E" iconBg="#DCFCE7" title="Health & safety check" subtitle="A quick reality check before you scan.">
+        <div className="mt-2 space-y-1">
+          <SmartyRow Icon={Ruler} color="#0E7C86" label="Stand 6–8 feet from the camera" sub="Full body should be visible top to bottom." />
+          <SmartyRow Icon={Smartphone} color="#7A3EBA" label="Use a phone or laptop camera" sub="Prop it up so it doesn't move mid-test." />
+          <SmartyRow Icon={EyeOff} color="#C2410C" label="Wear fitted clothing" sub="Baggy layers hide your joint angles." />
+          <SmartyRow Icon={ShieldCheck} color="#0F766E" label="Stop if anything hurts" sub="Skip a test if you feel sharp pain." />
+        </div>
+      </SmartyCard>
+
+      {/* CORE TESTS */}
+      <SmartyCard Icon={ListChecks} iconColor="#1D4ED8" iconBg="#DBEAFE" title="Core Tests · 5" subtitle="Everyone runs the same 5 fundamentals — every scan.">
+        <div className="mt-2 space-y-1.5">
+          {CORE_TESTS.map((t, i) => {
+            const palette = ["#0E7C86", "#7A3EBA", "#C2410C", "#0F766E", "#1D4ED8"][i % 5];
+            return (
+              <div key={t.id} className="flex items-center gap-3 py-1.5">
+                <span
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-sm font-extrabold text-white"
+                  style={{ background: palette, boxShadow: `0 6px 14px -8px ${palette}` }}
+                >
+                  {i + 1}
+                </span>
                 <div className="min-w-0 flex-1">
-                  <div className="font-semibold">{t.name}</div>
-                  <div className="text-xs text-muted-foreground">{t.duration}s · {t.focus.join(" + ")}</div>
+                  <div className="text-sm font-bold" style={{ color: "#14213A" }}>{t.name}</div>
+                  <div className="text-xs" style={{ color: "#5A6B85" }}>⏱ {t.duration}s · {t.focus.join(" + ")}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </SmartyCard>
+
+      {addOns.length > 0 && (
+        <SmartyCard Icon={Sparkles} iconColor="#7A3EBA" iconBg="#F1E9FA" title={`Add-on Tests · ${addOns.length}`} subtitle="Targeted checks based on the areas you flagged.">
+          <div className="mt-2 space-y-1.5">
+            {addOns.map((t, i) => (
+              <div key={t.id} className="flex items-center gap-3 py-1.5">
+                <span
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-sm font-extrabold text-white"
+                  style={{ background: "#7A3EBA", boxShadow: "0 6px 14px -8px #7A3EBA" }}
+                >
+                  +{i + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-bold" style={{ color: "#14213A" }}>{t.name}</div>
+                  {t.note && <div className="text-xs" style={{ color: "#C2410C" }}>⚠ {t.note}</div>}
                 </div>
               </div>
             ))}
           </div>
-        </section>
+        </SmartyCard>
+      )}
 
-        {addOns.length > 0 && (
-          <section>
-            <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">Add-on Tests · {addOns.length}</h3>
-            <div className="space-y-2">
-              {addOns.map((t, i) => (
-                <div key={t.id} className="flex items-center gap-3 rounded-2xl bg-card p-4 shadow-card">
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-accent text-sm font-bold text-accent-foreground">{CORE_TESTS.length + i + 1}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-semibold">{t.name}</div>
-                    {t.note && <div className="text-xs text-warning">{t.note}</div>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+      {/* PRIVACY */}
+      <SmartyCard Icon={EyeOff} iconColor="#0F766E" iconBg="#DCFCE7" title="Private by design" subtitle="Pose detection runs on your device. Raw video never leaves your phone — only the numeric scores are saved.">
+      </SmartyCard>
 
-        {canScan ? (
-          <Link to="/app/screen/run" onClick={startScreen} className="flex items-center justify-center gap-2 rounded-2xl brand-gradient p-4 font-bold text-primary-foreground shadow-soft">
-            <Play className="h-5 w-5" /> {last ? "Run re-scan" : "Start scan"}
-          </Link>
-        ) : (
-          <Link to="/pricing" className="flex items-center justify-center gap-2 rounded-2xl brand-gradient p-4 font-bold text-primary-foreground shadow-soft">
-            <Lock className="h-5 w-5" /> Buy a scan · €{SCAN_PRICE_EUR.toFixed(2)}
-          </Link>
-        )}
+      {/* LAST RESULT */}
+      {last && (
+        <SmartyCard
+          Icon={Timer}
+          iconColor="#1D4ED8"
+          iconBg="#DBEAFE"
+          title={`Last result · Score ${last.overall}`}
+          subtitle={`Taken on ${new Date(last.date).toLocaleDateString()}.`}
+          cta={{ label: "See breakdown", to: "/app/progress" }}
+        />
+      )}
 
-        {last && (
-          <div className="rounded-2xl bg-card p-4 shadow-card">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Last result</div>
-                <div className="mt-0.5 font-bold">Score {last.overall} · {new Date(last.date).toLocaleDateString()}</div>
-              </div>
-              <Link to="/app/progress" className="text-sm font-semibold text-primary">View <ChevronRight className="inline h-4 w-4" /></Link>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* FAQ CARD */}
+      <SmartyCard Icon={HelpCircle} iconColor="#C2410C" iconBg="#FDECD8" title="Common questions">
+        <div className="mt-1 flex flex-col gap-2">
+          {SCREEN_FAQ.map((f) => (
+            <details key={f.q} style={{ borderTop: "1px solid #EEF1F2", paddingTop: 8 }}>
+              <summary className="cursor-pointer text-sm font-bold" style={{ color: "#14213A", listStyle: "none" }}>
+                {f.q}
+              </summary>
+              <p className="mt-1.5 text-sm" style={{ color: "#3B4A63", lineHeight: 1.55 }}>{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </SmartyCard>
     </div>
   );
 }
+
+const SCREEN_FAQ = [
+  { q: "How long does a scan take?", a: "About 5 minutes for the 5 core tests, plus 1–2 minutes if you have add-on tests for a flagged joint." },
+  { q: "Do I need any equipment?", a: "No. Just your phone or laptop camera, a bit of clear floor space, and fitted clothes so your joints are visible." },
+  { q: "What happens after the scan?", a: "You get a Movement Score, Movement Age, sub-scores, and a 2-week corrective program built from your weakest areas." },
+  { q: "Is my video uploaded?", a: "No. Pose detection runs on your device. Only numeric scores and joint-angle summaries are saved to your account." },
+];
