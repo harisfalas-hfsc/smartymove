@@ -16,7 +16,7 @@ function PremiumReturn() {
   return (
     <div className="flex min-h-[100dvh] w-full flex-col" style={{ background: "#ffffff", color: "#14213A" }}>
       <SiteHeader showBack />
-      <main className="mx-auto w-full max-w-[560px] px-5 pb-8 pt-8 text-center">
+      <main className="mx-auto w-full max-w-[560px] flex-1 px-5 pb-6 pt-8 text-center">
         <div className="rounded-3xl bg-white p-8 shadow" style={{ border: "1px solid #E5EAEC" }}>
           {session_id ? (
             <>
@@ -37,8 +37,8 @@ function PremiumReturn() {
             </>
           )}
         </div>
-        <SiteFooter />
       </main>
+      <SiteFooter />
     </div>
   );
 }
