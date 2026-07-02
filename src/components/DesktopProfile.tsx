@@ -370,7 +370,7 @@ function DesktopProfileInner() {
               ) : (
                 <Button
                   onClick={() => {
-                    window.location.href = "/premium";
+                    window.location.href = "/pricing";
                   }}
                   className="rounded-2xl"
                 >
