@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Facebook, Instagram, Youtube, Mail } from "lucide-react";
+import { Facebook, Instagram, Youtube } from "lucide-react";
 
 const socialClass =
   "p-2 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors";
@@ -38,16 +38,14 @@ export function SiteFooter() {
             </a>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 md:gap-4 text-sm text-muted-foreground">
-            <Link to="/contact" className="hover:text-primary transition-colors inline-flex items-center gap-1.5 font-semibold text-primary">
-              <Mail className="h-4 w-4" /> Contact us
-            </Link>
-            <span className="hidden sm:inline text-muted-foreground/40">·</span>
+          <div className="flex flex-nowrap items-center justify-center gap-x-3 whitespace-nowrap text-xs sm:text-sm text-muted-foreground">
             <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+            <span className="text-muted-foreground/40">·</span>
             <Link to="/terms" className="hover:text-primary transition-colors">
               <span className="md:hidden">T&amp;Cs</span>
               <span className="hidden md:inline">Terms of Service</span>
             </Link>
+            <span className="text-muted-foreground/40">·</span>
             <Link to="/disclaimer" className="hover:text-primary transition-colors">Disclaimer</Link>
           </div>
 
