@@ -113,6 +113,7 @@
     -webkit-font-smoothing: antialiased;
     overscroll-behavior-y: none;
   }
+  html, #root { background-color: #ffffff; }
 }
 
 @utility brand-gradient {
