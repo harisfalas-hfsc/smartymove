@@ -50,6 +50,20 @@ async function markCanceled(sub: any, env: StripeEnv) {
     .eq("environment", env);
 }
 
+async function grantScanCredits(session: any) {
+  const meta = session.metadata ?? {};
+  if (meta.type !== "scan_pack") return;
+  const userId = meta.userId;
+  if (!userId) {
+    console.error("scan_pack checkout missing userId metadata", session.id);
+    return;
+  }
+  const credits = Math.max(1, parseInt(meta.credits ?? "1", 10) || 1);
+  const client = getSupabase() as any;
+  const { error } = await client.rpc("grant_scan_credits", { _user_id: userId, _credits: credits });
+  if (error) console.error("grant_scan_credits failed", userId, error);
+}
+
 export const Route = createFileRoute("/api/public/payments/webhook")({
   server: {
     handlers: {
@@ -68,6 +82,9 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
               break;
             case "customer.subscription.deleted":
               await markCanceled(event.data.object, env);
+              break;
+            case "checkout.session.completed":
+              await grantScanCredits(event.data.object);
               break;
             default:
               console.log("Unhandled event:", event.type);
