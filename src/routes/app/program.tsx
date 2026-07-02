@@ -14,7 +14,7 @@ import {
   formatProgramDayDate,
 } from "@/lib/program";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
-import { Camera, ArrowRight, CheckCircle2, Circle, Lock, RotateCcw, Info, Crown, AlertCircle } from "lucide-react";
+import { Camera, ArrowRight, CheckCircle2, Circle, Lock, RotateCcw, Info, AlertCircle } from "lucide-react";
 // Program access is unlocked once the user has completed a scan — no paywall gating here.
 
 export const Route = createFileRoute("/app/program")({ component: Program });
@@ -116,12 +116,6 @@ function Program() {
             onSelectDay={(d) => setActiveDay(d)}
           />
         )}
-
-        <Link to="/pricing" className="block rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft" style={{ textDecoration: "none" }}>
-          <Crown className="h-5 w-5" />
-          <div className="mt-1 text-base font-extrabold">Ready to progress?</div>
-          <p className="text-sm opacity-90">After 14 days, rescan for €3.99 to update your program based on your improvements.</p>
-        </Link>
       </div>
 
       <DaySheet
