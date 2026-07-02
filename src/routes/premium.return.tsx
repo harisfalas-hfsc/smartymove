@@ -14,7 +14,7 @@ export const Route = createFileRoute("/premium/return")({
 function PremiumReturn() {
   const { session_id } = Route.useSearch();
   return (
-    <div className="flex min-h-[100dvh] w-full flex-col" style={{ background: "#E7ECEC", color: "#14213A" }}>
+    <div className="flex min-h-[100dvh] w-full flex-col" style={{ background: "#ffffff", color: "#14213A" }}>
       <SiteHeader showBack />
       <main className="mx-auto w-full max-w-[560px] px-5 pb-8 pt-8 text-center">
         <div className="rounded-3xl bg-white p-8 shadow" style={{ border: "1px solid #E5EAEC" }}>

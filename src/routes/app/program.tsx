@@ -33,7 +33,7 @@ function Program() {
   // No scan yet → must scan first.
   if (status.reason === "no-scan") {
     return (
-      <div className="space-y-4 p-5" style={{ background: "#E7ECEC" }}>
+      <div className="space-y-4 p-5" style={{ background: "#ffffff" }}>
         <SmartyCard
           Icon={Camera}
           iconColor="#0E7C86"
@@ -59,7 +59,7 @@ function Program() {
   // Program expired or all sessions completed → require a rescan to unlock the next program.
   if (status.locked) {
     return (
-      <div className="space-y-4 p-5 pb-8" style={{ background: "#E7ECEC" }}>
+      <div className="space-y-4 p-5 pb-8" style={{ background: "#ffffff" }}>
         <SmartyCard
           Icon={Lock}
           iconColor="#C2410C"
@@ -93,7 +93,7 @@ function Program() {
   }
 
   return (
-    <div className="pb-8" style={{ background: "#E7ECEC" }}>
+    <div className="pb-8" style={{ background: "#ffffff" }}>
       <div className="space-y-4 px-5 pt-4">
         <SmartyCard
           Icon={Dumbbell}

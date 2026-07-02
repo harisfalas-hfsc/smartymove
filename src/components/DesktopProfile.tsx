@@ -191,7 +191,7 @@ function DesktopProfileInner() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_oklch(0.96_0.03_210),_oklch(0.99_0.005_220))]">
+    <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-8 py-4">
           <span className="grid h-9 w-9 place-items-center rounded-2xl brand-gradient text-primary-foreground">

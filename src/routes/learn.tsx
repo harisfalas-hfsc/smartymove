@@ -45,7 +45,7 @@ function LearnLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isIndex = pathname === "/learn" || pathname === "/learn/";
   return (
-    <div className="flex min-h-[100dvh] w-full flex-col" style={{ background: "#E7ECEC", color: "#14213A" }}>
+    <div className="flex min-h-[100dvh] w-full flex-col" style={{ background: "#ffffff", color: "#14213A" }}>
       <SiteHeader showBack />
       <main className="mx-auto w-full max-w-[760px] px-5 pb-8 pt-5">
         {isIndex ? <LearnIndex /> : <Outlet />}
