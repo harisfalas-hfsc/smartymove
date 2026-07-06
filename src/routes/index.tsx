@@ -259,7 +259,7 @@ function Welcome() {
           </div>
 
             {/* FAQ — rendered for SEO/GEO; wrapped in FAQPage JSON-LD in head() */}
-            <div className="mt-10 lg:mt-16" aria-labelledby="faq-heading">
+            <div className="mt-6 lg:mt-8" aria-labelledby="faq-heading">
               <SmartyCard
                 Icon={HelpCircle}
                 iconColor="#C2410C"
