@@ -16,6 +16,27 @@ type ScanAccessResult = {
 type CheckoutResult = { clientSecret: string } | { error: string };
 type ConsumeResult = { ok: boolean; credits: number; error?: string };
 
+/**
+ * Resolve the signed-in user's email. `claims.email` is populated by the
+ * Supabase Auth JWT most of the time, but not on every provider / project
+ * config. Fall back to the `profiles.email` row so admin bypass keeps
+ * working regardless of how the token was minted.
+ */
+async function resolveEmail(
+  supabase: any,
+  claims: any,
+  userId: string,
+): Promise<string | undefined> {
+  const claimEmail = claims?.email as string | undefined;
+  if (claimEmail) return claimEmail;
+  try {
+    const { data } = await supabase.from("profiles").select("email").eq("id", userId).maybeSingle();
+    return (data as any)?.email as string | undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 async function resolveOrCreateCustomer(
   stripe: ReturnType<typeof createStripeClient>,
   options: { email?: string; userId?: string },
@@ -51,7 +72,7 @@ export const getScanAccess = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ScanAccessResult> => {
     const { supabase, userId } = context;
-    const email = (context.claims as any)?.email as string | undefined;
+    const email = await resolveEmail(supabase, context.claims, userId);
     if (isAdminEmail(email)) {
       return { credits: 9999, scansPurchased: 0, hasActiveSubscription: true, canScan: true };
     }
@@ -85,7 +106,7 @@ export const consumeScanCredit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ConsumeResult> => {
     const { supabase, userId } = context;
-    const email = (context.claims as any)?.email as string | undefined;
+    const email = await resolveEmail(supabase, context.claims, userId);
     if (isAdminEmail(email)) {
       return { ok: true, credits: 9999 };
     }
