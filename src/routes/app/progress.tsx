@@ -189,7 +189,11 @@ function Progress() {
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0">
                         <div className="truncate text-sm font-semibold">{t.name}</div>
-                        {t.cameraView && (
+                        {t.viewFindings && t.viewFindings.length > 1 ? (
+                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                            {t.viewFindings.map(v => v.view).join(" + ")} views
+                          </div>
+                        ) : t.cameraView && (
                           <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t.cameraView} view</div>
                         )}
                       </div>
@@ -208,7 +212,34 @@ function Progress() {
                         <span className={flag ? "text-warning font-semibold" : ""}>Asymmetry {t.asymmetry}°</span>
                       </div>
                     )}
-                    {t.compensations && t.compensations.length > 0 && (
+                    {t.viewFindings && t.viewFindings.length > 1 ? (
+                      <div className="mt-2 space-y-1.5">
+                        {t.viewFindings.map((v, vi) => (
+                          <div key={vi} className="rounded-xl bg-background p-2">
+                            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                              <span>{v.view} view</span>
+                              <span className={
+                                v.valid === false ? "text-muted-foreground" :
+                                v.score === 3 ? "text-success" :
+                                v.score === 2 ? "text-warning" : "text-destructive"
+                              }>
+                                {v.valid === false ? "No reading" : v.score === 3 ? "Pass" : v.score === 2 ? "Borderline" : "Fail"}
+                              </span>
+                            </div>
+                            {v.compensations && v.compensations.length > 0 && (
+                              <ul className="mt-1 space-y-0.5">
+                                {v.compensations.map((c, ci) => (
+                                  <li key={ci} className="flex items-start gap-1.5 text-[11px] text-foreground">
+                                    <AlertCircle className="mt-[2px] h-3 w-3 shrink-0 text-warning" />
+                                    <span>{c}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : t.compensations && t.compensations.length > 0 && (
                       <div className="mt-1.5 flex flex-wrap gap-1.5">
                         {t.compensations.map((c, ci) => (
                           <span key={ci} className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-semibold text-warning">
