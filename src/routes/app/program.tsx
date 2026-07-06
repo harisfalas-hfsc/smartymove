@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useUser } from "@/lib/store";
+import { useUser, updateUser, type User } from "@/lib/store";
 import {
   useProgramRoutine,
   useProgramStatus,
@@ -337,16 +337,55 @@ function DaySheet({
               <RotateCcw className="h-4 w-4" /> Repeat this day (mark incomplete)
             </button>
           ) : (
-            <button
-              onClick={() => { markDayCompleted(dayIndex); onClose(); }}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl brand-gradient font-semibold text-primary-foreground shadow-soft"
-            >
-              <CheckCircle2 className="h-5 w-5" /> Mark day as completed
-            </button>
+            <MarkDoneButton dayIndex={dayIndex} onClose={onClose} />
           )}
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Marks the day complete and asks a one-tap "did anything feel different?"
+ * question. A "yes" seeds the rescan engine so the home screen offers an
+ * early re-scan instead of waiting for the 14-day cadence.
+ */
+function MarkDoneButton({ dayIndex, onClose }: { dayIndex: number; onClose: () => void }) {
+  const [asking, setAsking] = useState(false);
+  if (asking) {
+    return (
+      <div className="space-y-2">
+        <div className="text-center text-sm font-semibold">Did anything feel different today?</div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              updateUser((prev: User) => ({ ...prev, postSessionFeedback: { date: new Date().toISOString(), changed: false } }));
+              onClose();
+            }}
+            className="h-11 flex-1 rounded-2xl bg-secondary text-sm font-semibold"
+          >
+            No, same as before
+          </button>
+          <button
+            onClick={() => {
+              updateUser((prev: User) => ({ ...prev, postSessionFeedback: { date: new Date().toISOString(), changed: true } }));
+              onClose();
+            }}
+            className="h-11 flex-1 rounded-2xl brand-gradient text-sm font-semibold text-primary-foreground"
+          >
+            Yes, something shifted
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <button
+      onClick={() => { markDayCompleted(dayIndex); setAsking(true); }}
+      className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl brand-gradient font-semibold text-primary-foreground shadow-soft"
+    >
+      <CheckCircle2 className="h-5 w-5" /> Mark day as completed
+    </button>
   );
 }
 

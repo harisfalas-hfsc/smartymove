@@ -60,6 +60,8 @@ export interface ScreenSession {
   movementAge: number;
   tests: TestResult[];
   conditional: Joint[];
+  /** Goal at time of scan — used by rescan engine to detect goal changes. */
+  goalAtScan?: Goal;
 }
 
 export interface ProgramDay { date: string; completed: boolean; }
@@ -83,6 +85,16 @@ export interface User {
   nextRetestDate?: string;
   phaseOverride?: "restore" | "build" | "perform";
   parq?: ParqAnswers;
+  /**
+   * Post-session self-report — captured after a training session. When the
+   * user says "something shifted", the rescan engine surfaces an early
+   * re-scan suggestion.
+   */
+  postSessionFeedback?: {
+    date: string;
+    changed: boolean;
+    note?: string;
+  };
 }
 
 const KEY = "smartymove.user";
@@ -187,6 +199,7 @@ function makeUser(id: string, name: string, email: string, age: number, existing
     nextRetestDate: existing?.nextRetestDate,
     phaseOverride: existing?.phaseOverride,
     parq: existing?.parq,
+    postSessionFeedback: existing?.postSessionFeedback,
   };
 }
 

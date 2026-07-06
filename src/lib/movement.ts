@@ -1,5 +1,73 @@
 import type { Joint, TestResult, ScreenSession } from "./store";
 
+/**
+ * Per-test camera view definition. Every core/conditional test can declare
+ * one or more views, each with the compensations the camera can detect
+ * from that angle. Used to drive:
+ *   • the pre-test intro (silhouette + copy)
+ *   • the "reposition" transition between views
+ *   • per-view compensation detection in screen.run.tsx
+ *
+ * Some tests (hip abduction, elbow ROM) only need one view — the second
+ * view would add minimal insight and would waste user time.
+ */
+export type TestView = {
+  view: "front" | "side";
+  label: string;
+  /** One-line positioning hint shown on the reposition transition screen. */
+  cue: string;
+  /** Compensations reliably detectable from this view — for UX + docs. */
+  detects: string[];
+};
+
+export const TEST_VIEWS: Record<string, TestView[]> = {
+  squat: [
+    { view: "side",  label: "Side view",  cue: "Stand sideways to the camera so your full profile is visible.", detects: ["depth", "heel rise", "trunk lean", "lumbar rounding"] },
+    { view: "front", label: "Front view", cue: "Now face the camera straight on.", detects: ["knee valgus", "knee varus", "left-right asymmetry", "hip shift"] },
+  ],
+  hinge: [
+    { view: "side",  label: "Side view",  cue: "Stand sideways to the camera so we can see the line from your head to your hips.", detects: ["spine angle", "true hip flexion", "knee bend compensation"] },
+    { view: "front", label: "Front view", cue: "Now face the camera straight on.", detects: ["lateral trunk shift", "pelvic asymmetry"] },
+  ],
+  balance: [
+    { view: "front", label: "Front view", cue: "Face the camera. Full body in frame.", detects: ["pelvic drop", "trunk lateral lean", "knee position"] },
+    { view: "side",  label: "Side view",  cue: "Turn sideways to the camera. Do both legs from this angle too.", detects: ["forward trunk lean", "hip flexion substitution"] },
+  ],
+  lunge: [
+    { view: "side",  label: "Side view",  cue: "Stand sideways to the camera so we can see the front knee angle.", detects: ["front knee angle", "front heel rise", "trunk lean"] },
+    { view: "front", label: "Front view", cue: "Now face the camera and repeat on the same leg, then switch legs.", detects: ["front knee valgus", "torso rotation", "back-leg hip drop"] },
+  ],
+  overhead: [
+    { view: "front", label: "Front view", cue: "Face the camera, full body in frame.", detects: ["arm elevation angle", "shoulder shrug", "L/R shoulder symmetry"] },
+    { view: "side",  label: "Side view",  cue: "Turn sideways so we can see if the lower back arches.", detects: ["lumbar extension / arch", "rib-cage flare"] },
+  ],
+  ankle_df: [
+    { view: "side",  label: "Side view",  cue: "Kneel sideways to the camera.", detects: ["tibia forward lean", "heel lift"] },
+    { view: "front", label: "Front view", cue: "Now kneel facing the camera.", detects: ["knee collapsing inward (valgus)"] },
+  ],
+  knee_sld: [
+    { view: "front", label: "Front view", cue: "Face the camera on your step.", detects: ["knee valgus", "pelvic drop", "trunk lateral lean"] },
+    { view: "side",  label: "Side view",  cue: "Turn sideways for the second set.", detects: ["trunk forward pitch", "heel rise", "descent control"] },
+  ],
+  hip_abd: [
+    { view: "front", label: "Front view", cue: "Face the camera. Full body in frame.", detects: ["hip hike", "trunk lean", "leg lift height", "pelvic drop"] },
+  ],
+  bridge_hold: [
+    { view: "side",  label: "Side view",  cue: "Lie on your back with your side to the camera.", detects: ["hip height", "lumbar arch / hyperextension"] },
+    { view: "front", label: "Front view", cue: "Rotate so the camera can see across both hips.", detects: ["pelvic rotation / unilateral glute weakness"] },
+  ],
+  wall_slide: [
+    { view: "side",  label: "Side view",  cue: "Stand sideways to the camera against the wall.", detects: ["lumbar arch", "wall contact quality"] },
+    { view: "front", label: "Front view", cue: "Now face the camera against the wall.", detects: ["L/R shoulder height asymmetry"] },
+  ],
+  elbow_rom: [
+    { view: "front", label: "Front view", cue: "Face the camera.", detects: ["range of motion", "upper-arm compensation"] },
+  ],
+  wrist_rom: [
+    { view: "front", label: "Front view", cue: "Face the camera.", detects: ["wrist flexion/extension range (partly self-reported)"] },
+  ],
+};
+
 export const CORE_TESTS = [
   { id: "squat", name: "Squat", focus: ["mobility", "strength"], duration: 10 },
   { id: "hinge", name: "Hip Hinge", focus: ["mobility", "quality"], duration: 10 },
