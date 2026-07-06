@@ -159,11 +159,11 @@ function Welcome() {
         onSignUp={() => setMode("signup")}
         onBack={mode === "intro" ? undefined : () => setMode("intro")}
       />
-      <main className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "max-w-[420px] lg:max-w-5xl" : "max-w-[420px]"}`}>
+      <main className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "max-w-[420px] lg:max-w-[1196px] lg:px-0" : "max-w-[420px]"}`}>
 
         {mode === "intro" ? (
           <>
-          <div className="grid gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-10 lg:pt-4">
+          <div className="grid gap-8 lg:grid-cols-[560px_minmax(0,1fr)] lg:items-start lg:gap-9 lg:pt-4">
           <div className="sm-hero-left">
             <div
               className="flex items-center gap-2"
@@ -226,10 +226,10 @@ function Welcome() {
             </div>
           </div>
 
-          <div className="sm-hero-right flex lg:h-full">
+          <div className="sm-hero-right flex lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
             {/* Scan viewfinder card */}
             <div
-              className="relative overflow-hidden sm-hero-card flex flex-col justify-center lg:w-full lg:h-full"
+              className="relative overflow-hidden sm-hero-card flex flex-col justify-center lg:ml-auto"
               style={{
                 background: "linear-gradient(160deg,#13283A 0%, #0E1D2B 100%)",
                 borderRadius: 22,
@@ -398,8 +398,8 @@ function Welcome() {
           @media (min-width: 1024px){
             .sm-hero-title{ font-size: 40px !important; }
             .sm-hero-cta{ max-width: 280px !important; }
-            .sm-hero-card{ max-width: 100%; margin-left: 0; margin-right: 0; padding: 32px 28px !important; }
-            .sm-hero-score{ font-size: 88px !important; }
+            .sm-hero-card{ width: 522px; max-width: 100%; height: 228px; margin-left: auto; margin-right: 0; padding: 28px 28px !important; }
+            .sm-hero-score{ font-size: 84px !important; }
           }
           .sm-scanline{
             position:absolute; left:14px; right:14px; height:3px; top:18px;
@@ -419,7 +419,7 @@ function Welcome() {
             .sm-scanline{ animation: sm-sweep-lg 2.6s ease-in-out infinite; }
             @keyframes sm-sweep-lg{
               0%   { transform: translate3d(0, 0, 0); opacity:.95 }
-              50%  { transform: translate3d(0, 260px, 0); opacity:1 }
+              50%  { transform: translate3d(0, 154px, 0); opacity:1 }
               100% { transform: translate3d(0, 0, 0); opacity:.95 }
             }
           }
