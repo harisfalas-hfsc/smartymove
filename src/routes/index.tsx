@@ -163,7 +163,7 @@ function Welcome() {
 
         {mode === "intro" ? (
           <>
-          <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-10 lg:pt-4">
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-10 lg:pt-4">
           <div className="sm-hero-left">
             <div
               className="flex items-center gap-2"
@@ -226,10 +226,10 @@ function Welcome() {
             </div>
           </div>
 
-          <div className="sm-hero-right">
+          <div className="sm-hero-right flex lg:h-full">
             {/* Scan viewfinder card */}
             <div
-              className="relative overflow-hidden sm-hero-card"
+              className="relative overflow-hidden sm-hero-card flex flex-col justify-center lg:w-full lg:h-full"
               style={{
                 background: "linear-gradient(160deg,#13283A 0%, #0E1D2B 100%)",
                 borderRadius: 22,
@@ -398,8 +398,8 @@ function Welcome() {
           @media (min-width: 1024px){
             .sm-hero-title{ font-size: 40px !important; }
             .sm-hero-cta{ max-width: 280px !important; }
-            .sm-hero-card{ max-width: 420px; margin-left: auto; margin-right: auto; }
-            .sm-hero-score{ font-size: 68px !important; }
+            .sm-hero-card{ max-width: 100%; margin-left: 0; margin-right: 0; padding: 32px 28px !important; }
+            .sm-hero-score{ font-size: 88px !important; }
           }
           .sm-scanline{
             position:absolute; left:14px; right:14px; height:3px; top:18px;
