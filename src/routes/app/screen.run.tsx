@@ -107,6 +107,24 @@ const TEST_CAMERA_VIEW: Record<string, "front" | "side"> = {
   elbow_rom: "front",
 };
 
+// Big, from-across-the-room rep prompts. Shown as the primary instruction
+// on the intro screen AND overlaid on the live camera so the user knows
+// exactly what to do without walking back to read small text.
+const REP_PROMPT: Record<string, string> = {
+  squat:       "Give me 3 slow squats",
+  hinge:       "Give me 3 slow hip hinges",
+  balance:     "Balance on each leg for ~5 seconds",
+  lunge:       "1 lunge on each leg",
+  overhead:    "Reach arms overhead, then rotate L + R",
+  ankle_df:    "3 slow knee-to-wall reps each side",
+  knee_sld:    "3 slow step-downs each leg",
+  hip_abd:     "3 slow leg raises each side",
+  bridge_hold: "Hold the bridge ~10 seconds",
+  wall_slide:  "3 slow wall slides",
+  elbow_rom:   "3 full bend + straighten reps",
+  wrist_rom:   "3 slow wrist flex + extend reps",
+};
+
 // Landmarks required for a frame to count toward the score of each test.
 const TEST_LANDMARKS: Record<string, number[]> = {
   squat:       [PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_ANKLE],
