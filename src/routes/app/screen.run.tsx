@@ -412,9 +412,6 @@ function Runner() {
     setTimeout(() => navigate({ to: "/app/progress" }), 1200);
   }
 
-  const cur = seq[idx];
-  if (!u) return null;
-  const progress = seq.length ? ((idx + (phase === "running" ? 1 - countdown / (cur?.duration ?? 1) : 0)) / seq.length) * 100 : 0;
   // Group-level "test N of M" — the user thinks of the squat + its two views
   // as one test, not two.
   const groupIds = useMemo(() => {
@@ -422,6 +419,9 @@ function Runner() {
     for (const s of seq) if (!seen.includes(s.groupId)) seen.push(s.groupId);
     return seen;
   }, [seq]);
+  const cur = seq[idx];
+  if (!u) return null;
+  const progress = seq.length ? ((idx + (phase === "running" ? 1 - countdown / (cur?.duration ?? 1) : 0)) / seq.length) * 100 : 0;
   const groupIndex = cur ? groupIds.indexOf(cur.groupId) : -1;
   const groupCount = groupIds.length;
   const isReposition = !!cur && cur.viewIndex > 0;
