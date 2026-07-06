@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
-import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES } from "@/lib/movement";
+import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
 import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal } from "lucide-react";
@@ -9,6 +9,22 @@ import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForw
 export const Route = createFileRoute("/app/screen/run")({ component: Runner });
 
 type TestDef = { id: string; name: string; duration: number; instruction: string; conditional?: boolean; cameraView: "front" | "side" };
+
+// A single scan "step" = one camera view of one test. Tests with two views
+// produce two consecutive steps that share the same `groupId`.
+type Step = {
+  key: string;               // stable per-step id (`${groupId}:${viewIndex}`)
+  groupId: string;           // = testId, shared across a test's views
+  testId: string;
+  name: string;              // display name (test name)
+  duration: number;
+  cameraView: "front" | "side";
+  viewIndex: number;         // 0-based
+  totalViews: number;        // >=1
+  viewLabel: string;         // e.g. "Side view"
+  viewCue: string;           // reposition hint
+  conditional?: boolean;
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // REFERENCE_RANGES — v1 founder-supplied thresholds based on standard movement
@@ -103,29 +119,74 @@ const TEST_LANDMARKS: Record<string, number[]> = {
   elbow_rom:   [PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_WRIST, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_WRIST],
 };
 
-function buildSequence(joints: Joint[]): TestDef[] {
-  const core: TestDef[] = CORE_TESTS.map(t => ({
-    id: t.id, name: t.name, duration: t.duration,
-    instruction: instructionFor(t.id),
-    cameraView: TEST_CAMERA_VIEW[t.id] ?? "front",
+function expandToSteps(testId: string, name: string, duration: number, conditional?: boolean): Step[] {
+  const views = TEST_VIEWS[testId];
+  if (!views || views.length === 0) {
+    // Fallback to legacy single-view mapping if a test has no view definition.
+    const cv = TEST_CAMERA_VIEW[testId] ?? "front";
+    return [{
+      key: `${testId}:0`, groupId: testId, testId, name, duration, cameraView: cv,
+      viewIndex: 0, totalViews: 1,
+      viewLabel: cv === "side" ? "Side view" : "Front view",
+      viewCue: cv === "side" ? "Stand sideways to the camera." : "Face the camera straight on.",
+      conditional,
+    }];
+  }
+  return views.map((v, i) => ({
+    key: `${testId}:${i}`, groupId: testId, testId, name, duration,
+    cameraView: v.view, viewIndex: i, totalViews: views.length,
+    viewLabel: v.label, viewCue: v.cue, conditional,
   }));
+}
+
+function buildSequence(joints: Joint[]): Step[] {
+  const core = CORE_TESTS.flatMap(t => expandToSteps(t.id, t.name, t.duration));
   // Wrist test is intentionally excluded from v1 scoring — flagged "Coming
   // soon" because the wrist landmarks are too small on camera for a reliable
   // flexion/extension angle on phones. If the user picked wrist as a flagged
   // joint, we still run their other selected joint's add-on (if any).
-  const cond: TestDef[] = joints
+  const cond = joints
     .filter(j => j !== "none" && j !== "wrist")
     .slice(0, 2)
-    .map(j => {
+    .flatMap(j => {
       const c = CONDITIONAL_TESTS[j as keyof typeof CONDITIONAL_TESTS];
-      return {
-        id: c.id, name: c.name, duration: 10,
-        instruction: instructionFor(c.id),
-        conditional: true,
-        cameraView: TEST_CAMERA_VIEW[c.id] ?? "front",
-      };
+      return expandToSteps(c.id, c.name, 10, true);
     });
   return [...core, ...cond];
+}
+
+/** Merge per-view step results for a single test into one TestResult. */
+function mergeStepResults(stepResults: Array<TestResult & { viewIndex: number }>): TestResult {
+  const sorted = [...stepResults].sort((a, b) => a.viewIndex - b.viewIndex);
+  const primary = sorted[0];
+  const validAll = sorted.every(r => r.valid !== false);
+  const scoreMin = sorted.reduce<1 | 2 | 3>((m, r) => (r.score < m ? r.score : m), 3);
+  const comps = Array.from(new Set(sorted.flatMap(r => r.compensations ?? [])));
+  const notes = sorted
+    .map(r => `${r.cameraView === "side" ? "Side" : "Front"}: ${r.notes ?? ""}`)
+    .filter(n => n.length > 6)
+    .join(" · ");
+  return {
+    id: primary.id,
+    name: primary.name,
+    score: validAll ? scoreMin : 1,
+    valid: validAll,
+    metric: primary.metric,
+    left: primary.left,
+    right: primary.right,
+    asymmetry: primary.asymmetry,
+    cameraView: primary.cameraView,
+    compensations: comps.length ? comps : undefined,
+    frameValidRatio: primary.frameValidRatio,
+    notes: notes || primary.notes,
+    viewFindings: sorted.map(r => ({
+      view: (r.cameraView ?? "front") as "front" | "side",
+      score: r.score,
+      valid: r.valid,
+      metric: r.metric,
+      compensations: r.compensations,
+    })),
+  };
 }
 
 function instructionFor(id: string): string {
