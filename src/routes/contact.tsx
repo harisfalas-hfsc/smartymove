@@ -58,7 +58,7 @@ function Contact() {
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
       <SiteHeader showBack />
-      <main className="mx-auto w-full max-w-[760px] flex-1 px-4 pb-6 pt-4 space-y-6">
+      <main className="mx-auto w-full max-w-[760px] lg:max-w-5xl flex-1 px-4 lg:px-8 pb-6 pt-4 lg:pt-8 space-y-6">
         {/* Hero card */}
         <Card className="border-2 border-primary">
           <CardContent className="p-6">
