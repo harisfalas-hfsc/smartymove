@@ -463,9 +463,17 @@ function Runner() {
             <div className="rounded-full bg-black/70 px-5 py-2 text-2xl font-black uppercase tracking-widest text-white shadow-2xl ring-2 ring-white/30 backdrop-blur">
               {cur.cameraView === "side" ? "◐ SIDE VIEW" : "● FACE THE CAMERA"}
             </div>
-            <div className="rounded-2xl bg-white/95 px-4 py-1.5 text-xl font-extrabold text-foreground shadow-xl">
+            <div className="rounded-2xl bg-white/95 px-4 py-1.5 text-lg font-extrabold text-foreground shadow-xl">
               {cur.name}
             </div>
+            <div className="rounded-2xl brand-gradient px-5 py-2 text-2xl font-black text-primary-foreground shadow-2xl ring-2 ring-white/40">
+              {REP_PROMPT[cur.testId] ?? "Perform the movement"}
+            </div>
+            <div className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white/90 backdrop-blur">
+              Then walk back and press "I'm Done"
+            </div>
+          </div>
+        )}
           </div>
         )}
         {phase === "setup" && (
