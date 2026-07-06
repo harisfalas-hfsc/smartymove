@@ -81,8 +81,6 @@ export interface ScreenSession {
     stability: number;
     balance: number;
     quality: number;
-    /** @deprecated — not measurable from the movement screen. */
-    strength?: number;
   };
   movementAge: number;
   tests: TestResult[];
