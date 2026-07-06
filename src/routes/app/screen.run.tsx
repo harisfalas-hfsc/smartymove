@@ -216,6 +216,9 @@ function Runner() {
   const [results, setResults] = useState<TestResult[]>([]);
   const samplesRef = useRef<any[]>([]);
   const finishHandlerRef = useRef<((skipped?: boolean) => void) | null>(null);
+  // Per-view step results buffered per test groupId until all its views
+  // are captured, then merged into one TestResult and pushed into `results`.
+  const stepResultsRef = useRef<Map<string, Array<TestResult & { viewIndex: number }>>>(new Map());
   const [paused, setPaused] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [restartKey, setRestartKey] = useState(0);
@@ -308,7 +311,7 @@ function Runner() {
   useEffect(() => {
     if (phase !== "running") return;
     const test = seq[idx]; if (!test) return;
-    const activeKey = `${idx}:${restartKey}:${test.id}`;
+    const activeKey = `${idx}:${restartKey}:${test.key}`;
     activeTestKeyRef.current = activeKey;
     samplesRef.current = [];
     setCountdown(test.duration);
@@ -325,13 +328,32 @@ function Runner() {
       if (activeTestKeyRef.current !== activeKey) return;
       done = true;
       clearInterval(tickId); clearInterval(sampleId);
-      const score: TestResult = skipped
-        ? { id: test.id, name: test.name, score: 1, notes: "Skipped", valid: false, cameraView: test.cameraView }
-        : { ...scoreSamples(test.id, samplesRef.current, test.duration), cameraView: test.cameraView };
-      setResults(r => [...r, score]);
+      const scored: TestResult = skipped
+        ? { id: test.testId, name: test.name, score: 1, notes: "Skipped", valid: false, cameraView: test.cameraView }
+        : { ...scoreSamples(test.testId, samplesRef.current, test.duration), cameraView: test.cameraView };
+      // Buffer per-view results; on the last view of the group, merge into
+      // one TestResult and push to the top-level results.
+      const bucket = stepResultsRef.current.get(test.groupId) ?? [];
+      bucket.push({ ...scored, viewIndex: test.viewIndex });
+      stepResultsRef.current.set(test.groupId, bucket);
+      const isLastView = test.viewIndex + 1 >= test.totalViews;
+      let mergedForFinalize: TestResult | null = null;
+      if (isLastView) {
+        const merged = mergeStepResults(bucket);
+        mergedForFinalize = merged;
+        setResults(r => [...r, merged]);
+      }
       setTimeout(() => {
-        if (idx + 1 >= seq.length) finalize([...results, score]);
-        else setIdx(i => i + 1);
+        if (idx + 1 >= seq.length) {
+          const base = mergedForFinalize ? [...results, mergedForFinalize] : results;
+          finalize(base);
+        } else {
+          // If the next step belongs to the same group, hop straight to
+          // "reposition" (intro) so the user can rotate before the timer
+          // restarts. `setPhase("intro")` triggers the intro card.
+          setIdx(i => i + 1);
+          setPhase("intro");
+        }
       }, 400);
     };
     finishHandlerRef.current = finish;
@@ -390,6 +412,16 @@ function Runner() {
   const cur = seq[idx];
   if (!u) return null;
   const progress = seq.length ? ((idx + (phase === "running" ? 1 - countdown / (cur?.duration ?? 1) : 0)) / seq.length) * 100 : 0;
+  // Group-level "test N of M" — the user thinks of the squat + its two views
+  // as one test, not two.
+  const groupIds = useMemo(() => {
+    const seen: string[] = [];
+    for (const s of seq) if (!seen.includes(s.groupId)) seen.push(s.groupId);
+    return seen;
+  }, [seq]);
+  const groupIndex = cur ? groupIds.indexOf(cur.groupId) : -1;
+  const groupCount = groupIds.length;
+  const isReposition = !!cur && cur.viewIndex > 0;
 
   return (
     <div className="relative flex h-full min-h-[100dvh] flex-col bg-black text-white">
