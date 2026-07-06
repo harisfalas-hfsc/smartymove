@@ -937,13 +937,12 @@ function secondaryViewResult(testId: string, name: string, samples: Frame[], val
   switch (testId) {
     case "squat":
     case "lunge":
-    case "knee_sld":
-    case "ankle_df": {
+    case "knee_sld": {
       let valgusLFrames = 0, valgusRFrames = 0, activeFrames = 0;
       for (const s of samples) {
         const la = angle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE]);
         const ra = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE], s[PL.RIGHT_ANKLE]);
-        if (la < 160 || ra < 160 || testId === "ankle_df") {
+        if (la < 160 || ra < 160) {
           activeFrames++;
           const midAnkleX = (s[PL.LEFT_ANKLE].x + s[PL.RIGHT_ANKLE].x) / 2;
           if (Math.sign(s[PL.LEFT_KNEE].x - midAnkleX) !== Math.sign(s[PL.LEFT_ANKLE].x - midAnkleX)) valgusLFrames++;
@@ -953,7 +952,22 @@ function secondaryViewResult(testId: string, name: string, samples: Frame[], val
       const valgusRatio = activeFrames ? Math.max(valgusLFrames, valgusRFrames) / activeFrames : 0;
       metric = Math.round(valgusRatio * 100);
       if (valgusRatio > 0.3) {
-        comps.push(testId === "ankle_df" ? "Knee collapsed inward during the ankle check — that forward travel does not count as clean ankle range" : "Knee drifted inward from the front view — range was paired with hip-control compensation");
+        comps.push("Knee drifted inward from the front view — range was paired with hip-control compensation");
+        score = 2;
+      }
+      break;
+    }
+    case "ankle_df": {
+      let valgusLFrames = 0, valgusRFrames = 0;
+      for (const s of samples) {
+        const midAnkleX = (s[PL.LEFT_ANKLE].x + s[PL.RIGHT_ANKLE].x) / 2;
+        if (Math.sign(s[PL.LEFT_KNEE].x - midAnkleX) !== Math.sign(s[PL.LEFT_ANKLE].x - midAnkleX)) valgusLFrames++;
+        if (Math.sign(s[PL.RIGHT_KNEE].x - midAnkleX) !== Math.sign(s[PL.RIGHT_ANKLE].x - midAnkleX)) valgusRFrames++;
+      }
+      const valgusRatio = Math.max(valgusLFrames, valgusRFrames) / samples.length;
+      metric = Math.round(valgusRatio * 100);
+      if (valgusRatio > 0.3) {
+        comps.push("Knee collapsed inward during the ankle check — that forward travel does not count as clean ankle range");
         score = 2;
       }
       break;
