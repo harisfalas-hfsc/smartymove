@@ -281,7 +281,114 @@ interface Signal {
   severity: "fail" | "borderline";
   /** Compensation string or fallback "limited range" description. */
   detail: string;
+  /** Optional pattern tag used to select the right reasoning card. */
+  pattern?: CompensationPattern;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Compensation reasoning — for every detected compensation we emit three
+// plain-language fields the results screen renders as a Findings card:
+//   what:    what the scan actually saw
+//   why:     the root-cause explanation for the user
+//   program: the specific first-stage program direction it triggers
+// This is deterministic — no LLM. Copy is the founder-supplied education layer.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type CompensationPattern =
+  | "heel_rise"
+  | "knee_valgus"
+  | "spine_rounding"
+  | "lateral_trunk_shift"
+  | "forward_trunk_lean_balance"
+  | "lumbar_arch_overhead"
+  | "lumbar_arch_bridge"
+  | "shoulder_shrug"
+  | "hip_hike"
+  | "pelvis_rotation_bridge"
+  | "elbow_shoulder_cheat"
+  | "limited_range_no_comp";
+
+export interface CompensationReasoning {
+  what: string;
+  why: string;
+  program: string;
+}
+
+const REASONING: Record<CompensationPattern, (testName: string) => CompensationReasoning> = {
+  heel_rise: (t) => ({
+    what: `Your heel lifted during the ${t}.`,
+    why: "Your ankle can't yet dorsiflex enough to reach that depth naturally, so the body borrows the range by lifting the heel. The depth reading was bought through compensation, not real range.",
+    program: "Your program starts with ankle mobility work exclusively — wall dorsiflexion drills, calf and soleus stretches, banded ankle mobilisation. We don't add squat-pattern strength until a re-test shows the heel stays flat.",
+  }),
+  knee_valgus: (t) => ({
+    what: `Your knee tracked inward (valgus) during the ${t}.`,
+    why: "This is a hip stability issue, not a knee issue. The hip abductors and glute medius aren't controlling the knee's frontal-plane position. The knee is the symptom; the hip is the cause.",
+    program: "Your program addresses the hip first — clamshells, lateral band walks, single-leg glute bridges, side-lying hip abduction. Knee-specific work waits until the hip can hold the knee in line.",
+  }),
+  spine_rounding: (t) => ({
+    what: `Your lower back rounded instead of your hips hinging on the ${t}.`,
+    why: "This is a movement-pattern issue plus often a posterior-chain restriction. Stretching alone won't teach the pattern — you need to retrain the motor control of the hinge itself.",
+    program: "Your program teaches your hips to do the work before adding any load — wall-tap hinge drill, dowel hinge, plus core stability (bird dog, dead bug). No loaded hinge work until the spine stays neutral.",
+  }),
+  lateral_trunk_shift: (t) => ({
+    what: `You shifted sideways during the ${t}.`,
+    why: "One hip is doing less work than the other — a unilateral weakness or restriction. This adds to your bilateral asymmetry finding.",
+    program: "Your program adds unilateral hip stability and activation work on the weak side — single-leg glute bridges, clamshells, side-plank hip abduction — before returning to bilateral loading.",
+  }),
+  forward_trunk_lean_balance: (t) => ({
+    what: `You pitched your torso forward to save your balance during the ${t}.`,
+    why: "That's a strategy to keep the centre of mass over the stance foot when the hip and glute are too weak to stabilise the pelvis upright. It's a deeper instability signal than a simple pelvic drop.",
+    program: "Your program starts with foundational balance and proprioception work — eyes-open then eyes-closed single-leg holds, star reaches, tandem walks — before any loaded single-leg strength.",
+  }),
+  lumbar_arch_overhead: (t) => ({
+    what: `Your lower back arched to reach overhead on the ${t}.`,
+    why: "The lumbar spine is extending to make the arms appear to go higher — the shoulder range isn't actually there. Stretching the shoulders won't fix this without teaching the anterior core to lock down the ribs.",
+    program: "Your program leads with thoracic mobility (extension over a roller, open books) plus anterior core control (dead bug, plank). Shoulder mobility is secondary.",
+  }),
+  lumbar_arch_bridge: (t) => ({
+    what: `Your lower back arched during the ${t} instead of the glutes lifting.`,
+    why: "The lumbar spine is taking load the glutes should be handling — this is how low backs get overloaded during hip-thrust patterns.",
+    program: "Your program starts with glute activation (isolated glute squeeze, clamshells) and core stability before any loaded hip-thrust pattern.",
+  }),
+  shoulder_shrug: (t) => ({
+    what: `Your shoulders shrugged up toward your ears during the ${t}.`,
+    why: "The upper traps are doing the job the lower traps and serratus should be doing — this is a scapular control deficit, not a flexibility deficit. Shoulder stretches alone won't fix it.",
+    program: "Your program targets scapular motor control — Y/T/W holds, band pull-aparts, wall slides with an active retraction cue — before any overhead strength work.",
+  }),
+  hip_hike: (t) => ({
+    what: `Your pelvis hiked up during the ${t}.`,
+    why: "The lateral trunk muscles are lifting the pelvis to help the leg rise — the hip abductors aren't doing the work cleanly. This is a control problem, not a strength problem yet.",
+    program: "Your program starts with low-level abductor activation (clamshells, isolated side-lying abduction) before any loaded abduction work.",
+  }),
+  pelvis_rotation_bridge: (t) => ({
+    what: `Your pelvis rotated during the ${t} hold — one hip stayed higher than the other.`,
+    why: "One glute is weaker than the other. Even in a bilateral test, this is a unilateral finding.",
+    program: "Your program prioritises single-leg glute bridges over bilateral bridge progressions until the sides even out.",
+  }),
+  elbow_shoulder_cheat: (t) => ({
+    what: `Your shoulder moved during the ${t}.`,
+    why: "The upper arm compensated by moving the whole limb, so the elbow angle reading isn't reliable.",
+    program: "We don't score this attempt. Redo the test with your upper arm pinned to your side before we generate any elbow-specific program.",
+  }),
+  limited_range_no_comp: (t) => ({
+    what: `Range was limited on the ${t} but no compensation was flagged.`,
+    why: "The joint itself needs more room — nothing else compensated to fake it.",
+    program: "Your program uses joint-specific mobility work targeting the limiting tissue.",
+  }),
+};
+
+/** Public: build the reasoning card for a signal. */
+export function reasoningForSignal(sig: Signal | { pattern?: CompensationPattern; testName: string }): CompensationReasoning | null {
+  const pattern = sig.pattern;
+  if (!pattern) return null;
+  return REASONING[pattern](sig.testName);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Signal extraction — pattern-match the human-readable compensation strings
+// emitted by screen.run.tsx into structured (test, focusId, severity, pattern)
+// tuples. We don't modify the scorer, so this is the contract.
+// ─────────────────────────────────────────────────────────────────────────────
 
 function hasAny(comps: string[] | undefined, ...patterns: RegExp[]): string | null {
   if (!comps) return null;
@@ -372,9 +479,9 @@ function extractSignals(tests: TestResult[]): Signal[] {
       // most likely driver. We still flag hip stability as a secondary
       // signal if knee valgus appeared during the test.
       if (t.score < 3) {
-        signals.push({ testId: t.id, testName: t.name, focusId: "ankle_restriction", severity: sev, detail: "Limited ankle dorsiflexion" });
+        signals.push({ testId: t.id, testName: t.name, focusId: "ankle_restriction", severity: sev, detail: "Limited ankle dorsiflexion", pattern: "limited_range_no_comp" });
       }
-      if (valgus) signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: "borderline", detail: valgus });
+      if (valgus) signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: "borderline", detail: valgus, pattern: "knee_valgus" });
       continue;
     }
 
@@ -429,6 +536,26 @@ export interface ScanDecision {
   focuses: ScanFocus[];          // up to 2
   otherFindings: string[];        // plain-language lines for lower-priority issues
   insightSummary: string[];      // root-cause insights for the results screen
+  /** Per-signal reasoning cards — the "why it matters + what your program does". */
+  findings: Finding[];
+  /** Tests that passed cleanly (score 3, no compensation, valid). */
+  cleanPasses: { testId: string; testName: string }[];
+  /** True when every valid test passed cleanly — no corrective needed. */
+  allClean: boolean;
+  /** Borderline tests (score 2, no compensation) — light Foundation, not full. */
+  borderlines: { testId: string; testName: string }[];
+}
+
+export interface Finding {
+  testId: string;
+  testName: string;
+  focusLabel: string;
+  area: Area;
+  severity: "fail" | "borderline";
+  pattern: CompensationPattern;
+  what: string;
+  why: string;
+  program: string;
 }
 
 const MAX_FOCUSES = 2;
@@ -465,8 +592,19 @@ export function analyzeScan(
   goal: Goal | undefined,
 ): ScanDecision {
   const signals = extractSignals(tests);
+  const validTests = tests.filter((t) => t.valid !== false);
+  const cleanPasses = validTests
+    .filter((t) => t.score === 3 && (!t.compensations || t.compensations.length === 0))
+    .map((t) => ({ testId: t.id, testName: t.name }));
+  const borderlines = validTests
+    .filter((t) => t.score === 2 && (!t.compensations || t.compensations.length === 0))
+    .map((t) => ({ testId: t.id, testName: t.name }));
+  const allClean = validTests.length > 0 && validTests.every(
+    (t) => t.score === 3 && (!t.compensations || t.compensations.length === 0),
+  );
+
   if (signals.length === 0) {
-    return { focuses: [], otherFindings: [], insightSummary: [] };
+    return { focuses: [], otherFindings: [], insightSummary: [], findings: [], cleanPasses, allClean, borderlines };
   }
 
   // Group by focus.
@@ -514,7 +652,26 @@ export function analyzeScan(
 
   const insightSummary: string[] = focuses.map((f) => f.rationale);
 
-  return { focuses, otherFindings, insightSummary };
+  const findings: Finding[] = signals
+    .map((s): Finding | null => {
+      const r = reasoningForSignal(s);
+      if (!r || !s.pattern) return null;
+      const tmpl = FOCUS_TEMPLATES[s.focusId];
+      return {
+        testId: s.testId,
+        testName: s.testName,
+        focusLabel: tmpl.label,
+        area: tmpl.area,
+        severity: s.severity,
+        pattern: s.pattern,
+        what: r.what,
+        why: r.why,
+        program: r.program,
+      };
+    })
+    .filter((f): f is Finding => f !== null);
+
+  return { focuses, otherFindings, insightSummary, findings, cleanPasses, allClean, borderlines };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

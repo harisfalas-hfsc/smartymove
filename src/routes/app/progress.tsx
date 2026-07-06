@@ -4,7 +4,7 @@ import { useScanDecision } from "@/lib/program";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
-import { Calendar, TrendingUp, Share2, Lock, AlertCircle, Target } from "lucide-react";
+import { Calendar, TrendingUp, Share2, Lock, AlertCircle, Target, CheckCircle2, Info } from "lucide-react";
 
 export const Route = createFileRoute("/app/progress")({ component: Progress });
 
@@ -121,6 +121,60 @@ function Progress() {
                 </ul>
               </div>
             )}
+          </div>
+        )}
+        {decision && decision.allClean && (
+          <div className="rounded-3xl border border-success/40 bg-success/10 p-5">
+            <div className="mb-1 flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-success" />
+              <h3 className="text-base font-bold text-success">Your movement screen looks solid</h3>
+            </div>
+            <p className="text-sm text-foreground/80">
+              No major restrictions or compensations found across the board. Your program shifts to building strength and maintaining what you've got — no corrective block needed.
+            </p>
+          </div>
+        )}
+        {decision && decision.cleanPasses.length > 0 && !decision.allClean && (
+          <div className="rounded-3xl border border-success/40 bg-success/5 p-5">
+            <div className="mb-2 flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-success" />
+              <h3 className="text-base font-bold">Passed cleanly — real progress</h3>
+            </div>
+            <ul className="space-y-1">
+              {decision.cleanPasses.map((p) => (
+                <li key={p.testId} className="text-sm text-foreground/80">
+                  • <strong>{p.testName}</strong> — no compensation detected. We're keeping this area at maintenance-level work while we focus on the areas that need it.
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {decision && decision.findings.length > 0 && (
+          <div className="rounded-3xl bg-card p-5 shadow-card">
+            <div className="mb-2 flex items-center gap-2">
+              <Info className="h-4 w-4 text-primary" />
+              <h3 className="text-base font-bold">Findings & what your program does about them</h3>
+            </div>
+            <p className="mb-3 text-[11px] text-muted-foreground">
+              Every flagged compensation gets its own card — what we saw, why it matters, and the specific direction your program takes to fix the root cause.
+            </p>
+            <ul className="space-y-3">
+              {decision.findings.map((f, i) => (
+                <li key={i} className="rounded-2xl border border-border bg-background/60 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-sm font-bold">{f.focusLabel}</div>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${f.severity === "fail" ? "bg-destructive/15 text-destructive" : "bg-warning/15 text-warning"}`}>
+                      {f.severity === "fail" ? "Fail" : "Borderline"} · {f.testName}
+                    </span>
+                  </div>
+                  <div className="mt-2 space-y-1.5 text-xs">
+                    <div><span className="font-semibold text-foreground">What we saw: </span><span className="text-foreground/80">{f.what}</span></div>
+                    <div><span className="font-semibold text-foreground">Why it matters: </span><span className="text-foreground/80">{f.why}</span></div>
+                    <div><span className="font-semibold text-primary">Your program: </span><span className="text-foreground/80">{f.program}</span></div>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
         {latest && latest.tests.length > 0 && (

@@ -1,110 +1,65 @@
-# SmartyMove Corrective Exercise Engine v1
+# Dual-Angle Scanning + Reasoning Upgrade
 
-Encodes your spec literally. Exercises are NEVER generated — only picked from the seven libraries you listed, by area + category + phase ratio.
+Additive only. Existing scoring, compensation detection, decision engine, exercise library, and phase logic stay intact — no rewrites.
 
-## 1. Hard-coded curated libraries (your exact lists)
+## PART 1 — Dual-angle scan flow (`src/lib/movement.ts`, `src/routes/app/screen.run.tsx`)
 
-New file `src/lib/corrective/libraries.ts`. Seven areas × three categories, names verbatim from your prompt:
+Add per-test camera-view definitions to each entry in `CORE_TESTS` and `CONDITIONAL_TESTS`:
 
-**Ankle**
-- Mobility: Knee To Wall, Ankle Rockers, Calf Stretch, Soleus Stretch, Ankle Circles, Toe Elevation Stretch, Dorsiflexion Mobilization, Heel Raises, Tibialis Raises, Foot Rolling
-- Stability: Single Leg Balance, Single Leg Balance Eyes Closed, Star Balance Reach, Clock Reach, Single Leg RDL Reach, Tandem Walk, Heel Walk, Toe Walk, Bosu Balance, Lateral Hops
-- Strength: Calf Raises, Single Leg Calf Raises, Tibialis Raises, Split Squat, Reverse Lunge, Step Ups, Farmer Carry, Walking Lunges, Skater Step, Sled Push
+```
+views: [{ id: "side", label, silhouetteHint, detects: [...] },
+        { id: "front", label, silhouetteHint, detects: [...] }]
+```
 
-**Knee**
-- Mobility: Quad Stretch, Hamstring Stretch, Calf Stretch, Knee Flexion Mobilization, Heel Slides, Assisted Deep Squat Hold, Couch Stretch, Adductor Rockback, Hip Flexor Stretch, Ankle Mobility Drill
-- Stability: Single Leg Balance, Step Down Hold, Split Squat Hold, Wall Sit, Terminal Knee Control, Lateral Reach, Clock Reach, Single Leg Sit To Stand, Balance Pad Hold, March Hold
-- Strength: Sit To Stand, Goblet Squat, Split Squat, Reverse Lunge, Step Ups, Bulgarian Split Squat, Wall Sit, Spanish Squat, Deadlift, Farmer Carry
+Mapping:
+- **Two-angle**: squat (side→front), hinge (side→front), balance (front→side, per leg), lunge (side→front, per leg), overhead (front→side), ankle_df (side→front), knee_sld (front→side), bridge_hold (side→front), wall_slide (side→front)
+- **Single-angle unchanged**: hip_abd (front only), elbow_rom (front only), wrist_rom (front only)
 
-**Hip**
-- Mobility: 90/90 Hip Stretch, Hip Rotations, Figure Four Stretch, Adductor Rockback, Frog Stretch, Hip Flexor Stretch, World's Greatest Stretch, Cossack Mobility, Glute Stretch, Leg Swings
-- Stability: Single Leg Balance, Bird Dog, Dead Bug, Side Plank, Glute Bridge Hold, Hip Airplane, March Hold, Single Leg Reach, Pallof Press, Split Stance Hold
-- Strength: Glute Bridge, Hip Thrust, Split Squat, Step Up, Deadlift, Single Leg RDL, Goblet Squat, Farmer Carry, Lateral Lunge, Walking Lunge
+`screen.run.tsx` becomes a per-view loop: for each test, run all views sequentially with a "Reposition" transition screen (silhouette + copy: "Great — now face the camera") between them. Each view runs its own compensation detectors; results merge into one `TestResult` with combined score = min of per-view scores and union of compensation strings. `TestResult` gains `viewFindings: { view, score, compensations }[]` (persisted; renders per-view in results).
 
-**Low Back** (Push Ups explicitly BLOCKED)
-- Mobility: Cat Cow, Child Pose, Open Book, Pelvic Tilt, Hip Flexor Stretch, 90/90 Hip Stretch, Hamstring Mobility, Thoracic Rotation, Adductor Rockback, Deep Squat Hold
-- Stability: Bird Dog, Dead Bug, Side Plank, Front Plank, Pallof Press, Glute Bridge Hold, March Hold, Bear Hold, Suitcase Carry, Single Leg Balance
-- Strength: Glute Bridge, Hip Thrust, Farmer Carry, Suitcase Carry, Step Up, Split Squat, Goblet Squat, Deadlift Progressions, Reverse Lunge, Sled Push
+## PART 2 — Compensation reasoning (`src/lib/corrective/decision.ts`)
 
-**Shoulder**
-- Mobility: Wall Slides, Thread The Needle, Open Book, Arm Circles, Band Dislocates, Thoracic Rotation, Child Pose Reach, Pec Stretch, Lat Stretch, Sleeper Stretch
-- Stability: Scapular Push Up, Y Hold, T Hold, Wall Slide Hold, Bottom Up Carry, Farmer Carry, Dead Bug Reach, Bird Dog Reach, Side Plank Reach, Band External Rotation
-- Strength: Row, Face Pull, Band Pull Apart, Landmine Press, Half Kneeling Press, Carry Variations, TRX Row, Incline Push Up, Dumbbell Press, Shoulder Press
+Each focus template gains a `perCompensation` map keyed on the compensation regex family. Signal extraction records the matched pattern; when we render the results card we emit:
+1. **What we saw** — plain-language finding
+2. **Why it matters** — root-cause explanation
+3. **What your program does about it** — the specific first-stage direction
 
-**Elbow**
-- Mobility: Wrist Flexor Stretch, Wrist Extensor Stretch, Forearm Rotations, Elbow Flexion Extension, Nerve Glides, Wall Mobility, Hand Open Close, Grip Mobility, Finger Extensions, Wrist Circles
-- Stability: Grip Hold, Farmer Carry, Bottom Up Carry, Dead Hang, Suitcase Carry, Band Holds, Wrist Isometrics, Towel Grip, Plank Hold, Push Up Hold
-- Strength: Row, Hammer Curl, Reverse Curl, Farmer Carry, Wrist Curl, Wrist Extension, Grip Crush, TRX Row, Band Row, Carry Variations
+Add the 10 explanation rules from the spec (heel rise, valgus, spine rounding, lateral trunk shift, forward trunk lean, lumbar arch overhead, lumbar arch bridge, shoulder shrug, hip hike, pelvis rotation bridge, elbow shoulder-cheat). Elbow shoulder-cheat sets `t.valid = false` in `screen.run.tsx` and shows a "retry" prompt instead of scoring.
 
-**Wrist**
-- Mobility: Wrist Circles, Palm Stretch, Reverse Palm Stretch, Wrist Flexion Stretch, Wrist Extension Stretch, Finger Mobility, Prayer Stretch, Table Wrist Rocks, Forearm Rotation, Hand Open Close
-- Stability: Quadruped Weight Shift, Wrist Isometric Hold, Farmer Carry, Bottom Up Carry, Wall Push Hold, Bear Hold, Plank Hold, Side Plank Hold, Grip Hold, Towel Hold
-- Strength: Wrist Curl, Reverse Wrist Curl, Farmer Carry, Grip Crush, Plate Pinch, Band Extension, Rice Bucket Work, Hammer Rotation, Dead Hang, Carry Variations
+Results screen (`src/routes/app/screen.tsx`) gets a new "Findings" section — one card per signal with the three fields above, before the routine.
 
-Each entry stored as `{ canonical, keywords[] }` so the resolver can match it to the closest row in the `public.exercises` library (exact name → keyword score → skip if no GIF). Push Ups are on a blocklist for the Low Back area.
+## PART 3 — Re-scan trigger engine (new `src/lib/corrective/rescan.ts`)
 
-## 2. Mandatory user flow (already partially built)
+Pure function `evaluateRescan(profile, sessions, program)` returns `{ suggest: boolean, reason: string, message: string, urgency }`. Rules:
 
-- **Readiness questionnaire** — already exists at `/onboarding/questionnaire`. Add the missing fields: numbness, night pain, unexplained symptoms (currently merged into one "red flags" switch — split into three). Red flag → warning banner, do NOT block.
-- **Disclaimer** — already exists; keep, requires acceptance.
-- **Pain area selection** — `/onboarding/joints`. Enforce **max 2 areas** (currently unbounded). "None" allowed.
-- **Movement assessment** — `/app/screen.run` already runs the 5 tests (Squat, Hip Hinge, Single Leg Balance, Split Stance Reach, Overhead Reach). Verify all 5 are present; add any missing.
-- **Goal selection** — already exists with your 5 options.
+1. Foundation-phase sessions completed → "Ready to re-scan and move to Build"
+2. User answers "something changed" on post-session prompt → "Sounds like something shifted"
+3. Two consecutive 14-day scans with no improvement → "Consider a movement specialist" (different copy)
+4. Goal changed since last scan → immediate re-scan CTA
+5. Test now passes cleanly → celebration, remove from primary focus, progress area
+6. Passes primary angle but compensation still present → NOT clean, stays Foundation, explicit copy
 
-## 3. Phase engine (`src/lib/corrective/phase.ts`)
+Wire into `src/routes/app/index.tsx` (home banner) and `src/routes/app/program.tsx` (top card). Post-session feedback question added to program screen.
 
-Derive from `programStartDate` (set on first goal completion; backfilled to `createdAt` for existing users):
+## PART 4 — No-correction-needed program paths (`src/lib/corrective/decision.ts` + `engine.ts`)
 
-| Weeks | Phase    | Mob | Stab | Str |
-|-------|----------|-----|------|-----|
-| 0–1   | Restore  | 70% | 20%  | 10% |
-| 2–5   | Build    | 30% | 40%  | 30% |
-| 6+    | Perform  | 20% | 30%  | 50% |
+New `buildProgramPlan(session)` produces one of:
+- **Clean pass on an area** → maintenance slot for that area, primary focus shifts to remaining issues
+- **All clean** → skip Foundation, jump straight to Stage 3 Maintain & Perform based on `goal`
+- **Only borderline (score 2, no compensation)** → light Foundation (1–2 exercises) for those areas, primary focus goes to Build for the rest
 
-For a 7-exercise daily routine the slot counts become Restore 5/1/1, Build 2/3/2, Perform 1/2/4.
+`engine.ts` accepts an area-level `mode: "foundation" | "build" | "maintain"` override per area so mixed plans work in one routine.
 
-Nobody graduates — phase keeps advancing forever.
+## PART 5 — Non-goals / preserved invariants
 
-## 4. Routine engine (`src/lib/corrective/engine.ts`) — replaces current slot picker
+- No LLM calls anywhere in this pipeline — all deterministic.
+- Low-back push-up blocklist, curated library only, 2-focus cap, 14-day timer, phase ratios — all unchanged.
+- No DB schema changes required; new fields ride inside the existing `ScreenSession` JSON blob in `profiles.app_user`.
 
-Inputs: user's pain areas (max 2; if "none", default areas from goal), phase ratios, library rows from `public.exercises`.
+## Technical checkpoints
 
-1. Compute slot counts from phase ratios.
-2. Walk Mobility → Stability → Strength. For each slot, alternate across the user's areas and pull the next un-used curated name from that area + category.
-3. Resolve curated name → library row (exact → keyword score, body-weight preferred, must have GIF). If no resolution, log to admin warnings and skip to next curated entry.
-4. Daily order is seeded by `(userId, date)` so the routine is stable for the day and rotates day-to-day.
-5. Return `RoutineItem[]` tagged with `category` (mobility/stability/strength) and `area` for UI grouping.
+- Type additions in `src/lib/store.ts` for `viewFindings` and `postSessionFeedback`.
+- `screen.run.tsx` refactor is the biggest chunk — view queue, transition screen, per-view detector dispatch.
+- Verify with `bunx tsgo --noEmit` after each of Part 1, Part 2+4, Part 3.
 
-Wire `useMicroRoutine` in `src/lib/exercises.ts` to delegate to this engine. Keep the existing signed-URL flow and `ExerciseSheet` popup unchanged.
-
-## 5. Retest cycle (`src/lib/corrective/retest.ts`)
-
-- After every screen session, store `nextRetestDate = +14d`.
-- Home shows a "Retest due" CTA when reached.
-- On retest completion, compare to previous session and render a Progress Report card: delta per sub-score (Mobility / Stability / Balance / Quality / Strength), Movement Score trend, Movement Age delta.
-- If overall improvement ≥ threshold, surface a "Ready for next goal?" suggestion (e.g. "Your knee function improved — ready to start a running pathway?"). User can accept → updates `goal`.
-
-## 6. UI changes
-
-- `src/routes/app/index.tsx` — header shows **Phase · Week N** and ratio chips (Mob/Stab/Str). Routine list shows category badge + area badge per item.
-- `src/routes/app/program.tsx` — phase banner; weekly view tagged by category.
-- `src/routes/app/progress.tsx` — Movement Score trend chart + last retest delta.
-- `src/routes/onboarding/joints.tsx` — enforce max 2 selections.
-- `src/routes/onboarding/questionnaire.tsx` — split the single "red flags" switch into Numbness / Night pain / Unexplained symptoms.
-- `src/routes/admin.exercises.tsx` — list curated names that failed to resolve to a DB row so you can fix them.
-
-## 7. Data
-
-No schema changes. We reuse the existing `public.exercises` table (already populated with GIFs). Unresolved curated names surface in the admin page; those will be a follow-up DB seed, not part of this build.
-
-## Files
-
-**New**: `src/lib/corrective/libraries.ts`, `engine.ts`, `phase.ts`, `retest.ts`; `src/components/PhaseHeader.tsx`, `ProgressReport.tsx`, `RetestCTA.tsx`.
-
-**Edited**: `src/lib/store.ts` (add `programStartDate`, `nextRetestDate`, `painAreas` limit helper), `src/lib/exercises.ts` (delegate to engine), `src/routes/app/index.tsx`, `program.tsx`, `progress.tsx`, `onboarding/questionnaire.tsx`, `onboarding/joints.tsx`, `admin.exercises.tsx`.
-
-## Out of scope (explicit)
-
-- Seeding missing curated movements into `public.exercises` (surfaced in admin, fixed in a follow-up turn).
-- Equipment filter UI.
-- Custom user-uploaded GIFs.
+Scope is large — I'll implement in that order and verify the build between parts. Approve to proceed.

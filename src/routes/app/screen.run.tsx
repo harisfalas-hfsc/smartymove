@@ -307,6 +307,8 @@ function Runner() {
     }
     const joints = (u.questionnaire?.joints ?? []).filter(j => j !== "none") as Joint[];
     const session = computeSession(allResults, joints, u.age);
+    // Stamp the goal at time of scan so the rescan engine can detect goal changes later.
+    session.goalAtScan = u.goal;
     const wasReTest = u.sessions.length > 0;
     const nextRetest = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
     updateUser(prev => ({

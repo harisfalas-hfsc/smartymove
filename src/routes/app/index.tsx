@@ -9,6 +9,7 @@ import { ExerciseSheet } from "@/components/ExerciseSheet";
 import { evaluateProgress } from "@/lib/corrective/progression";
 import { getOngoingTrack } from "@/lib/corrective/phase";
 import { useProgramStatus, isTrainingDay, TRAINING_DAY_INDICES, PROGRAM_SESSIONS } from "@/lib/program";
+import { evaluateRescan } from "@/lib/corrective/rescan";
 
 export const Route = createFileRoute("/app/")({ component: Home });
 
@@ -21,9 +22,9 @@ function Home() {
   const latest = u.sessions[u.sessions.length - 1];
   const daysSince = latest ? Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000) : null;
   const daysUntilRetest = latest ? Math.max(0, 14 - (daysSince ?? 0)) : null;
-  const retestDue = latest != null && (daysSince ?? 0) >= 14;
   const progression = evaluateProgress(u.sessions);
   const ongoing = getOngoingTrack(u.programStartDate ?? u.createdAt, u.goal);
+  const rescan = evaluateRescan(u, status);
 
   return (
     <div className="pb-6">
@@ -57,21 +58,19 @@ function Home() {
       </header>
 
       <div className="-mt-5 space-y-4 rounded-t-[2rem] bg-background px-5 pt-6">
-        {retestDue && (
+        {rescan && rescan.reason !== "first-scan" && (
           <Link
             to="/app/screen"
-            className="block rounded-3xl brand-gradient p-5 text-primary-foreground shadow-soft"
+            className={`block rounded-3xl p-5 shadow-soft ${rescan.urgency === "high" ? "brand-gradient text-primary-foreground" : "bg-card"}`}
             style={{ textDecoration: "none" }}
           >
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest opacity-90">
-              <Calendar className="h-3.5 w-3.5" /> Time to rescan
+            <div className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest ${rescan.urgency === "high" ? "opacity-90" : "text-muted-foreground"}`}>
+              <Calendar className="h-3.5 w-3.5" /> {rescan.reason === "foundation-complete" ? "Foundation complete" : rescan.reason === "goal-changed" ? "Goal updated" : rescan.reason === "self-reported-change" ? "Something shifted" : rescan.reason === "no-improvement" ? "Program adjustment" : "Time to rescan"}
             </div>
-            <div className="mt-1 text-lg font-extrabold">Your program needs an update</div>
-            <p className="mt-1 text-sm opacity-95">
-              Your 2-week program is complete. Rescan now to measure your progress and unlock your next program.
-            </p>
-            <div className="mt-3 inline-flex items-center gap-1 text-sm font-semibold">
-              Start Movement Screen <ArrowRight className="h-4 w-4" />
+            <div className={`mt-1 text-lg font-extrabold ${rescan.urgency === "high" ? "" : "text-foreground"}`}>{rescan.title}</div>
+            <p className={`mt-1 text-sm ${rescan.urgency === "high" ? "opacity-95" : "text-muted-foreground"}`}>{rescan.message}</p>
+            <div className={`mt-3 inline-flex items-center gap-1 text-sm font-semibold ${rescan.urgency === "high" ? "" : "text-primary"}`}>
+              {rescan.cta} <ArrowRight className="h-4 w-4" />
             </div>
           </Link>
         )}
