@@ -5,25 +5,28 @@ import { Play, Lock, Loader2, Camera, ShieldCheck, Smartphone, EyeOff, Ruler, Sp
 import { useQuery } from "@tanstack/react-query";
 import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
 import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
+import { isAdminEmail } from "@/lib/admin";
 
 export const Route = createFileRoute("/app/screen/")({ component: ScreenIndex });
 
 function ScreenIndex() {
   const u = useUser();
   const navigate = useNavigate();
+  const isAdmin = !!u && isAdminEmail(u.email);
   const access = useQuery({
     queryKey: ["scan-access", u?.id ?? "pending"],
     queryFn: () => getScanAccess(),
-    enabled: !!u,
+    enabled: !!u && !isAdmin,
     staleTime: 30_000,
   });
   if (!u) return null;
   const joints = (u.questionnaire?.joints ?? []).filter(j => j !== "none");
   const addOns = joints.slice(0, 2).map(j => CONDITIONAL_TESTS[j as keyof typeof CONDITIONAL_TESTS]);
   const last = u.sessions[u.sessions.length - 1];
-  const canScan = access.data?.canScan ?? false;
-  const credits = access.data?.credits ?? 0;
-  const grandfathered = !!access.data?.hasActiveSubscription;
+  const canScan = isAdmin ? true : (access.data?.canScan ?? false);
+  const credits = isAdmin ? 9999 : (access.data?.credits ?? 0);
+  const grandfathered = isAdmin ? true : !!access.data?.hasActiveSubscription;
+  const accessLoading = !isAdmin && access.isLoading;
   function startScreen(e: React.MouseEvent) {
     if (canScan) return;
     e.preventDefault();
@@ -60,8 +63,10 @@ function ScreenIndex() {
         subtitle="A camera-based assessment. 5 core tests plus targeted add-ons — done in about 5 minutes from your phone or laptop."
       >
         <div className="mt-1 rounded-2xl p-3 text-center text-sm" style={{ background: "#F1F7F8", color: "#14213A" }}>
-          {access.isLoading ? (
+          {accessLoading ? (
             <span className="inline-flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Checking scan access…</span>
+          ) : isAdmin ? (
+            <><span style={{ color: "#0E7C86" }}>✓</span> <strong>Admin access</strong> — unlimited scans.</>
           ) : grandfathered ? (
             <><span style={{ color: "#0E7C86" }}>✓</span> <strong>Unlimited scans</strong> included with your legacy plan.</>
           ) : canScan ? (
