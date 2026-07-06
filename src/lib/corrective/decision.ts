@@ -465,13 +465,14 @@ function extractSignals(tests: TestResult[]): Signal[] {
     if (t.id === "squat") {
       const heel = hasAny(comps, /heel.*lift|heels lifted/i);
       const valgus = hasAny(comps, /knee.*inward|valgus/i);
+      const varus = hasAny(comps, /bowed outward|varus/i);
       const trunk = hasAny(comps, /trunk collapsed|spine compensated/i);
-      if (heel) signals.push({ testId: t.id, testName: t.name, focusId: "ankle_restriction", severity: "fail", detail: heel });
-      if (valgus) signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: "fail", detail: valgus });
-      if (trunk) signals.push({ testId: t.id, testName: t.name, focusId: "thoracic_mobility", severity: "fail", detail: trunk });
-      // No compensation but limited depth → general ankle+hip combo
-      if (!heel && !valgus && !trunk && t.score < 3) {
-        signals.push({ testId: t.id, testName: t.name, focusId: "general_lower_mobility", severity: sev, detail: "Limited squat depth, no compensation flagged" });
+      if (heel) signals.push({ testId: t.id, testName: t.name, focusId: "ankle_restriction", severity: "fail", detail: heel, pattern: "heel_rise" });
+      if (valgus) signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: "fail", detail: valgus, pattern: "knee_valgus" });
+      if (varus) signals.push({ testId: t.id, testName: t.name, focusId: "hip_mobility", severity: "fail", detail: varus, pattern: "knee_varus" });
+      if (trunk) signals.push({ testId: t.id, testName: t.name, focusId: "thoracic_mobility", severity: "fail", detail: trunk, pattern: "trunk_collapse_squat" });
+      if (!heel && !valgus && !varus && !trunk && t.score < 3) {
+        signals.push({ testId: t.id, testName: t.name, focusId: "general_lower_mobility", severity: sev, detail: "Limited squat depth, no compensation flagged", pattern: "limited_range_no_comp" });
       }
       continue;
     }
@@ -480,11 +481,12 @@ function extractSignals(tests: TestResult[]): Signal[] {
     if (t.id === "hinge") {
       const spineRound = hasAny(comps, /back rounded|spine rounding|spine compensation/i);
       const becameSquat = hasAny(comps, /knees bent|became a squat/i);
-      if (spineRound) signals.push({ testId: t.id, testName: t.name, focusId: "core_spinal_control", severity: "fail", detail: spineRound });
-      if (becameSquat) signals.push({ testId: t.id, testName: t.name, focusId: "hip_hinge_pattern", severity: "fail", detail: becameSquat });
-      // No compensation, limited angle, neutral spine → true hip mobility issue
-      if (!spineRound && !becameSquat && t.score < 3) {
-        signals.push({ testId: t.id, testName: t.name, focusId: "hip_mobility", severity: sev, detail: "Limited hip joint angle with neutral spine" });
+      const lateralShift = hasAny(comps, /shifted sideways|lateral shift/i);
+      if (spineRound) signals.push({ testId: t.id, testName: t.name, focusId: "core_spinal_control", severity: "fail", detail: spineRound, pattern: "spine_rounding" });
+      if (becameSquat) signals.push({ testId: t.id, testName: t.name, focusId: "hip_hinge_pattern", severity: "fail", detail: becameSquat, pattern: "hinge_became_squat" });
+      if (lateralShift) signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: "fail", detail: lateralShift, pattern: "lateral_trunk_shift" });
+      if (!spineRound && !becameSquat && !lateralShift && t.score < 3) {
+        signals.push({ testId: t.id, testName: t.name, focusId: "hip_mobility", severity: sev, detail: "Limited hip joint angle with neutral spine", pattern: "limited_range_no_comp" });
       }
       continue;
     }
@@ -492,10 +494,15 @@ function extractSignals(tests: TestResult[]): Signal[] {
     // ─── Single-leg balance ──────────────────────────────────────────────
     if (t.id === "balance") {
       const trunkLean = hasAny(comps, /trunk leaned sideways/i);
+      const balanceLost = hasAny(comps, /balance lost/i);
       if (trunkLean) {
-        signals.push({ testId: t.id, testName: t.name, focusId: "balance_proprioception", severity: "fail", detail: trunkLean });
-      } else if (t.score < 3) {
-        signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: sev, detail: "Pelvic drop on single-leg stance" });
+        signals.push({ testId: t.id, testName: t.name, focusId: "balance_proprioception", severity: "fail", detail: trunkLean, pattern: "forward_trunk_lean_balance" });
+      }
+      if (balanceLost) {
+        signals.push({ testId: t.id, testName: t.name, focusId: "balance_proprioception", severity: "fail", detail: balanceLost, pattern: "balance_lost_early" });
+      }
+      if (!trunkLean && !balanceLost && t.score < 3) {
+        signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: sev, detail: "Pelvic drop on single-leg stance", pattern: "pelvic_drop_balance" });
       }
       continue;
     }
@@ -505,11 +512,13 @@ function extractSignals(tests: TestResult[]): Signal[] {
       const heel = hasAny(comps, /heel lifted/i);
       const valgus = hasAny(comps, /knee.*inward|valgus/i);
       const rotation = hasAny(comps, /rotated your torso/i);
-      if (heel) signals.push({ testId: t.id, testName: t.name, focusId: "ankle_restriction", severity: "fail", detail: heel });
-      if (valgus) signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: "fail", detail: valgus });
-      if (rotation) signals.push({ testId: t.id, testName: t.name, focusId: "core_spinal_control", severity: "fail", detail: rotation });
-      if (!heel && !valgus && !rotation && t.score < 3) {
-        signals.push({ testId: t.id, testName: t.name, focusId: "hip_mobility", severity: sev, detail: "Limited lunge depth, no compensation flagged" });
+      const uncontrolled = hasAny(comps, /uncontrolled|lost control/i);
+      if (heel) signals.push({ testId: t.id, testName: t.name, focusId: "ankle_restriction", severity: "fail", detail: heel, pattern: "heel_rise" });
+      if (valgus) signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: "fail", detail: valgus, pattern: "knee_valgus" });
+      if (rotation) signals.push({ testId: t.id, testName: t.name, focusId: "core_spinal_control", severity: "fail", detail: rotation, pattern: "trunk_rotation_lunge" });
+      if (uncontrolled && t.id === "knee_sld") signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: "fail", detail: uncontrolled, pattern: "step_down_uncontrolled" });
+      if (!heel && !valgus && !rotation && !uncontrolled && t.score < 3) {
+        signals.push({ testId: t.id, testName: t.name, focusId: "hip_mobility", severity: sev, detail: "Limited lunge depth, no compensation flagged", pattern: "limited_range_no_comp" });
       }
       continue;
     }
@@ -517,11 +526,11 @@ function extractSignals(tests: TestResult[]): Signal[] {
     // ─── Overhead reach / wall slide ─────────────────────────────────────
     if (t.id === "overhead" || t.id === "wall_slide") {
       const lumbar = hasAny(comps, /lower back arched|lumbar/i);
-      const shrug = hasAny(comps, /shoulders shrugged|upper-trap/i);
-      if (lumbar) signals.push({ testId: t.id, testName: t.name, focusId: "thoracic_mobility", severity: "fail", detail: lumbar });
-      if (shrug) signals.push({ testId: t.id, testName: t.name, focusId: "scapular_control", severity: "fail", detail: shrug });
+      const shrug = hasAny(comps, /shoulders shrugged|upper-trap|shoulder height/i);
+      if (lumbar) signals.push({ testId: t.id, testName: t.name, focusId: "thoracic_mobility", severity: "fail", detail: lumbar, pattern: "lumbar_arch_overhead" });
+      if (shrug) signals.push({ testId: t.id, testName: t.name, focusId: "scapular_control", severity: "fail", detail: shrug, pattern: "shoulder_shrug" });
       if (!lumbar && !shrug && t.score < 3) {
-        signals.push({ testId: t.id, testName: t.name, focusId: "shoulder_mobility", severity: sev, detail: "Limited overhead reach, no compensation flagged" });
+        signals.push({ testId: t.id, testName: t.name, focusId: "shoulder_mobility", severity: sev, detail: "Limited overhead reach, no compensation flagged", pattern: "limited_range_no_comp" });
       }
       continue;
     }
@@ -541,13 +550,12 @@ function extractSignals(tests: TestResult[]): Signal[] {
 
     // ─── Standing hip abduction ──────────────────────────────────────────
     if (t.id === "hip_abd") {
-      const hike = hasAny(comps, /pelvis hiked/i);
-      const lean = hasAny(comps, /trunk leaned away/i);
-      if (hike) signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: "fail", detail: hike });
-      if (lean) signals.push({ testId: t.id, testName: t.name, focusId: "core_spinal_control", severity: "borderline", detail: lean });
+      const hike = hasAny(comps, /pelvis hiked|hip hiked/i);
+      const lean = hasAny(comps, /trunk leaned away|leaned to help/i);
+      if (hike) signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: "fail", detail: hike, pattern: "hip_hike" });
+      if (lean) signals.push({ testId: t.id, testName: t.name, focusId: "core_spinal_control", severity: "borderline", detail: lean, pattern: "hip_abd_trunk_lean" });
       if (!hike && !lean && t.score < 3) {
-        // True abductor weakness — handled by hip_stability strength pool.
-        signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: sev, detail: "Limited hip abduction strength" });
+        signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: sev, detail: "Limited hip abduction strength", pattern: "limited_range_no_comp" });
       }
       continue;
     }
@@ -555,16 +563,18 @@ function extractSignals(tests: TestResult[]): Signal[] {
     // ─── Glute bridge hold ───────────────────────────────────────────────
     if (t.id === "bridge_hold") {
       const lumbar = hasAny(comps, /lumbar hyperextension|lower back arched/i);
-      const sag = hasAny(comps, /hip sag/i);
-      if (lumbar) signals.push({ testId: t.id, testName: t.name, focusId: "core_spinal_control", severity: "fail", detail: lumbar });
-      else if (sag || t.score < 3) signals.push({ testId: t.id, testName: t.name, focusId: "glute_strength", severity: sev, detail: sag ?? "Short bridge hold" });
+      const sag = hasAny(comps, /hip sag|fatigued quickly/i);
+      const rotation = hasAny(comps, /pelvis rotated|pelvic rotation/i);
+      if (lumbar) signals.push({ testId: t.id, testName: t.name, focusId: "core_spinal_control", severity: "fail", detail: lumbar, pattern: "lumbar_arch_bridge" });
+      if (rotation) signals.push({ testId: t.id, testName: t.name, focusId: "hip_stability", severity: "fail", detail: rotation, pattern: "pelvis_rotation_bridge" });
+      if (!lumbar && !rotation && (sag || t.score < 3)) signals.push({ testId: t.id, testName: t.name, focusId: "glute_strength", severity: sev, detail: sag ?? "Short bridge hold", pattern: "bridge_short_hold" });
       continue;
     }
 
     // ─── Elbow ROM ───────────────────────────────────────────────────────
     if (t.id === "elbow_rom") {
       if (t.score < 3) {
-        signals.push({ testId: t.id, testName: t.name, focusId: "elbow_mobility", severity: sev, detail: "Limited elbow range" });
+        signals.push({ testId: t.id, testName: t.name, focusId: "elbow_mobility", severity: sev, detail: "Limited elbow range", pattern: "limited_range_no_comp" });
       }
       continue;
     }
@@ -733,7 +743,9 @@ export function analyzeScan(
 // Falls back to the area-based engine in program.ts when no decision exists.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const TARGET_ROUTINE_SIZE = 7;
+// Cap the assigned program at 5 exercises per session. Fewer, targeted
+// exercises beat many generic ones — clustered by area, not per finding.
+const TARGET_ROUTINE_SIZE = 5;
 
 export interface FocusPick {
   area: Area;
