@@ -528,6 +528,11 @@ function Runner() {
                   </div>
                   <p className="mt-1 text-sm opacity-95">{cur.viewCue}</p>
                 </div>
+                <div className="mt-3 rounded-2xl border-2 border-primary bg-primary/5 p-4 text-foreground">
+                  <div className="text-[11px] font-bold uppercase tracking-widest text-primary">Your task</div>
+                  <div className="mt-1 text-2xl font-black">{REP_PROMPT[cur.testId] ?? "Perform the movement"}</div>
+                  <div className="mt-1 text-xs text-muted-foreground">When finished, walk back and press "I'm Done". Your walk back is not scored.</div>
+                </div>
                 {isReposition ? (
                   <div className="mt-4 rounded-2xl bg-secondary/50 p-3 text-sm text-foreground">
                     <div className="font-semibold">Same movement, new camera angle.</div>
