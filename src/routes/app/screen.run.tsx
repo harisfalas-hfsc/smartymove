@@ -442,7 +442,7 @@ function Runner() {
               <div className="h-full brand-gradient transition-[width]" style={{ width: `${progress}%` }} />
             </div>
             <div className="mt-1 text-[11px] font-semibold uppercase tracking-widest opacity-80">
-              {seq.length ? `Test ${Math.min(idx + 1, seq.length)} of ${seq.length}` : ""}
+              {groupCount ? `Test ${Math.min(groupIndex + 1, groupCount)} of ${groupCount}` : ""}
             </div>
           </div>
         </div>
@@ -531,7 +531,7 @@ function Runner() {
                 The camera didn't detect enough movement to give a reliable result. Stand 6–8 feet back so your full body is in frame, then actually perform each movement during the timer. Skipping or staying still will not produce a real score.
               </p>
               <button
-                onClick={() => { setResults([]); setIdx(0); setPhase("intro"); }}
+                onClick={() => { setResults([]); stepResultsRef.current = new Map(); setIdx(0); setPhase("intro"); }}
                 className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-semibold"
               >
                 Try again
