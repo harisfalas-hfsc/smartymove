@@ -107,6 +107,24 @@ const TEST_CAMERA_VIEW: Record<string, "front" | "side"> = {
   elbow_rom: "front",
 };
 
+// Big, from-across-the-room rep prompts. Shown as the primary instruction
+// on the intro screen AND overlaid on the live camera so the user knows
+// exactly what to do without walking back to read small text.
+const REP_PROMPT: Record<string, string> = {
+  squat:       "Give me 3 slow squats",
+  hinge:       "Give me 3 slow hip hinges",
+  balance:     "Balance on each leg for ~5 seconds",
+  lunge:       "1 lunge on each leg",
+  overhead:    "Reach arms overhead, then rotate L + R",
+  ankle_df:    "3 slow knee-to-wall reps each side",
+  knee_sld:    "3 slow step-downs each leg",
+  hip_abd:     "3 slow leg raises each side",
+  bridge_hold: "Hold the bridge ~10 seconds",
+  wall_slide:  "3 slow wall slides",
+  elbow_rom:   "3 full bend + straighten reps",
+  wrist_rom:   "3 slow wrist flex + extend reps",
+};
+
 // Landmarks required for a frame to count toward the score of each test.
 const TEST_LANDMARKS: Record<string, number[]> = {
   squat:       [PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_ANKLE],
@@ -331,12 +349,15 @@ function Runner() {
       if (activeTestKeyRef.current !== activeKey) return;
       done = true;
       clearInterval(tickId); clearInterval(sampleId);
-      // Trim the last ~1.5s of samples so the user's movement toward the
-      // "Done" button isn't scored as part of the test.
-      const TAIL_TRIM_SAMPLES = 15; // sampler @ 100ms → 1.5s
+      // Trim the first ~1s (walking into position after pressing Start) and
+      // the last ~1.5s (walking back to press "I'm Done") so only the actual
+      // reps are scored.
+      const HEAD_TRIM_SAMPLES = 10; // 1.0s
+      const TAIL_TRIM_SAMPLES = 15; // 1.5s
+      const raw = samplesRef.current;
       const trimmed = skipped
-        ? samplesRef.current
-        : samplesRef.current.slice(0, Math.max(0, samplesRef.current.length - TAIL_TRIM_SAMPLES));
+        ? raw
+        : raw.slice(HEAD_TRIM_SAMPLES, Math.max(HEAD_TRIM_SAMPLES, raw.length - TAIL_TRIM_SAMPLES));
       const scoredDuration = Math.max(1, Math.round(trimmed.length / 10));
       const scored: TestResult = skipped
         ? { id: test.testId, name: test.name, score: 1, notes: "Skipped", valid: false, cameraView: test.cameraView }
@@ -445,8 +466,14 @@ function Runner() {
             <div className="rounded-full bg-black/70 px-5 py-2 text-2xl font-black uppercase tracking-widest text-white shadow-2xl ring-2 ring-white/30 backdrop-blur">
               {cur.cameraView === "side" ? "◐ SIDE VIEW" : "● FACE THE CAMERA"}
             </div>
-            <div className="rounded-2xl bg-white/95 px-4 py-1.5 text-xl font-extrabold text-foreground shadow-xl">
+            <div className="rounded-2xl bg-white/95 px-4 py-1.5 text-lg font-extrabold text-foreground shadow-xl">
               {cur.name}
+            </div>
+            <div className="rounded-2xl brand-gradient px-5 py-2 text-2xl font-black text-primary-foreground shadow-2xl ring-2 ring-white/40">
+              {REP_PROMPT[cur.testId] ?? "Perform the movement"}
+            </div>
+            <div className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white/90 backdrop-blur">
+              Then walk back and press "I'm Done"
             </div>
           </div>
         )}
@@ -503,6 +530,11 @@ function Runner() {
                     {cur.cameraView === "side" ? "Side to camera" : "Face the camera"}
                   </div>
                   <p className="mt-1 text-sm opacity-95">{cur.viewCue}</p>
+                </div>
+                <div className="mt-3 rounded-2xl border-2 border-primary bg-primary/5 p-4 text-foreground">
+                  <div className="text-[11px] font-bold uppercase tracking-widest text-primary">Your task</div>
+                  <div className="mt-1 text-2xl font-black">{REP_PROMPT[cur.testId] ?? "Perform the movement"}</div>
+                  <div className="mt-1 text-xs text-muted-foreground">When finished, walk back and press "I'm Done". Your walk back is not scored.</div>
                 </div>
                 {isReposition ? (
                   <div className="mt-4 rounded-2xl bg-secondary/50 p-3 text-sm text-foreground">
