@@ -103,26 +103,67 @@ export function scoreFromRange(value: number, ideal: number, tolerance: number):
 }
 
 export function computeSession(results: TestResult[], conditional: Joint[], age: number): ScreenSession {
-  const focusMap: Record<string, string[]> = {
-    squat: ["mobility","strength","quality"],
-    hinge: ["mobility","quality"],
-    balance: ["balance","stability"],
-    lunge: ["mobility","stability","strength"],
-    overhead: ["mobility","quality"],
-    ankle_df: ["mobility"], knee_sld: ["stability","strength"],
-    hip_abd: ["stability","balance"], bridge_hold: ["strength","stability"],
-    wall_slide: ["mobility","quality"], elbow_rom: ["mobility"], wrist_rom: ["mobility"],
+  // Per-test contribution map. Each test only contributes to the dimensions
+  // it can actually measure from the camera. Strength was removed — a
+  // camera movement screen cannot measure strength capacity.
+  //
+  //   Mobility  ← hip hinge + overhead + ankle_df (if run) + lunge
+  //   Stability ← single-leg balance + lunge (knee tracking) + hip_abd (if run)
+  //   Balance   ← single-leg balance (both sides)
+  //   Quality   ← squat, hip hinge, overhead (compensation-adjusted scores)
+  const focusMap: Record<string, Array<"mobility" | "stability" | "balance" | "quality">> = {
+    squat:       ["quality"],
+    hinge:       ["mobility", "quality"],
+    balance:     ["balance", "stability"],
+    lunge:       ["mobility", "stability"],
+    overhead:    ["mobility", "quality"],
+    ankle_df:    ["mobility"],
+    knee_sld:    ["stability"],
+    hip_abd:     ["stability"],
+    bridge_hold: ["stability"],
+    wall_slide:  ["mobility"],
+    elbow_rom:   ["mobility"],
+    wrist_rom:   [],
   };
-  const subs = { mobility: [] as number[], stability: [] as number[], balance: [] as number[], quality: [] as number[], strength: [] as number[] };
+  const buckets = {
+    mobility: [] as number[],
+    stability: [] as number[],
+    balance: [] as number[],
+    quality: [] as number[],
+  };
+  // Every number the user sees must come from a test we actually captured
+  // cleanly. Skipped / invalid / no-clear-reading tests are excluded from
+  // every sub-score (they show "No reading" in the per-test breakdown).
   const valid = results.filter(r => r.valid !== false);
+  // score 3 → 100, score 2 → 67, score 1 → 33
+  const scoreToPct = (s: 1 | 2 | 3) => (s === 3 ? 100 : s === 2 ? 67 : 33);
   for (const r of valid) {
-    const pct = (r.score / 3) * 100;
-    for (const f of focusMap[r.id] ?? []) (subs as any)[f].push(pct);
+    const pct = scoreToPct(r.score);
+    for (const f of focusMap[r.id] ?? []) buckets[f].push(pct);
   }
-  const avg = (a: number[]) => a.length ? Math.round(a.reduce((x,y)=>x+y,0)/a.length) : 0;
-  const sub = { mobility: avg(subs.mobility), stability: avg(subs.stability), balance: avg(subs.balance), quality: avg(subs.quality), strength: avg(subs.strength) };
-  const present = [sub.mobility, sub.stability, sub.balance, sub.quality, sub.strength].filter(v => v > 0);
-  const overall = present.length ? Math.round(present.reduce((a,b)=>a+b,0) / present.length) : 0;
+  // MIN_CONTRIBUTORS = 1: a single test IS enough for a sub-score. If nothing
+  // contributed, the sub-score is marked as -1 ("Insufficient data"). This
+  // matches the spec: never show a fake number when we don't have data.
+  const avgOrInsufficient = (a: number[]) =>
+    a.length >= 1 ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : -1;
+  const sub = {
+    mobility: avgOrInsufficient(buckets.mobility),
+    stability: avgOrInsufficient(buckets.stability),
+    balance: avgOrInsufficient(buckets.balance),
+    quality: avgOrInsufficient(buckets.quality),
+  };
+  // Overall = weighted average of the four sub-scores (Mobility 30, Stability
+  // 25, Balance 25, Quality 20). If a sub-score is "Insufficient data" it is
+  // excluded from the weighting and the remaining weights are renormalized.
+  const weights: Record<keyof typeof sub, number> = {
+    mobility: 0.30, stability: 0.25, balance: 0.25, quality: 0.20,
+  };
+  let wSum = 0, weighted = 0;
+  (Object.keys(weights) as Array<keyof typeof sub>).forEach(k => {
+    const v = sub[k];
+    if (v >= 0) { weighted += v * weights[k]; wSum += weights[k]; }
+  });
+  const overall = wSum > 0 ? Math.round(weighted / wSum) : 0;
   const offset = Math.round(((75 - overall) / 25) * 5);
   const movementAge = Math.max(16, Math.min(90, age + offset));
   return { date: new Date().toISOString(), overall, sub, movementAge, tests: results, conditional };
