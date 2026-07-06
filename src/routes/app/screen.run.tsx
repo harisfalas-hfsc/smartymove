@@ -361,7 +361,7 @@ function Runner() {
       const scoredDuration = Math.max(1, Math.round(trimmed.length / 10));
       const scored: TestResult = skipped
         ? { id: test.testId, name: test.name, score: 1, notes: "Skipped", valid: false, cameraView: test.cameraView }
-        : { ...scoreSamples(test.testId, trimmed, scoredDuration), cameraView: test.cameraView };
+        : { ...scoreSamples(test.testId, trimmed, scoredDuration, test.cameraView), cameraView: test.cameraView };
       // Buffer per-view results; on the last view of the group, merge into
       // one TestResult and push to the top-level results.
       const bucket = stepResultsRef.current.get(test.groupId) ?? [];
@@ -448,7 +448,7 @@ function Runner() {
   }, [seq]);
   const cur = seq[idx];
   if (!u) return null;
-  const progress = seq.length ? ((idx + (phase === "running" ? 1 - countdown / (cur?.duration ?? 1) : 0)) / seq.length) * 100 : 0;
+  const progress = seq.length ? ((idx + (phase === "running" ? Math.min(1, countdown / (cur?.duration ?? 1)) : 0)) / seq.length) * 100 : 0;
   const groupIndex = cur ? groupIds.indexOf(cur.groupId) : -1;
   const groupCount = groupIds.length;
   const isReposition = !!cur && cur.viewIndex > 0;
@@ -903,7 +903,152 @@ function landmarkStd(samples: Frame[], id: number, axis: "x" | "y"): number {
   return Math.sqrt(vals.reduce((a, b) => a + (b - m) ** 2, 0) / vals.length);
 }
 
-function scoreSamples(testId: string, rawSamples: Frame[], duration: number): TestResult {
+function pointMotion(samples: Frame[], ids: number[]): number {
+  let maxMotion = 0;
+  for (const id of ids) {
+    const xs = samples.map(s => s[id]?.x).filter((v): v is number => typeof v === "number");
+    const ys = samples.map(s => s[id]?.y).filter((v): v is number => typeof v === "number");
+    if (xs.length < 2 || ys.length < 2) continue;
+    maxMotion = Math.max(maxMotion, Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+  }
+  return maxMotion;
+}
+
+function needsMovementSignal(testId: string): boolean {
+  return testId !== "balance" && testId !== "bridge_hold";
+}
+
+function notEnoughMovement(testId: string, name: string, ratio: number): TestResult {
+  return {
+    id: testId,
+    name,
+    score: 1,
+    valid: false,
+    frameValidRatio: ratio,
+    notes: "The camera saw you, but it didn't detect enough of the movement to score this test. Retry with your full body visible and complete the reps before pressing I'm Done.",
+  };
+}
+
+function secondaryViewResult(testId: string, name: string, samples: Frame[], validRatio: number, cameraView: "front" | "side"): TestResult {
+  const comps: string[] = [];
+  let score: 1 | 2 | 3 = 3;
+  let metric: number | undefined;
+
+  switch (testId) {
+    case "squat":
+    case "lunge":
+    case "knee_sld": {
+      let valgusLFrames = 0, valgusRFrames = 0, activeFrames = 0;
+      for (const s of samples) {
+        const la = angle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE]);
+        const ra = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE], s[PL.RIGHT_ANKLE]);
+        if (la < 160 || ra < 160) {
+          activeFrames++;
+          const midAnkleX = (s[PL.LEFT_ANKLE].x + s[PL.RIGHT_ANKLE].x) / 2;
+          if (Math.sign(s[PL.LEFT_KNEE].x - midAnkleX) !== Math.sign(s[PL.LEFT_ANKLE].x - midAnkleX)) valgusLFrames++;
+          if (Math.sign(s[PL.RIGHT_KNEE].x - midAnkleX) !== Math.sign(s[PL.RIGHT_ANKLE].x - midAnkleX)) valgusRFrames++;
+        }
+      }
+      const valgusRatio = activeFrames ? Math.max(valgusLFrames, valgusRFrames) / activeFrames : 0;
+      metric = Math.round(valgusRatio * 100);
+      if (valgusRatio > 0.3) {
+        comps.push("Knee drifted inward from the front view — range was paired with hip-control compensation");
+        score = 2;
+      }
+      break;
+    }
+    case "ankle_df": {
+      let valgusLFrames = 0, valgusRFrames = 0;
+      for (const s of samples) {
+        const midAnkleX = (s[PL.LEFT_ANKLE].x + s[PL.RIGHT_ANKLE].x) / 2;
+        if (Math.sign(s[PL.LEFT_KNEE].x - midAnkleX) !== Math.sign(s[PL.LEFT_ANKLE].x - midAnkleX)) valgusLFrames++;
+        if (Math.sign(s[PL.RIGHT_KNEE].x - midAnkleX) !== Math.sign(s[PL.RIGHT_ANKLE].x - midAnkleX)) valgusRFrames++;
+      }
+      const valgusRatio = Math.max(valgusLFrames, valgusRFrames) / samples.length;
+      metric = Math.round(valgusRatio * 100);
+      if (valgusRatio > 0.3) {
+        comps.push("Knee collapsed inward during the ankle check — that forward travel does not count as clean ankle range");
+        score = 2;
+      }
+      break;
+    }
+    case "hinge":
+    case "balance": {
+      const shoulderTilts = samples.map(shoulderTilt);
+      const hipTilts = samples.map(hipTilt);
+      const baseShoulder = shoulderTilts.slice(0, Math.min(5, shoulderTilts.length)).reduce((a, b) => a + b, 0) / Math.min(5, shoulderTilts.length);
+      const baseHip = hipTilts.slice(0, Math.min(5, hipTilts.length)).reduce((a, b) => a + b, 0) / Math.min(5, hipTilts.length);
+      const maxShift = Math.max(
+        ...shoulderTilts.map(v => Math.abs(v - baseShoulder)),
+        ...hipTilts.map(v => Math.abs(v - baseHip)),
+      );
+      metric = Math.round(maxShift * 10) / 10;
+      if (testId === "hinge" && maxShift > 7) {
+        comps.push("You shifted sideways during the hinge — one side is not sharing the load evenly");
+        score = 2;
+      }
+      if (testId === "balance") {
+        const maxForwardLean = Math.max(...samples.map(trunkLeanAngle));
+        metric = Math.round(maxForwardLean * 10) / 10;
+        if (maxForwardLean > 12) {
+          comps.push("Torso pitched forward to save the balance — that points to hip/control compensation");
+          score = 2;
+        }
+      }
+      break;
+    }
+    case "overhead":
+    case "wall_slide": {
+      let peakFrames = 0, archFrames = 0;
+      let shoulderAsym = 0;
+      for (const s of samples) {
+        const al = angle(s[PL.LEFT_HIP], s[PL.LEFT_SHOULDER], s[PL.LEFT_ELBOW]);
+        const ar = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_SHOULDER], s[PL.RIGHT_ELBOW]);
+        shoulderAsym = Math.max(shoulderAsym, Math.abs(al - ar));
+        if (al > 140 || ar > 140) {
+          peakFrames++;
+          if (trunkLeanAngle(s) > 10) archFrames++;
+        }
+      }
+      const archRatio = peakFrames ? archFrames / peakFrames : 0;
+      metric = Math.round(Math.max(archRatio * 100, shoulderAsym));
+      if (testId === "overhead" && archRatio > 0.3) {
+        comps.push("Lower back arched from the side view — overhead range came partly from the spine");
+        score = 2;
+      }
+      if (testId === "wall_slide" && shoulderAsym > 12) {
+        comps.push("Shoulder height/range was uneven from the front view");
+        score = 2;
+      }
+      break;
+    }
+    case "bridge_hold": {
+      const tilts = samples.map(hipTilt);
+      const base = tilts.slice(0, Math.min(5, tilts.length)).reduce((a, b) => a + b, 0) / Math.min(5, tilts.length);
+      const maxTilt = Math.max(...tilts.map(v => Math.abs(v - base)));
+      metric = Math.round(maxTilt * 10) / 10;
+      if (maxTilt > 6) {
+        comps.push("Pelvis rotated or dropped during the bridge — both hips did not hold evenly");
+        score = 2;
+      }
+      break;
+    }
+  }
+
+  return {
+    id: testId,
+    name,
+    score,
+    metric,
+    compensations: comps.length ? comps : undefined,
+    frameValidRatio: Math.round(validRatio * 100) / 100,
+    notes: comps.length
+      ? comps.join("; ")
+      : `${cameraView === "front" ? "Front" : "Side"} view checked for angle-specific compensations; range score comes from the primary ${TEST_CAMERA_VIEW[testId] ?? "front"} view.`,
+  };
+}
+
+function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cameraView: "front" | "side"): TestResult {
   const name = lookupName(testId);
   const expectedFrames = Math.max(1, Math.floor(duration * 10)); // sampler @ 100ms
 
@@ -922,6 +1067,17 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number): Te
 
   // Smooth landmark coordinates before any angle math.
   const samples = smoothSamples(validFrames, relevant);
+
+  const validRatioRounded = Math.round(validRatio * 100) / 100;
+  const motion = pointMotion(samples, relevant);
+  if (needsMovementSignal(testId) && motion < 0.025) {
+    return notEnoughMovement(testId, name, validRatioRounded);
+  }
+
+  const primaryView = TEST_CAMERA_VIEW[testId] ?? "front";
+  if (cameraView !== primaryView) {
+    return secondaryViewResult(testId, name, samples, validRatio, cameraView);
+  }
 
   switch (testId) {
     case "squat": {
