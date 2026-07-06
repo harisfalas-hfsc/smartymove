@@ -415,6 +415,14 @@ function Welcome() {
             50%  { transform: translate3d(0, 110px, 0); opacity:1 }
             100% { transform: translate3d(0, 0, 0); opacity:.95 }
           }
+          @media (min-width: 1024px){
+            .sm-scanline{ animation: sm-sweep-lg 2.6s ease-in-out infinite; }
+            @keyframes sm-sweep-lg{
+              0%   { transform: translate3d(0, 0, 0); opacity:.95 }
+              50%  { transform: translate3d(0, 260px, 0); opacity:1 }
+              100% { transform: translate3d(0, 0, 0); opacity:.95 }
+            }
+          }
         `}</style>
       </main>
       <SiteFooter />
