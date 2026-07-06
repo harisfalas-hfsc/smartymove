@@ -138,7 +138,7 @@ export interface BuildInput {
    * biases category slot counts toward the user's weakest dimensions and
    * forces the Foundation phase for very low overall scores.
    */
-  sessionSub?: { mobility: number; stability: number; balance: number; quality: number; strength?: number };
+  sessionSub?: { mobility: number; stability: number; balance: number; quality: number };
 }
 
 export interface BuiltRoutine {
@@ -169,18 +169,18 @@ export function buildCorrectiveRoutine(
   library: LibraryExercise[],
 ): BuiltRoutine {
   const sub = input.sessionSub;
-  // Strength sub-score was removed from the movement screen — treat any
-  // missing value as neutral (50) so legacy sessions still compute an
-  // overall the same way.
-  const strengthNeutral = 50;
+  // Strength was removed from the movement screen — the four remaining
+  // sub-scores drive the overall used for phase / slot decisions here.
+  // Any dimension flagged "Insufficient data" (-1) is neutralised at 50
+  // so it doesn't bias the phase in either direction.
+  const NEUTRAL = 50;
   const overall = sub
     ? Math.round(
-        ((sub.mobility >= 0 ? sub.mobility : strengthNeutral) +
-          (sub.stability >= 0 ? sub.stability : strengthNeutral) +
-          (sub.balance >= 0 ? sub.balance : strengthNeutral) +
-          (sub.quality >= 0 ? sub.quality : strengthNeutral) +
-          (sub.strength ?? strengthNeutral)) /
-          5,
+        ((sub.mobility >= 0 ? sub.mobility : NEUTRAL) +
+          (sub.stability >= 0 ? sub.stability : NEUTRAL) +
+          (sub.balance >= 0 ? sub.balance : NEUTRAL) +
+          (sub.quality >= 0 ? sub.quality : NEUTRAL)) /
+          4,
       )
     : null;
   // Force the gentlest phase when the user's scan flags poor movement.
@@ -207,16 +207,17 @@ export function buildCorrectiveRoutine(
 
   // Bias category order by the user's weakest dimension so the weakest
   // bucket is filled first, before slots get consumed by other categories.
-  const strengthFor = (s: NonNullable<BuildInput["sessionSub"]>) =>
-    s.strength ?? strengthNeutral;
+  // Strength is no longer a measured sub-score — treat the training
+  // category as neutral in ordering. Weakest measured dimension still
+  // wins the slot bias.
   const order: Category[] = sub
     ? (["mobility", "stability", "strength"] as Category[]).slice().sort((a, b) => {
         const sa = a === "mobility" ? Math.max(0, sub.mobility)
           : a === "stability" ? Math.max(0, Math.min(sub.stability, sub.balance))
-          : strengthFor(sub);
+          : NEUTRAL;
         const sb = b === "mobility" ? Math.max(0, sub.mobility)
           : b === "stability" ? Math.max(0, Math.min(sub.stability, sub.balance))
-          : strengthFor(sub);
+          : NEUTRAL;
         return sa - sb;
       })
     : ["mobility", "stability", "strength"];
