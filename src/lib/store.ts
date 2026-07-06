@@ -69,7 +69,21 @@ export interface TestResult {
 export interface ScreenSession {
   date: string;
   overall: number;
-  sub: { mobility: number; stability: number; balance: number; quality: number; strength: number };
+  /**
+   * Sub-scores in 0–100. A value < 0 (e.g. -1) means "Insufficient data" —
+   * not enough valid tests contributed to that dimension to compute a score.
+   * `strength` is deprecated in v1 (cannot be measured from a camera movement
+   * screen) and is kept optional only for backward compatibility with old
+   * saved sessions.
+   */
+  sub: {
+    mobility: number;
+    stability: number;
+    balance: number;
+    quality: number;
+    /** @deprecated — not measurable from the movement screen. */
+    strength?: number;
+  };
   movementAge: number;
   tests: TestResult[];
   conditional: Joint[];
