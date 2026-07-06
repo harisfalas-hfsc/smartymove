@@ -297,13 +297,22 @@ interface Signal {
 export type CompensationPattern =
   | "heel_rise"
   | "knee_valgus"
+  | "knee_varus"
+  | "trunk_collapse_squat"
   | "spine_rounding"
+  | "hinge_became_squat"
   | "lateral_trunk_shift"
   | "forward_trunk_lean_balance"
+  | "pelvic_drop_balance"
+  | "balance_lost_early"
+  | "trunk_rotation_lunge"
   | "lumbar_arch_overhead"
   | "lumbar_arch_bridge"
   | "shoulder_shrug"
   | "hip_hike"
+  | "hip_abd_trunk_lean"
+  | "step_down_uncontrolled"
+  | "bridge_short_hold"
   | "pelvis_rotation_bridge"
   | "elbow_shoulder_cheat"
   | "limited_range_no_comp";
@@ -374,6 +383,51 @@ const REASONING: Record<CompensationPattern, (testName: string) => CompensationR
     what: `Range was limited on the ${t} but no compensation was flagged.`,
     why: "The joint itself needs more room — nothing else compensated to fake it.",
     program: "Your program uses joint-specific mobility work targeting the limiting tissue.",
+  }),
+  knee_varus: (t) => ({
+    what: `Your knees bowed outward during the ${t}.`,
+    why: "This is a hip external-rotation control issue — the hip is over-rotating rather than tracking the knees over the toes.",
+    program: "Your program adds hip internal-rotation mobility plus glute-medius control work so the knees track cleanly.",
+  }),
+  trunk_collapse_squat: (t) => ({
+    what: `Your trunk collapsed forward at the bottom of the ${t}.`,
+    why: "Either ankle stiffness or weak core stability forced the spine to fold to keep balance over the feet. The spine is compensating.",
+    program: "Your program leads with ankle mobility + anterior-core control (dead bug, plank, bird dog) before any loaded squat pattern.",
+  }),
+  hinge_became_squat: (t) => ({
+    what: `Your knees bent significantly during the ${t} — it turned into a squat.`,
+    why: "Limited hip flexion mobility (or hinge motor-pattern habit) makes the knees take over. The hinge reading isn't a true hinge until the knees stay quiet.",
+    program: "Your program drills the hip-hinge pattern (dowel hinge, wall-tap hinge, RDL progressions) with hip mobility work.",
+  }),
+  pelvic_drop_balance: (t) => ({
+    what: `Your pelvis dropped on the standing-leg side during the ${t}.`,
+    why: "Glute medius (hip stabiliser) isn't holding the pelvis level under single-leg load.",
+    program: "Your program starts with hip-abductor activation (clamshells, side plank, single-leg glute bridge) before any loaded single-leg work.",
+  }),
+  balance_lost_early: (t) => ({
+    what: `You lost balance before the ${t} target time.`,
+    why: "Ankle proprioception and hip-level stability aren't yet strong enough to hold a quiet single-leg stance.",
+    program: "Your program builds foundational balance first — eyes-open then eyes-closed single-leg holds, tandem walks — before adding load.",
+  }),
+  trunk_rotation_lunge: (t) => ({
+    what: `Your torso rotated during the ${t}.`,
+    why: "Hip mobility restriction on the front or back leg forced the trunk to twist so you could reach depth.",
+    program: "Your program pairs hip-mobility work (90/90, hip flexor, adductor) with anti-rotation core drills (Pallof press, dead bug).",
+  }),
+  hip_abd_trunk_lean: (t) => ({
+    what: `Your trunk leaned away during the ${t}.`,
+    why: "The side trunk muscles are recruiting to help lift the leg because the hip abductors aren't yet strong enough.",
+    program: "Your program starts with isolated abductor activation (clamshells, side-lying leg lift) plus side-plank work.",
+  }),
+  step_down_uncontrolled: (t) => ({
+    what: `You couldn't control the descent on the ${t}.`,
+    why: "Quadriceps eccentric control and hip stability aren't ready to lower one-leg body weight cleanly.",
+    program: "Your program adds slow-tempo split squats, step-down holds and single-leg sit-to-stand progressions.",
+  }),
+  bridge_short_hold: (t) => ({
+    what: `Your ${t} hold ended short — glutes fatigued quickly.`,
+    why: "Posterior-chain endurance is low. This shows up as low-back overload later during any hinge or loaded work.",
+    program: "Your program builds glute endurance with tempo bridges, hip thrusts and hold variations, progressing time under tension.",
   }),
 };
 
