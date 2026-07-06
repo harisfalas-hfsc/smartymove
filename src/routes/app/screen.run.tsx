@@ -317,7 +317,7 @@ function Runner() {
     const activeKey = `${idx}:${restartKey}:${test.key}`;
     activeTestKeyRef.current = activeKey;
     samplesRef.current = [];
-    setCountdown(test.duration);
+    setCountdown(0);
     setElapsed(0);
     setPaused(false);
     setShowInstructions(false);
@@ -331,9 +331,16 @@ function Runner() {
       if (activeTestKeyRef.current !== activeKey) return;
       done = true;
       clearInterval(tickId); clearInterval(sampleId);
+      // Trim the last ~1.5s of samples so the user's movement toward the
+      // "Done" button isn't scored as part of the test.
+      const TAIL_TRIM_SAMPLES = 15; // sampler @ 100ms → 1.5s
+      const trimmed = skipped
+        ? samplesRef.current
+        : samplesRef.current.slice(0, Math.max(0, samplesRef.current.length - TAIL_TRIM_SAMPLES));
+      const scoredDuration = Math.max(1, Math.round(trimmed.length / 10));
       const scored: TestResult = skipped
         ? { id: test.testId, name: test.name, score: 1, notes: "Skipped", valid: false, cameraView: test.cameraView }
-        : { ...scoreSamples(test.testId, samplesRef.current, test.duration), cameraView: test.cameraView };
+        : { ...scoreSamples(test.testId, trimmed, scoredDuration), cameraView: test.cameraView };
       // Buffer per-view results; on the last view of the group, merge into
       // one TestResult and push to the top-level results.
       const bucket = stepResultsRef.current.get(test.groupId) ?? [];
@@ -364,10 +371,9 @@ function Runner() {
       if (activeTestKeyRef.current !== activeKey) return;
       if (pausedRef.current) return;
       setElapsed(e => e + 1);
-      setCountdown(c => {
-        if (c <= 1) { finish(false); return 0; }
-        return c - 1;
-      });
+      // Count UP as an elapsed-time indicator. The user presses "Done"
+      // manually when they finish the movement — no auto-finish.
+      setCountdown(c => c + 1);
     }, 1000);
     return () => { activeTestKeyRef.current = null; clearInterval(tickId); clearInterval(sampleId); finishHandlerRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
