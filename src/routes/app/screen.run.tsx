@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
-import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES } from "@/lib/movement";
+import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
 import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal } from "lucide-react";
@@ -9,6 +9,22 @@ import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForw
 export const Route = createFileRoute("/app/screen/run")({ component: Runner });
 
 type TestDef = { id: string; name: string; duration: number; instruction: string; conditional?: boolean; cameraView: "front" | "side" };
+
+// A single scan "step" = one camera view of one test. Tests with two views
+// produce two consecutive steps that share the same `groupId`.
+type Step = {
+  key: string;               // stable per-step id (`${groupId}:${viewIndex}`)
+  groupId: string;           // = testId, shared across a test's views
+  testId: string;
+  name: string;              // display name (test name)
+  duration: number;
+  cameraView: "front" | "side";
+  viewIndex: number;         // 0-based
+  totalViews: number;        // >=1
+  viewLabel: string;         // e.g. "Side view"
+  viewCue: string;           // reposition hint
+  conditional?: boolean;
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // REFERENCE_RANGES — v1 founder-supplied thresholds based on standard movement
@@ -103,29 +119,74 @@ const TEST_LANDMARKS: Record<string, number[]> = {
   elbow_rom:   [PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_WRIST, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_WRIST],
 };
 
-function buildSequence(joints: Joint[]): TestDef[] {
-  const core: TestDef[] = CORE_TESTS.map(t => ({
-    id: t.id, name: t.name, duration: t.duration,
-    instruction: instructionFor(t.id),
-    cameraView: TEST_CAMERA_VIEW[t.id] ?? "front",
+function expandToSteps(testId: string, name: string, duration: number, conditional?: boolean): Step[] {
+  const views = TEST_VIEWS[testId];
+  if (!views || views.length === 0) {
+    // Fallback to legacy single-view mapping if a test has no view definition.
+    const cv = TEST_CAMERA_VIEW[testId] ?? "front";
+    return [{
+      key: `${testId}:0`, groupId: testId, testId, name, duration, cameraView: cv,
+      viewIndex: 0, totalViews: 1,
+      viewLabel: cv === "side" ? "Side view" : "Front view",
+      viewCue: cv === "side" ? "Stand sideways to the camera." : "Face the camera straight on.",
+      conditional,
+    }];
+  }
+  return views.map((v, i) => ({
+    key: `${testId}:${i}`, groupId: testId, testId, name, duration,
+    cameraView: v.view, viewIndex: i, totalViews: views.length,
+    viewLabel: v.label, viewCue: v.cue, conditional,
   }));
+}
+
+function buildSequence(joints: Joint[]): Step[] {
+  const core = CORE_TESTS.flatMap(t => expandToSteps(t.id, t.name, t.duration));
   // Wrist test is intentionally excluded from v1 scoring — flagged "Coming
   // soon" because the wrist landmarks are too small on camera for a reliable
   // flexion/extension angle on phones. If the user picked wrist as a flagged
   // joint, we still run their other selected joint's add-on (if any).
-  const cond: TestDef[] = joints
+  const cond = joints
     .filter(j => j !== "none" && j !== "wrist")
     .slice(0, 2)
-    .map(j => {
+    .flatMap(j => {
       const c = CONDITIONAL_TESTS[j as keyof typeof CONDITIONAL_TESTS];
-      return {
-        id: c.id, name: c.name, duration: 10,
-        instruction: instructionFor(c.id),
-        conditional: true,
-        cameraView: TEST_CAMERA_VIEW[c.id] ?? "front",
-      };
+      return expandToSteps(c.id, c.name, 10, true);
     });
   return [...core, ...cond];
+}
+
+/** Merge per-view step results for a single test into one TestResult. */
+function mergeStepResults(stepResults: Array<TestResult & { viewIndex: number }>): TestResult {
+  const sorted = [...stepResults].sort((a, b) => a.viewIndex - b.viewIndex);
+  const primary = sorted[0];
+  const validAll = sorted.every(r => r.valid !== false);
+  const scoreMin = sorted.reduce<1 | 2 | 3>((m, r) => (r.score < m ? r.score : m), 3);
+  const comps = Array.from(new Set(sorted.flatMap(r => r.compensations ?? [])));
+  const notes = sorted
+    .map(r => `${r.cameraView === "side" ? "Side" : "Front"}: ${r.notes ?? ""}`)
+    .filter(n => n.length > 6)
+    .join(" · ");
+  return {
+    id: primary.id,
+    name: primary.name,
+    score: validAll ? scoreMin : 1,
+    valid: validAll,
+    metric: primary.metric,
+    left: primary.left,
+    right: primary.right,
+    asymmetry: primary.asymmetry,
+    cameraView: primary.cameraView,
+    compensations: comps.length ? comps : undefined,
+    frameValidRatio: primary.frameValidRatio,
+    notes: notes || primary.notes,
+    viewFindings: sorted.map(r => ({
+      view: (r.cameraView ?? "front") as "front" | "side",
+      score: r.score,
+      valid: r.valid,
+      metric: r.metric,
+      compensations: r.compensations,
+    })),
+  };
 }
 
 function instructionFor(id: string): string {
@@ -155,6 +216,9 @@ function Runner() {
   const [results, setResults] = useState<TestResult[]>([]);
   const samplesRef = useRef<any[]>([]);
   const finishHandlerRef = useRef<((skipped?: boolean) => void) | null>(null);
+  // Per-view step results buffered per test groupId until all its views
+  // are captured, then merged into one TestResult and pushed into `results`.
+  const stepResultsRef = useRef<Map<string, Array<TestResult & { viewIndex: number }>>>(new Map());
   const [paused, setPaused] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [restartKey, setRestartKey] = useState(0);
@@ -247,7 +311,7 @@ function Runner() {
   useEffect(() => {
     if (phase !== "running") return;
     const test = seq[idx]; if (!test) return;
-    const activeKey = `${idx}:${restartKey}:${test.id}`;
+    const activeKey = `${idx}:${restartKey}:${test.key}`;
     activeTestKeyRef.current = activeKey;
     samplesRef.current = [];
     setCountdown(test.duration);
@@ -264,13 +328,32 @@ function Runner() {
       if (activeTestKeyRef.current !== activeKey) return;
       done = true;
       clearInterval(tickId); clearInterval(sampleId);
-      const score: TestResult = skipped
-        ? { id: test.id, name: test.name, score: 1, notes: "Skipped", valid: false, cameraView: test.cameraView }
-        : { ...scoreSamples(test.id, samplesRef.current, test.duration), cameraView: test.cameraView };
-      setResults(r => [...r, score]);
+      const scored: TestResult = skipped
+        ? { id: test.testId, name: test.name, score: 1, notes: "Skipped", valid: false, cameraView: test.cameraView }
+        : { ...scoreSamples(test.testId, samplesRef.current, test.duration), cameraView: test.cameraView };
+      // Buffer per-view results; on the last view of the group, merge into
+      // one TestResult and push to the top-level results.
+      const bucket = stepResultsRef.current.get(test.groupId) ?? [];
+      bucket.push({ ...scored, viewIndex: test.viewIndex });
+      stepResultsRef.current.set(test.groupId, bucket);
+      const isLastView = test.viewIndex + 1 >= test.totalViews;
+      let mergedForFinalize: TestResult | null = null;
+      if (isLastView) {
+        const merged = mergeStepResults(bucket);
+        mergedForFinalize = merged;
+        setResults(r => [...r, merged]);
+      }
       setTimeout(() => {
-        if (idx + 1 >= seq.length) finalize([...results, score]);
-        else setIdx(i => i + 1);
+        if (idx + 1 >= seq.length) {
+          const base = mergedForFinalize ? [...results, mergedForFinalize] : results;
+          finalize(base);
+        } else {
+          // If the next step belongs to the same group, hop straight to
+          // "reposition" (intro) so the user can rotate before the timer
+          // restarts. `setPhase("intro")` triggers the intro card.
+          setIdx(i => i + 1);
+          setPhase("intro");
+        }
       }, 400);
     };
     finishHandlerRef.current = finish;
@@ -329,6 +412,16 @@ function Runner() {
   const cur = seq[idx];
   if (!u) return null;
   const progress = seq.length ? ((idx + (phase === "running" ? 1 - countdown / (cur?.duration ?? 1) : 0)) / seq.length) * 100 : 0;
+  // Group-level "test N of M" — the user thinks of the squat + its two views
+  // as one test, not two.
+  const groupIds = useMemo(() => {
+    const seen: string[] = [];
+    for (const s of seq) if (!seen.includes(s.groupId)) seen.push(s.groupId);
+    return seen;
+  }, [seq]);
+  const groupIndex = cur ? groupIds.indexOf(cur.groupId) : -1;
+  const groupCount = groupIds.length;
+  const isReposition = !!cur && cur.viewIndex > 0;
 
   return (
     <div className="relative flex h-full min-h-[100dvh] flex-col bg-black text-white">
@@ -349,7 +442,7 @@ function Runner() {
               <div className="h-full brand-gradient transition-[width]" style={{ width: `${progress}%` }} />
             </div>
             <div className="mt-1 text-[11px] font-semibold uppercase tracking-widest opacity-80">
-              {seq.length ? `Test ${Math.min(idx + 1, seq.length)} of ${seq.length}` : ""}
+              {groupCount ? `Test ${Math.min(groupIndex + 1, groupCount)} of ${groupCount}` : ""}
             </div>
           </div>
         </div>
@@ -368,18 +461,31 @@ function Runner() {
             </div>
           )}
           {phase === "intro" && cur && (() => {
-            const g = TEST_GUIDES[cur.id];
+            const g = TEST_GUIDES[cur.testId];
             return (
               <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
-                <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Test {idx + 1} of {seq.length} · {g?.reps ?? "10 sec"}</div>
-                <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
+                <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">
+                  Test {groupIndex + 1} of {groupCount}
+                  {cur.totalViews > 1 ? ` · View ${cur.viewIndex + 1} of ${cur.totalViews}` : ""}
+                  {" · "}{g?.reps ?? "10 sec"}
+                </div>
+                <div className="mt-0.5 text-xl font-extrabold">
+                  {isReposition ? `${cur.name} — reposition` : cur.name}
+                </div>
                 <div className="mt-3 flex items-center gap-2 rounded-2xl bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">
                   {cur.cameraView === "side"
                     ? <><RotateCw className="h-4 w-4" /> Camera position: <span className="font-extrabold">Side view</span></>
                     : <><MoveHorizontal className="h-4 w-4" /> Camera position: <span className="font-extrabold">Front view</span></>}
-                  <span className="ml-auto text-[11px] font-medium text-primary/80">{cur.cameraView === "side" ? "stand sideways to the camera" : "face the camera straight on"}</span>
+                  <span className="ml-auto text-[11px] font-medium text-primary/80">{cur.viewCue}</span>
                 </div>
-                {g && (
+                {isReposition ? (
+                  <div className="mt-4 rounded-2xl bg-secondary/50 p-3 text-sm text-foreground">
+                    <div className="font-semibold">Same movement, new camera angle.</div>
+                    <p className="mt-1 text-muted-foreground">
+                      Rotate so the camera has a {cur.cameraView === "side" ? "clear side profile" : "clear front-on view"} of you, then repeat the movement. This second angle catches what the first angle can't see.
+                    </p>
+                  </div>
+                ) : g && (
                   <>
                     <div className="mt-4">
                       <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Set up</div>
@@ -405,7 +511,7 @@ function Runner() {
                 )}
                 <div className="mt-5 flex gap-2">
                   <button onClick={() => navigate({ to: "/app/screen" })} className="h-12 flex-1 rounded-2xl bg-secondary text-sm font-semibold text-foreground">Exit</button>
-                  <button onClick={() => setPhase("running")} disabled={!poseReady} className="h-12 flex-[2] rounded-2xl brand-gradient text-base font-semibold text-primary-foreground disabled:opacity-50">{poseReady ? "I'm ready · Start" : "Loading…"}</button>
+                  <button onClick={() => setPhase("running")} disabled={!poseReady} className="h-12 flex-[2] rounded-2xl brand-gradient text-base font-semibold text-primary-foreground disabled:opacity-50">{poseReady ? (isReposition ? "I'm repositioned · Start" : "I'm ready · Start") : "Loading…"}</button>
                 </div>
               </div>
             );
@@ -425,7 +531,7 @@ function Runner() {
                 The camera didn't detect enough movement to give a reliable result. Stand 6–8 feet back so your full body is in frame, then actually perform each movement during the timer. Skipping or staying still will not produce a real score.
               </p>
               <button
-                onClick={() => { setResults([]); setIdx(0); setPhase("intro"); }}
+                onClick={() => { setResults([]); stepResultsRef.current = new Map(); setIdx(0); setPhase("intro"); }}
                 className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-semibold"
               >
                 Try again
@@ -446,7 +552,7 @@ function Runner() {
             <div className="flex items-center gap-3">
               <div className="min-w-0 flex-1">
                 <div className="text-[10px] font-semibold uppercase tracking-widest text-white/60">
-                  {paused || showInstructions ? "Paused" : "In progress"} · Test {idx + 1}/{seq.length}
+                  {paused || showInstructions ? "Paused" : "In progress"} · Test {groupIndex + 1}/{groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""}
                 </div>
                 <div className="truncate text-base font-extrabold text-white">{cur.name}</div>
               </div>
@@ -489,13 +595,13 @@ function Runner() {
         </div>
       )}
       {phase === "running" && cur && showInstructions && (() => {
-        const g = TEST_GUIDES[cur.id];
+        const g = TEST_GUIDES[cur.testId];
         return (
           <div className="absolute inset-0 z-20 flex items-end bg-black/60 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
             <div className="mx-auto max-h-[80vh] w-full max-w-[720px] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Test {idx + 1} of {seq.length} · Paused</div>
+                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Test {groupIndex + 1} of {groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""} · Paused</div>
                   <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
                 </div>
                 <button onClick={() => setShowInstructions(false)} aria-label="Close" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground">

@@ -51,6 +51,19 @@ export interface TestResult {
   compensations?: string[];
   /** Fraction of captured frames that passed the visibility threshold. */
   frameValidRatio?: number;
+  /**
+   * Per-camera-view breakdown when the test was captured from more than
+   * one angle. Each entry corresponds to one view of the same movement.
+   * The top-level `score`/`compensations` fields are the merged result
+   * (min score across views, union of compensations).
+   */
+  viewFindings?: Array<{
+    view: "front" | "side";
+    score: 1 | 2 | 3;
+    valid?: boolean;
+    metric?: number;
+    compensations?: string[];
+  }>;
 }
 
 export interface ScreenSession {
