@@ -183,6 +183,20 @@ function Progress() {
               {latest.tests.map((t, i) => {
                 const bilateral = t.left != null && t.right != null;
                 const flag = (t.asymmetry ?? 0) >= 10;
+                const scoreLabel = t.valid === false ? "—" : `${t.score}/3`;
+                const cleanPass = t.valid !== false && t.score === 3 && (!t.compensations || t.compensations.length === 0);
+                const cleanCopy: Record<string, string> = {
+                  squat:    "Clean squat — good depth, good alignment.",
+                  hinge:    "Good hip hinge — hips did the work, spine stayed neutral.",
+                  balance:  "Balanced cleanly — pelvis stayed level.",
+                  lunge:    "Clean lunge — depth reached with the knee tracking over the foot.",
+                  overhead: "Full overhead reach — no lumbar or shoulder compensation.",
+                  ankle_df: "Clean ankle dorsiflexion — heel stayed flat.",
+                  knee_sld: "Controlled step-down — knee tracked over the foot.",
+                  hip_abd:  "Clean hip abduction — no hike, no trunk lean.",
+                  bridge_hold: "Held the bridge with level hips.",
+                  wall_slide:  "Full wall slide range — contact maintained.",
+                };
                 return (
                   <li key={i} className="rounded-2xl border border-border bg-background/60 p-3">
                     <div className="flex items-center justify-between gap-2">
@@ -201,9 +215,14 @@ function Progress() {
                         t.score === 3 ? "bg-success/20 text-success" :
                         t.score === 2 ? "bg-warning/20 text-warning" : "bg-destructive/20 text-destructive"
                       }`}>
-                        {t.valid === false ? "No reading" : t.score === 3 ? "Pass" : t.score === 2 ? "Borderline" : "Fail"}
+                        {t.valid === false ? "No data" : `${t.score === 3 ? "Pass" : t.score === 2 ? "Borderline" : "Fail"} · ${scoreLabel}`}
                       </span>
                     </div>
+                    {cleanPass && (
+                      <div className="mt-1.5 text-[11px] font-medium text-success">
+                        {cleanCopy[t.id] ?? "Clean pass — no compensation detected."}
+                      </div>
+                    )}
                     {bilateral && (
                       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
                         <span>L <strong className="text-foreground">{t.left}°</strong></span>
