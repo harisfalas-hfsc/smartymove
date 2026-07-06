@@ -79,11 +79,10 @@ function Progress() {
           <div className="rounded-3xl bg-card p-5 shadow-card">
             <h3 className="mb-3 text-base font-bold">Sub-scores</h3>
             <div className="space-y-3">
-              <SubScoreBar label="Mobility" value={latest.sub.mobility} />
-              <SubScoreBar label="Stability" value={latest.sub.stability} />
-              <SubScoreBar label="Balance" value={latest.sub.balance} />
-              <SubScoreBar label="Movement Quality" value={latest.sub.quality} />
-              <SubScoreBar label="Strength Capacity" value={latest.sub.strength} />
+              <SubScoreBar label="Mobility" value={latest.sub.mobility} hint="Hip hinge, overhead reach, lunge, ankle" />
+              <SubScoreBar label="Stability" value={latest.sub.stability} hint="Single-leg balance, lunge, hip abduction" />
+              <SubScoreBar label="Balance" value={latest.sub.balance} hint="Single-leg balance (left + right)" />
+              <SubScoreBar label="Movement Quality" value={latest.sub.quality} hint="Squat, hip hinge & overhead — compensations included" />
             </div>
           </div>
         )}

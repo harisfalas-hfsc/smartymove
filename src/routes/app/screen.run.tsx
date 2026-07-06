@@ -180,9 +180,20 @@ function buildSequence(joints: Joint[]): Step[] {
 function mergeStepResults(stepResults: Array<TestResult & { viewIndex: number }>): TestResult {
   const sorted = [...stepResults].sort((a, b) => a.viewIndex - b.viewIndex);
   const primary = sorted[0];
-  const validAll = sorted.every(r => r.valid !== false);
-  const scoreMin = sorted.reduce<1 | 2 | 3>((m, r) => (r.score < m ? r.score : m), 3);
-  const comps = Array.from(new Set(sorted.flatMap(r => r.compensations ?? [])));
+  // The primary view carries the range-of-motion reading and IS the test.
+  // Secondary views only detect compensations. So the merged test is valid
+  // whenever the primary view is valid — a poor secondary reading must never
+  // downgrade a good primary reading to "No reading".
+  const primaryValid = primary.valid !== false;
+  // Only cap the score using views that actually got a clean reading. An
+  // invalid secondary view returns score 1 by convention, but that 1 does
+  // NOT reflect the movement — it means we couldn't read that angle.
+  const validViewsForScore = sorted.filter(r => r.valid !== false);
+  const scoreSource = validViewsForScore.length ? validViewsForScore : [primary];
+  const scoreMin = scoreSource.reduce<1 | 2 | 3>((m, r) => (r.score < m ? r.score : m), 3);
+  const comps = Array.from(
+    new Set(validViewsForScore.flatMap(r => r.compensations ?? [])),
+  );
   const notes = sorted
     .map(r => `${r.cameraView === "side" ? "Side" : "Front"}: ${r.notes ?? ""}`)
     .filter(n => n.length > 6)
@@ -190,8 +201,8 @@ function mergeStepResults(stepResults: Array<TestResult & { viewIndex: number }>
   return {
     id: primary.id,
     name: primary.name,
-    score: validAll ? scoreMin : 1,
-    valid: validAll,
+    score: primaryValid ? scoreMin : 1,
+    valid: primaryValid,
     metric: primary.metric,
     left: primary.left,
     right: primary.right,
