@@ -117,8 +117,8 @@ function NavDrawer({ onClose, isAuthed }: { onClose: () => void; isAuthed: boole
     {
       heading: "SmartyMove",
       items: [
-        { to: "/pricing", label: "Pricing", Icon: Crown },
         { to: "/about", label: "About", Icon: Info },
+        { to: "/pricing", label: "Pricing", Icon: Crown },
         { to: "/contact", label: "Contact us", Icon: Mail },
       ],
     },

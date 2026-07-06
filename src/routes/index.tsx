@@ -159,11 +159,11 @@ function Welcome() {
         onSignUp={() => setMode("signup")}
         onBack={mode === "intro" ? undefined : () => setMode("intro")}
       />
-      <main className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "max-w-[420px] lg:max-w-6xl" : "max-w-[420px]"}`}>
+      <main className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "max-w-[420px] lg:max-w-5xl" : "max-w-[420px]"}`}>
 
         {mode === "intro" ? (
           <>
-          <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-14 lg:pt-6">
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-12 lg:pt-6">
           <div>
             <div
               className="flex items-center gap-2"
@@ -176,7 +176,7 @@ function Welcome() {
             </div>
 
             <h1
-              className="lg:!text-[56px]"
+              className="lg:!text-[44px]"
               style={{ fontWeight: 800, fontSize: 32, lineHeight: 1.05, letterSpacing: "-0.02em", margin: "14px 0 16px" }}
             >
               Know how you move.<br />
@@ -229,7 +229,7 @@ function Welcome() {
           <div>
             {/* Scan viewfinder card */}
             <div
-              className="relative overflow-hidden lg:min-h-[420px]"
+              className="relative overflow-hidden"
               style={{
                 background: "linear-gradient(160deg,#13283A 0%, #0E1D2B 100%)",
                 borderRadius: 22,
@@ -243,11 +243,11 @@ function Welcome() {
               <span style={cornerStyle({ bottom: 14, left: 14, borderRight: "none", borderTop: "none", borderRadius: "0 0 0 6px" })} />
               <span style={cornerStyle({ bottom: 14, right: 14, borderLeft: "none", borderTop: "none", borderRadius: "0 0 6px 0" })} />
               <span className="sm-scanline" />
-              <div className="relative text-center lg:py-14" style={{ zIndex: 2, padding: "14px 0 6px" }}>
+              <div className="relative text-center lg:py-6" style={{ zIndex: 2, padding: "14px 0 6px" }}>
                 <div style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", fontWeight: 700 }}>
                   Movement Score
                 </div>
-                <div className="lg:!text-[96px]" style={{ fontWeight: 800, fontSize: 56, lineHeight: 1, margin: "4px 0 10px", letterSpacing: "-0.02em" }}>
+                <div className="lg:!text-[64px]" style={{ fontWeight: 800, fontSize: 56, lineHeight: 1, margin: "4px 0 10px", letterSpacing: "-0.02em" }}>
                   72<sup style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", marginLeft: 2 }}>/100</sup>
                 </div>
                 <div className="flex items-baseline justify-center gap-1.5" style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", fontWeight: 500 }}>
@@ -259,7 +259,7 @@ function Welcome() {
           </div>
 
             {/* FAQ — rendered for SEO/GEO; wrapped in FAQPage JSON-LD in head() */}
-            <div className="mt-10 lg:mt-14 lg:max-w-4xl lg:mx-auto" aria-labelledby="faq-heading">
+            <div className="mt-10 lg:mt-14" aria-labelledby="faq-heading">
               <SmartyCard
                 Icon={HelpCircle}
                 iconColor="#C2410C"
