@@ -437,6 +437,19 @@ function Runner() {
       <div className="relative flex-1 overflow-hidden bg-black">
         <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-contain [transform:scaleX(-1)]" />
         <canvas ref={canvasRef} className="absolute inset-0 h-full w-full object-contain [transform:scaleX(-1)]" />
+        {/* Big, from-across-the-room banner. Visible during running so the
+            user knows what movement + which camera view without walking
+            back to the phone to read small text. */}
+        {phase === "running" && cur && !showInstructions && (
+          <div className="pointer-events-none absolute inset-x-0 top-16 z-10 flex flex-col items-center gap-2 px-4 text-center">
+            <div className="rounded-full bg-black/70 px-5 py-2 text-2xl font-black uppercase tracking-widest text-white shadow-2xl ring-2 ring-white/30 backdrop-blur">
+              {cur.cameraView === "side" ? "◐ SIDE VIEW" : "● FACE THE CAMERA"}
+            </div>
+            <div className="rounded-2xl bg-white/95 px-4 py-1.5 text-xl font-extrabold text-foreground shadow-xl">
+              {cur.name}
+            </div>
+          </div>
+        )}
         {phase === "setup" && (
           <svg viewBox="0 0 200 400" className="pointer-events-none absolute inset-0 m-auto h-[80%] w-auto opacity-30">
             <path d="M100 30 a18 18 0 1 1 0.1 0 M82 70 h36 v90 l-16 70 v100 l-10 30 M118 70 v90 l16 70 v100 l10 30 M82 80 l-30 70 M118 80 l30 70" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" />
@@ -476,16 +489,20 @@ function Runner() {
                 <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">
                   Test {groupIndex + 1} of {groupCount}
                   {cur.totalViews > 1 ? ` · View ${cur.viewIndex + 1} of ${cur.totalViews}` : ""}
-                  {" · "}{g?.reps ?? "10 sec"}
+                  {" · No timer — press Done when finished"}
                 </div>
                 <div className="mt-0.5 text-xl font-extrabold">
                   {isReposition ? `${cur.name} — reposition` : cur.name}
                 </div>
-                <div className="mt-3 flex items-center gap-2 rounded-2xl bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">
-                  {cur.cameraView === "side"
-                    ? <><RotateCw className="h-4 w-4" /> Camera position: <span className="font-extrabold">Side view</span></>
-                    : <><MoveHorizontal className="h-4 w-4" /> Camera position: <span className="font-extrabold">Front view</span></>}
-                  <span className="ml-auto text-[11px] font-medium text-primary/80">{cur.viewCue}</span>
+                <div className="mt-3 rounded-2xl bg-primary p-4 text-primary-foreground shadow-lg">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest opacity-90">
+                    {cur.cameraView === "side" ? <RotateCw className="h-4 w-4" /> : <MoveHorizontal className="h-4 w-4" />}
+                    Stand like this
+                  </div>
+                  <div className="mt-1 text-3xl font-black uppercase tracking-wide">
+                    {cur.cameraView === "side" ? "Side to camera" : "Face the camera"}
+                  </div>
+                  <p className="mt-1 text-sm opacity-95">{cur.viewCue}</p>
                 </div>
                 {isReposition ? (
                   <div className="mt-4 rounded-2xl bg-secondary/50 p-3 text-sm text-foreground">
