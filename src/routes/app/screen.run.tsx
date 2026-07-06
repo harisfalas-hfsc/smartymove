@@ -578,17 +578,17 @@ function Runner() {
             <div className="flex items-center gap-3">
               <div className="min-w-0 flex-1">
                 <div className="text-[10px] font-semibold uppercase tracking-widest text-white/60">
-                  {paused || showInstructions ? "Paused" : "In progress"} · Test {groupIndex + 1}/{groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""}
+                  {paused || showInstructions ? "Paused" : "Recording"} · Test {groupIndex + 1}/{groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""}
                 </div>
-                <div className="truncate text-base font-extrabold text-white">{cur.name}</div>
+                <div className="truncate text-base font-extrabold text-white">{cur.name} · press Done when finished</div>
               </div>
-              <div className="w-12 text-center text-4xl font-extrabold tabular-nums brand-text">{countdown}</div>
+              <div className="w-14 text-center text-3xl font-extrabold tabular-nums brand-text">{countdown}s</div>
               <button
                 onClick={() => finishHandlerRef.current?.(false)}
-                disabled={elapsed < 2}
-                className="flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-full brand-gradient px-4 text-sm font-bold text-primary-foreground disabled:opacity-50"
+                disabled={elapsed < 3}
+                className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-full brand-gradient px-5 text-base font-black text-primary-foreground disabled:opacity-40"
               >
-                <CheckCircle2 className="h-5 w-5" /> Done
+                <CheckCircle2 className="h-5 w-5" /> I'm Done
               </button>
             </div>
             <div className="flex items-center gap-2">
