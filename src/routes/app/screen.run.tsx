@@ -349,12 +349,15 @@ function Runner() {
       if (activeTestKeyRef.current !== activeKey) return;
       done = true;
       clearInterval(tickId); clearInterval(sampleId);
-      // Trim the last ~1.5s of samples so the user's movement toward the
-      // "Done" button isn't scored as part of the test.
-      const TAIL_TRIM_SAMPLES = 15; // sampler @ 100ms → 1.5s
+      // Trim the first ~1s (walking into position after pressing Start) and
+      // the last ~1.5s (walking back to press "I'm Done") so only the actual
+      // reps are scored.
+      const HEAD_TRIM_SAMPLES = 10; // 1.0s
+      const TAIL_TRIM_SAMPLES = 15; // 1.5s
+      const raw = samplesRef.current;
       const trimmed = skipped
-        ? samplesRef.current
-        : samplesRef.current.slice(0, Math.max(0, samplesRef.current.length - TAIL_TRIM_SAMPLES));
+        ? raw
+        : raw.slice(HEAD_TRIM_SAMPLES, Math.max(HEAD_TRIM_SAMPLES, raw.length - TAIL_TRIM_SAMPLES));
       const scoredDuration = Math.max(1, Math.round(trimmed.length / 10));
       const scored: TestResult = skipped
         ? { id: test.testId, name: test.name, score: 1, notes: "Skipped", valid: false, cameraView: test.cameraView }
