@@ -317,7 +317,7 @@ function Runner() {
     const activeKey = `${idx}:${restartKey}:${test.key}`;
     activeTestKeyRef.current = activeKey;
     samplesRef.current = [];
-    setCountdown(test.duration);
+    setCountdown(0);
     setElapsed(0);
     setPaused(false);
     setShowInstructions(false);
@@ -331,9 +331,16 @@ function Runner() {
       if (activeTestKeyRef.current !== activeKey) return;
       done = true;
       clearInterval(tickId); clearInterval(sampleId);
+      // Trim the last ~1.5s of samples so the user's movement toward the
+      // "Done" button isn't scored as part of the test.
+      const TAIL_TRIM_SAMPLES = 15; // sampler @ 100ms → 1.5s
+      const trimmed = skipped
+        ? samplesRef.current
+        : samplesRef.current.slice(0, Math.max(0, samplesRef.current.length - TAIL_TRIM_SAMPLES));
+      const scoredDuration = Math.max(1, Math.round(trimmed.length / 10));
       const scored: TestResult = skipped
         ? { id: test.testId, name: test.name, score: 1, notes: "Skipped", valid: false, cameraView: test.cameraView }
-        : { ...scoreSamples(test.testId, samplesRef.current, test.duration), cameraView: test.cameraView };
+        : { ...scoreSamples(test.testId, trimmed, scoredDuration), cameraView: test.cameraView };
       // Buffer per-view results; on the last view of the group, merge into
       // one TestResult and push to the top-level results.
       const bucket = stepResultsRef.current.get(test.groupId) ?? [];
@@ -364,10 +371,9 @@ function Runner() {
       if (activeTestKeyRef.current !== activeKey) return;
       if (pausedRef.current) return;
       setElapsed(e => e + 1);
-      setCountdown(c => {
-        if (c <= 1) { finish(false); return 0; }
-        return c - 1;
-      });
+      // Count UP as an elapsed-time indicator. The user presses "Done"
+      // manually when they finish the movement — no auto-finish.
+      setCountdown(c => c + 1);
     }, 1000);
     return () => { activeTestKeyRef.current = null; clearInterval(tickId); clearInterval(sampleId); finishHandlerRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -431,6 +437,19 @@ function Runner() {
       <div className="relative flex-1 overflow-hidden bg-black">
         <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-contain [transform:scaleX(-1)]" />
         <canvas ref={canvasRef} className="absolute inset-0 h-full w-full object-contain [transform:scaleX(-1)]" />
+        {/* Big, from-across-the-room banner. Visible during running so the
+            user knows what movement + which camera view without walking
+            back to the phone to read small text. */}
+        {phase === "running" && cur && !showInstructions && (
+          <div className="pointer-events-none absolute inset-x-0 top-16 z-10 flex flex-col items-center gap-2 px-4 text-center">
+            <div className="rounded-full bg-black/70 px-5 py-2 text-2xl font-black uppercase tracking-widest text-white shadow-2xl ring-2 ring-white/30 backdrop-blur">
+              {cur.cameraView === "side" ? "◐ SIDE VIEW" : "● FACE THE CAMERA"}
+            </div>
+            <div className="rounded-2xl bg-white/95 px-4 py-1.5 text-xl font-extrabold text-foreground shadow-xl">
+              {cur.name}
+            </div>
+          </div>
+        )}
         {phase === "setup" && (
           <svg viewBox="0 0 200 400" className="pointer-events-none absolute inset-0 m-auto h-[80%] w-auto opacity-30">
             <path d="M100 30 a18 18 0 1 1 0.1 0 M82 70 h36 v90 l-16 70 v100 l-10 30 M118 70 v90 l16 70 v100 l10 30 M82 80 l-30 70 M118 80 l30 70" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" />
@@ -470,16 +489,20 @@ function Runner() {
                 <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">
                   Test {groupIndex + 1} of {groupCount}
                   {cur.totalViews > 1 ? ` · View ${cur.viewIndex + 1} of ${cur.totalViews}` : ""}
-                  {" · "}{g?.reps ?? "10 sec"}
+                  {" · No timer — press Done when finished"}
                 </div>
                 <div className="mt-0.5 text-xl font-extrabold">
                   {isReposition ? `${cur.name} — reposition` : cur.name}
                 </div>
-                <div className="mt-3 flex items-center gap-2 rounded-2xl bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">
-                  {cur.cameraView === "side"
-                    ? <><RotateCw className="h-4 w-4" /> Camera position: <span className="font-extrabold">Side view</span></>
-                    : <><MoveHorizontal className="h-4 w-4" /> Camera position: <span className="font-extrabold">Front view</span></>}
-                  <span className="ml-auto text-[11px] font-medium text-primary/80">{cur.viewCue}</span>
+                <div className="mt-3 rounded-2xl bg-primary p-4 text-primary-foreground shadow-lg">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest opacity-90">
+                    {cur.cameraView === "side" ? <RotateCw className="h-4 w-4" /> : <MoveHorizontal className="h-4 w-4" />}
+                    Stand like this
+                  </div>
+                  <div className="mt-1 text-3xl font-black uppercase tracking-wide">
+                    {cur.cameraView === "side" ? "Side to camera" : "Face the camera"}
+                  </div>
+                  <p className="mt-1 text-sm opacity-95">{cur.viewCue}</p>
                 </div>
                 {isReposition ? (
                   <div className="mt-4 rounded-2xl bg-secondary/50 p-3 text-sm text-foreground">
@@ -555,17 +578,17 @@ function Runner() {
             <div className="flex items-center gap-3">
               <div className="min-w-0 flex-1">
                 <div className="text-[10px] font-semibold uppercase tracking-widest text-white/60">
-                  {paused || showInstructions ? "Paused" : "In progress"} · Test {groupIndex + 1}/{groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""}
+                  {paused || showInstructions ? "Paused" : "Recording"} · Test {groupIndex + 1}/{groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""}
                 </div>
-                <div className="truncate text-base font-extrabold text-white">{cur.name}</div>
+                <div className="truncate text-base font-extrabold text-white">{cur.name} · press Done when finished</div>
               </div>
-              <div className="w-12 text-center text-4xl font-extrabold tabular-nums brand-text">{countdown}</div>
+              <div className="w-14 text-center text-3xl font-extrabold tabular-nums brand-text">{countdown}s</div>
               <button
                 onClick={() => finishHandlerRef.current?.(false)}
-                disabled={elapsed < 2}
-                className="flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-full brand-gradient px-4 text-sm font-bold text-primary-foreground disabled:opacity-50"
+                disabled={elapsed < 3}
+                className="flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-full brand-gradient px-5 text-base font-black text-primary-foreground disabled:opacity-40"
               >
-                <CheckCircle2 className="h-5 w-5" /> Done
+                <CheckCircle2 className="h-5 w-5" /> I'm Done
               </button>
             </div>
             <div className="flex items-center gap-2">
