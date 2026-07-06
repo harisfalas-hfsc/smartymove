@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { DesktopProfile } from "@/components/DesktopProfile";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/desktop")({
   head: () => ({ meta: [{ title: "SmartyMove — Desktop Dashboard" }] }),
-  component: DesktopProfile,
+  beforeLoad: () => {
+    throw redirect({ to: "/app" });
+  },
 });
