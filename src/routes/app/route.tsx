@@ -1,7 +1,6 @@
 import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { BottomTabs } from "@/components/BottomTabs";
-import { DesktopProfile } from "@/components/DesktopProfile";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { getUser, restoreUserFromBackend } from "@/lib/store";
@@ -26,18 +25,15 @@ function AppLayout() {
     }).catch(() => navigate({ to: "/" }));
   }, [navigate]);
   return (
-    <>
-      <div className="hidden lg:block"><DesktopProfile /></div>
-      <div className="lg:hidden flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
-        {!isScreenRun && <SiteHeader />}
-        <div className={`mx-auto flex w-full flex-1 flex-col bg-background ${isScreenRun ? "max-w-none" : "max-w-[440px]"}`}>
-          <div className={`flex flex-1 flex-col overflow-y-auto ${isScreenRun ? "pb-0" : "pb-24"}`}>
-            <div className="flex-1"><Outlet /></div>
-            {!isScreenRun && <SiteFooter />}
-          </div>
-          {!isScreenRun && <BottomTabs />}
+    <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
+      {!isScreenRun && <SiteHeader />}
+      <div className={`mx-auto flex w-full flex-1 flex-col bg-background ${isScreenRun ? "max-w-none" : "max-w-[440px]"}`}>
+        <div className={`flex flex-1 flex-col overflow-y-auto ${isScreenRun ? "pb-0" : "pb-24 lg:pb-0"}`}>
+          <div className="flex-1"><Outlet /></div>
+          {!isScreenRun && <SiteFooter />}
         </div>
+        {!isScreenRun && <div className="lg:hidden"><BottomTabs /></div>}
       </div>
-    </>
+    </div>
   );
 }
