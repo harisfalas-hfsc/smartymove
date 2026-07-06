@@ -6,7 +6,10 @@ import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
 import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal } from "lucide-react";
 
-export const Route = createFileRoute("/app/screen/run")({ component: Runner });
+export const Route = createFileRoute("/app/screen/run")({
+  ssr: false,
+  component: Runner,
+});
 
 type TestDef = { id: string; name: string; duration: number; instruction: string; conditional?: boolean; cameraView: "front" | "side" };
 
