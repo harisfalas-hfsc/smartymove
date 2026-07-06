@@ -138,7 +138,7 @@ export interface BuildInput {
    * biases category slot counts toward the user's weakest dimensions and
    * forces the Foundation phase for very low overall scores.
    */
-  sessionSub?: { mobility: number; stability: number; balance: number; quality: number; strength: number };
+  sessionSub?: { mobility: number; stability: number; balance: number; quality: number; strength?: number };
 }
 
 export interface BuiltRoutine {
@@ -169,7 +169,20 @@ export function buildCorrectiveRoutine(
   library: LibraryExercise[],
 ): BuiltRoutine {
   const sub = input.sessionSub;
-  const overall = sub ? Math.round((sub.mobility + sub.stability + sub.balance + sub.quality + sub.strength) / 5) : null;
+  // Strength sub-score was removed from the movement screen — treat any
+  // missing value as neutral (50) so legacy sessions still compute an
+  // overall the same way.
+  const strengthNeutral = 50;
+  const overall = sub
+    ? Math.round(
+        ((sub.mobility >= 0 ? sub.mobility : strengthNeutral) +
+          (sub.stability >= 0 ? sub.stability : strengthNeutral) +
+          (sub.balance >= 0 ? sub.balance : strengthNeutral) +
+          (sub.quality >= 0 ? sub.quality : strengthNeutral) +
+          (sub.strength ?? strengthNeutral)) /
+          5,
+      )
+    : null;
   // Force the gentlest phase when the user's scan flags poor movement.
   const effectiveOverride: PhaseInfo["phase"] | undefined =
     input.phaseOverride ?? (overall !== null && overall < 50 ? "restore" : undefined);
@@ -194,14 +207,16 @@ export function buildCorrectiveRoutine(
 
   // Bias category order by the user's weakest dimension so the weakest
   // bucket is filled first, before slots get consumed by other categories.
+  const strengthFor = (s: NonNullable<BuildInput["sessionSub"]>) =>
+    s.strength ?? strengthNeutral;
   const order: Category[] = sub
     ? (["mobility", "stability", "strength"] as Category[]).slice().sort((a, b) => {
-        const sa = a === "mobility" ? sub.mobility
-          : a === "stability" ? Math.min(sub.stability, sub.balance)
-          : sub.strength;
-        const sb = b === "mobility" ? sub.mobility
-          : b === "stability" ? Math.min(sub.stability, sub.balance)
-          : sub.strength;
+        const sa = a === "mobility" ? Math.max(0, sub.mobility)
+          : a === "stability" ? Math.max(0, Math.min(sub.stability, sub.balance))
+          : strengthFor(sub);
+        const sb = b === "mobility" ? Math.max(0, sub.mobility)
+          : b === "stability" ? Math.max(0, Math.min(sub.stability, sub.balance))
+          : strengthFor(sub);
         return sa - sb;
       })
     : ["mobility", "stability", "strength"];
