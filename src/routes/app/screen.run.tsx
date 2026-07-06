@@ -461,18 +461,31 @@ function Runner() {
             </div>
           )}
           {phase === "intro" && cur && (() => {
-            const g = TEST_GUIDES[cur.id];
+            const g = TEST_GUIDES[cur.testId];
             return (
               <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
-                <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Test {idx + 1} of {seq.length} · {g?.reps ?? "10 sec"}</div>
-                <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
+                <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">
+                  Test {groupIndex + 1} of {groupCount}
+                  {cur.totalViews > 1 ? ` · View ${cur.viewIndex + 1} of ${cur.totalViews}` : ""}
+                  {" · "}{g?.reps ?? "10 sec"}
+                </div>
+                <div className="mt-0.5 text-xl font-extrabold">
+                  {isReposition ? `${cur.name} — reposition` : cur.name}
+                </div>
                 <div className="mt-3 flex items-center gap-2 rounded-2xl bg-primary/10 px-3 py-2 text-sm font-semibold text-primary">
                   {cur.cameraView === "side"
                     ? <><RotateCw className="h-4 w-4" /> Camera position: <span className="font-extrabold">Side view</span></>
                     : <><MoveHorizontal className="h-4 w-4" /> Camera position: <span className="font-extrabold">Front view</span></>}
-                  <span className="ml-auto text-[11px] font-medium text-primary/80">{cur.cameraView === "side" ? "stand sideways to the camera" : "face the camera straight on"}</span>
+                  <span className="ml-auto text-[11px] font-medium text-primary/80">{cur.viewCue}</span>
                 </div>
-                {g && (
+                {isReposition ? (
+                  <div className="mt-4 rounded-2xl bg-secondary/50 p-3 text-sm text-foreground">
+                    <div className="font-semibold">Same movement, new camera angle.</div>
+                    <p className="mt-1 text-muted-foreground">
+                      Rotate so the camera has a {cur.cameraView === "side" ? "clear side profile" : "clear front-on view"} of you, then repeat the movement. This second angle catches what the first angle can't see.
+                    </p>
+                  </div>
+                ) : g && (
                   <>
                     <div className="mt-4">
                       <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Set up</div>
@@ -498,7 +511,7 @@ function Runner() {
                 )}
                 <div className="mt-5 flex gap-2">
                   <button onClick={() => navigate({ to: "/app/screen" })} className="h-12 flex-1 rounded-2xl bg-secondary text-sm font-semibold text-foreground">Exit</button>
-                  <button onClick={() => setPhase("running")} disabled={!poseReady} className="h-12 flex-[2] rounded-2xl brand-gradient text-base font-semibold text-primary-foreground disabled:opacity-50">{poseReady ? "I'm ready · Start" : "Loading…"}</button>
+                  <button onClick={() => setPhase("running")} disabled={!poseReady} className="h-12 flex-[2] rounded-2xl brand-gradient text-base font-semibold text-primary-foreground disabled:opacity-50">{poseReady ? (isReposition ? "I'm repositioned · Start" : "I'm ready · Start") : "Loading…"}</button>
                 </div>
               </div>
             );
@@ -539,7 +552,7 @@ function Runner() {
             <div className="flex items-center gap-3">
               <div className="min-w-0 flex-1">
                 <div className="text-[10px] font-semibold uppercase tracking-widest text-white/60">
-                  {paused || showInstructions ? "Paused" : "In progress"} · Test {idx + 1}/{seq.length}
+                  {paused || showInstructions ? "Paused" : "In progress"} · Test {groupIndex + 1}/{groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""}
                 </div>
                 <div className="truncate text-base font-extrabold text-white">{cur.name}</div>
               </div>
@@ -582,13 +595,13 @@ function Runner() {
         </div>
       )}
       {phase === "running" && cur && showInstructions && (() => {
-        const g = TEST_GUIDES[cur.id];
+        const g = TEST_GUIDES[cur.testId];
         return (
           <div className="absolute inset-0 z-20 flex items-end bg-black/60 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
             <div className="mx-auto max-h-[80vh] w-full max-w-[720px] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Test {idx + 1} of {seq.length} · Paused</div>
+                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Test {groupIndex + 1} of {groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""} · Paused</div>
                   <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
                 </div>
                 <button onClick={() => setShowInstructions(false)} aria-label="Close" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground">
