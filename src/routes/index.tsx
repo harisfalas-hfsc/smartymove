@@ -159,10 +159,12 @@ function Welcome() {
         onSignUp={() => setMode("signup")}
         onBack={mode === "intro" ? undefined : () => setMode("intro")}
       />
-      <main className="mx-auto w-full max-w-[420px] flex-1 px-5 pb-6 pt-5">
+      <main className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "max-w-[420px] lg:max-w-6xl" : "max-w-[420px]"}`}>
 
         {mode === "intro" ? (
           <>
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-14 lg:pt-6">
+          <div>
             <div
               className="flex items-center gap-2"
               style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "#0E7C86", fontWeight: 700 }}
@@ -174,42 +176,14 @@ function Welcome() {
             </div>
 
             <h1
-              style={{ fontWeight: 800, fontSize: 32, lineHeight: 1.1, letterSpacing: "-0.02em", margin: "14px 0 16px" }}
+              className="lg:!text-[56px]"
+              style={{ fontWeight: 800, fontSize: 32, lineHeight: 1.05, letterSpacing: "-0.02em", margin: "14px 0 16px" }}
             >
               Know how you move.<br />
               <span style={{ color: "#0E7C86" }}>Move smarter.</span>
             </h1>
 
-            {/* Scan viewfinder card */}
-            <div
-              className="relative overflow-hidden"
-              style={{
-                background: "linear-gradient(160deg,#13283A 0%, #0E1D2B 100%)",
-                borderRadius: 22,
-                padding: "22px 18px 20px",
-                color: "#fff",
-                marginBottom: 18,
-              }}
-            >
-              <span style={cornerStyle({ top: 14, left: 14, borderRight: "none", borderBottom: "none", borderRadius: "6px 0 0 0" })} />
-              <span style={cornerStyle({ top: 14, right: 14, borderLeft: "none", borderBottom: "none", borderRadius: "0 6px 0 0" })} />
-              <span style={cornerStyle({ bottom: 14, left: 14, borderRight: "none", borderTop: "none", borderRadius: "0 0 0 6px" })} />
-              <span style={cornerStyle({ bottom: 14, right: 14, borderLeft: "none", borderTop: "none", borderRadius: "0 0 6px 0" })} />
-              <span className="sm-scanline" />
-              <div className="relative text-center" style={{ zIndex: 2, padding: "14px 0 6px" }}>
-                <div style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", fontWeight: 700 }}>
-                  Movement Score
-                </div>
-                <div style={{ fontWeight: 800, fontSize: 56, lineHeight: 1, margin: "4px 0 10px", letterSpacing: "-0.02em" }}>
-                  72<sup style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", marginLeft: 2 }}>/100</sup>
-                </div>
-                <div className="flex items-baseline justify-center gap-1.5" style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", fontWeight: 500 }}>
-                  Movement Age <b style={{ color: "#4FB286", fontSize: 15 }}>41</b> · Chronological 47
-                </div>
-              </div>
-            </div>
-
-            <p style={{ fontSize: 15, lineHeight: 1.55, color: "#3B4A63", margin: "4px 0 18px" }}>
+            <p style={{ fontSize: 15, lineHeight: 1.55, color: "#3B4A63", margin: "4px 0 18px" }} className="lg:!text-[17px]">
               <b style={{ color: "#14213A" }}>Your pocket movement coach.</b> Scan your movement with your camera, get your score, and a 5-minute daily routine built around what your body actually needs.
             </p>
 
@@ -232,10 +206,11 @@ function Welcome() {
                 boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)",
                 marginBottom: 14, cursor: "pointer",
               }}
+              className="lg:!max-w-[280px]"
             >
               Get started
             </button>
-            <div className="mb-3 text-center">
+            <div className="mb-3 lg:text-left text-center">
               <Link
                 to="/about"
                 style={{ color: "#0E7C86", fontWeight: 700, fontSize: 14, textDecoration: "none", borderBottom: "1.5px solid rgba(14,124,134,0.35)", paddingBottom: 1 }}
@@ -243,15 +218,48 @@ function Welcome() {
                 About SmartyMove
               </Link>
             </div>
-            <div className="text-center" style={{ fontSize: 13.5, color: "#6B7A90" }}>
+            <div className="lg:text-left text-center" style={{ fontSize: 13.5, color: "#6B7A90" }}>
               Already have an account?{" "}
               <button onClick={() => setMode("signin")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                 Sign in
               </button>
             </div>
+          </div>
+
+          <div>
+            {/* Scan viewfinder card */}
+            <div
+              className="relative overflow-hidden lg:min-h-[420px]"
+              style={{
+                background: "linear-gradient(160deg,#13283A 0%, #0E1D2B 100%)",
+                borderRadius: 22,
+                padding: "22px 18px 20px",
+                color: "#fff",
+                marginBottom: 0,
+              }}
+            >
+              <span style={cornerStyle({ top: 14, left: 14, borderRight: "none", borderBottom: "none", borderRadius: "6px 0 0 0" })} />
+              <span style={cornerStyle({ top: 14, right: 14, borderLeft: "none", borderBottom: "none", borderRadius: "0 6px 0 0" })} />
+              <span style={cornerStyle({ bottom: 14, left: 14, borderRight: "none", borderTop: "none", borderRadius: "0 0 0 6px" })} />
+              <span style={cornerStyle({ bottom: 14, right: 14, borderLeft: "none", borderTop: "none", borderRadius: "0 0 6px 0" })} />
+              <span className="sm-scanline" />
+              <div className="relative text-center lg:py-14" style={{ zIndex: 2, padding: "14px 0 6px" }}>
+                <div style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", fontWeight: 700 }}>
+                  Movement Score
+                </div>
+                <div className="lg:!text-[96px]" style={{ fontWeight: 800, fontSize: 56, lineHeight: 1, margin: "4px 0 10px", letterSpacing: "-0.02em" }}>
+                  72<sup style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", marginLeft: 2 }}>/100</sup>
+                </div>
+                <div className="flex items-baseline justify-center gap-1.5" style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", fontWeight: 500 }}>
+                  Movement Age <b style={{ color: "#4FB286", fontSize: 15 }}>41</b> · Chronological 47
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
 
             {/* FAQ — rendered for SEO/GEO; wrapped in FAQPage JSON-LD in head() */}
-            <div className="mt-8" aria-labelledby="faq-heading">
+            <div className="mt-10 lg:mt-14 lg:max-w-4xl lg:mx-auto" aria-labelledby="faq-heading">
               <SmartyCard
                 Icon={HelpCircle}
                 iconColor="#C2410C"

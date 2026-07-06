@@ -47,7 +47,7 @@ function LearnLayout() {
   return (
     <div className="flex min-h-[100dvh] w-full flex-col" style={{ background: "#ffffff", color: "#14213A" }}>
       <SiteHeader showBack />
-      <main className="mx-auto w-full max-w-[760px] flex-1 px-5 pb-6 pt-5">
+      <main className="mx-auto w-full max-w-[760px] lg:max-w-5xl flex-1 px-5 lg:px-8 pb-6 pt-5 lg:pt-8">
         {isIndex ? <LearnIndex /> : <Outlet />}
       </main>
       <SiteFooter />
