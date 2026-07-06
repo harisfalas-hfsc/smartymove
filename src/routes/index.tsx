@@ -163,8 +163,8 @@ function Welcome() {
 
         {mode === "intro" ? (
           <>
-          <div className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-12 lg:pt-6">
-          <div>
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-10 lg:pt-4">
+          <div className="sm-hero-left">
             <div
               className="flex items-center gap-2"
               style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "#0E7C86", fontWeight: 700 }}
@@ -176,14 +176,14 @@ function Welcome() {
             </div>
 
             <h1
-              className="lg:!text-[44px]"
+              className="sm-hero-title"
               style={{ fontWeight: 800, fontSize: 32, lineHeight: 1.05, letterSpacing: "-0.02em", margin: "14px 0 16px" }}
             >
               Know how you move.<br />
               <span style={{ color: "#0E7C86" }}>Move smarter.</span>
             </h1>
 
-            <p style={{ fontSize: 15, lineHeight: 1.55, color: "#3B4A63", margin: "4px 0 18px" }} className="lg:!text-[17px]">
+            <p style={{ fontSize: 15, lineHeight: 1.55, color: "#3B4A63", margin: "4px 0 18px" }}>
               <b style={{ color: "#14213A" }}>Your pocket movement coach.</b> Scan your movement with your camera, get your score, and a 5-minute daily routine built around what your body actually needs.
             </p>
 
@@ -206,7 +206,7 @@ function Welcome() {
                 boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)",
                 marginBottom: 14, cursor: "pointer",
               }}
-              className="lg:!max-w-[280px]"
+              className="sm-hero-cta"
             >
               Get started
             </button>
@@ -226,10 +226,10 @@ function Welcome() {
             </div>
           </div>
 
-          <div>
+          <div className="sm-hero-right">
             {/* Scan viewfinder card */}
             <div
-              className="relative overflow-hidden"
+              className="relative overflow-hidden sm-hero-card"
               style={{
                 background: "linear-gradient(160deg,#13283A 0%, #0E1D2B 100%)",
                 borderRadius: 22,
@@ -243,11 +243,11 @@ function Welcome() {
               <span style={cornerStyle({ bottom: 14, left: 14, borderRight: "none", borderTop: "none", borderRadius: "0 0 0 6px" })} />
               <span style={cornerStyle({ bottom: 14, right: 14, borderLeft: "none", borderTop: "none", borderRadius: "0 0 6px 0" })} />
               <span className="sm-scanline" />
-              <div className="relative text-center lg:py-6" style={{ zIndex: 2, padding: "14px 0 6px" }}>
+              <div className="relative text-center" style={{ zIndex: 2, padding: "14px 0 6px" }}>
                 <div style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", fontWeight: 700 }}>
                   Movement Score
                 </div>
-                <div className="lg:!text-[64px]" style={{ fontWeight: 800, fontSize: 56, lineHeight: 1, margin: "4px 0 10px", letterSpacing: "-0.02em" }}>
+                <div className="sm-hero-score" style={{ fontWeight: 800, fontSize: 56, lineHeight: 1, margin: "4px 0 10px", letterSpacing: "-0.02em" }}>
                   72<sup style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", marginLeft: 2 }}>/100</sup>
                 </div>
                 <div className="flex items-baseline justify-center gap-1.5" style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", fontWeight: 500 }}>
@@ -259,7 +259,7 @@ function Welcome() {
           </div>
 
             {/* FAQ — rendered for SEO/GEO; wrapped in FAQPage JSON-LD in head() */}
-            <div className="mt-10 lg:mt-14" aria-labelledby="faq-heading">
+            <div className="mt-10 lg:mt-16" aria-labelledby="faq-heading">
               <SmartyCard
                 Icon={HelpCircle}
                 iconColor="#C2410C"
@@ -395,6 +395,12 @@ function Welcome() {
         )}
 
         <style>{`
+          @media (min-width: 1024px){
+            .sm-hero-title{ font-size: 40px !important; }
+            .sm-hero-cta{ max-width: 280px !important; }
+            .sm-hero-card{ max-width: 420px; margin-left: auto; margin-right: auto; }
+            .sm-hero-score{ font-size: 68px !important; }
+          }
           .sm-scanline{
             position:absolute; left:14px; right:14px; height:3px; top:18px;
             background:linear-gradient(90deg, transparent, #4FB286 20%, #7CFFB8 50%, #4FB286 80%, transparent);
