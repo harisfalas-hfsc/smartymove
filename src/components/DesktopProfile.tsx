@@ -472,7 +472,6 @@ function DesktopProfileInner() {
                 <SubScoreBar label="Stability" value={latest.sub.stability} />
                 <SubScoreBar label="Balance" value={latest.sub.balance} />
                 <SubScoreBar label="Movement Quality" value={latest.sub.quality} />
-                <SubScoreBar label="Strength Capacity" value={latest.sub.strength} />
               </div>
             </div>
           )}
