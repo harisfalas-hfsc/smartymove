@@ -10,6 +10,8 @@ import { evaluateProgress } from "@/lib/corrective/progression";
 import { getOngoingTrack } from "@/lib/corrective/phase";
 import { useProgramStatus, isTrainingDay, TRAINING_DAY_INDICES, PROGRAM_SESSIONS } from "@/lib/program";
 import { evaluateRescan } from "@/lib/corrective/rescan";
+import { evaluateGraduation, recommendSmartyGym } from "@/lib/graduation";
+import { SmartyGymHandoff } from "@/components/SmartyGymHandoff";
 
 export const Route = createFileRoute("/app/")({ component: Home });
 
@@ -25,6 +27,8 @@ function Home() {
   const progression = evaluateProgress(u.sessions);
   const ongoing = getOngoingTrack(u.programStartDate ?? u.createdAt, u.goal);
   const rescan = evaluateRescan(u, status);
+  const graduation = evaluateGraduation(u);
+  const recommendation = graduation.status === "cleared" ? recommendSmartyGym(u.goal, graduation.status) : null;
 
   return (
     <div className="pb-6">
@@ -58,6 +62,9 @@ function Home() {
       </header>
 
       <div className="-mt-5 space-y-4 rounded-t-[2rem] bg-background px-5 pt-6">
+        {recommendation && (
+          <SmartyGymHandoff variant="cleared" recommendation={recommendation} />
+        )}
         {rescan && rescan.reason !== "first-scan" && (
           <Link
             to="/app/screen"

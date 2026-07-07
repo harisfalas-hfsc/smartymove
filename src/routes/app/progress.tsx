@@ -5,6 +5,8 @@ import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { Calendar, TrendingUp, Share2, Lock, AlertCircle, Target, CheckCircle2, Info } from "lucide-react";
+import { evaluateGraduation, recommendSmartyGym } from "@/lib/graduation";
+import { SmartyGymHandoff } from "@/components/SmartyGymHandoff";
 
 export const Route = createFileRoute("/app/progress")({ component: Progress });
 
@@ -19,6 +21,8 @@ function Progress() {
   const delta = latest && first ? latest.overall - first.overall : 0;
   const projection = u.firstRetestDone && sessions.length >= 2
     ? Math.min(100, Math.round(latest.overall + Math.max(0, delta) * 1.2)) : null;
+  const graduation = evaluateGraduation(u);
+  const recommendation = recommendSmartyGym(u.goal, graduation.status);
 
   return (
     <div className="pb-6">
@@ -33,6 +37,12 @@ function Progress() {
       </header>
 
       <div className="-mt-4 space-y-4 rounded-t-[2rem] bg-background px-5 pt-5">
+        {recommendation && (
+          <SmartyGymHandoff
+            variant={graduation.status === "cleared" ? "cleared" : "performance-track"}
+            recommendation={recommendation}
+          />
+        )}
         {!latest && (
           <div className="rounded-3xl bg-card p-5 text-center shadow-card">
             <Calendar className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />

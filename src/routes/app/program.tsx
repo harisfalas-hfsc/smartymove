@@ -17,6 +17,8 @@ import { ExerciseSheet } from "@/components/ExerciseSheet";
 import { Camera, ArrowRight, CheckCircle2, Circle, Lock, RotateCcw, Info, AlertCircle, CalendarDays } from "lucide-react";
 import { SmartyCard } from "@/components/SmartyCard";
 import { Sparkles, Dumbbell, Flame, Target } from "lucide-react";
+import { evaluateGraduation, recommendSmartyGym } from "@/lib/graduation";
+import { SmartyGymHandoff } from "@/components/SmartyGymHandoff";
 // Program access is unlocked once the user has completed a scan — no paywall gating here.
 
 export const Route = createFileRoute("/app/program")({ component: Program });
@@ -29,6 +31,9 @@ function Program() {
   const [activeDay, setActiveDay] = useState<number | null>(null);
 
   if (!u || !status) return null;
+  const graduation = evaluateGraduation(u);
+  const recommendation = recommendSmartyGym(u.goal, graduation.status);
+  const programComplete = status.reason === "completed" || status.completedDays.length >= PROGRAM_SESSIONS;
 
   // No scan yet → must scan first.
   if (status.reason === "no-scan") {
@@ -79,6 +84,9 @@ function Program() {
         <SmartyCard Icon={CalendarDays} iconColor="#1D4ED8" iconBg="#DBEAFE" title="Your 2-week schedule" subtitle="View only — rescan to start a new program.">
           <ProgramOverview status={status} routine={routine} onSelectDay={setActiveDay} readOnly />
         </SmartyCard>
+        {recommendation && (
+          <SmartyGymHandoff variant="program-complete" recommendation={recommendation} />
+        )}
         <DaySheet
           dayIndex={activeDay}
           onClose={() => setActiveDay(null)}
@@ -127,6 +135,13 @@ function Program() {
               onSelectDay={(d) => setActiveDay(d)}
             />
           </SmartyCard>
+        )}
+
+        {recommendation && (
+          <SmartyGymHandoff
+            variant={programComplete ? "program-complete" : graduation.status === "cleared" ? "cleared" : "performance-track"}
+            recommendation={recommendation}
+          />
         )}
       </div>
 

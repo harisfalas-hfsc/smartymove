@@ -1,65 +1,69 @@
-# Dual-Angle Scanning + Reasoning Upgrade
 
-Additive only. Existing scoring, compensation detection, decision engine, exercise library, and phase logic stay intact — no rewrites.
+## Goal
 
-## PART 1 — Dual-angle scan flow (`src/lib/movement.ts`, `src/routes/app/screen.run.tsx`)
+When a SmartyMove user is either (a) performance-minded from the start or (b) shown to be "clear" by their scan(s), we stop pretending they need corrective work forever and hand them off to smartygym.com with a specific category recommendation. SmartyMove stays a scanning + corrective app; SmartyGym is where actual performance training lives.
 
-Add per-test camera-view definitions to each entry in `CORE_TESTS` and `CONDITIONAL_TESTS`:
+## What SmartyGym actually offers (verified in that project)
 
-```
-views: [{ id: "side", label, silhouetteHint, detects: [...] },
-        { id: "front", label, silhouetteHint, detects: [...] }]
-```
+**Single-session Workouts (`/workout/:type`):**
+WOD · Strength · Calorie Burning · Metabolic · Cardio · Mobility · Challenge · Pilates · Recovery · Micro-workouts
 
-Mapping:
-- **Two-angle**: squat (side→front), hinge (side→front), balance (front→side, per leg), lunge (side→front, per leg), overhead (front→side), ankle_df (side→front), knee_sld (front→side), bridge_hold (side→front), wall_slide (side→front)
-- **Single-angle unchanged**: hip_abd (front only), elbow_rom (front only), wrist_rom (front only)
+**Multi-week Training Programs (`/training-program/:type`):**
+Cardio Endurance · Functional Strength · Muscle Hypertrophy · Weight Loss · Pain Relief · Movement Quality
 
-`screen.run.tsx` becomes a per-view loop: for each test, run all views sequentially with a "Reposition" transition screen (silhouette + copy: "Great — now face the camera") between them. Each view runs its own compensation detectors; results merge into one `TestResult` with combined score = min of per-view scores and union of compensation strings. `TestResult` gains `viewFindings: { view, score, compensations }[]` (persisted; renders per-view in results).
+We link into these directly — no auth handoff needed, they're public browse pages.
 
-## PART 2 — Compensation reasoning (`src/lib/corrective/decision.ts`)
+## Graduation criteria (when to cross-sell)
 
-Each focus template gains a `perCompensation` map keyed on the compensation regex family. Signal extraction records the matched pattern; when we render the results card we emit:
-1. **What we saw** — plain-language finding
-2. **Why it matters** — root-cause explanation
-3. **What your program does about it** — the specific first-stage direction
+A user is "cleared for performance" when ANY of:
+1. Latest scan `overall` ≥ 85 AND no test scored 1/3 AND no active pain flag in questionnaire.
+2. Two consecutive scans where the newest has `overall` ≥ 80 and no 1/3 tests (they proved improvement).
+3. First scan is fully green (no failure clusters detected by `analyzeScan`) — even a new user can qualify.
 
-Add the 10 explanation rules from the spec (heel rise, valgus, spine rounding, lateral trunk shift, forward trunk lean, lumbar arch overhead, lumbar arch bridge, shoulder shrug, hip hike, pelvis rotation bridge, elbow shoulder-cheat). Elbow shoulder-cheat sets `t.valid = false` in `screen.run.tsx` and shows a "retry" prompt instead of scoring.
+A user is "performance-minded up front" when questionnaire goal ∈ {`perform_better`, `start_sport`} AND PAR-Q is clean (no medical flags). They see performance CTAs from day one, alongside their program — not instead of it.
 
-Results screen (`src/routes/app/screen.tsx`) gets a new "Findings" section — one card per signal with the three fields above, before the routine.
+## Goal → SmartyGym recommendation map
 
-## PART 3 — Re-scan trigger engine (new `src/lib/corrective/rescan.ts`)
+| SmartyMove goal | Primary program | Backup workouts |
+|---|---|---|
+| perform_better | Functional Strength (program) | Strength, Metabolic, Challenge |
+| start_sport | Cardio Endurance (program) | Cardio, Mobility, Metabolic |
+| feel_better | Movement Quality (program) | Pilates, Mobility, Recovery |
+| prevent_injury | Movement Quality (program) | Mobility, Recovery, Pilates |
+| reduce_pain | Pain Relief (program) — **only after cleared** | Recovery, Mobility |
 
-Pure function `evaluateRescan(profile, sessions, program)` returns `{ suggest: boolean, reason: string, message: string, urgency }`. Rules:
+Reduce-pain users never see performance cross-sells until they graduate. Everyone else sees at least the "Recovery/Mobility" tier from the start.
 
-1. Foundation-phase sessions completed → "Ready to re-scan and move to Build"
-2. User answers "something changed" on post-session prompt → "Sounds like something shifted"
-3. Two consecutive 14-day scans with no improvement → "Consider a movement specialist" (different copy)
-4. Goal changed since last scan → immediate re-scan CTA
-5. Test now passes cleanly → celebration, remove from primary focus, progress area
-6. Passes primary angle but compensation still present → NOT clean, stays Foundation, explicit copy
+## Where the CTAs appear
 
-Wire into `src/routes/app/index.tsx` (home banner) and `src/routes/app/program.tsx` (top card). Post-session feedback question added to program screen.
+1. **Progress screen (`src/routes/app/progress.tsx`)** — new "Ready for performance" card at the top when graduated, or a softer "Continue building at SmartyGym" card when performance-minded but still mid-program. Card shows 1 recommended program + 2 recommended workout categories, each linking to the matching smartygym.com URL in a new tab.
 
-## PART 4 — No-correction-needed program paths (`src/lib/corrective/decision.ts` + `engine.ts`)
+2. **Program screen (`src/routes/app/program.tsx`)** — after the user marks the 14th day complete (program finished), show a "What's next" panel with the same recommendations plus a "Retest first" secondary button.
 
-New `buildProgramPlan(session)` produces one of:
-- **Clean pass on an area** → maintenance slot for that area, primary focus shifts to remaining issues
-- **All clean** → skip Foundation, jump straight to Stage 3 Maintain & Perform based on `goal`
-- **Only borderline (score 2, no compensation)** → light Foundation (1–2 exercises) for those areas, primary focus goes to Build for the rest
+3. **Home (`src/routes/app/index.tsx`)** — subtle banner ("Cleared. Level up →") only when graduated, dismissible.
 
-`engine.ts` accepts an area-level `mode: "foundation" | "build" | "maintain"` override per area so mixed plans work in one routine.
+Copy is honest: "Your scan says your movement is ready — SmartyMove is a scanner, not a gym. Train performance at SmartyGym." No fake urgency.
 
-## PART 5 — Non-goals / preserved invariants
+## Technical plan
 
-- No LLM calls anywhere in this pipeline — all deterministic.
-- Low-back push-up blocklist, curated library only, 2-focus cap, 14-day timer, phase ratios — all unchanged.
-- No DB schema changes required; new fields ride inside the existing `ScreenSession` JSON blob in `profiles.app_user`.
+**New file `src/lib/graduation.ts`** — pure logic:
+- `evaluateGraduation(user): { status: 'not-cleared' | 'performance-track' | 'cleared'; reason: string }`
+- `recommendSmartyGym(user, status): { program: {slug,title,url}; workouts: [{slug,title,url}] }`
+- URL builder pointing at `https://smartygym.com/training-program/{slug}` and `https://smartygym.com/workout/{slug}`.
 
-## Technical checkpoints
+**New component `src/components/SmartyGymHandoff.tsx`** — the visual card used by all three surfaces. Props: `variant: 'cleared' | 'performance-track' | 'program-complete'`, plus the recommendation object.
 
-- Type additions in `src/lib/store.ts` for `viewFindings` and `postSessionFeedback`.
-- `screen.run.tsx` refactor is the biggest chunk — view queue, transition screen, per-view detector dispatch.
-- Verify with `bunx tsgo --noEmit` after each of Part 1, Part 2+4, Part 3.
+**Edits:**
+- `src/routes/app/progress.tsx` — mount the card above existing content when applicable.
+- `src/routes/app/program.tsx` — show the "What's next" panel on completion.
+- `src/routes/app/index.tsx` — cleared-only banner.
 
-Scope is large — I'll implement in that order and verify the build between parts. Approve to proceed.
+**No backend / DB changes.** Everything is derived client-side from the existing `user.sessions`, `user.goal`, and questionnaire state. No new tables, no migrations.
+
+**Verification:** typecheck + Playwright pass on the progress route in both states (mock a cleared scan, mock a mid-program state) to confirm the correct card variant renders and the outbound links resolve.
+
+## Out of scope (say so explicitly)
+
+- Deep linking a specific SmartyGym workout ID — we route to the category page and let SmartyGym own selection.
+- Shared login / SSO between the two apps — not part of this change.
+- Adding SmartyGym content inside SmartyMove — this is a handoff, not an embed.
