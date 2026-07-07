@@ -226,10 +226,10 @@ function Welcome() {
             </div>
           </div>
 
-          <div className="sm-hero-right flex lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
+          <div className="sm-hero-right flex w-full lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
             {/* Scan viewfinder card */}
             <div
-              className="relative overflow-hidden sm-hero-card flex flex-col justify-center lg:ml-auto"
+              className="relative w-full overflow-hidden sm-hero-card flex flex-col justify-center lg:ml-auto"
               style={{
                 background: "linear-gradient(160deg,#13283A 0%, #0E1D2B 100%)",
                 borderRadius: 22,
