@@ -204,27 +204,6 @@ function Welcome() {
           </div>
           </div>
 
-            {/* FAQ — rendered for SEO/GEO; wrapped in FAQPage JSON-LD in head() */}
-            <div className="mt-6 lg:mt-8" aria-labelledby="faq-heading">
-              <SmartyCard
-                Icon={HelpCircle}
-                iconColor="#C2410C"
-                iconBg="#FDECD8"
-                title={<span id="faq-heading">Frequently asked questions</span>}
-                subtitle="Everything people ask before their first scan."
-              >
-                <div className="mt-1 flex flex-col gap-2">
-                  {HOME_FAQ.map((f) => (
-                    <details key={f.q} style={{ borderTop: "1px solid #EEF1F2", paddingTop: 10 }}>
-                      <summary style={{ fontWeight: 700, color: "#14213A", fontSize: 14.5, cursor: "pointer", listStyle: "none" }}>
-                        {f.q}
-                      </summary>
-                      <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.55, color: "#3B4A63" }}>{f.a}</p>
-                    </details>
-                  ))}
-                </div>
-              </SmartyCard>
-            </div>
           </>
         ) : mode === "signup" ? (
           <form onSubmit={submit} className="mt-2 flex flex-col gap-3">
