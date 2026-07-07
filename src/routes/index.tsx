@@ -7,7 +7,7 @@ import { clearOnboardingDraft, getOnboardingDraft, getUser, restoreUserFromBacke
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, HelpCircle } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { SmartyCard } from "@/components/SmartyCard";
 
 export const Route = createFileRoute("/")({
@@ -28,50 +28,10 @@ export const Route = createFileRoute("/")({
       { property: "og:url", content: "https://smartymove.com/" },
     ],
     links: [{ rel: "canonical", href: "https://smartymove.com/" }],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: HOME_FAQ.map((f) => ({
-            "@type": "Question",
-            name: f.q,
-            acceptedAnswer: { "@type": "Answer", text: f.a },
-          })),
-        }),
-      },
-    ],
   }),
   component: Welcome,
 });
 
-const HOME_FAQ: { q: string; a: string }[] = [
-  {
-    q: "What is a movement screen and why does it matter?",
-    a: "A movement screen is a short set of standardized tests (like a squat, hinge, single-leg balance, lunge, and overhead reach) that reveals where your body is restricted, unstable, or compensating. It matters because pain and injury usually start from the weakest link in your movement chain — not the spot that hurts.",
-  },
-  {
-    q: "How does SmartyMove score my movement?",
-    a: "Your phone camera tracks your joints during each test. SmartyMove measures range of motion, tempo, and compensations (heel rise, spine rounding, knee valgus, left/right asymmetry) and compares them to reference values for each movement. Those scores combine into a single 0–100 Movement Score.",
-  },
-  {
-    q: "Is SmartyMove a replacement for physical therapy?",
-    a: "No. SmartyMove is a wellness and education tool, not a medical device. It helps you understand how you move and gives you a corrective routine — but if you have pain, an injury, or a medical condition, see a qualified physiotherapist or physician.",
-  },
-  {
-    q: "What is Movement Age?",
-    a: "Movement Age is a motivational estimate of how old your movement quality looks, compared to your chronological age. It's based on your Movement Score and is designed to be lowered over time as your mobility, stability and strength improve.",
-  },
-  {
-    q: "Does SmartyMove work for knee pain, low back pain, or starting to run?",
-    a: "SmartyMove identifies the root cause behind common complaints — usually limited ankle mobility, weak hips, poor core control, or scapular dysfunction — and prescribes corrective work for that root cause. If you have acute pain or an undiagnosed injury, get cleared by a clinician first.",
-  },
-  {
-    q: "Is my camera footage stored or sent anywhere?",
-    a: "No. Pose detection runs on your device. Raw video is not uploaded to our servers — only the numeric movement scores and the joint-angle summaries needed to build your program are saved to your account.",
-  },
-];
 
 function Welcome() {
   const navigate = useNavigate();
@@ -210,20 +170,6 @@ function Welcome() {
             >
               Get started
             </button>
-            <div className="mb-3 lg:text-left text-center lg:hidden">
-              <Link
-                to="/about"
-                style={{ color: "#0E7C86", fontWeight: 700, fontSize: 14, textDecoration: "none", borderBottom: "1.5px solid rgba(14,124,134,0.35)", paddingBottom: 1 }}
-              >
-                About SmartyMove
-              </Link>
-            </div>
-            <div className="lg:text-left text-center lg:hidden" style={{ fontSize: 13.5, color: "#6B7A90" }}>
-              Already have an account?{" "}
-              <button onClick={() => setMode("signin")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                Sign in
-              </button>
-            </div>
           </div>
 
           <div className="sm-hero-right flex w-full lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
@@ -258,27 +204,6 @@ function Welcome() {
           </div>
           </div>
 
-            {/* FAQ — rendered for SEO/GEO; wrapped in FAQPage JSON-LD in head() */}
-            <div className="mt-6 lg:mt-8" aria-labelledby="faq-heading">
-              <SmartyCard
-                Icon={HelpCircle}
-                iconColor="#C2410C"
-                iconBg="#FDECD8"
-                title={<span id="faq-heading">Frequently asked questions</span>}
-                subtitle="Everything people ask before their first scan."
-              >
-                <div className="mt-1 flex flex-col gap-2">
-                  {HOME_FAQ.map((f) => (
-                    <details key={f.q} style={{ borderTop: "1px solid #EEF1F2", paddingTop: 10 }}>
-                      <summary style={{ fontWeight: 700, color: "#14213A", fontSize: 14.5, cursor: "pointer", listStyle: "none" }}>
-                        {f.q}
-                      </summary>
-                      <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.55, color: "#3B4A63" }}>{f.a}</p>
-                    </details>
-                  ))}
-                </div>
-              </SmartyCard>
-            </div>
           </>
         ) : mode === "signup" ? (
           <form onSubmit={submit} className="mt-2 flex flex-col gap-3">

@@ -16,6 +16,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as LearnRouteImport } from './routes/learn'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as DesktopRouteImport } from './routes/desktop'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -74,6 +75,11 @@ const PremiumRoute = PremiumRouteImport.update({
 const LearnRoute = LearnRouteImport.update({
   id: '/learn',
   path: '/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DisclaimerRoute = DisclaimerRouteImport.update({
@@ -207,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
+  '/faq': typeof FaqRoute
   '/learn': typeof LearnRouteWithChildren
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
@@ -239,6 +246,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
+  '/faq': typeof FaqRoute
   '/learn': typeof LearnRouteWithChildren
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
@@ -272,6 +280,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
+  '/faq': typeof FaqRoute
   '/learn': typeof LearnRouteWithChildren
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
@@ -307,6 +316,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/desktop'
     | '/disclaimer'
+    | '/faq'
     | '/learn'
     | '/premium'
     | '/pricing'
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/desktop'
     | '/disclaimer'
+    | '/faq'
     | '/learn'
     | '/premium'
     | '/pricing'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/desktop'
     | '/disclaimer'
+    | '/faq'
     | '/learn'
     | '/premium'
     | '/pricing'
@@ -405,6 +417,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DesktopRoute: typeof DesktopRoute
   DisclaimerRoute: typeof DisclaimerRoute
+  FaqRoute: typeof FaqRoute
   LearnRoute: typeof LearnRouteWithChildren
   PremiumRoute: typeof PremiumRouteWithChildren
   PricingRoute: typeof PricingRoute
@@ -466,6 +479,13 @@ declare module '@tanstack/react-router' {
       path: '/learn'
       fullPath: '/learn'
       preLoaderRoute: typeof LearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/disclaimer': {
@@ -722,6 +742,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DesktopRoute: DesktopRoute,
   DisclaimerRoute: DisclaimerRoute,
+  FaqRoute: FaqRoute,
   LearnRoute: LearnRouteWithChildren,
   PremiumRoute: PremiumRouteWithChildren,
   PricingRoute: PricingRoute,
