@@ -123,9 +123,9 @@ function Home() {
           </Link>
         ) : (
           <div className="rounded-3xl bg-card p-5 shadow-card">
-            <div className="flex items-center justify-between gap-4">
-              <ScoreRing value={latest.overall} size={140} />
-              <div className="min-w-0 flex-1">
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <ScoreRing value={latest.overall} size={220} />
+              <div className="text-center sm:min-w-0 sm:flex-1 sm:text-left">
                 <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Movement Age</div>
                 <div className="mt-0.5 text-3xl font-extrabold brand-text">{latest.movementAge}</div>
                 <div className="text-xs text-muted-foreground">Chronological: {u.age}</div>
