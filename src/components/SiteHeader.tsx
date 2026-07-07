@@ -119,7 +119,7 @@ function NavDrawer({ onClose, isAuthed }: { onClose: () => void; isAuthed: boole
       items: [
         { to: "/about", label: "About", Icon: Info },
         { to: "/pricing", label: "Pricing", Icon: Crown },
-        { to: "/faq", label: "Frequently asked questions", Icon: HelpCircle },
+        { to: "/faq", label: "FAQ", Icon: HelpCircle },
         { to: "/contact", label: "Contact us", Icon: Mail },
       ],
     },

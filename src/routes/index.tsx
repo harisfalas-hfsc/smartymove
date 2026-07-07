@@ -124,7 +124,7 @@ function Welcome() {
         {mode === "intro" ? (
           <>
           <div className="grid gap-8 lg:grid-cols-[560px_minmax(0,1fr)] lg:items-start lg:gap-9 lg:pt-4">
-          <div className="sm-hero-left">
+          <div className="sm-hero-left order-2 lg:order-1">
             <div
               className="flex items-center gap-2"
               style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "#0E7C86", fontWeight: 700 }}
@@ -172,7 +172,7 @@ function Welcome() {
             </button>
           </div>
 
-          <div className="sm-hero-right flex w-full lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
+          <div className="sm-hero-right order-1 lg:order-2 flex w-full lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
             {/* Scan viewfinder card */}
             <div
               className="relative w-full overflow-hidden sm-hero-card flex flex-col justify-center lg:ml-auto"
