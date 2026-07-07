@@ -28,20 +28,6 @@ export const Route = createFileRoute("/")({
       { property: "og:url", content: "https://smartymove.com/" },
     ],
     links: [{ rel: "canonical", href: "https://smartymove.com/" }],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: HOME_FAQ.map((f) => ({
-            "@type": "Question",
-            name: f.q,
-            acceptedAnswer: { "@type": "Answer", text: f.a },
-          })),
-        }),
-      },
-    ],
   }),
   component: Welcome,
 });
