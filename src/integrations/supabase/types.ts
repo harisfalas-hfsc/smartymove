@@ -98,6 +98,62 @@ export type Database = {
         }
         Relationships: []
       }
+      smartymove_exercises: {
+        Row: {
+          addresses: string
+          also_helps: string[]
+          approved: boolean
+          area: Database["public"]["Enums"]["smarty_area"]
+          category: Database["public"]["Enums"]["smarty_category"]
+          created_at: string
+          equipment: string
+          id: string
+          level: string
+          name: string
+          sort_order: number
+          source_exercise_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          addresses: string
+          also_helps?: string[]
+          approved?: boolean
+          area: Database["public"]["Enums"]["smarty_area"]
+          category: Database["public"]["Enums"]["smarty_category"]
+          created_at?: string
+          equipment?: string
+          id?: string
+          level?: string
+          name: string
+          sort_order?: number
+          source_exercise_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          addresses?: string
+          also_helps?: string[]
+          approved?: boolean
+          area?: Database["public"]["Enums"]["smarty_area"]
+          category?: Database["public"]["Enums"]["smarty_category"]
+          created_at?: string
+          equipment?: string
+          id?: string
+          level?: string
+          name?: string
+          sort_order?: number
+          source_exercise_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "smartymove_exercises_source_exercise_id_fkey"
+            columns: ["source_exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -163,7 +219,15 @@ export type Database = {
       has_scan_access: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      smarty_area:
+        | "ankle"
+        | "knee"
+        | "hip"
+        | "low_back"
+        | "shoulder"
+        | "elbow"
+        | "wrist"
+      smarty_category: "mobility" | "stability" | "strength"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -290,6 +354,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      smarty_area: [
+        "ankle",
+        "knee",
+        "hip",
+        "low_back",
+        "shoulder",
+        "elbow",
+        "wrist",
+      ],
+      smarty_category: ["mobility", "stability", "strength"],
+    },
   },
 } as const
