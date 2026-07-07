@@ -20,7 +20,7 @@ export const Route = createFileRoute("/disclaimer")({
 
 function Disclaimer() {
   return (
-    <LegalLayout title="Disclaimer & Release of Liability" icon={<AlertTriangle className="h-5 w-5" />} lastUpdated="January 2025">
+    <LegalLayout title="Disclaimer & Release of Liability" icon={<AlertTriangle className="h-5 w-5" />} lastUpdated="July 2026">
       <div className="callout">
         <strong>⚠️ Mandatory readiness check.</strong> Before performing any movement screen or corrective
         routine in SmartyMove, you must complete the in-app PAR-Q-style readiness questionnaire, select any
@@ -30,7 +30,9 @@ function Disclaimer() {
       </div>
 
       <p>
-        The information provided by <strong>SmartyMove</strong> (smartymove.com) is intended solely for
+        The information provided by <strong>SmartyMove</strong> (smartymove.com), part of the{" "}
+        <a href="https://smartywellness.com" target="_blank" rel="noopener noreferrer">Smarty Wellness</a>{" "}
+        family of brands (alongside SmartyGym and SmartyDiet), is intended solely for
         <strong> general educational and wellness purposes</strong>. SmartyMove is a movement-quality
         diagnostic and corrective specialist; it is not a physiotherapist, doctor, or any other healthcare
         provider, and it does not provide medical advice, diagnosis, or treatment.
@@ -80,8 +82,9 @@ function Disclaimer() {
         <li>
           <strong>Complete release:</strong> By using SmartyMove, you voluntarily and knowingly assume all
           risks associated with physical activity and hereby <strong>RELEASE, WAIVE, DISCHARGE, AND COVENANT
-          NOT TO SUE</strong> SmartyMove, its operator, owners, contributors, employees, contractors,
-          affiliates, and agents from any and all liability arising from your use of SmartyMove.
+          NOT TO SUE</strong> SmartyMove, its parent Smarty Wellness, its affiliated brands
+          (SmartyGym and SmartyDiet), and their respective operators, owners, contributors, employees,
+          contractors, affiliates, and agents from any and all liability arising from your use of SmartyMove.
         </li>
         <li>
           <strong>No liability:</strong> SmartyMove and its representatives <strong>shall not be held

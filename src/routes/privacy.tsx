@@ -28,14 +28,19 @@ function Privacy() {
     <LegalLayout
       title="Privacy Policy"
       icon={<Shield className="h-5 w-5" />}
-      lastUpdated="June 2026"
+      lastUpdated="July 2026"
     >
       <p>
         At <strong>SmartyMove</strong> (smartymove.com) we value your privacy and are committed to
-        protecting your personal data. This Privacy Policy explains how SmartyMove collects, uses,
-        stores, and protects your information when you use our movement screening and corrective
-        program. Our practices comply with the General Data Protection Regulation (GDPR) (EU)
-        2016/679, the ePrivacy Directive 2002/58/EC, and applicable data protection laws worldwide.
+        protecting your personal data. SmartyMove is part of the{" "}
+        <a href="https://smartywellness.com" target="_blank" rel="noopener noreferrer">Smarty Wellness</a>{" "}
+        family of brands — a science-based ecosystem for everyday human wellness that also includes{" "}
+        <a href="https://smartygym.com" target="_blank" rel="noopener noreferrer">SmartyGym</a> (train) and{" "}
+        <a href="https://smartydiet.com" target="_blank" rel="noopener noreferrer">SmartyDiet</a> (fuel).
+        This Privacy Policy explains how SmartyMove collects, uses, stores, and protects your
+        information when you use our movement screening and corrective program. Our practices comply
+        with the General Data Protection Regulation (GDPR) (EU) 2016/679, the ePrivacy Directive
+        2002/58/EC, and applicable data protection laws worldwide.
       </p>
 
       <h2>1. Data We Collect</h2>
@@ -268,8 +273,12 @@ function Privacy() {
 
       <h2>12. Contact</h2>
       <p>
-        Data Controller: <strong>SmartyMove</strong> (smartymove.com). For privacy questions or to
-        exercise your rights, contact{" "}
+        Data Controller: <strong>SmartyMove</strong> (smartymove.com), part of{" "}
+        <a href="https://smartywellness.com" target="_blank" rel="noopener noreferrer">Smarty Wellness</a>
+        , alongside sister brands{" "}
+        <a href="https://smartygym.com" target="_blank" rel="noopener noreferrer">SmartyGym</a> and{" "}
+        <a href="https://smartydiet.com" target="_blank" rel="noopener noreferrer">SmartyDiet</a>.
+        For privacy questions or to exercise your rights, contact{" "}
         <a href="mailto:smartymove@outlook.com">smartymove@outlook.com</a>.
       </p>
     </LegalLayout>

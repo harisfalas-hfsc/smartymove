@@ -29,13 +29,15 @@ function Terms() {
     <LegalLayout
       title="Terms & Conditions"
       icon={<FileText className="h-5 w-5" />}
-      lastUpdated="June 2026"
+      lastUpdated="July 2026"
     >
       <p>
-        Welcome to <strong>SmartyMove</strong> (smartymove.com). By accessing or using our
-        mobile-first movement diagnostic and corrective program, you agree to comply with and be
-        bound by the following Terms &amp; Conditions. Please read them carefully before using
-        SmartyMove.
+        Welcome to <strong>SmartyMove</strong> (smartymove.com), part of the{" "}
+        <a href="https://smartywellness.com" target="_blank" rel="noopener noreferrer">Smarty Wellness</a>{" "}
+        family of brands — a science-based wellness ecosystem that also includes SmartyGym (train)
+        and SmartyDiet (fuel). By accessing or using our mobile-first movement diagnostic and
+        corrective program, you agree to comply with and be bound by the following Terms &amp;
+        Conditions. Please read them carefully before using SmartyMove.
       </p>
 
       <h2>1. Acceptance of Terms</h2>
@@ -80,8 +82,10 @@ function Terms() {
       <p>
         SmartyMove is a <strong>movement-quality diagnostic and corrective specialist</strong>. It
         is not a general fitness platform, gym, training program library, or weight-loss product.
-        For broader fitness content, see our sister product SmartyGym (smartygym.com) — the two are
-        separate apps with separate accounts.
+        SmartyMove is one of three pillars in the Smarty Wellness family: <strong>SmartyGym</strong>{" "}
+        (train — smartygym.com), <strong>SmartyMove</strong> (assess — smartymove.com), and{" "}
+        <strong>SmartyDiet</strong> (fuel — smartydiet.com). Each brand is a separate app with a
+        separate account.
       </p>
       <p>
         SmartyMove is intended for <strong>personal educational and wellness purposes only</strong>{" "}
@@ -250,10 +254,10 @@ function Terms() {
       <h2>12. Intellectual Property</h2>
       <p>
         All content, branding, screening methodology, scoring system, corrective routines, source
-        code, and copy in SmartyMove are the intellectual property of SmartyMove and its operator
-        and are protected by copyright, trademark, and other intellectual property laws. You receive
-        a limited, personal, non-transferable, non-exclusive license to use SmartyMove for personal,
-        non-commercial purposes only.
+        code, and copy in SmartyMove are the intellectual property of SmartyMove and its parent,
+        Smarty Wellness, and are protected by copyright, trademark, and other intellectual property
+        laws. You receive a limited, personal, non-transferable, non-exclusive license to use
+        SmartyMove for personal, non-commercial purposes only.
       </p>
 
       <h2>13. Account Deletion</h2>
@@ -303,8 +307,9 @@ function Terms() {
 
       <h2>17. Contact</h2>
       <p>
-        For questions about these Terms, contact us at{" "}
-        <a href="mailto:smartymove@outlook.com">smartymove@outlook.com</a>.
+        For questions about these Terms, contact SmartyMove (part of{" "}
+        <a href="https://smartywellness.com" target="_blank" rel="noopener noreferrer">Smarty Wellness</a>
+        ) at <a href="mailto:smartymove@outlook.com">smartymove@outlook.com</a>.
       </p>
     </LegalLayout>
   );
