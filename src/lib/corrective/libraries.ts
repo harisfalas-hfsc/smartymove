@@ -70,7 +70,7 @@ export const LIBRARY: LibraryMap = {
     ],
     stability: [
       "Single-Leg Balance",
-      "Single-Leg Balance – Eyes Closed",
+      "Single-Leg Balance \u2013 Eyes Closed",
       "Star / Y-Balance Reach",
       "Clock Reach",
       "Single-Leg RDL Reach (bodyweight)",
@@ -146,7 +146,7 @@ export const LIBRARY: LibraryMap = {
       "90/90 Hip Stretch",
       "Seated Figure-Four Stretch",
       "Frog Stretch",
-      "World"s Greatest Stretch",
+      "World's Greatest Stretch",
       "Cossack Squat Mobility",
       "Half-Kneeling Hip Flexor Stretch",
       "Pigeon Stretch",
@@ -188,7 +188,7 @@ export const LIBRARY: LibraryMap = {
   low_back: {
     mobility: [
       "Cat-Cow",
-      "Child"s Pose",
+      "Child's Pose",
       "Open Book (side-lying)",
       "Supine Pelvic Tilts",
       "Half-Kneeling Hip Flexor Stretch",
@@ -240,7 +240,7 @@ export const LIBRARY: LibraryMap = {
       "Lat Stretch (kneeling)",
       "Sleeper Stretch",
       "Cross-Body Shoulder Stretch",
-      "Child"s Pose Reach",
+      "Child's Pose Reach",
       "Prone Y/T/W",
       "Shoulder CARs",
     ],
@@ -254,8 +254,8 @@ export const LIBRARY: LibraryMap = {
       "Dead Bug with Reach",
       "Bird Dog with Reach",
       "Side Plank with Reach",
-      "Band External Rotation (0°)",
-      "Band External Rotation (90°)",
+      "Band External Rotation (0\u00b0)",
+      "Band External Rotation (90\u00b0)",
       "Prone I-Y-T-W Series",
     ],
     strength: [
