@@ -170,20 +170,6 @@ function Welcome() {
             >
               Get started
             </button>
-            <div className="mb-3 lg:text-left text-center lg:hidden">
-              <Link
-                to="/about"
-                style={{ color: "#0E7C86", fontWeight: 700, fontSize: 14, textDecoration: "none", borderBottom: "1.5px solid rgba(14,124,134,0.35)", paddingBottom: 1 }}
-              >
-                About SmartyMove
-              </Link>
-            </div>
-            <div className="lg:text-left text-center lg:hidden" style={{ fontSize: 13.5, color: "#6B7A90" }}>
-              Already have an account?{" "}
-              <button onClick={() => setMode("signin")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                Sign in
-              </button>
-            </div>
           </div>
 
           <div className="sm-hero-right flex w-full lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
