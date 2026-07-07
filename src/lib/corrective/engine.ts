@@ -40,6 +40,68 @@ function tokenize(s: string): string[] {
     .filter((t) => t && !STOPWORDS.has(t));
 }
 
+/**
+ * "Qualifier" tokens describe HOW a movement is performed (setup, side,
+ * tempo, level, equipment context). They are NOT the movement itself, so
+ * the strict-subset check ignores them.
+ *
+ * Everything not in this set is treated as a MOVEMENT/CONTENT token — if
+ * the library row carries a content token the curated canonical didn't
+ * ask for, the row is introducing an exercise we didn't prescribe and is
+ * rejected outright.
+ */
+const QUALIFIER_TOKENS = new Set([
+  // position / stance
+  "kneeling", "half", "standing", "seated", "supine", "prone", "quadruped",
+  "tall", "short", "split", "staggered", "narrow", "wide", "close", "open",
+  "neutral", "forward", "backward", "front", "back", "top", "bottom", "side",
+  "sides", "lateral", "medial", "left", "right", "each", "per", "alternating",
+  // support / setup
+  "supported", "unsupported", "assisted", "unassisted", "modified", "wall",
+  "bench", "chair", "floor", "mat", "box", "step", "table",
+  // equipment context (allowed variants)
+  "band", "bands", "resistance", "bodyweight", "body", "weight", "elastic",
+  "dumbbell", "dumbbells", "kettlebell", "kettlebells", "medicine", "ball",
+  "weighted", "loaded",
+  // count / laterality
+  "single", "double", "two", "one", "three", "leg", "legs", "arm", "arms",
+  "bilateral", "unilateral",
+  // execution
+  "hold", "holds", "isometric", "eccentric", "concentric", "static", "dynamic",
+  "slow", "tempo", "reverse", "regression", "progression", "beginner",
+  "advanced", "intermediate", "variation", "variations", "level", "easy", "hard",
+  // grammatical / descriptors
+  "the", "a", "an", "and", "or", "to", "of", "with", "on", "in", "from",
+  "for", "by", "into", "up", "down", "against", "using", "over", "under",
+  "closed", "eyes", "open",
+]);
+
+function contentTokens(name: string): string[] {
+  return tokenize(name).filter((t) => !QUALIFIER_TOKENS.has(t));
+}
+
+/**
+ * HARD REJECTS — never appropriate for a corrective program regardless of
+ * how well the name matches. We are a corrective/rehab tool, not a gym
+ * programmer. Olympic lifts, plyometrics, sprints, kipping, and compound
+ * CrossFit-style combos are all off-limits.
+ */
+const UNSAFE_FOR_CORRECTIVE = /(burpee|snatch|clean\s*(and|&)?\s*jerk|power\s*clean|hang\s*clean|muscle\s*up|kipping|plyo|plyometric|box\s*jump|broad\s*jump|depth\s*jump|sprint|olympic|jerk\b)/i;
+
+/**
+ * Heavy/gym equipment we won't substitute in unless the curated canonical
+ * explicitly names it. Body-weight, band, and light dumbbell variants are
+ * fine; barbells, machines, cables, sleds, and trap bars are not.
+ */
+const HEAVY_EQUIPMENT = /(barbell|machine|smith|cable|sled|trap\s*bar|leg\s*press|hack\s*squat|lat\s*pulldown)/i;
+
+/**
+ * Connective phrases that indicate a COMPOUND movement (two exercises
+ * fused into one). "Push-Up To Side Plank", "Squat Into Press", etc.
+ * Reject unless the canonical asked for the same connector.
+ */
+const COMPOUND_CONNECTOR = /(\bto\b|\binto\b|\bplus\b|\+|\&)/i;
+
 /** Score a library row against a curated canonical name. 0 = no match. */
 function scoreRow(canonical: string, row: LibraryExercise): number {
   if (!row.gif_url) return 0;
@@ -50,25 +112,41 @@ function scoreRow(canonical: string, row: LibraryExercise): number {
   const canonTokens = tokenize(canonical);
   if (canonTokens.length === 0) return 0;
 
+  // HARD REJECTS — non-negotiable for a corrective tool.
+  if (UNSAFE_FOR_CORRECTIVE.test(name)) return 0;
+  if (HEAVY_EQUIPMENT.test(name) && !HEAVY_EQUIPMENT.test(canonLower)) return 0;
+  if (COMPOUND_CONNECTOR.test(name) && !COMPOUND_CONNECTOR.test(canonLower)) return 0;
+
+  // STRICT SUBSET — every MOVEMENT token in the library row must appear in
+  // the curated canonical. This is what stops "Push-Up To Side Plank" from
+  // resolving to "Side Plank": the row carries "push" as a content token,
+  // the canonical does not, so the row is prescribing a movement we never
+  // asked for. Same rule kills "Bird Dog Reach" for "Bird Dog",
+  // "Glute Bridge Two Legs On Bench" for "Glute Bridge", etc.
+  const canonContent = new Set(contentTokens(canonical));
+  const rowContent = contentTokens(name);
+  if (rowContent.length === 0) return 0;
+  for (const t of rowContent) {
+    if (!canonContent.has(t)) return 0;
+  }
+  // And the canonical's core movement tokens must all be present in the row.
+  for (const t of canonContent) {
+    if (!name.includes(t)) return 0;
+  }
+
   let matched = 0;
   for (const t of canonTokens) {
     if (name.includes(t)) matched++;
   }
   if (matched === 0) return 0;
 
-  // Require at least half the keywords (rounded up) to match — keeps
-  // "Glute Bridge" from matching just any "bridge" row.
-  const required = Math.ceil(canonTokens.length / 2);
-  if (matched < required) return 0;
-
   let score = matched * 100;
   if (row.equipment === "body weight") score += 30;
+  if (row.equipment === "band" || row.equipment === "resistance band") score += 20;
   // Prefer shorter, cleaner names.
   score += Math.max(0, 60 - name.length);
-  // Penalize obviously loaded variants when curated name is plain.
-  if (!/(barbell|dumbbell|cable|machine|smith|kettlebell)/.test(canonLower)) {
-    if (/barbell|machine|smith/.test(name)) score -= 20;
-  }
+  // Prefer rows that match the canonical exactly in content-token count.
+  if (rowContent.length === canonContent.size) score += 50;
   return score;
 }
 
