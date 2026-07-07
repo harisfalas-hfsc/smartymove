@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PaywallProvider } from "@/lib/paywall";
+import { SisterAppsPopup } from "@/components/growth/SisterAppsPopup";
 
 function NotFoundComponent() {
   return (
@@ -164,6 +165,7 @@ function RootComponent() {
       <PaywallProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <SisterAppsPopup />
       </PaywallProvider>
     </QueryClientProvider>
   );
