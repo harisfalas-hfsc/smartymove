@@ -61,6 +61,8 @@ const QUALIFIER_TOKENS = new Set([
   "bench", "chair", "floor", "mat", "box", "step", "table",
   // equipment context (allowed variants)
   "band", "bands", "resistance", "bodyweight", "body", "weight", "elastic",
+  "dumbbell", "dumbbells", "kettlebell", "kettlebells", "medicine", "ball",
+  "weighted", "loaded",
   // count / laterality
   "single", "double", "two", "one", "three", "leg", "legs", "arm", "arms",
   "bilateral", "unilateral",
