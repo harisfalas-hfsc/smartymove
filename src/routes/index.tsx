@@ -7,7 +7,7 @@ import { clearOnboardingDraft, getOnboardingDraft, getUser, restoreUserFromBacke
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, HelpCircle } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { SmartyCard } from "@/components/SmartyCard";
 
 export const Route = createFileRoute("/")({
