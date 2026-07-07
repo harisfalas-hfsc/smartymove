@@ -27,7 +27,9 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
           style={{ background: "#fff", border: "1px solid #E5EAEC", borderRadius: 18, padding: "16px 18px", fontSize: 13, color: "#3B4A63" }}
         >
           <strong>Last updated:</strong> {lastUpdated} ·{" "}
-          <strong>Operator:</strong> SmartyMove (smartymove.com), part of the Smarty family ·{" "}
+          <strong>Operator:</strong> SmartyMove (smartymove.com), part of the{" "}
+          <a href="https://smartywellness.com" target="_blank" rel="noopener noreferrer" style={{ color: "#0E7C86", fontWeight: 600 }}>Smarty Wellness</a>{" "}
+          family of brands (with SmartyGym and SmartyDiet) ·{" "}
           <strong>Contact:</strong>{" "}
           <a href="mailto:smartymove@outlook.com" style={{ color: "#0E7C86", fontWeight: 600 }}>smartymove@outlook.com</a>
         </div>
