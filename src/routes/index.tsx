@@ -32,32 +32,6 @@ export const Route = createFileRoute("/")({
   component: Welcome,
 });
 
-const HOME_FAQ: { q: string; a: string }[] = [
-  {
-    q: "What is a movement screen and why does it matter?",
-    a: "A movement screen is a short set of standardized tests (like a squat, hinge, single-leg balance, lunge, and overhead reach) that reveals where your body is restricted, unstable, or compensating. It matters because pain and injury usually start from the weakest link in your movement chain — not the spot that hurts.",
-  },
-  {
-    q: "How does SmartyMove score my movement?",
-    a: "Your phone camera tracks your joints during each test. SmartyMove measures range of motion, tempo, and compensations (heel rise, spine rounding, knee valgus, left/right asymmetry) and compares them to reference values for each movement. Those scores combine into a single 0–100 Movement Score.",
-  },
-  {
-    q: "Is SmartyMove a replacement for physical therapy?",
-    a: "No. SmartyMove is a wellness and education tool, not a medical device. It helps you understand how you move and gives you a corrective routine — but if you have pain, an injury, or a medical condition, see a qualified physiotherapist or physician.",
-  },
-  {
-    q: "What is Movement Age?",
-    a: "Movement Age is a motivational estimate of how old your movement quality looks, compared to your chronological age. It's based on your Movement Score and is designed to be lowered over time as your mobility, stability and strength improve.",
-  },
-  {
-    q: "Does SmartyMove work for knee pain, low back pain, or starting to run?",
-    a: "SmartyMove identifies the root cause behind common complaints — usually limited ankle mobility, weak hips, poor core control, or scapular dysfunction — and prescribes corrective work for that root cause. If you have acute pain or an undiagnosed injury, get cleared by a clinician first.",
-  },
-  {
-    q: "Is my camera footage stored or sent anywhere?",
-    a: "No. Pose detection runs on your device. Raw video is not uploaded to our servers — only the numeric movement scores and the joint-angle summaries needed to build your program are saved to your account.",
-  },
-];
 
 function Welcome() {
   const navigate = useNavigate();
