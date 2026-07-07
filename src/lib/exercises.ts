@@ -218,14 +218,58 @@ function titleCase(s: string): string {
   return s.replace(/\b\w/g, c => c.toUpperCase());
 }
 
-/** Fetch the full library once and cache. */
+/**
+ * Fetch the SmartyMove curated library.
+ *
+ * Reads from `smartymove_exercises` — the closed, approved list of ~250
+ * exercises the corrective engine is allowed to prescribe. The generic
+ * `public.exercises` pool is kept only for future enrichment; the engine
+ * NEVER pulls from it directly.
+ *
+ * When a curated row has a `source_exercise_id`, we hydrate the linked
+ * `exercises` row's GIF, instructions and muscle metadata for the UI.
+ * Otherwise the row is returned without a GIF and the UI renders name +
+ * addresses only — still fully usable.
+ */
 async function fetchLibrary(): Promise<LibraryExercise[]> {
   const { data, error } = await supabase
-    .from("exercises")
-    .select("id,name,body_part,equipment,target,secondary_muscles,instructions,gif_url")
-    .not("gif_url", "is", null);
+    .from("smartymove_exercises")
+    .select(
+      "id,name,area,category,equipment,addresses,source_exercise_id,source:exercises!smartymove_exercises_source_exercise_id_fkey(id,body_part,equipment,target,secondary_muscles,instructions,gif_url)"
+    )
+    .eq("approved", true)
+    .order("area")
+    .order("category")
+    .order("sort_order");
   if (error) throw error;
-  return (data ?? []) as LibraryExercise[];
+  const rows = (data ?? []) as Array<{
+    id: string;
+    name: string;
+    area: string;
+    category: string;
+    equipment: string | null;
+    addresses: string | null;
+    source_exercise_id: string | null;
+    source: {
+      id: string;
+      body_part: string | null;
+      equipment: string | null;
+      target: string | null;
+      secondary_muscles: string[] | null;
+      instructions: string[] | null;
+      gif_url: string | null;
+    } | null;
+  }>;
+  return rows.map((r) => ({
+    id: r.source?.id ?? r.id,
+    name: r.name,
+    body_part: r.source?.body_part ?? r.area,
+    equipment: r.source?.equipment ?? (r.equipment ?? null),
+    target: r.source?.target ?? null,
+    secondary_muscles: r.source?.secondary_muscles ?? [],
+    instructions: r.source?.instructions ?? (r.addresses ? [r.addresses] : []),
+    gif_url: r.source?.gif_url ?? null,
+  }));
 }
 
 /** Sign GIF URLs in one batch and attach them. */
