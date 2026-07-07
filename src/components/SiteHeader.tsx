@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, User as UserIcon, Crown, Mail, Info, Shield, FileText, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, User as UserIcon, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUser } from "@/lib/store";
 
@@ -119,6 +119,7 @@ function NavDrawer({ onClose, isAuthed }: { onClose: () => void; isAuthed: boole
       items: [
         { to: "/about", label: "About", Icon: Info },
         { to: "/pricing", label: "Pricing", Icon: Crown },
+        { to: "/faq", label: "Frequently asked questions", Icon: HelpCircle },
         { to: "/contact", label: "Contact us", Icon: Mail },
       ],
     },
