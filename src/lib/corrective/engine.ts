@@ -104,7 +104,8 @@ const COMPOUND_CONNECTOR = /(\bto\b|\binto\b|\bplus\b|\+|\&)/i;
 
 /** Score a library row against a curated canonical name. 0 = no match. */
 function scoreRow(canonical: string, row: LibraryExercise): number {
-  if (!row.gif_url) return 0;
+  // Rows come from the closed SmartyMove library; every row is pre-approved.
+  // A missing GIF is a media gap, not a reason to exclude the exercise.
   const name = row.name.toLowerCase();
   const canonLower = canonical.toLowerCase();
   if (name === canonLower) return 10000;
