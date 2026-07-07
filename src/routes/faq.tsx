@@ -7,9 +7,9 @@ import { SmartyCard } from "@/components/SmartyCard";
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
-      { title: "Frequently Asked Questions — SmartyMove" },
+      { title: "FAQ — SmartyMove" },
       { name: "description", content: "Answers to common questions about SmartyMove: how the movement screen works, what Movement Age means, privacy, and who it's for." },
-      { property: "og:title", content: "Frequently Asked Questions — SmartyMove" },
+      { property: "og:title", content: "FAQ — SmartyMove" },
       { property: "og:description", content: "Everything people ask before their first scan." },
       { property: "og:url", content: "https://smartymove.com/faq" },
     ],
@@ -68,7 +68,7 @@ function Faq() {
           Icon={HelpCircle}
           iconColor="#C2410C"
           iconBg="#FDECD8"
-          title="Frequently asked questions"
+          title="FAQ"
           subtitle="Everything people ask before their first scan."
         >
           <div className="mt-1 flex flex-col gap-2">
