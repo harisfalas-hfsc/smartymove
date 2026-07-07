@@ -1,10 +1,12 @@
 /**
  * SmartyMove Corrective Exercise Libraries.
  *
- * Curated per-area, per-category lists from the v1 spec. The routine
- * engine NEVER invents exercises — it can only pick from these names
- * and resolve each one to the closest row in the `public.exercises`
- * library table.
+ * Curated per-area, per-category names — these mirror the closed
+ * `smartymove_exercises` table (the SmartyMove Library). The routine
+ * engine ONLY picks from these names, and every name resolves 1:1 to a
+ * row in `smartymove_exercises`. The generic `public.exercises` pool is
+ * retained solely as a reservoir for future curation — the engine never
+ * pulls from it directly.
  */
 
 export type Area = "ankle" | "knee" | "hip" | "low_back" | "shoulder" | "elbow" | "wrist";
