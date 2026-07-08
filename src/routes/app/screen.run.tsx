@@ -187,6 +187,50 @@ const TEST_LANDMARKS: Record<string, number[]> = {
 };
 
 function expandToSteps(testId: string, name: string, duration: number, conditional?: boolean): Step[] {
+  return _expandToSteps(testId, name, duration, conditional);
+}
+
+/**
+ * Copy shown on the mandatory clearing-test gate that appears before the
+ * three FMS clearing patterns. Each answer is Yes / No — pain = score 0
+ * and the pattern is skipped; no pain = proceed to the normal intro.
+ */
+function clearingPrompt(testId: string): { intro: string; action: string; question: string } {
+  switch (testId) {
+    case "overhead":
+      return {
+        intro:
+          "This checks that your shoulders can tolerate the overhead reach without pain before we score it.",
+        action:
+          "Stand tall. Press both palms together behind your back — one arm reaching over the top of your shoulder down your spine, the other reaching up from below.",
+        question: "Do you feel any sharp pain or pinching in either shoulder?",
+      };
+    case "bridge_hold":
+      return {
+        intro:
+          "This checks that your spine tolerates extension before we ask you to press up from the floor.",
+        action:
+          "Lie face down. Press your hands flat on the floor at shoulder level and push your upper body up like a cobra, keeping your hips on the floor.",
+        question: "Do you feel any pain in your spine?",
+      };
+    case "rotary_stability":
+      return {
+        intro:
+          "This checks that your spine tolerates flexion before we score the pattern.",
+        action:
+          "From hands and knees, slowly rock your hips back toward your heels (child's pose direction).",
+        question: "Do you feel any pain in your spine?",
+      };
+    default:
+      return {
+        intro: "Quick safety check before this pattern.",
+        action: "Follow the on-screen action.",
+        question: "Any pain?",
+      };
+  }
+}
+
+function _expandToSteps(testId: string, name: string, duration: number, conditional?: boolean): Step[] {
   const views = TEST_VIEWS[testId];
   if (!views || views.length === 0) {
     // Fallback to legacy single-view mapping if a test has no view definition.
