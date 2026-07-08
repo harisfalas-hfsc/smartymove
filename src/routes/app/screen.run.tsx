@@ -422,57 +422,9 @@ function Runner() {
     setPhase("confirm");
   }
 
-  /** Resolve a clearing-test pain check. If painful, rewrite the merged
-   *  test result to a hard 0 (invalid) so it drops out of scoring, then
-   *  advance to the next test or finalize. */
-  function resolvePainCheck(painful: boolean) {
-    const testId = painCheckTestId;
-    if (!testId) return;
-    let updated = results;
-    if (painful) {
-      updated = results.map(r =>
-        r.id === testId
-          ? {
-              ...r,
-              score: 0,
-              valid: false,
-              compensations: [...(r.compensations ?? []), "Pain reported during this movement — scored 0. Please consult a doctor or physiotherapist before continuing with this test."],
-              notes: "Cleared to 0 — pain reported during the pattern.",
-            }
-          : r,
-      );
-      setResults(updated);
-    }
-    setPainCheckTestId(null);
-    if (idx + 1 >= seq.length) {
-      finalize(updated);
-    } else {
-      setIdx(i => i + 1);
-      setPhase("intro");
-    }
-  }
-
-  /** Pre-test pain gate: ask before EVERY test whether the user currently
-   *  has pain in the target area. Yes → push a score-0 invalid result and
-   *  advance to the next test (or finalize). No → proceed to running. */
-  function resolvePrePain(painful: boolean) {
-    const step = seq[idx];
-    if (!step) return;
-    askedPainRef.current.add(step.groupId);
-    if (!painful) {
-      setPhase("running");
-      return;
-    }
-    const painResult: TestResult = {
-      id: step.testId,
-      name: step.name,
-      score: 0,
-      valid: false,
-      cameraView: step.cameraView,
-      compensations: ["Pain reported before this movement — scored 0. Please consult a doctor or physiotherapist before continuing with this test."],
-      notes: "Skipped — pain reported before the movement.",
-    };
-    const updated = [...results, painResult];
+  // Pain gating happens once in the onboarding questionnaire (see
+  // `painAreas`). The in-scan pain gate was removed so a paid scan always
+  // produces a full 8-pattern result — no wasted tokens.
     setResults(updated);
     // Skip all remaining views of the same test.
     let nextIdx = idx + 1;
