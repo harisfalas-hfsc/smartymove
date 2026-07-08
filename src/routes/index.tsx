@@ -163,8 +163,7 @@ function Welcome() {
               <section className="sm-panel sm-panel-hero sm-border-hero">
                 <div className="sm-eyebrow"><Sparkles className="h-3 w-3" /> Movement diagnostic</div>
                 <h1 className="sm-wellness-title">
-                  <span>Know how</span>
-                  <span>you move.</span>
+                  <span>Know how you move.</span>
                   <span>Move smarter.</span>
                 </h1>
               </section>
