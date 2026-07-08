@@ -218,7 +218,7 @@ export function clearOnboardingDraft() {
 export function useUser() {
   const [u, setU] = useState<User | null>(null);
   useEffect(() => {
-    setU(getUser());
+    void restoreUserFromBackend().then(setU).catch(() => setU(null));
     const f = () => setU(getUser());
     window.addEventListener("smartymove:user", f);
     window.addEventListener("storage", f);
@@ -296,7 +296,10 @@ async function saveProfile(user: User) {
 export async function restoreUserFromBackend(): Promise<User | null> {
   const { data: sessionData } = await supabase.auth.getSession();
   const authUser = sessionData.session?.user;
-  if (!authUser) return getUser();
+  if (!authUser) {
+    cacheOnly(null);
+    return null;
+  }
 
   const { data, error } = await (supabase as any)
     .from("profiles")
@@ -322,7 +325,12 @@ export async function restoreUserFromBackend(): Promise<User | null> {
   return user;
 }
 
-export async function signUpWithEmailProfile(name: string, email: string, age: number, password: string): Promise<User> {
+export async function signUpWithEmailProfile(
+  name: string,
+  email: string,
+  age: number,
+  password: string,
+): Promise<{ user: User; emailVerificationRequired: boolean }> {
   const normalizedEmail = normalizeEmail(email);
   const draft = getOnboardingDraft();
   const partial: Partial<User> = { questionnaire: draft.questionnaire, goal: draft.goal };
@@ -342,10 +350,11 @@ export async function signUpWithEmailProfile(name: string, email: string, age: n
     await saveProfile(user);
     clearOnboardingDraft();
     clearPendingProfile();
+    return { user, emailVerificationRequired: false };
   } else {
-    cacheOnly(user);
+    cacheOnly(null);
   }
-  return user;
+  return { user, emailVerificationRequired: true };
 }
 
 export async function signInWithEmailProfile(email: string, password: string): Promise<User> {

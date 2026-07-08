@@ -127,6 +127,8 @@ export const createScanCheckout = createServerFn({ method: "POST" })
       const prices = await stripe.prices.list({ lookup_keys: [SCAN_PRICE_ID] });
       if (!prices.data.length) throw new Error("Scan price not found in Stripe");
       const price = prices.data[0];
+      const productId = typeof price.product === "string" ? price.product : price.product.id;
+      const product = await stripe.products.retrieve(productId);
       const customerId = await resolveOrCreateCustomer(stripe, {
         email: data.email,
         userId: context.userId,
@@ -143,7 +145,7 @@ export const createScanCheckout = createServerFn({ method: "POST" })
           credits: "1",
         },
         payment_intent_data: {
-          description: "SmartyMove Movement Scan",
+          description: product.name,
           metadata: {
             userId: context.userId,
             type: "scan_pack",

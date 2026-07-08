@@ -70,6 +70,9 @@ function Welcome() {
   const [submitting, setSubmitting] = useState(false);
   const [showPw, setShowPw] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
+  const [emailUnverified, setEmailUnverified] = useState(false);
 
   useEffect(() => {
     const requestedMode =
@@ -95,6 +98,9 @@ function Welcome() {
       setMode("intro");
       setAuthError("");
       setResetSent(false);
+      setVerificationSent(false);
+      setResendSent(false);
+      setEmailUnverified(false);
     };
     window.addEventListener("smartymove:home", handler);
     return () => window.removeEventListener("smartymove:home", handler);
@@ -104,14 +110,21 @@ function Welcome() {
     e.preventDefault();
     if (!name || !email || !age || !pw) return;
     setAuthError("");
+    setVerificationSent(false);
+    setResendSent(false);
+    setEmailUnverified(false);
     setSubmitting(true);
     try {
-      const u = await signUpWithEmailProfile(name, email, Number(age), pw);
+      const result = await signUpWithEmailProfile(name, email, Number(age), pw);
+      if (result.emailVerificationRequired) {
+        setVerificationSent(true);
+        return;
+      }
       const draft = getOnboardingDraft();
       clearOnboardingDraft();
       navigate({
         to:
-          (u.questionnaire || draft.questionnaire) && (u.goal || draft.goal)
+          (result.user.questionnaire || draft.questionnaire) && (result.user.goal || draft.goal)
             ? "/app"
             : "/onboarding/parq",
       });
@@ -126,14 +139,44 @@ function Welcome() {
     e.preventDefault();
     if (!email || !pw) return;
     setAuthError("");
+    setEmailUnverified(false);
+    setResendSent(false);
     setSubmitting(true);
     try {
       const u = await signInWithEmailProfile(email, pw);
       navigate({ to: u.questionnaire && u.goal ? "/app" : "/onboarding/parq" });
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Sign in failed. Check your email and password.";
+      if (/email not (confirmed|verified)/i.test(message)) {
+        setEmailUnverified(true);
+        setAuthError("Please verify your email before signing in. Check your inbox, or resend the verification email below.");
+        return;
+      }
       setAuthError(
-        error instanceof Error ? error.message : "Sign in failed. Check your email and password.",
+        message,
       );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function resendVerification() {
+    if (!email) return;
+    setAuthError("");
+    setResendSent(false);
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim().toLowerCase(),
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (error) throw error;
+      setResendSent(true);
+      setVerificationSent(true);
+      setEmailUnverified(false);
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Couldn't resend the verification email.");
     } finally {
       setSubmitting(false);
     }
@@ -325,19 +368,49 @@ function Welcome() {
                 onToggle={() => setShowPw((s) => !s)}
               />
             </div>
+            {verificationSent && (
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm" style={{ color: "#14213A" }}>
+                <strong>Verify your email to continue.</strong>
+                <p className="mt-1" style={{ color: "#6B7A90" }}>
+                  We sent a verification link to {email.trim().toLowerCase()}. You cannot buy a scan or enter the app until that email is verified.
+                </p>
+              </div>
+            )}
             <Button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || verificationSent}
               style={{
                 background: "#FF6B4A",
                 boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)",
               }}
               className="mt-2 h-12 w-full rounded-2xl text-base font-semibold text-white hover:opacity-95"
             >
-              {submitting ? "Saving..." : "Continue"}
+              {verificationSent ? "Check your email" : submitting ? "Saving..." : "Continue"}
             </Button>
+            {verificationSent && (
+              <button
+                type="button"
+                onClick={resendVerification}
+                disabled={submitting || resendSent}
+                className="text-center text-sm font-semibold disabled:opacity-60"
+                style={{ color: "#0E7C86" }}
+              >
+                {resendSent ? "Verification email resent ✓" : "Resend verification email"}
+              </button>
+            )}
             {authError && (
               <p className="text-center text-sm font-semibold text-destructive">{authError}</p>
+            )}
+            {emailUnverified && (
+              <button
+                type="button"
+                onClick={resendVerification}
+                disabled={submitting || resendSent}
+                className="text-center text-sm font-semibold disabled:opacity-60"
+                style={{ color: "#0E7C86" }}
+              >
+                {resendSent ? "Verification email resent ✓" : "Resend verification email"}
+              </button>
             )}
             <p className="mt-1 text-center text-sm" style={{ color: "#6B7A90" }}>
               Have an account?{" "}
