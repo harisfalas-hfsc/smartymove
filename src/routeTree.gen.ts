@@ -17,6 +17,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as MovementIntelligenceRouteImport } from './routes/movement-intelligence'
 import { Route as LearnRouteImport } from './routes/learn'
+import { Route as GlossaryRouteImport } from './routes/glossary'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as DesktopRouteImport } from './routes/desktop'
@@ -81,6 +82,11 @@ const MovementIntelligenceRoute = MovementIntelligenceRouteImport.update({
 const LearnRoute = LearnRouteImport.update({
   id: '/learn',
   path: '/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GlossaryRoute = GlossaryRouteImport.update({
+  id: '/glossary',
+  path: '/glossary',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
+  '/glossary': typeof GlossaryRoute
   '/learn': typeof LearnRouteWithChildren
   '/movement-intelligence': typeof MovementIntelligenceRoute
   '/premium': typeof PremiumRouteWithChildren
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
+  '/glossary': typeof GlossaryRoute
   '/learn': typeof LearnRouteWithChildren
   '/movement-intelligence': typeof MovementIntelligenceRoute
   '/premium': typeof PremiumRouteWithChildren
@@ -289,6 +297,7 @@ export interface FileRoutesById {
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
+  '/glossary': typeof GlossaryRoute
   '/learn': typeof LearnRouteWithChildren
   '/movement-intelligence': typeof MovementIntelligenceRoute
   '/premium': typeof PremiumRouteWithChildren
@@ -326,6 +335,7 @@ export interface FileRouteTypes {
     | '/desktop'
     | '/disclaimer'
     | '/faq'
+    | '/glossary'
     | '/learn'
     | '/movement-intelligence'
     | '/premium'
@@ -360,6 +370,7 @@ export interface FileRouteTypes {
     | '/desktop'
     | '/disclaimer'
     | '/faq'
+    | '/glossary'
     | '/learn'
     | '/movement-intelligence'
     | '/premium'
@@ -394,6 +405,7 @@ export interface FileRouteTypes {
     | '/desktop'
     | '/disclaimer'
     | '/faq'
+    | '/glossary'
     | '/learn'
     | '/movement-intelligence'
     | '/premium'
@@ -430,6 +442,7 @@ export interface RootRouteChildren {
   DesktopRoute: typeof DesktopRoute
   DisclaimerRoute: typeof DisclaimerRoute
   FaqRoute: typeof FaqRoute
+  GlossaryRoute: typeof GlossaryRoute
   LearnRoute: typeof LearnRouteWithChildren
   MovementIntelligenceRoute: typeof MovementIntelligenceRoute
   PremiumRoute: typeof PremiumRouteWithChildren
@@ -499,6 +512,13 @@ declare module '@tanstack/react-router' {
       path: '/learn'
       fullPath: '/learn'
       preLoaderRoute: typeof LearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/glossary': {
+      id: '/glossary'
+      path: '/glossary'
+      fullPath: '/glossary'
+      preLoaderRoute: typeof GlossaryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -763,6 +783,7 @@ const rootRouteChildren: RootRouteChildren = {
   DesktopRoute: DesktopRoute,
   DisclaimerRoute: DisclaimerRoute,
   FaqRoute: FaqRoute,
+  GlossaryRoute: GlossaryRoute,
   LearnRoute: LearnRouteWithChildren,
   MovementIntelligenceRoute: MovementIntelligenceRoute,
   PremiumRoute: PremiumRouteWithChildren,
