@@ -88,6 +88,8 @@ export const getScanAccess = createServerFn({ method: "GET" })
     const credits = Number((profile as any)?.scan_credits ?? 0);
     const scansPurchased = Number((profile as any)?.scans_purchased ?? 0);
     const now = Date.now();
+    // Strict pay-per-scan: access is based on credits only. Legacy monthly
+    // subscribers no longer get unlimited scans — every scan consumes one credit.
     const hasActiveSubscription = !!(subs as any[])?.some((s) => {
       const future = !s.current_period_end || new Date(s.current_period_end).getTime() > now;
       if (["active", "trialing", "past_due"].includes(s.status) && future) return true;
@@ -98,7 +100,7 @@ export const getScanAccess = createServerFn({ method: "GET" })
       credits,
       scansPurchased,
       hasActiveSubscription,
-      canScan: credits > 0 || hasActiveSubscription,
+      canScan: credits > 0,
     };
   });
 

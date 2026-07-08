@@ -233,7 +233,8 @@ function Runner() {
   const rafRef = useRef<number>(0);
   const latestLandmarksRef = useRef<any[] | null>(null);
 
-  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "done" | "failed">("setup");
+  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "confirm" | "submitting" | "done" | "failed">("setup");
+  const [pendingResults, setPendingResults] = useState<TestResult[] | null>(null);
   const seq = useMemo(
     () => buildSequence(u?.questionnaire?.joints ?? []),
     [u?.questionnaire?.joints?.join("|")],
@@ -418,7 +419,15 @@ function Runner() {
       setPhase("failed");
       return;
     }
-    // Consume one scan credit (grandfathered subscribers are skipped server-side).
+    // Ask the user to confirm before we spend their paid scan credit.
+    setPendingResults(allResults);
+    setPhase("confirm");
+  }
+
+  async function submitScan() {
+    if (!u || !pendingResults) return;
+    setPhase("submitting");
+    // Consume one scan credit. Every scan costs exactly one credit.
     try {
       const res = await consumeScanCredit();
       if (!res.ok) {
@@ -430,7 +439,7 @@ function Runner() {
       console.error("consumeScanCredit failed", e);
     }
     const joints = (u.questionnaire?.joints ?? []).filter(j => j !== "none") as Joint[];
-    const session = computeSession(allResults, joints, u.age);
+    const session = computeSession(pendingResults, joints, u.age);
     // Stamp the goal at time of scan so the rescan engine can detect goal changes later.
     session.goalAtScan = u.goal;
     const wasReTest = u.sessions.length > 0;
@@ -448,6 +457,14 @@ function Runner() {
     }));
     setPhase("done");
     setTimeout(() => navigate({ to: "/app/progress" }), 1200);
+  }
+
+  function retryScan() {
+    setPendingResults(null);
+    setResults([]);
+    stepResultsRef.current = new Map();
+    setIdx(0);
+    setPhase("intro");
   }
 
   // Group-level "test N of M" — the user thinks of the squat + its two views
@@ -590,6 +607,31 @@ function Runner() {
               <CheckCircle2 className="mx-auto h-8 w-8" />
               <div className="mt-1 text-lg font-bold">Screen complete</div>
               <p className="text-sm opacity-85">Crunching your scores...</p>
+            </div>
+          )}
+          {(phase === "confirm" || phase === "submitting") && (
+            <div className="rounded-3xl bg-white/10 p-5 text-center backdrop-blur-xl">
+              <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-400" />
+              <div className="mt-2 text-lg font-bold">Ready to submit your scan?</div>
+              <p className="mt-2 text-sm opacity-90 leading-relaxed">
+                Submitting will use <strong>1 scan credit</strong> and lock in these results as your official Movement Screen. We'll build your personalized <strong>2-week training program</strong> from them.
+                <br /><br />
+                Once submitted this can't be undone — if you'd rather practice first, you can redo the scan without spending your credit.
+              </p>
+              <button
+                onClick={submitScan}
+                disabled={phase === "submitting"}
+                className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-bold text-white disabled:opacity-60"
+              >
+                {phase === "submitting" ? "Submitting…" : "Yes, submit my scan"}
+              </button>
+              <button
+                onClick={retryScan}
+                disabled={phase === "submitting"}
+                className="mt-2 h-11 w-full rounded-2xl bg-white/10 text-sm font-semibold disabled:opacity-60"
+              >
+                Redo the scan (no credit used)
+              </button>
             </div>
           )}
           {phase === "failed" && (
