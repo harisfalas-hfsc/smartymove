@@ -169,6 +169,14 @@ function Welcome() {
                 </h1>
               </section>
 
+              <div className="sm-panel-score-picture sm-border-score">
+                <div className="sm-score-card">
+                  <div>Movement Score</div>
+                  <strong>72<small>/100</small></strong>
+                  <p>Movement Age 41 · Chronological 47</p>
+                </div>
+              </div>
+
               <section className="sm-panel sm-panel-mobile sm-border-mobile">
                 <div className="sm-eyebrow">Best experience</div>
                 <h2><span>SMARTY</span> MOVE</h2>
@@ -184,14 +192,6 @@ function Welcome() {
                   Get started <ArrowRight className="h-4 w-4" />
                 </button>
               </section>
-
-              <div className="sm-panel-score-picture sm-border-score">
-                <div className="sm-score-card">
-                  <div>Movement Score</div>
-                  <strong>72<small>/100</small></strong>
-                  <p>Movement Age 41 · Chronological 47</p>
-                </div>
-              </div>
 
               <section className="sm-panel sm-panel-about sm-border-about">
                 <div className="sm-card-topline"><span /> Assess <IconBubble Icon={Activity} /></div>
@@ -763,6 +763,9 @@ function Welcome() {
             .sm-wellness-title{ font-size:42px; }
             .sm-primary-cta{ width:100%; margin-top:18px; min-height:46px; font-size:14px; }
             .sm-panel-score-picture{ min-height: 190px; }
+            .sm-panel-about,
+            .sm-panel-program,
+            .sm-panel-tools{ display: none; }
           }
           @media (min-width: 1024px){
             .sm-wellness-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
