@@ -26,6 +26,11 @@ function Progress() {
     ? Math.min(100, Math.round(latest.overall + Math.max(0, delta) * 1.2)) : null;
   const graduation = evaluateGraduation(u);
   const recommendation = recommendSmartyGym(u.goal, graduation.status);
+  const [selectedIdx, setSelectedIdx] = useState<number>(sessions.length ? sessions.length - 1 : 0);
+  const safeIdx = Math.min(selectedIdx, Math.max(0, sessions.length - 1));
+  const selected = sessions[safeIdx] ?? latest;
+  const isLatestSelected = safeIdx === sessions.length - 1;
+  const fmtDate = (iso: string) => new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
   return (
     <div className="pb-6">
