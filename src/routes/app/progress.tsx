@@ -193,7 +193,8 @@ function Progress() {
               {latest.tests.map((t, i) => {
                 const bilateral = t.left != null && t.right != null;
                 const flag = (t.asymmetry ?? 0) >= 10;
-                const scoreLabel = t.valid === false ? "—" : `${t.score}/3`;
+                const pained = t.score === 0;
+                const scoreLabel = t.valid === false ? (pained ? "0/3" : "—") : `${t.score}/3`;
                 const cleanPass = t.valid !== false && t.score === 3 && (!t.compensations || t.compensations.length === 0);
                 const cleanCopy: Record<string, string> = {
                   squat:    "Clean squat — good depth, good alignment.",
@@ -221,11 +222,14 @@ function Progress() {
                         )}
                       </div>
                       <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${
+                        pained ? "bg-destructive/20 text-destructive" :
                         t.valid === false ? "bg-muted text-muted-foreground" :
                         t.score === 3 ? "bg-success/20 text-success" :
                         t.score === 2 ? "bg-warning/20 text-warning" : "bg-destructive/20 text-destructive"
                       }`}>
-                        {t.valid === false ? "No data" : `${t.score === 3 ? "Pass" : t.score === 2 ? "Borderline" : "Fail"} · ${scoreLabel}`}
+                        {pained ? `Pain · ${scoreLabel}` :
+                          t.valid === false ? "No data" :
+                          `${t.score === 3 ? "Pass" : t.score === 2 ? "Borderline" : "Fail"} · ${scoreLabel}`}
                       </span>
                     </div>
                     {cleanPass && (
