@@ -1,16 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Camera, Loader2, X, ScanLine, Sparkles, Infinity as InfinityIcon, RefreshCw, ShoppingBag, Play, Calendar, TrendingUp, CheckCircle2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Camera, Loader2, ScanLine, Sparkles, Infinity as InfinityIcon, RefreshCw, ShoppingBag, Play, Calendar, TrendingUp, CheckCircle2 } from "lucide-react";
+import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
-import { clearLocalAccountData, useUser } from "@/lib/store";
+import { useBuyScan } from "@/components/BuyScanDialog";
+import { useUser } from "@/lib/store";
 import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -30,8 +28,7 @@ function Pricing() {
   const u = useUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [signInPromptOpen, setSignInPromptOpen] = useState(false);
+  const { openBuyScan, buyScanElement } = useBuyScan("/pricing?paid=1");
   const access = useQuery({
     queryKey: ["scan-access", u?.id ?? "anon"],
     queryFn: () => getScanAccess(),
@@ -68,21 +65,6 @@ function Pricing() {
   }, [u, navigate, queryClient]);
 
   const paidReturn = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("paid") === "1";
-
-  async function handleBuy() {
-    const { data } = await supabase.auth.getSession();
-    const authUser = data.session?.user;
-    if (!u || !authUser) {
-      clearLocalAccountData();
-      setSignInPromptOpen(true);
-      return;
-    }
-    if (!authUser.email_confirmed_at && !authUser.confirmed_at) {
-      setSignInPromptOpen(true);
-      return;
-    }
-    setCheckoutOpen(true);
-  }
 
   const perks = [
     { Icon: ScanLine, color: "text-blue-500", label: "Full Movement Screen — 5 core tests + add-ons" },
@@ -122,7 +104,7 @@ function Pricing() {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 No subscription. One-time payment for a full Movement Screen plus your personalized 2-week training program — yours to keep forever.
               </p>
-              <Button size="lg" onClick={handleBuy} className="w-full">
+              <Button size="lg" onClick={openBuyScan} className="w-full">
                 <Camera className="w-4 h-4 mr-2" /> Buy one scan · €{SCAN_PRICE_EUR.toFixed(2)}
               </Button>
               {u ? (
@@ -187,35 +169,7 @@ function Pricing() {
       </main>
       <SiteFooter />
 
-      {checkoutOpen && u && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center p-3 sm:items-center" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setCheckoutOpen(false)} />
-          <div className="relative w-full max-w-[560px] max-h-[92dvh] overflow-y-auto rounded-3xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b p-4">
-              <div className="font-bold">Buy a Movement Scan</div>
-              <button onClick={() => setCheckoutOpen(false)} aria-label="Close" className="grid h-9 w-9 place-items-center rounded-full bg-black/5"><X className="h-4 w-4" /></button>
-            </div>
-            <div className="p-4">
-              <StripeEmbeddedCheckout mode="scan" email={u.email} returnUrl={`${window.location.origin}/pricing?paid=1`} />
-            </div>
-          </div>
-        </div>
-      )}
-
-      <Dialog open={signInPromptOpen} onOpenChange={setSignInPromptOpen}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Sign in required</DialogTitle>
-            <DialogDescription>
-              You must sign in with a verified email to purchase a scan. It only takes a moment — we'll bring you right back here to complete your purchase.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-2">
-            <Button variant="outline" onClick={() => setSignInPromptOpen(false)}>Cancel</Button>
-            <Button onClick={() => { window.location.href = "/?auth=signin&next=%2Fpricing"; }}>Sign in</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {buyScanElement}
     </div>
   );
 }

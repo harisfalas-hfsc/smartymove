@@ -8,6 +8,7 @@ import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
 import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
 import { TestPreviewSheet } from "@/components/TestPreviewSheet";
 import { isAdminEmail } from "@/lib/admin";
+import { useBuyScan } from "@/components/BuyScanDialog";
 
 export const Route = createFileRoute("/app/screen/")({ component: ScreenIndex });
 
@@ -17,6 +18,7 @@ function ScreenIndex() {
   const isAdmin = !!u && isAdminEmail(u.email);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewFocus, setPreviewFocus] = useState<string | undefined>(undefined);
+  const { openBuyScan, buyScanElement } = useBuyScan("/pricing?paid=1");
   const access = useQuery({
     queryKey: ["scan-access", u?.id ?? "pending"],
     queryFn: () => getScanAccess(),
@@ -31,7 +33,7 @@ function ScreenIndex() {
   function startScreen(e: React.MouseEvent) {
     if (canScan) return;
     e.preventDefault();
-    navigate({ to: "/pricing" });
+    void openBuyScan();
   }
 
   const primaryCta = canScan ? (
@@ -44,13 +46,14 @@ function ScreenIndex() {
       <Play className="h-5 w-5" /> {last ? "Run re-scan" : "Start scan"}
     </Link>
   ) : (
-    <Link
-      to="/pricing"
+    <button
+      type="button"
+      onClick={() => void openBuyScan()}
       className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold text-white"
       style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
     >
       <Lock className="h-5 w-5" /> Buy a scan · €{SCAN_PRICE_EUR.toFixed(2)}
-    </Link>
+    </button>
   );
 
   return (
@@ -160,6 +163,7 @@ function ScreenIndex() {
       testIds={CORE_TESTS.map((t) => t.id)}
       focusTestId={previewFocus}
     />
+    {buyScanElement}
     </>
   );
 }
