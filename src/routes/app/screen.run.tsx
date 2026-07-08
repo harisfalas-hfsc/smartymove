@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
-import { angle, CORE_TESTS, CONDITIONAL_TESTS, CLEARING_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
+import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
 import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal } from "lucide-react";
@@ -231,7 +231,7 @@ function Runner() {
   const rafRef = useRef<number>(0);
   const latestLandmarksRef = useRef<any[] | null>(null);
 
-  const [phase, setPhase] = useState<"setup" | "prePain" | "intro" | "running" | "painCheck" | "confirm" | "submitting" | "done" | "failed">("setup");
+  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "confirm" | "submitting" | "done" | "failed">("setup");
   const [pendingResults, setPendingResults] = useState<TestResult[] | null>(null);
   const seq = useMemo(
     () => buildSequence(u?.questionnaire?.joints ?? []),
@@ -255,11 +255,6 @@ function Runner() {
   const [restartKey, setRestartKey] = useState(0);
   const pausedRef = useRef(false);
   const activeTestKeyRef = useRef<string | null>(null);
-  // Tracks the test that just finished and is awaiting a pain-clearing answer.
-  const [painCheckTestId, setPainCheckTestId] = useState<string | null>(null);
-  // Set of test groupIds we've already asked the pre-test pain question for
-  // (in the current run). Prevents re-asking when a test has multiple views.
-  const askedPainRef = useRef<Set<string>>(new Set());
   useEffect(() => { pausedRef.current = paused || showInstructions; }, [paused, showInstructions]);
 
   // Detection-latency tracking so we can downgrade the model if the device
@@ -390,14 +385,6 @@ function Runner() {
         setResults(r => [...r, merged]);
       }
       setTimeout(() => {
-        // Clearing-test gate: after the last view of a clearing test, pause
-        // the flow and ask if the user felt pain. Their answer either keeps
-        // the merged result or forces it to score 0 (invalid).
-        if (isLastView && CLEARING_TESTS.has(test.testId)) {
-          setPainCheckTestId(test.testId);
-          setPhase("painCheck");
-          return;
-        }
         if (idx + 1 >= seq.length) {
           const base = mergedForFinalize ? [...results, mergedForFinalize] : results;
           finalize(base);
@@ -435,68 +422,9 @@ function Runner() {
     setPhase("confirm");
   }
 
-  /** Resolve a clearing-test pain check. If painful, rewrite the merged
-   *  test result to a hard 0 (invalid) so it drops out of scoring, then
-   *  advance to the next test or finalize. */
-  function resolvePainCheck(painful: boolean) {
-    const testId = painCheckTestId;
-    if (!testId) return;
-    let updated = results;
-    if (painful) {
-      updated = results.map(r =>
-        r.id === testId
-          ? {
-              ...r,
-              score: 0,
-              valid: false,
-              compensations: [...(r.compensations ?? []), "Pain reported during this movement — scored 0. Please consult a doctor or physiotherapist before continuing with this test."],
-              notes: "Cleared to 0 — pain reported during the pattern.",
-            }
-          : r,
-      );
-      setResults(updated);
-    }
-    setPainCheckTestId(null);
-    if (idx + 1 >= seq.length) {
-      finalize(updated);
-    } else {
-      setIdx(i => i + 1);
-      setPhase("intro");
-    }
-  }
-
-  /** Pre-test pain gate: ask before EVERY test whether the user currently
-   *  has pain in the target area. Yes → push a score-0 invalid result and
-   *  advance to the next test (or finalize). No → proceed to running. */
-  function resolvePrePain(painful: boolean) {
-    const step = seq[idx];
-    if (!step) return;
-    askedPainRef.current.add(step.groupId);
-    if (!painful) {
-      setPhase("running");
-      return;
-    }
-    const painResult: TestResult = {
-      id: step.testId,
-      name: step.name,
-      score: 0,
-      valid: false,
-      cameraView: step.cameraView,
-      compensations: ["Pain reported before this movement — scored 0. Please consult a doctor or physiotherapist before continuing with this test."],
-      notes: "Skipped — pain reported before the movement.",
-    };
-    const updated = [...results, painResult];
-    setResults(updated);
-    // Skip all remaining views of the same test.
-    let nextIdx = idx + 1;
-    while (nextIdx < seq.length && seq[nextIdx].groupId === step.groupId) nextIdx++;
-    if (nextIdx >= seq.length) {
-      finalize(updated);
-    } else {
-      setIdx(nextIdx);
-      setPhase("intro");
-    }
-  }
+  // Pain gating happens once in the onboarding questionnaire (see
+  // `painAreas`). The in-scan pain gate was removed so a paid scan always
+  // produces a full 8-pattern result — no wasted tokens.
 
   async function submitScan() {
     if (!u || !pendingResults) return;
@@ -673,14 +601,7 @@ function Runner() {
                   <button onClick={() => navigate({ to: "/app/screen" })} className="h-12 flex-1 rounded-2xl bg-secondary text-sm font-semibold text-foreground">Exit</button>
                   <button
                     onClick={() => {
-                      // Ask the pre-test pain question once per test (first
-                      // view only). On repositioning between views, skip
-                      // straight to running.
-                      if (!isReposition && !askedPainRef.current.has(cur.groupId)) {
-                        setPhase("prePain");
-                      } else {
-                        setPhase("running");
-                      }
+                      setPhase("running");
                     }}
                     disabled={!poseReady}
                     className="h-12 flex-[2] rounded-2xl brand-gradient text-base font-semibold text-primary-foreground disabled:opacity-50"
@@ -694,58 +615,6 @@ function Runner() {
               <CheckCircle2 className="mx-auto h-8 w-8" />
               <div className="mt-1 text-lg font-bold">Screen complete</div>
               <p className="text-sm opacity-85">Crunching your scores...</p>
-            </div>
-          )}
-          {phase === "painCheck" && painCheckTestId && (
-            <div className="rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
-              <div className="flex items-center gap-2 text-warning">
-                <AlertCircle className="h-5 w-5" />
-                <div className="text-[11px] font-bold uppercase tracking-widest">Pain check</div>
-              </div>
-              <div className="mt-1 text-xl font-extrabold">Did you feel pain during that pattern?</div>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                This is one of the clearing patterns. If you felt sharp pain anywhere during the movement, we clear the pattern to <strong>0</strong> so your program treats it as a red flag instead of a mobility issue.
-              </p>
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={() => resolvePainCheck(false)}
-                  className="h-12 flex-1 rounded-2xl brand-gradient text-base font-bold text-primary-foreground"
-                >
-                  No pain — continue
-                </button>
-                <button
-                  onClick={() => resolvePainCheck(true)}
-                  className="h-12 flex-1 rounded-2xl bg-destructive/90 text-base font-bold text-white"
-                >
-                  Yes, there was pain
-                </button>
-              </div>
-            </div>
-          )}
-          {phase === "prePain" && cur && (
-            <div className="rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
-              <div className="flex items-center gap-2 text-warning">
-                <AlertCircle className="h-5 w-5" />
-                <div className="text-[11px] font-bold uppercase tracking-widest">Before we start</div>
-              </div>
-              <div className="mt-1 text-xl font-extrabold">Do you currently have any pain in this area?</div>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                We're about to test <strong>{cur.name}</strong>. If you have pain here <em>right now</em>, we'll skip this test and record it as a 0 — so your program treats it as something to see a doctor or physio about, not something to train through.
-              </p>
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={() => resolvePrePain(false)}
-                  className="h-12 flex-1 rounded-2xl brand-gradient text-base font-bold text-primary-foreground"
-                >
-                  No pain — start test
-                </button>
-                <button
-                  onClick={() => resolvePrePain(true)}
-                  className="h-12 flex-1 rounded-2xl bg-destructive/90 text-base font-bold text-white"
-                >
-                  Yes, skip this test
-                </button>
-              </div>
             </div>
           )}
           {(phase === "confirm" || phase === "submitting") && (
