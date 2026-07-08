@@ -16,6 +16,7 @@ import { Route as ResearchRouteImport } from './routes/research'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as MovementPatternsRouteImport } from './routes/movement-patterns'
 import { Route as MovementIntelligenceRouteImport } from './routes/movement-intelligence'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as GlossaryRouteImport } from './routes/glossary'
@@ -78,6 +79,11 @@ const PricingRoute = PricingRouteImport.update({
 const PremiumRoute = PremiumRouteImport.update({
   id: '/premium',
   path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MovementPatternsRoute = MovementPatternsRouteImport.update({
+  id: '/movement-patterns',
+  path: '/movement-patterns',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MovementIntelligenceRoute = MovementIntelligenceRouteImport.update({
@@ -235,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/glossary': typeof GlossaryRoute
   '/learn': typeof LearnRouteWithChildren
   '/movement-intelligence': typeof MovementIntelligenceRoute
+  '/movement-patterns': typeof MovementPatternsRoute
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -271,6 +278,7 @@ export interface FileRoutesByTo {
   '/glossary': typeof GlossaryRoute
   '/learn': typeof LearnRouteWithChildren
   '/movement-intelligence': typeof MovementIntelligenceRoute
+  '/movement-patterns': typeof MovementPatternsRoute
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -308,6 +316,7 @@ export interface FileRoutesById {
   '/glossary': typeof GlossaryRoute
   '/learn': typeof LearnRouteWithChildren
   '/movement-intelligence': typeof MovementIntelligenceRoute
+  '/movement-patterns': typeof MovementPatternsRoute
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -347,6 +356,7 @@ export interface FileRouteTypes {
     | '/glossary'
     | '/learn'
     | '/movement-intelligence'
+    | '/movement-patterns'
     | '/premium'
     | '/pricing'
     | '/privacy'
@@ -383,6 +393,7 @@ export interface FileRouteTypes {
     | '/glossary'
     | '/learn'
     | '/movement-intelligence'
+    | '/movement-patterns'
     | '/premium'
     | '/pricing'
     | '/privacy'
@@ -419,6 +430,7 @@ export interface FileRouteTypes {
     | '/glossary'
     | '/learn'
     | '/movement-intelligence'
+    | '/movement-patterns'
     | '/premium'
     | '/pricing'
     | '/privacy'
@@ -457,6 +469,7 @@ export interface RootRouteChildren {
   GlossaryRoute: typeof GlossaryRoute
   LearnRoute: typeof LearnRouteWithChildren
   MovementIntelligenceRoute: typeof MovementIntelligenceRoute
+  MovementPatternsRoute: typeof MovementPatternsRoute
   PremiumRoute: typeof PremiumRouteWithChildren
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -518,6 +531,13 @@ declare module '@tanstack/react-router' {
       path: '/premium'
       fullPath: '/premium'
       preLoaderRoute: typeof PremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movement-patterns': {
+      id: '/movement-patterns'
+      path: '/movement-patterns'
+      fullPath: '/movement-patterns'
+      preLoaderRoute: typeof MovementPatternsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/movement-intelligence': {
@@ -806,6 +826,7 @@ const rootRouteChildren: RootRouteChildren = {
   GlossaryRoute: GlossaryRoute,
   LearnRoute: LearnRouteWithChildren,
   MovementIntelligenceRoute: MovementIntelligenceRoute,
+  MovementPatternsRoute: MovementPatternsRoute,
   PremiumRoute: PremiumRouteWithChildren,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
