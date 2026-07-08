@@ -2,22 +2,22 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
 import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
-import squatVid from "@/assets/fms/squat.mp4.asset.json";
-import balanceVid from "@/assets/fms/balance.mp4.asset.json";
-import lungeVid from "@/assets/fms/lunge.mp4.asset.json";
-import overheadVid from "@/assets/fms/overhead.mp4.asset.json";
-import hipAbdVid from "@/assets/fms/hip_abd.mp4.asset.json";
-import bridgeHoldVid from "@/assets/fms/bridge_hold.mp4.asset.json";
-import rotaryVid from "@/assets/fms/rotary_stability.mp4.asset.json";
+import squatImg from "@/assets/fms/squat.png.asset.json";
+import balanceImg from "@/assets/fms/balance.png.asset.json";
+import lungeImg from "@/assets/fms/lunge.png.asset.json";
+import overheadImg from "@/assets/fms/overhead.png.asset.json";
+import hipAbdImg from "@/assets/fms/hip_abd.png.asset.json";
+import bridgeHoldImg from "@/assets/fms/bridge_hold.png.asset.json";
+import rotaryImg from "@/assets/fms/rotary_stability.png.asset.json";
 
-const DEMO_VIDEOS: Record<string, string> = {
-  squat: squatVid.url,
-  balance: balanceVid.url,
-  lunge: lungeVid.url,
-  overhead: overheadVid.url,
-  hip_abd: hipAbdVid.url,
-  bridge_hold: bridgeHoldVid.url,
-  rotary_stability: rotaryVid.url,
+const DEMO_IMAGES: Record<string, string> = {
+  squat: squatImg.url,
+  balance: balanceImg.url,
+  lunge: lungeImg.url,
+  overhead: overheadImg.url,
+  hip_abd: hipAbdImg.url,
+  bridge_hold: bridgeHoldImg.url,
+  rotary_stability: rotaryImg.url,
 };
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
@@ -592,20 +592,15 @@ function Runner() {
                   </div>
                 ) : g && (
                   <>
-                    {DEMO_VIDEOS[cur.testId] && (
-                      <div className="mt-4 overflow-hidden rounded-2xl bg-black">
-                        <video
-                          key={cur.testId}
-                          src={DEMO_VIDEOS[cur.testId]}
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                          controls
-                          className="h-auto w-full"
+                    {DEMO_IMAGES[cur.testId] && (
+                      <div className="mt-4 overflow-hidden rounded-2xl bg-white ring-1 ring-border">
+                        <img
+                          src={DEMO_IMAGES[cur.testId]}
+                          alt={`${cur.name} demonstration`}
+                          className="mx-auto h-56 w-auto object-contain"
                         />
-                        <div className="bg-black/80 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/80">
-                          Demonstration · {cur.name}
+                        <div className="bg-secondary px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                          Reference position · {cur.name}
                         </div>
                       </div>
                     )}
