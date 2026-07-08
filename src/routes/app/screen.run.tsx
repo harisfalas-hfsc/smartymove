@@ -1116,9 +1116,11 @@ function Runner() {
             <div className="flex items-center gap-3">
               <div className="min-w-0 flex-1">
                 <div className="text-[10px] font-semibold uppercase tracking-widest text-white/60">
-                  {paused || showInstructions ? "Paused" : "Recording"} · Test {groupIndex + 1}/{groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""}
+                  {paused || showInstructions ? "Paused" : "Recording"} {cur.stepIndex}/{cur.totalSteps} · Test {groupIndex + 1}/{groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""}
                 </div>
-                <div className="truncate text-base font-extrabold text-white">{cur.name} · press Done when finished</div>
+                <div className="truncate text-base font-extrabold text-white">
+                  {cur.name}{cur.sideLabel ? ` · ${cur.sideLabel}` : ""} · press Done when finished
+                </div>
               </div>
               <div className="w-14 text-center text-3xl font-extrabold tabular-nums brand-text">{countdown}s</div>
               <button
@@ -1165,8 +1167,8 @@ function Runner() {
             <div className="mx-auto max-h-[80vh] w-full max-w-[720px] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Test {groupIndex + 1} of {groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""} · Paused</div>
-                  <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
+                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Recording {cur.stepIndex} of {cur.totalSteps} · Test {groupIndex + 1} of {groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""} · Paused</div>
+                  <div className="mt-0.5 text-xl font-extrabold">{cur.name}{cur.sideLabel ? ` · ${cur.sideLabel}` : ""}</div>
                 </div>
                 <button onClick={() => setShowInstructions(false)} aria-label="Close" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground">
                   <X className="h-4 w-4" />
