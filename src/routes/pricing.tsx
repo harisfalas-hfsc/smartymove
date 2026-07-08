@@ -190,6 +190,21 @@ function Pricing() {
           </div>
         </div>
       )}
+
+      <Dialog open={signInPromptOpen} onOpenChange={setSignInPromptOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Sign in required</DialogTitle>
+            <DialogDescription>
+              You must sign in to purchase a scan. It only takes a moment — we'll bring you right back here to complete your purchase.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" onClick={() => setSignInPromptOpen(false)}>Cancel</Button>
+            <Button onClick={() => { window.location.href = "/?auth=signin"; }}>Sign in</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
