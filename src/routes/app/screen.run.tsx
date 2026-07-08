@@ -1664,17 +1664,73 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       };
     }
     case "rotary_stability": {
-      // Placeholder v1 scoring — user will provide final scoring rules.
-      // We accept the pattern as a clean 3 when the camera saw enough valid
-      // frames with real motion (movement gate already ran above). No
-      // angle-based grading is asserted here on purpose.
-      const motion = pointMotion(samples, TEST_LANDMARKS.rotary_stability ?? []);
-      const score: 1 | 2 | 3 = motion >= 0.08 ? 3 : motion >= 0.04 ? 2 : 1;
+      // Real v2 scoring for Rotary Stability. We can't distinguish "same-side"
+      // vs "diagonal" reps from a single side-view camera reliably in 10 s,
+      // so we grade the movement on FMS-adjacent, camera-observable signals:
+      //   • balance loss    → torso midpoint wobble across the window
+      //   • bilateral cover → both wrists reached forward past the shoulders
+      //   • touch attempt   → min wrist↔knee distance approached the knee
+      // Score 0 is never assigned here — the clearing-test pain gate on the
+      // intro card converts a pain-reported clearing test to score 0 before
+      // scoring runs.
+      const r = REFERENCE_RANGES.rotary_stability;
+      // Torso midpoint = mean of shoulders + hips. Wobble = std across window.
+      const midXs: number[] = [];
+      const midYs: number[] = [];
+      let reachedL = 0, reachedR = 0;
+      let minWristKnee = Infinity;
+      for (const s of samples) {
+        const sx = (s[PL.LEFT_SHOULDER].x + s[PL.RIGHT_SHOULDER].x) / 2;
+        const hx = (s[PL.LEFT_HIP].x + s[PL.RIGHT_HIP].x) / 2;
+        const sy = (s[PL.LEFT_SHOULDER].y + s[PL.RIGHT_SHOULDER].y) / 2;
+        const hy = (s[PL.LEFT_HIP].y + s[PL.RIGHT_HIP].y) / 2;
+        midXs.push((sx + hx) / 2);
+        midYs.push((sy + hy) / 2);
+        // A wrist counts as "reached" when its horizontal distance from
+        // the torso midline exceeds `reachThresh`.
+        const midline = (sx + hx) / 2;
+        if (Math.abs(s[PL.LEFT_WRIST].x - midline) > r.reachThresh) reachedL++;
+        if (Math.abs(s[PL.RIGHT_WRIST].x - midline) > r.reachThresh) reachedR++;
+        // Elbow-to-knee touch proxy — wrist↔knee across all combinations.
+        for (const w of [PL.LEFT_WRIST, PL.RIGHT_WRIST]) {
+          for (const k of [PL.LEFT_KNEE, PL.RIGHT_KNEE]) {
+            const dx = s[w].x - s[k].x;
+            const dy = s[w].y - s[k].y;
+            const d = Math.hypot(dx, dy);
+            if (d < minWristKnee) minWristKnee = d;
+          }
+        }
+      }
+      const stdOf = (a: number[]) => {
+        if (!a.length) return 0;
+        const m = a.reduce((x, y) => x + y, 0) / a.length;
+        return Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / a.length);
+      };
+      const wobble = Math.max(stdOf(midXs), stdOf(midYs));
+      const frac = samples.length || 1;
+      const bilateralReach = reachedL / frac > 0.15 && reachedR / frac > 0.15;
+      const touchOK = Number.isFinite(minWristKnee) && minWristKnee < r.touchThresh;
+      const comps: string[] = [];
+      let score: 1 | 2 | 3 = 1;
+      if (wobble >= r.wobbleFail) {
+        score = 1;
+        comps.push("Lost balance during the pattern — torso wobble was too large to score above a 1");
+      } else if (bilateralReach && touchOK && wobble < r.wobbleBorderline) {
+        score = 3;
+      } else if (bilateralReach && wobble < r.wobbleFail) {
+        score = 2;
+        if (!touchOK) comps.push("Elbow and knee didn't clearly meet over the board — score capped at 2");
+        if (wobble >= r.wobbleBorderline) comps.push("Visible torso wobble during the extension — score capped at 2");
+      } else {
+        score = 1;
+        if (!bilateralReach) comps.push("Only one side of the pattern was completed — both sides required for a full score");
+      }
       return {
         id: testId, name, score,
-        metric: Math.round(motion * 1000) / 10,
+        metric: Math.round(wobble * 1000) / 10,
+        compensations: comps.length ? comps : undefined,
         frameValidRatio: Math.round(validRatio * 100) / 100,
-        notes: `Rotary stability captured (motion index ${Math.round(motion * 1000) / 10}). Final scoring rules pending.`,
+        notes: `Torso wobble ${(wobble * 100).toFixed(1)} · reach L ${Math.round((reachedL / frac) * 100)}% / R ${Math.round((reachedR / frac) * 100)}% · min wrist↔knee ${Number.isFinite(minWristKnee) ? (minWristKnee * 100).toFixed(1) : "n/a"}${comps.length ? " · " + comps.join("; ") : ""}`,
       };
     }
     // wrist_rom intentionally omitted — surfaced as "Coming soon" by being
