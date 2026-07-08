@@ -336,7 +336,7 @@ function buildSequence(_joints: Joint[]): Step[] {
  * program priority. Side-to-side gap > 1 point sets `asymmetryFlag`.
  */
 function mergeStepResults(
-  stepResults: Array<TestResult & { viewIndex: number; side: "both" | "right" | "left" }>,
+  stepResults: Array<TestResult & { viewIndex: number; sideKey: "both" | "right" | "left" }>,
 ): TestResult {
   const sorted = [...stepResults].sort((a, b) => a.viewIndex - b.viewIndex);
   const primary = sorted[0];
@@ -350,9 +350,9 @@ function mergeStepResults(
     return { score, valid: validArr.length > 0, compensations };
   };
 
-  const right = collapseSide(sorted.filter(r => r.side === "right"));
-  const left  = collapseSide(sorted.filter(r => r.side === "left"));
-  const both  = collapseSide(sorted.filter(r => r.side === "both"));
+  const right = collapseSide(sorted.filter(r => r.sideKey === "right"));
+  const left  = collapseSide(sorted.filter(r => r.sideKey === "left"));
+  const both  = collapseSide(sorted.filter(r => r.sideKey === "both"));
 
   let finalScore: 0 | 1 | 2 | 3;
   let finalValid: boolean;
@@ -382,7 +382,7 @@ function mergeStepResults(
 
   const notes = sorted
     .map(r => {
-      const sideTag = r.side === "right" ? "R " : r.side === "left" ? "L " : "";
+      const sideTag = r.sideKey === "right" ? "R " : r.sideKey === "left" ? "L " : "";
       const viewTag = r.cameraView === "side" ? "Side" : "Front";
       return `${sideTag}${viewTag}: ${r.notes ?? ""}`;
     })
@@ -470,7 +470,7 @@ function Runner() {
   const finishHandlerRef = useRef<((skipped?: boolean) => void) | null>(null);
   // Per-view step results buffered per test groupId until all its views
   // are captured, then merged into one TestResult and pushed into `results`.
-  const stepResultsRef = useRef<Map<string, Array<TestResult & { viewIndex: number }>>>(new Map());
+  const stepResultsRef = useRef<Map<string, Array<TestResult & { viewIndex: number; sideKey: "both" | "right" | "left" }>>>(new Map());
   const [paused, setPaused] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [restartKey, setRestartKey] = useState(0);
@@ -596,7 +596,7 @@ function Runner() {
       // Buffer per-view results; on the last view of the group, merge into
       // one TestResult and push to the top-level results.
       const bucket = stepResultsRef.current.get(test.groupId) ?? [];
-      bucket.push({ ...scored, viewIndex: test.viewIndex });
+      bucket.push({ ...scored, viewIndex: test.viewIndex, sideKey: test.side });
       stepResultsRef.current.set(test.groupId, bucket);
       const isLastView = test.viewIndex + 1 >= test.totalViews;
       let mergedForFinalize: TestResult | null = null;
