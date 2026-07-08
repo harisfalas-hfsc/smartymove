@@ -133,6 +133,18 @@ export interface User {
     changed: boolean;
     note?: string;
   };
+  /**
+   * One-time pre-scan setup. Captures the user's tibial height (floor to the
+   * bony bump just below the kneecap) and confirms the physical props are in
+   * place (tape marks for the inline lunge, hurdle-height mark, heel-lift
+   * object). Persisted once — never asked again unless the user resets their
+   * profile. `tibialHeightCm` drives inline-lunge foot spacing and the hurdle
+   * step target height.
+   */
+  scanSetup?: {
+    tibialHeightCm: number;
+    completedAt: string;
+  };
 }
 
 const KEY = "smartymove.user";
@@ -238,6 +250,7 @@ function makeUser(id: string, name: string, email: string, age: number, existing
     phaseOverride: existing?.phaseOverride,
     parq: existing?.parq,
     postSessionFeedback: existing?.postSessionFeedback,
+    scanSetup: existing?.scanSetup,
   };
 }
 

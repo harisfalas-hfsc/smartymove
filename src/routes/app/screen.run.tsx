@@ -268,6 +268,16 @@ function Runner() {
   const rafRef = useRef<number>(0);
   const latestLandmarksRef = useRef<any[] | null>(null);
 
+  // Gate: the one-time pre-scan setup (tibial height + tape/hurdle/heel-lift
+  // confirmations) is mandatory before the first scan and cannot be skipped.
+  // Once completed we never ask again unless the user resets their profile.
+  useEffect(() => {
+    if (!u) return;
+    if (!u.scanSetup?.tibialHeightCm) {
+      navigate({ to: "/app/screen/setup", replace: true, search: { next: "/app/screen/run" } });
+    }
+  }, [u?.scanSetup?.tibialHeightCm]);
+
   const [phase, setPhase] = useState<"setup" | "intro" | "running" | "confirm" | "submitting" | "done" | "failed">("setup");
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewedPrompt, setReviewedPrompt] = useState(false);
