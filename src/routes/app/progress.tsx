@@ -138,18 +138,21 @@ function Progress() {
             </div>
           </div>
         )}
-        {latest && (
+        {selected && (
           <div className="rounded-3xl bg-card p-5 shadow-card">
-            <h3 className="mb-3 text-base font-bold">Sub-scores</h3>
+            <div className="mb-3 flex items-baseline justify-between gap-2">
+              <h3 className="text-base font-bold">Sub-scores</h3>
+              <span className="text-[11px] text-muted-foreground">Scan #{safeIdx + 1} · {fmtDate(selected.date)}</span>
+            </div>
             <div className="space-y-3">
-              <SubScoreBar label="Mobility" value={latest.sub.mobility} hint="Hip hinge, overhead reach, lunge, ankle" />
-              <SubScoreBar label="Stability" value={latest.sub.stability} hint="Single-leg balance, lunge, hip abduction" />
-              <SubScoreBar label="Balance" value={latest.sub.balance} hint="Single-leg balance (left + right)" />
-              <SubScoreBar label="Movement Quality" value={latest.sub.quality} hint="Squat, hip hinge & overhead — compensations included" />
+              <SubScoreBar label="Mobility" value={selected.sub.mobility} hint="Hip hinge, overhead reach, lunge, ankle" />
+              <SubScoreBar label="Stability" value={selected.sub.stability} hint="Single-leg balance, lunge, hip abduction" />
+              <SubScoreBar label="Balance" value={selected.sub.balance} hint="Single-leg balance (left + right)" />
+              <SubScoreBar label="Movement Quality" value={selected.sub.quality} hint="Squat, hip hinge & overhead — compensations included" />
             </div>
           </div>
         )}
-        {decision && decision.focuses.length > 0 && (
+        {isLatestSelected && decision && decision.focuses.length > 0 && (
           <div className="rounded-3xl bg-card p-5 shadow-card">
             <div className="mb-2 flex items-center gap-2">
               <Target className="h-4 w-4 text-primary" />
@@ -185,7 +188,7 @@ function Progress() {
             )}
           </div>
         )}
-        {decision && decision.allClean && (
+        {isLatestSelected && decision && decision.allClean && (
           <div className="rounded-3xl border border-success/40 bg-success/10 p-5">
             <div className="mb-1 flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-success" />
@@ -196,7 +199,7 @@ function Progress() {
             </p>
           </div>
         )}
-        {decision && decision.cleanPasses.length > 0 && !decision.allClean && (
+        {isLatestSelected && decision && decision.cleanPasses.length > 0 && !decision.allClean && (
           <div className="rounded-3xl border border-success/40 bg-success/5 p-5">
             <div className="mb-2 flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-success" />
@@ -211,7 +214,7 @@ function Progress() {
             </ul>
           </div>
         )}
-        {decision && decision.findings.length > 0 && (
+        {isLatestSelected && decision && decision.findings.length > 0 && (
           <div className="rounded-3xl bg-card p-5 shadow-card">
             <div className="mb-2 flex items-center gap-2">
               <Info className="h-4 w-4 text-primary" />
@@ -239,11 +242,14 @@ function Progress() {
             </ul>
           </div>
         )}
-        {latest && latest.tests.length > 0 && (
+        {selected && selected.tests.length > 0 && (
           <div className="rounded-3xl bg-card p-5 shadow-card">
-            <h3 className="mb-3 text-base font-bold">Per-test breakdown</h3>
+            <div className="mb-3 flex items-baseline justify-between gap-2">
+              <h3 className="text-base font-bold">Per-test breakdown</h3>
+              <span className="text-[11px] text-muted-foreground">Scan #{safeIdx + 1} · {fmtDate(selected.date)}</span>
+            </div>
             <ul className="space-y-2">
-              {latest.tests.map((t, i) => {
+              {selected.tests.map((t, i) => {
                 const bilateral = t.left != null && t.right != null;
                 const flag = (t.asymmetry ?? 0) >= 10;
                 const pained = t.score === 0;
