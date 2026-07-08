@@ -46,13 +46,9 @@ import { SubScoreBar } from "@/components/SubScoreBar";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
-import { cancelPremiumSubscription, createBillingPortalSession } from "@/lib/payments.functions";
-import { getStripeEnvironment } from "@/lib/stripe";
 import { clearLocalAccountData, signOutUser, updateUser, type Goal } from "@/lib/store";
 import { useUserPremium } from "@/lib/useUserPremium";
 
-type PortalResult = { url: string } | { error: string };
-type CancelResult = { ok: true; currentPeriodEnd: string | null } | { error: string };
 type ExportResult = { data: unknown } | { error: string };
 type DeleteResult = { ok: true; canceledSubscriptions: number } | { error: string };
 
@@ -92,9 +88,7 @@ function DesktopProfileInner() {
   const [goal, setGoal] = useState<Goal | undefined>(u?.goal);
   const [saved, setSaved] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState<"portal" | "cancel" | "export" | "delete" | null>(null);
-  const openPortal = useServerFn(createBillingPortalSession);
-  const cancelSubscription = useServerFn(cancelPremiumSubscription);
+  const [loading, setLoading] = useState<"export" | "delete" | null>(null);
   const exportData = useServerFn(exportAccountData);
   const deleteAccount = useServerFn(deleteAccountAndData);
 
@@ -115,46 +109,6 @@ function DesktopProfileInner() {
   async function requireSession() {
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw new Error("Please sign in again before managing billing or account data.");
-  }
-
-  async function manageSubscription() {
-    setLoading("portal");
-    setMessage(null);
-    try {
-      await requireSession();
-      const result = (await openPortal({
-        data: { environment: getStripeEnvironment(), returnUrl: window.location.href },
-      })) as PortalResult;
-      if ("error" in result) throw new Error(result.error);
-      const portalWindow = window.open(result.url, "_blank", "noopener,noreferrer");
-      if (portalWindow) portalWindow.location.href = result.url;
-      else window.location.assign(result.url);
-      setMessage("Billing portal opened in a new tab. If nothing opened, allow pop-ups for this site.");
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Could not open billing portal");
-    } finally {
-      setLoading(null);
-    }
-  }
-
-  async function cancelPlan() {
-    setLoading("cancel");
-    setMessage(null);
-    try {
-      await requireSession();
-      const result = (await cancelSubscription({
-        data: { environment: getStripeEnvironment() },
-      })) as CancelResult;
-      if ("error" in result) throw new Error(result.error);
-      const date = result.currentPeriodEnd
-        ? new Date(result.currentPeriodEnd).toLocaleDateString()
-        : "the end of the paid period";
-      setMessage(`Cancellation scheduled. Premium stays active until ${date}.`);
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Could not cancel subscription");
-    } finally {
-      setLoading(null);
-    }
   }
 
   async function downloadAccountData() {
@@ -316,74 +270,11 @@ function DesktopProfileInner() {
             </div>
           </div>
 
-          <div className="rounded-3xl bg-card p-6 shadow-card">
-            <h2 className="text-lg font-bold">Subscription</h2>
-            <div className="mt-3 flex items-center justify-between gap-4 rounded-2xl brand-gradient-soft p-4">
-              <div>
-                <div className="font-bold">{u.premium ? "Premium" : "Free"}</div>
-                <div className="text-xs text-muted-foreground">
-                  {u.premium
-                    ? "Manage billing, invoices, payment card, and cancellation"
-                    : "Upgrade for daily routines, re-tests, joint tests, Movement Age, projections"}
-                </div>
-              </div>
-              {u.premium ? (
-                <div className="flex flex-wrap justify-end gap-2">
-                  <Button
-                    onClick={manageSubscription}
-                    disabled={loading === "portal"}
-                    className="rounded-2xl"
-                  >
-                    {loading === "portal" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />} Manage billing
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        disabled={loading === "cancel"}
-                        variant="destructive"
-                        className="rounded-2xl"
-                      >
-                        {loading === "cancel" && <Loader2 className="h-4 w-4 animate-spin" />}{" "}
-                        Cancel
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="rounded-3xl">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Cancel Premium?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Your subscription will stop renewing. You keep Premium until the end of
-                          the paid period.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Keep Premium</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={cancelPlan}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          Cancel plan
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              ) : (
-                <Button
-                  onClick={() => {
-                    window.location.href = "/pricing";
-                  }}
-                  className="rounded-2xl"
-                >
-                  Upgrade
-                </Button>
-              )}
+          {message && (
+            <div className="rounded-2xl bg-secondary p-3 text-sm font-semibold text-foreground">
+              {message}
             </div>
-            {message && (
-              <div className="mt-3 rounded-2xl bg-secondary p-3 text-sm font-semibold text-foreground">
-                {message}
-              </div>
-            )}
-          </div>
+          )}
 
           <div className="rounded-3xl bg-card p-6 shadow-card">
             <h2 className="text-lg font-bold">Account data</h2>

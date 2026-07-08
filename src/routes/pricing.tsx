@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Camera, Loader2, X, Crown, ScanLine, Sparkles, Infinity as InfinityIcon, RefreshCw, ShoppingBag, Play, Calendar, TrendingUp, CheckCircle2 } from "lucide-react";
+import { Camera, Loader2, X, ScanLine, Sparkles, Infinity as InfinityIcon, RefreshCw, ShoppingBag, Play, Calendar, TrendingUp, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -7,7 +7,6 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { useUser } from "@/lib/store";
 import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
-import { createBillingPortalSession } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,14 +30,12 @@ function Pricing() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [portalLoading, setPortalLoading] = useState(false);
   const access = useQuery({
     queryKey: ["scan-access", u?.id ?? "anon"],
     queryFn: () => getScanAccess(),
     enabled: !!u,
     staleTime: 30_000,
   });
-  const grandfathered = !!access.data?.hasActiveSubscription;
   const credits = access.data?.credits ?? 0;
 
   useEffect(() => {
@@ -72,22 +69,6 @@ function Pricing() {
   function handleBuy() {
     if (!u) { window.location.href = "/"; return; }
     setCheckoutOpen(true);
-  }
-  async function handleManage() {
-    if (!u) return;
-    setPortalLoading(true);
-    const w = window.open("about:blank", "_blank");
-    try {
-      const result = await createBillingPortalSession({
-        data: { environment: getStripeEnvironment(), returnUrl: `${window.location.origin}/pricing` },
-      });
-      if ("error" in result) throw new Error(result.error);
-      if (w) w.location.href = result.url;
-      else window.location.assign(result.url);
-    } catch (e) {
-      w?.close();
-      alert(e instanceof Error ? e.message : "Could not open billing portal");
-    } finally { setPortalLoading(false); }
   }
 
   const perks = [
@@ -135,20 +116,6 @@ function Pricing() {
                 <p className="text-xs text-muted-foreground">
                   You have <strong className="text-foreground">{credits}</strong> scan{credits === 1 ? "" : "s"} available.
                 </p>
-              )}
-              {grandfathered && (
-                <div className="space-y-2 rounded-md bg-primary/5 p-3 text-xs text-left">
-                  <div className="flex items-center gap-2 font-semibold text-primary">
-                    <Crown className="h-3.5 w-3.5" /> Legacy monthly subscription
-                  </div>
-                  <p className="text-muted-foreground">
-                    We've moved to a simple pay-per-scan model. Manage or cancel your old monthly subscription anytime.
-                  </p>
-                  <Button variant="outline" size="sm" onClick={handleManage} disabled={portalLoading} className="w-full">
-                    {portalLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : null}
-                    {portalLoading ? "Opening…" : "Manage subscription"}
-                  </Button>
-                </div>
               )}
             </div>
           </CardContent>
