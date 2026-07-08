@@ -231,7 +231,7 @@ function Runner() {
   const rafRef = useRef<number>(0);
   const latestLandmarksRef = useRef<any[] | null>(null);
 
-  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "confirm" | "submitting" | "done" | "failed">("setup");
+  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "painCheck" | "confirm" | "submitting" | "done" | "failed">("setup");
   const [pendingResults, setPendingResults] = useState<TestResult[] | null>(null);
   const seq = useMemo(
     () => buildSequence(u?.questionnaire?.joints ?? []),
@@ -255,6 +255,8 @@ function Runner() {
   const [restartKey, setRestartKey] = useState(0);
   const pausedRef = useRef(false);
   const activeTestKeyRef = useRef<string | null>(null);
+  // Tracks the test that just finished and is awaiting a pain-clearing answer.
+  const [painCheckTestId, setPainCheckTestId] = useState<string | null>(null);
   useEffect(() => { pausedRef.current = paused || showInstructions; }, [paused, showInstructions]);
 
   // Detection-latency tracking so we can downgrade the model if the device
