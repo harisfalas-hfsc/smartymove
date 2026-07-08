@@ -595,6 +595,9 @@ function Welcome() {
           .sm-panel-program,
           .sm-panel-score,
           .sm-panel-tools{ min-height: 266px; }
+          .sm-panel-program{ display:flex; flex-direction:column; }
+          .sm-panel-program .sm-tile-grid{ flex:1; align-content:stretch; }
+          .sm-panel-program .sm-mini-tile{ min-height:44px; font-size:12px; }
           .sm-feature-list{
             display:grid;
             gap:10px;
