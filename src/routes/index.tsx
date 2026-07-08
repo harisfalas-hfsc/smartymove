@@ -197,14 +197,17 @@ function Welcome() {
                 <div className="sm-card-topline"><span /> Assess <IconBubble Icon={Activity} /></div>
                 <h2>Smarty <span>Move</span></h2>
                 <p>
-                  Your pocket movement coach. Turn your phone camera into a movement screen — get
-                  your Movement Score, Movement Age, and a 5-minute daily corrective workout built
-                  around what your body actually needs.
+                  Your pocket movement coach. Use your phone, tablet, laptop, or desktop camera for
+                  a guided movement screen — get your Movement Score, Movement Age, and a 5-minute
+                  daily corrective workout built around what your body actually needs.
                 </p>
                 <div className="sm-feature-list">
-                  <FeatureLine Icon={Camera} color="#2C99B3" title="Camera-based movement scan" text="Quick guided patterns from your phone or laptop." />
+                  <FeatureLine Icon={Camera} color="#2C99B3" title="Camera-based movement scan" text="Quick guided patterns from any device with a camera." />
                   <FeatureLine Icon={ShieldCheck} color="#43AD5C" title="Private by design" text="Pose detection runs on your device — video stays with you." />
                   <FeatureLine Icon={Clock} color="#FF8A4C" title="5-minute daily routine" text="Simple corrective work for mobility, stability, and strength." />
+                  <FeatureLine Icon={Target} color="#7A3EBA" title="Personalized priority areas" text="Two focus areas selected from your real movement limits." />
+                  <FeatureLine Icon={Repeat} color="#38A5C7" title="Retest every 14 days" text="Track changes and evolve your program as you improve." />
+                  <FeatureLine Icon={Monitor} color="#4FB286" title="Works on any screen" text="Phone, tablet, laptop, or desktop — train wherever you are." />
                 </div>
                 <Link to="/about" className="sm-text-link">
                   Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
