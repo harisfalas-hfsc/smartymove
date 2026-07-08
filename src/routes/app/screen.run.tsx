@@ -328,39 +328,78 @@ function buildSequence(_joints: Joint[]): Step[] {
   return raw.map((s, i) => ({ ...s, stepIndex: i + 1, totalSteps: raw.length }));
 }
 
-/** Merge per-view step results for a single test into one TestResult. */
-function mergeStepResults(stepResults: Array<TestResult & { viewIndex: number }>): TestResult {
+/**
+ * Merge per-view / per-side step results for a single test into one
+ * TestResult. For bilateral tests, right and left are scored independently
+ * (min score across that side's views), and the final `score` is the lower
+ * of the two sides — matching the spec that the weaker side sets the
+ * program priority. Side-to-side gap > 1 point sets `asymmetryFlag`.
+ */
+function mergeStepResults(
+  stepResults: Array<TestResult & { viewIndex: number; side: "both" | "right" | "left" }>,
+): TestResult {
   const sorted = [...stepResults].sort((a, b) => a.viewIndex - b.viewIndex);
   const primary = sorted[0];
-  // The primary view carries the range-of-motion reading and IS the test.
-  // Secondary views only detect compensations. So the merged test is valid
-  // whenever the primary view is valid — a poor secondary reading must never
-  // downgrade a good primary reading to "No reading".
-  const primaryValid = primary.valid !== false;
-  // Only cap the score using views that actually got a clean reading. An
-  // invalid secondary view returns score 1 by convention, but that 1 does
-  // NOT reflect the movement — it means we couldn't read that angle.
-  const validViewsForScore = sorted.filter(r => r.valid !== false);
-  const scoreSource = validViewsForScore.length ? validViewsForScore : [primary];
-  const scoreMin = scoreSource.reduce<0 | 1 | 2 | 3>((m, r) => (r.score < m ? r.score : m) as 0 | 1 | 2 | 3, 3);
-  const comps = Array.from(
-    new Set(validViewsForScore.flatMap(r => r.compensations ?? [])),
-  );
+
+  const collapseSide = (arr: typeof stepResults) => {
+    if (!arr.length) return null;
+    const validArr = arr.filter(r => r.valid !== false);
+    const src = validArr.length ? validArr : arr;
+    const score = src.reduce<0 | 1 | 2 | 3>((m, r) => (r.score < m ? r.score : m) as 0 | 1 | 2 | 3, 3);
+    const compensations = Array.from(new Set(src.flatMap(r => r.compensations ?? [])));
+    return { score, valid: validArr.length > 0, compensations };
+  };
+
+  const right = collapseSide(sorted.filter(r => r.side === "right"));
+  const left  = collapseSide(sorted.filter(r => r.side === "left"));
+  const both  = collapseSide(sorted.filter(r => r.side === "both"));
+
+  let finalScore: 0 | 1 | 2 | 3;
+  let finalValid: boolean;
+  let mergedComps: string[];
+  let sideScores: TestResult["sideScores"];
+  let asymmetryFlag = false;
+
+  if (right || left) {
+    // Bilateral — final = lower of the two sides.
+    const scores = [right?.score, left?.score].filter((x): x is 0 | 1 | 2 | 3 => x != null);
+    finalScore = (scores.length ? Math.min(...scores) : 1) as 0 | 1 | 2 | 3;
+    finalValid = Boolean(right?.valid || left?.valid);
+    mergedComps = Array.from(new Set([
+      ...(right?.compensations ?? []),
+      ...(left?.compensations ?? []),
+    ]));
+    sideScores = {
+      right: right ? { score: right.score, valid: right.valid, compensations: right.compensations.length ? right.compensations : undefined } : undefined,
+      left:  left  ? { score: left.score,  valid: left.valid,  compensations: left.compensations.length  ? left.compensations  : undefined } : undefined,
+    };
+    if (right && left) asymmetryFlag = Math.abs(right.score - left.score) > 1;
+  } else {
+    finalScore = (both?.score ?? 1) as 0 | 1 | 2 | 3;
+    finalValid = Boolean(both?.valid);
+    mergedComps = both?.compensations ?? [];
+  }
+
   const notes = sorted
-    .map(r => `${r.cameraView === "side" ? "Side" : "Front"}: ${r.notes ?? ""}`)
-    .filter(n => n.length > 6)
+    .map(r => {
+      const sideTag = r.side === "right" ? "R " : r.side === "left" ? "L " : "";
+      const viewTag = r.cameraView === "side" ? "Side" : "Front";
+      return `${sideTag}${viewTag}: ${r.notes ?? ""}`;
+    })
+    .filter(n => n.length > 8)
     .join(" · ");
+
   return {
     id: primary.id,
     name: primary.name,
-    score: primaryValid ? scoreMin : 1 as 0 | 1 | 2 | 3,
-    valid: primaryValid,
+    score: finalScore,
+    valid: finalValid,
     metric: primary.metric,
     left: primary.left,
     right: primary.right,
     asymmetry: primary.asymmetry,
     cameraView: primary.cameraView,
-    compensations: comps.length ? comps : undefined,
+    compensations: mergedComps.length ? mergedComps : undefined,
     frameValidRatio: primary.frameValidRatio,
     notes: notes || primary.notes,
     viewFindings: sorted.map(r => ({
@@ -370,6 +409,8 @@ function mergeStepResults(stepResults: Array<TestResult & { viewIndex: number }>
       metric: r.metric,
       compensations: r.compensations,
     })),
+    sideScores,
+    asymmetryFlag,
   };
 }
 
