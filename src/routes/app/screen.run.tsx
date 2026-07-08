@@ -326,7 +326,7 @@ function Runner() {
     }
   }, [u?.scanSetup?.tibialHeightCm]);
 
-  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "confirm" | "submitting" | "done" | "failed">("setup");
+  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "squat_retry" | "confirm" | "submitting" | "done" | "failed">("setup");
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewedPrompt, setReviewedPrompt] = useState(false);
   const [pendingResults, setPendingResults] = useState<TestResult[] | null>(null);
@@ -338,6 +338,12 @@ function Runner() {
   // Tests the user has explicitly cleared via the pre-test pain gate. A
   // clearing test cannot be captured until this Set contains its id.
   const [clearedTests, setClearedTests] = useState<Set<string>>(new Set());
+  // Heel-elevated squat branching: if the standard Deep Squat scores 1
+  // (cannot reach depth heels flat), we prompt for a heel-elevated retry.
+  // Passing with heels up = score 2 and flags Ankle Mobility. Failing again
+  // = keep score 1 (hip/general mobility). Recorded once per scan so a
+  // subsequent user "re-do" of the squat can't retrigger the prompt.
+  const squatRetryDecidedRef = useRef(false);
   const seq = useMemo(
     () => buildSequence(u?.questionnaire?.joints ?? []),
     [u?.questionnaire?.joints?.join("|")],
