@@ -166,7 +166,7 @@ function Welcome() {
 
               <section className="sm-panel sm-panel-mobile sm-green-border">
                 <div className="sm-eyebrow">Best experience</div>
-                <h2><span>SMARTY</span> MOVE</h2>
+                <h2><span>Open</span> on mobile</h2>
                 <p className="hidden lg:block">
                   For better results, open SmartyMove on your phone. The camera scan is easier,
                   the movement test fits naturally in your space, and your daily training sessions
