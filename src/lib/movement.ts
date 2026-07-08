@@ -57,6 +57,12 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
   rotary_stability: [
     { view: "side",  label: "Side view",  cue: "Get on all fours over a 2×6 board with your knees under your hips and hands under your shoulders. Extend your same-side arm and leg.", detects: ["arm and leg extend in line with the torso", "touch elbow to knee over the board", "no loss of balance"] },
   ],
+  sl_balance: [
+    { view: "front", label: "Front view", cue: "Face the camera, arms crossed on your chest, feet under your hips. Lift one foot just off the floor and hold.",
+      detects: ["pelvic drop on the lifted side", "trunk lateral lean", "stance-knee wobble"] },
+    { view: "side",  label: "Side view",  cue: "Now turn sideways so your full profile is visible. Same leg lifted, same 10-second hold.",
+      detects: ["forward trunk pitch (>20° from vertical)", "hip flexion substitution"] },
+  ],
   wall_slide: [
     { view: "side",  label: "Side view",  cue: "Stand sideways to the camera against the wall.", detects: ["lumbar arch", "wall contact quality"] },
     { view: "front", label: "Front view", cue: "Now face the camera against the wall.", detects: ["L/R shoulder height asymmetry"] },
@@ -97,6 +103,7 @@ export const CORE_TESTS = [
   { id: "hip_abd",          name: "Active Straight-Leg Raise",  focus: ["mobility"],              duration: 10 },
   { id: "bridge_hold",      name: "Trunk Stability Push-Up",    focus: ["stability"],             duration: 10 },
   { id: "rotary_stability", name: "Rotary Stability",           focus: ["stability", "quality"],  duration: 10 },
+  { id: "sl_balance",       name: "Single-Leg Balance",         focus: ["balance", "stability"], duration: 10 },
 ] as const;
 
 /** Tests that surface a "Did you feel pain during that pattern?" prompt.
@@ -146,6 +153,7 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
     hip_abd:     ["mobility"],
     bridge_hold: ["stability"],
     rotary_stability: ["stability", "quality"],
+    sl_balance:  ["balance", "stability"],
     wall_slide:  ["mobility"],
     elbow_rom:   ["mobility"],
     wrist_rom:   [],
