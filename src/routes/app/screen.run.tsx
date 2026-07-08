@@ -592,6 +592,23 @@ function Runner() {
                   </div>
                 ) : g && (
                   <>
+                    {DEMO_VIDEOS[cur.testId] && (
+                      <div className="mt-4 overflow-hidden rounded-2xl bg-black">
+                        <video
+                          key={cur.testId}
+                          src={DEMO_VIDEOS[cur.testId]}
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          controls
+                          className="h-auto w-full"
+                        />
+                        <div className="bg-black/80 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/80">
+                          Demonstration · {cur.name}
+                        </div>
+                      </div>
+                    )}
                     <div className="mt-4">
                       <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Set up</div>
                       <ul className="mt-1 space-y-1 text-sm">
