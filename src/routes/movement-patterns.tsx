@@ -70,8 +70,32 @@ function MovementPatternsPage() {
           </CardContent>
         </Card>
 
-        {/* Patterns grid */}
-        <div className="grid gap-4 lg:grid-cols-2">
+        {/* Patterns list — mobile compact (no cards, no description) */}
+        <ul className="divide-y divide-border rounded-2xl border border-border bg-card lg:hidden">
+          {patterns.map(({ n, id, Icon, color, name, tests }) => (
+            <li key={n}>
+              <button
+                type="button"
+                onClick={() => setOpenId(id)}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left active:bg-primary/5"
+                aria-label={`Preview the ${name} test`}
+              >
+                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 text-sm font-extrabold text-primary">
+                  {n}
+                </div>
+                <Icon className={`w-5 h-5 ${color} shrink-0`} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-bold text-foreground truncate">{name}</div>
+                  <div className="text-[11px] font-semibold text-muted-foreground truncate">{tests}</div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-primary shrink-0" />
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        {/* Patterns grid — desktop */}
+        <div className="hidden lg:grid gap-4 lg:grid-cols-2">
           {patterns.map(({ n, id, Icon, color, name, tests, body }) => (
             <button
               key={n}
