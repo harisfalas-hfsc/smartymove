@@ -6,11 +6,17 @@ import { type Pain, updateOnboardingDraft, updateUser, getOnboardingDraft, getUs
 
 export const Route = createFileRoute("/onboarding/questionnaire")({ component: Page });
 
-const PAINS: { v: Pain; label: string; tint: string }[] = [
-  { v: "none", label: "None", tint: "bg-success/15 text-foreground" },
-  { v: "mild", label: "Mild", tint: "bg-accent text-accent-foreground" },
-  { v: "moderate", label: "Moderate", tint: "bg-warning/20 text-foreground" },
-  { v: "severe", label: "Severe", tint: "bg-destructive/15 text-foreground" },
+const PAINS: {
+  v: Pain;
+  label: string;
+  selectedBg: string;
+  selectedText: string;
+  selectedRing: string;
+}[] = [
+  { v: "none",     label: "None",     selectedBg: "#16A34A", selectedText: "#FFFFFF", selectedRing: "#16A34A" },
+  { v: "mild",     label: "Mild",     selectedBg: "#EAB308", selectedText: "#1F1300", selectedRing: "#CA8A04" },
+  { v: "moderate", label: "Moderate", selectedBg: "#F97316", selectedText: "#FFFFFF", selectedRing: "#EA580C" },
+  { v: "severe",   label: "Severe",   selectedBg: "#DC2626", selectedText: "#FFFFFF", selectedRing: "#B91C1C" },
 ];
 
 function Page() {
@@ -64,12 +70,29 @@ function Page() {
       <div>
         <Label className="mb-2 block text-sm font-semibold">Current pain level</Label>
         <div className="grid grid-cols-4 gap-2">
-          {PAINS.map(p => (
-            <button key={p.v} onClick={() => setPain(p.v)}
-              className={`rounded-2xl px-2 py-3 text-xs font-semibold transition-all ${pain === p.v ? "ring-2 ring-primary shadow-card " + p.tint : p.tint + " opacity-70"}`}>
-              {p.label}
-            </button>
-          ))}
+          {PAINS.map(p => {
+            const isSelected = pain === p.v;
+            return (
+              <button
+                key={p.v}
+                type="button"
+                onClick={() => setPain(p.v)}
+                aria-pressed={isSelected}
+                style={isSelected ? {
+                  background: p.selectedBg,
+                  color: p.selectedText,
+                  boxShadow: `0 8px 20px -8px ${p.selectedRing}, 0 0 0 2px ${p.selectedRing}`,
+                } : undefined}
+                className={`rounded-2xl px-2 py-3 text-sm font-bold transition-all active:scale-[0.97] ${
+                  isSelected
+                    ? "scale-[1.02]"
+                    : "bg-secondary text-foreground/70 hover:bg-secondary/80 border border-border"
+                }`}
+              >
+                {p.label}
+              </button>
+            );
+          })}
         </div>
       </div>
       <div className="rounded-3xl bg-card p-1 shadow-card">
@@ -80,12 +103,16 @@ function Page() {
               <button
                 type="button"
                 onClick={() => row.set(true)}
-                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${row.v === true ? "bg-primary text-primary-foreground shadow-card" : "bg-secondary text-foreground/70"}`}
+                aria-pressed={row.v === true}
+                style={row.v === true ? { background: "#16A34A", color: "#FFFFFF", boxShadow: "0 6px 14px -6px #16A34A, 0 0 0 2px #16A34A" } : undefined}
+                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ${row.v === true ? "" : "bg-secondary text-foreground/70 border border-border hover:bg-secondary/80"}`}
               >Yes</button>
               <button
                 type="button"
                 onClick={() => row.set(false)}
-                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${row.v === false ? "bg-primary text-primary-foreground shadow-card" : "bg-secondary text-foreground/70"}`}
+                aria-pressed={row.v === false}
+                style={row.v === false ? { background: "#DC2626", color: "#FFFFFF", boxShadow: "0 6px 14px -6px #DC2626, 0 0 0 2px #B91C1C" } : undefined}
+                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ${row.v === false ? "" : "bg-secondary text-foreground/70 border border-border hover:bg-secondary/80"}`}
               >No</button>
             </div>
           </div>
