@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useUser } from "@/lib/store";
 import { useScanDecision } from "@/lib/program";
 import { ScoreRing } from "@/components/ScoreRing";
@@ -25,6 +26,11 @@ function Progress() {
     ? Math.min(100, Math.round(latest.overall + Math.max(0, delta) * 1.2)) : null;
   const graduation = evaluateGraduation(u);
   const recommendation = recommendSmartyGym(u.goal, graduation.status);
+  const [selectedIdx, setSelectedIdx] = useState<number>(sessions.length ? sessions.length - 1 : 0);
+  const safeIdx = Math.min(selectedIdx, Math.max(0, sessions.length - 1));
+  const selected = sessions[safeIdx] ?? latest;
+  const isLatestSelected = safeIdx === sessions.length - 1;
+  const fmtDate = (iso: string) => new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
   return (
     <div className="pb-6">
@@ -52,30 +58,54 @@ function Progress() {
             <p className="text-sm text-muted-foreground">Take your first Movement Screen to see progress.</p>
           </div>
         )}
-        {latest && (
+        {sessions.length > 0 && (
+          <div className="rounded-3xl bg-card p-4 shadow-card">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-bold">Scan history</h3>
+              <span className="text-[11px] text-muted-foreground">{sessions.length} scan{sessions.length === 1 ? "" : "s"} · tap to view</span>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {sessions.map((s, i) => {
+                const active = i === safeIdx;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedIdx(i)}
+                    className={`shrink-0 rounded-2xl border px-3 py-2 text-left transition ${active ? "border-primary bg-primary/10" : "border-border bg-background/60"}`}
+                  >
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Scan #{i + 1}{i === sessions.length - 1 ? " · Latest" : ""}</div>
+                    <div className="text-xs font-semibold">{fmtDate(s.date)}</div>
+                    <div className="mt-0.5 text-lg font-extrabold brand-text">{s.overall}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {selected && (
           <div className="flex items-center gap-4 rounded-3xl bg-card p-5 shadow-card">
-            <ScoreRing value={latest.overall} size={140} />
+            <ScoreRing value={selected.overall} size={140} />
             <div className="min-w-0 flex-1">
-              <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Movement Age</div>
-              <div className="mt-0.5 text-3xl font-extrabold brand-text">{latest.movementAge}</div>
+              <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Movement Age · {fmtDate(selected.date)}</div>
+              <div className="mt-0.5 text-3xl font-extrabold brand-text">{selected.movementAge}</div>
               <div className="text-xs text-muted-foreground">Chronological: {u.age}</div>
               <p className="mt-2 text-[11px] text-muted-foreground">Motivational estimate, not a clinical measurement.</p>
             </div>
           </div>
         )}
-        {latest?.redFlags && latest.redFlags.length > 0 && (
+        {selected?.redFlags && selected.redFlags.length > 0 && (
           <div className="rounded-3xl border-2 border-destructive/50 bg-destructive/10 p-5 shadow-card">
             <div className="mb-2 flex items-center gap-2 text-destructive">
               <ShieldAlert className="h-5 w-5" />
               <h3 className="text-base font-bold">Pain reported — please read</h3>
             </div>
             <p className="mb-3 text-sm text-foreground/90">
-              You reported pain during {latest.redFlags.length === 1 ? "this pattern" : "these patterns"}.
+              You reported pain during {selected.redFlags.length === 1 ? "this pattern" : "these patterns"}.
               We&apos;ve capped the affected sub-scores at 50 and paused loading exercises for the joint areas involved.
               Please see a qualified clinician before pushing these patterns further.
             </p>
             <ul className="space-y-1">
-              {latest.redFlags.map(id => (
+              {selected.redFlags.map(id => (
                 <li key={id} className="flex items-center gap-2 text-sm font-semibold text-destructive">
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
                   {TEST_GUIDES[id]?.name ?? id}
@@ -108,18 +138,21 @@ function Progress() {
             </div>
           </div>
         )}
-        {latest && (
+        {selected && (
           <div className="rounded-3xl bg-card p-5 shadow-card">
-            <h3 className="mb-3 text-base font-bold">Sub-scores</h3>
+            <div className="mb-3 flex items-baseline justify-between gap-2">
+              <h3 className="text-base font-bold">Sub-scores</h3>
+              <span className="text-[11px] text-muted-foreground">Scan #{safeIdx + 1} · {fmtDate(selected.date)}</span>
+            </div>
             <div className="space-y-3">
-              <SubScoreBar label="Mobility" value={latest.sub.mobility} hint="Hip hinge, overhead reach, lunge, ankle" />
-              <SubScoreBar label="Stability" value={latest.sub.stability} hint="Single-leg balance, lunge, hip abduction" />
-              <SubScoreBar label="Balance" value={latest.sub.balance} hint="Single-leg balance (left + right)" />
-              <SubScoreBar label="Movement Quality" value={latest.sub.quality} hint="Squat, hip hinge & overhead — compensations included" />
+              <SubScoreBar label="Mobility" value={selected.sub.mobility} hint="Hip hinge, overhead reach, lunge, ankle" />
+              <SubScoreBar label="Stability" value={selected.sub.stability} hint="Single-leg balance, lunge, hip abduction" />
+              <SubScoreBar label="Balance" value={selected.sub.balance} hint="Single-leg balance (left + right)" />
+              <SubScoreBar label="Movement Quality" value={selected.sub.quality} hint="Squat, hip hinge & overhead — compensations included" />
             </div>
           </div>
         )}
-        {decision && decision.focuses.length > 0 && (
+        {isLatestSelected && decision && decision.focuses.length > 0 && (
           <div className="rounded-3xl bg-card p-5 shadow-card">
             <div className="mb-2 flex items-center gap-2">
               <Target className="h-4 w-4 text-primary" />
@@ -155,7 +188,7 @@ function Progress() {
             )}
           </div>
         )}
-        {decision && decision.allClean && (
+        {isLatestSelected && decision && decision.allClean && (
           <div className="rounded-3xl border border-success/40 bg-success/10 p-5">
             <div className="mb-1 flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-success" />
@@ -166,7 +199,7 @@ function Progress() {
             </p>
           </div>
         )}
-        {decision && decision.cleanPasses.length > 0 && !decision.allClean && (
+        {isLatestSelected && decision && decision.cleanPasses.length > 0 && !decision.allClean && (
           <div className="rounded-3xl border border-success/40 bg-success/5 p-5">
             <div className="mb-2 flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-success" />
@@ -181,7 +214,7 @@ function Progress() {
             </ul>
           </div>
         )}
-        {decision && decision.findings.length > 0 && (
+        {isLatestSelected && decision && decision.findings.length > 0 && (
           <div className="rounded-3xl bg-card p-5 shadow-card">
             <div className="mb-2 flex items-center gap-2">
               <Info className="h-4 w-4 text-primary" />
@@ -209,11 +242,14 @@ function Progress() {
             </ul>
           </div>
         )}
-        {latest && latest.tests.length > 0 && (
+        {selected && selected.tests.length > 0 && (
           <div className="rounded-3xl bg-card p-5 shadow-card">
-            <h3 className="mb-3 text-base font-bold">Per-test breakdown</h3>
+            <div className="mb-3 flex items-baseline justify-between gap-2">
+              <h3 className="text-base font-bold">Per-test breakdown</h3>
+              <span className="text-[11px] text-muted-foreground">Scan #{safeIdx + 1} · {fmtDate(selected.date)}</span>
+            </div>
             <ul className="space-y-2">
-              {latest.tests.map((t, i) => {
+              {selected.tests.map((t, i) => {
                 const bilateral = t.left != null && t.right != null;
                 const flag = (t.asymmetry ?? 0) >= 10;
                 const pained = t.score === 0;
