@@ -777,7 +777,15 @@ function Runner() {
   const progress = seq.length ? ((idx + (phase === "running" ? Math.min(1, countdown / (cur?.duration ?? 1)) : 0)) / seq.length) * 100 : 0;
   const groupIndex = cur ? groupIds.indexOf(cur.groupId) : -1;
   const groupCount = groupIds.length;
-  const isReposition = !!cur && cur.viewIndex > 0;
+  const prev = idx > 0 ? seq[idx - 1] : null;
+  const isSameGroupAsPrev = !!prev && !!cur && prev.groupId === cur.groupId;
+  const isSideSwitch = !!prev && !!cur && isSameGroupAsPrev && prev.side !== cur.side;
+  const isReposition = !!cur && cur.viewIndex > 0 && isSameGroupAsPrev;
+  const stepPrompt = cur
+    ? (cur.side !== "both" && SIDE_COPY[cur.testId]?.[cur.side]?.prompt)
+      || REP_PROMPT[cur.testId]
+      || "Perform the movement"
+    : "";
 
   return (
     <div className="relative flex h-full min-h-[100dvh] flex-col bg-black text-white">
