@@ -671,7 +671,20 @@ function Runner() {
                 )}
                 <div className="mt-5 flex gap-2">
                   <button onClick={() => navigate({ to: "/app/screen" })} className="h-12 flex-1 rounded-2xl bg-secondary text-sm font-semibold text-foreground">Exit</button>
-                  <button onClick={() => setPhase("running")} disabled={!poseReady} className="h-12 flex-[2] rounded-2xl brand-gradient text-base font-semibold text-primary-foreground disabled:opacity-50">{poseReady ? (isReposition ? "I'm repositioned · Start" : "I'm ready · Start") : "Loading…"}</button>
+                  <button
+                    onClick={() => {
+                      // Ask the pre-test pain question once per test (first
+                      // view only). On repositioning between views, skip
+                      // straight to running.
+                      if (!isReposition && !askedPainRef.current.has(cur.groupId)) {
+                        setPhase("prePain");
+                      } else {
+                        setPhase("running");
+                      }
+                    }}
+                    disabled={!poseReady}
+                    className="h-12 flex-[2] rounded-2xl brand-gradient text-base font-semibold text-primary-foreground disabled:opacity-50"
+                  >{poseReady ? (isReposition ? "I'm repositioned · Start" : "I'm ready · Start") : "Loading…"}</button>
                 </div>
               </div>
             );
