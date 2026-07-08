@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Sparkles } from "lucide-react";
 import logoMove from "@/assets/smartymove-logo.png";
@@ -56,6 +56,7 @@ export const SisterAppsPopup = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="w-[calc(100vw-2.5rem)] max-w-[350px] sm:max-w-2xl sm:w-[95vw] max-h-[calc(100dvh-2.5rem)] overflow-y-auto p-0 border-2 border-primary/40 rounded-xl bg-card shadow-2xl">
+        <DialogTitle className="sr-only">Complete your Smarty Wellness journey</DialogTitle>
         <div className="p-3 sm:p-6">
           <div className="text-center mb-3 sm:mb-5 px-4 sm:px-0">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] sm:text-[11px] font-bold uppercase tracking-normal mb-2 sm:mb-3">
