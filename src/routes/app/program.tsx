@@ -6,17 +6,14 @@ import {
   useProgramStatus,
   markDayCompleted,
   unmarkDayCompleted,
-  setsRepsFor,
-  getAsymmetryByArea,
-  type AsymmetryBias,
   PROGRAM_LENGTH_DAYS,
   PROGRAM_SESSIONS,
   TRAINING_DAY_INDICES,
-  isTrainingDay,
   formatProgramDayDate,
 } from "@/lib/program";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
-import { Camera, ArrowRight, CheckCircle2, Circle, Lock, RotateCcw, Info, AlertCircle, CalendarDays } from "lucide-react";
+import { DayWorkoutSheet } from "@/components/DayWorkoutSheet";
+import { Camera, ArrowRight, CheckCircle2, Lock, RotateCcw, AlertCircle, CalendarDays } from "lucide-react";
 import { SmartyCard } from "@/components/SmartyCard";
 import { Sparkles, Dumbbell, Flame, Target } from "lucide-react";
 import { evaluateGraduation, recommendSmartyGym } from "@/lib/graduation";
