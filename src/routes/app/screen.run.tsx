@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
-import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
+import { angle, CORE_TESTS, CONDITIONAL_TESTS, CLEARING_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
 import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal } from "lucide-react";
@@ -87,6 +87,12 @@ const REFERENCE_RANGES = {
 
   // Knee single-leg step-down — uses the same min-knee thresholds as lunge.
   knee_sld: { passMin: 80, passMax: 100, borderlineMax: 120 },
+
+  // Rotary Stability — placeholder v1 scoring. The user will supply the
+  // final scoring rules; until then we accept the movement as clean if the
+  // camera sees enough valid frames with meaningful motion. No angle-based
+  // thresholds are asserted here on purpose.
+  rotary_stability: { placeholder: true },
 } as const;
 
 const VISIBILITY_THRESHOLD = 0.6;
@@ -101,8 +107,9 @@ const TEST_CAMERA_VIEW: Record<string, "front" | "side"> = {
   overhead: "front",
   ankle_df: "side",
   knee_sld: "front",
-  hip_abd: "front",
+  hip_abd: "side",
   bridge_hold: "side",
+  rotary_stability: "side",
   wall_slide: "side",
   elbow_rom: "front",
 };
@@ -111,18 +118,19 @@ const TEST_CAMERA_VIEW: Record<string, "front" | "side"> = {
 // on the intro screen AND overlaid on the live camera so the user knows
 // exactly what to do without walking back to read small text.
 const REP_PROMPT: Record<string, string> = {
-  squat:       "Give me 3 slow squats",
-  hinge:       "Give me 3 slow hip hinges",
-  balance:     "Balance on each leg for ~5 seconds",
-  lunge:       "1 lunge on each leg",
-  overhead:    "Reach arms overhead, then rotate L + R",
-  ankle_df:    "3 slow knee-to-wall reps each side",
-  knee_sld:    "3 slow step-downs each leg",
-  hip_abd:     "3 slow leg raises each side",
-  bridge_hold: "Hold the bridge ~10 seconds",
-  wall_slide:  "3 slow wall slides",
-  elbow_rom:   "3 full bend + straighten reps",
-  wrist_rom:   "3 slow wrist flex + extend reps",
+  squat:            "Overhead squat — up to 3 slow reps",
+  hinge:            "Give me 3 slow hip hinges",
+  balance:          "Hurdle step — up to 3 slow reps each leg",
+  lunge:            "In-line lunge — up to 3 slow reps each leg",
+  overhead:         "Reach one fist over, the other up the back — both sides",
+  ankle_df:         "3 slow knee-to-wall reps each side",
+  knee_sld:         "3 slow step-downs each leg",
+  hip_abd:          "Straight-leg raise — up to 3 slow reps each leg",
+  bridge_hold:      "1 strict trunk-stability push-up",
+  rotary_stability: "Same-side arm + leg extend, then elbow to knee — each side",
+  wall_slide:       "3 slow wall slides",
+  elbow_rom:        "3 full bend + straighten reps",
+  wrist_rom:        "3 slow wrist flex + extend reps",
 };
 
 // Landmarks required for a frame to count toward the score of each test.
@@ -136,6 +144,7 @@ const TEST_LANDMARKS: Record<string, number[]> = {
   knee_sld:    [PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_ANKLE],
   hip_abd:     [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER],
   bridge_hold: [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_KNEE, PL.RIGHT_KNEE],
+  rotary_stability: [PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_WRIST, PL.RIGHT_WRIST],
   wall_slide:  [PL.LEFT_EAR, PL.RIGHT_EAR, PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_HIP, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_HIP],
   elbow_rom:   [PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_WRIST, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_WRIST],
 };
@@ -160,20 +169,9 @@ function expandToSteps(testId: string, name: string, duration: number, condition
   }));
 }
 
-function buildSequence(joints: Joint[]): Step[] {
-  const core = CORE_TESTS.flatMap(t => expandToSteps(t.id, t.name, t.duration));
-  // Wrist test is intentionally excluded from v1 scoring — flagged "Coming
-  // soon" because the wrist landmarks are too small on camera for a reliable
-  // flexion/extension angle on phones. If the user picked wrist as a flagged
-  // joint, we still run their other selected joint's add-on (if any).
-  const cond = joints
-    .filter(j => j !== "none" && j !== "wrist")
-    .slice(0, 2)
-    .flatMap(j => {
-      const c = CONDITIONAL_TESTS[j as keyof typeof CONDITIONAL_TESTS];
-      return expandToSteps(c.id, c.name, 10, true);
-    });
-  return [...core, ...cond];
+function buildSequence(_joints: Joint[]): Step[] {
+  // SmartyMove Scan is a fixed 7-pattern set — no joint-based branching.
+  return CORE_TESTS.flatMap(t => expandToSteps(t.id, t.name, t.duration));
 }
 
 /** Merge per-view step results for a single test into one TestResult. */
@@ -233,7 +231,7 @@ function Runner() {
   const rafRef = useRef<number>(0);
   const latestLandmarksRef = useRef<any[] | null>(null);
 
-  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "confirm" | "submitting" | "done" | "failed">("setup");
+  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "painCheck" | "confirm" | "submitting" | "done" | "failed">("setup");
   const [pendingResults, setPendingResults] = useState<TestResult[] | null>(null);
   const seq = useMemo(
     () => buildSequence(u?.questionnaire?.joints ?? []),
@@ -257,6 +255,8 @@ function Runner() {
   const [restartKey, setRestartKey] = useState(0);
   const pausedRef = useRef(false);
   const activeTestKeyRef = useRef<string | null>(null);
+  // Tracks the test that just finished and is awaiting a pain-clearing answer.
+  const [painCheckTestId, setPainCheckTestId] = useState<string | null>(null);
   useEffect(() => { pausedRef.current = paused || showInstructions; }, [paused, showInstructions]);
 
   // Detection-latency tracking so we can downgrade the model if the device
@@ -387,6 +387,14 @@ function Runner() {
         setResults(r => [...r, merged]);
       }
       setTimeout(() => {
+        // Clearing-test gate: after the last view of a clearing test, pause
+        // the flow and ask if the user felt pain. Their answer either keeps
+        // the merged result or forces it to score 0 (invalid).
+        if (isLastView && CLEARING_TESTS.has(test.testId)) {
+          setPainCheckTestId(test.testId);
+          setPhase("painCheck");
+          return;
+        }
         if (idx + 1 >= seq.length) {
           const base = mergedForFinalize ? [...results, mergedForFinalize] : results;
           finalize(base);
@@ -422,6 +430,36 @@ function Runner() {
     // Ask the user to confirm before we spend their paid scan credit.
     setPendingResults(allResults);
     setPhase("confirm");
+  }
+
+  /** Resolve a clearing-test pain check. If painful, rewrite the merged
+   *  test result to a hard 0 (invalid) so it drops out of scoring, then
+   *  advance to the next test or finalize. */
+  function resolvePainCheck(painful: boolean) {
+    const testId = painCheckTestId;
+    if (!testId) return;
+    let updated = results;
+    if (painful) {
+      updated = results.map(r =>
+        r.id === testId
+          ? {
+              ...r,
+              score: 1,
+              valid: false,
+              compensations: [...(r.compensations ?? []), "Pain reported during clearing test — pattern cleared to 0."],
+              notes: "Cleared to 0 — pain reported during the pattern.",
+            }
+          : r,
+      );
+      setResults(updated);
+    }
+    setPainCheckTestId(null);
+    if (idx + 1 >= seq.length) {
+      finalize(updated);
+    } else {
+      setIdx(i => i + 1);
+      setPhase("intro");
+    }
   }
 
   async function submitScan() {
@@ -607,6 +645,32 @@ function Runner() {
               <CheckCircle2 className="mx-auto h-8 w-8" />
               <div className="mt-1 text-lg font-bold">Screen complete</div>
               <p className="text-sm opacity-85">Crunching your scores...</p>
+            </div>
+          )}
+          {phase === "painCheck" && painCheckTestId && (
+            <div className="rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
+              <div className="flex items-center gap-2 text-warning">
+                <AlertCircle className="h-5 w-5" />
+                <div className="text-[11px] font-bold uppercase tracking-widest">Pain check</div>
+              </div>
+              <div className="mt-1 text-xl font-extrabold">Did you feel pain during that pattern?</div>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                This is one of the clearing patterns. If you felt sharp pain anywhere during the movement, we clear the pattern to <strong>0</strong> so your program treats it as a red flag instead of a mobility issue.
+              </p>
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() => resolvePainCheck(false)}
+                  className="h-12 flex-1 rounded-2xl brand-gradient text-base font-bold text-primary-foreground"
+                >
+                  No pain — continue
+                </button>
+                <button
+                  onClick={() => resolvePainCheck(true)}
+                  className="h-12 flex-1 rounded-2xl bg-destructive/90 text-base font-bold text-white"
+                >
+                  Yes, there was pain
+                </button>
+              </div>
             </div>
           )}
           {(phase === "confirm" || phase === "submitting") && (
@@ -1573,6 +1637,20 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
         asymmetry: asym(rangeL, rangeR),
         frameValidRatio: Math.round(validRatio * 100) / 100,
         notes: `ROM L ${Math.round(rangeL)}° / R ${Math.round(rangeR)}° · ext ${Math.round(extension)}°`,
+      };
+    }
+    case "rotary_stability": {
+      // Placeholder v1 scoring — user will provide final scoring rules.
+      // We accept the pattern as a clean 3 when the camera saw enough valid
+      // frames with real motion (movement gate already ran above). No
+      // angle-based grading is asserted here on purpose.
+      const motion = pointMotion(samples, TEST_LANDMARKS.rotary_stability ?? []);
+      const score: 1 | 2 | 3 = motion >= 0.08 ? 3 : motion >= 0.04 ? 2 : 1;
+      return {
+        id: testId, name, score,
+        metric: Math.round(motion * 1000) / 10,
+        frameValidRatio: Math.round(validRatio * 100) / 100,
+        notes: `Rotary stability captured (motion index ${Math.round(motion * 1000) / 10}). Final scoring rules pending.`,
       };
     }
     // wrist_rom intentionally omitted — surfaced as "Coming soon" by being

@@ -22,24 +22,23 @@ export type TestView = {
 
 export const TEST_VIEWS: Record<string, TestView[]> = {
   squat: [
-    { view: "side",  label: "Side view",  cue: "Stand sideways to the camera so your full profile is visible.", detects: ["depth", "heel rise", "trunk lean", "lumbar rounding"] },
-    { view: "front", label: "Front view", cue: "Now face the camera straight on.", detects: ["knee valgus", "knee varus", "left-right asymmetry", "hip shift"] },
+    { view: "front", label: "Front view", cue: "Face the camera, feet shoulder-width, dowel held overhead with arms straight.", detects: ["knee valgus", "left-right asymmetry"] },
+    { view: "side",  label: "Side view",  cue: "Now turn sideways so your full profile is visible.", detects: ["depth (thighs below parallel)", "heel rise", "excessive forward lean", "dowel dropping forward"] },
   ],
   hinge: [
     { view: "side",  label: "Side view",  cue: "Stand sideways to the camera so we can see the line from your head to your hips.", detects: ["spine angle", "true hip flexion", "knee bend compensation"] },
     { view: "front", label: "Front view", cue: "Now face the camera straight on.", detects: ["lateral trunk shift", "pelvic asymmetry"] },
   ],
   balance: [
-    { view: "front", label: "Front view", cue: "Face the camera. Full body in frame.", detects: ["pelvic drop", "trunk lateral lean", "knee position"] },
-    { view: "side",  label: "Side view",  cue: "Turn sideways to the camera. Do both legs from this angle too.", detects: ["forward trunk lean", "hip flexion substitution"] },
+    { view: "front", label: "Front view", cue: "Face the camera, hurdle set at your shin height, dowel across your shoulders.", detects: ["pelvis staying level", "L/R stance leg asymmetry"] },
+    { view: "side",  label: "Side view",  cue: "Now stand sideways so we can see the stepping leg clear the hurdle.", detects: ["forward trunk lean", "hip flexion range", "loss of stance-leg alignment"] },
   ],
   lunge: [
-    { view: "side",  label: "Side view",  cue: "Stand sideways to the camera so we can see the front knee angle.", detects: ["front knee angle", "front heel rise", "trunk lean"] },
-    { view: "front", label: "Front view", cue: "Now face the camera and repeat on the same leg, then switch legs.", detects: ["front knee valgus", "torso rotation", "back-leg hip drop"] },
+    { view: "side",  label: "Side view",  cue: "Stand sideways with both feet in line on a 2×6 board. Dowel behind your back (head, spine, tailbone touching).", detects: ["front knee tracks over foot", "back knee touches the board behind the front heel", "trunk stays upright"] },
+    { view: "front", label: "Front view", cue: "Now face the camera on the board and repeat, then switch legs.", detects: ["loss of balance", "torso rotation", "front-knee drift"] },
   ],
   overhead: [
-    { view: "front", label: "Front view", cue: "Face the camera, full body in frame.", detects: ["arm elevation angle", "shoulder shrug", "L/R shoulder symmetry"] },
-    { view: "side",  label: "Side view",  cue: "Turn sideways so we can see if the lower back arches.", detects: ["lumbar extension / arch", "rib-cage flare"] },
+    { view: "front", label: "Front view", cue: "Face the camera. Make a fist around your thumb on each hand.", detects: ["fist-to-fist distance (target: within one hand length)", "L/R shoulder symmetry"] },
   ],
   ankle_df: [
     { view: "side",  label: "Side view",  cue: "Kneel sideways to the camera.", detects: ["tibia forward lean", "heel lift"] },
@@ -50,11 +49,13 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
     { view: "side",  label: "Side view",  cue: "Turn sideways for the second set.", detects: ["trunk forward pitch", "heel rise", "descent control"] },
   ],
   hip_abd: [
-    { view: "front", label: "Front view", cue: "Face the camera. Full body in frame.", detects: ["hip hike", "trunk lean", "leg lift height", "pelvic drop"] },
+    { view: "side",  label: "Side view",  cue: "Lie on your back with the camera on your side. Arms flat, legs straight, toes up.", detects: ["moving-leg ankle height vs. mid-thigh of the down leg", "opposite-leg staying flat", "loss of neutral pelvis"] },
   ],
   bridge_hold: [
-    { view: "side",  label: "Side view",  cue: "Lie on your back with your side to the camera.", detects: ["hip height", "lumbar arch / hyperextension"] },
-    { view: "front", label: "Front view", cue: "Rotate so the camera can see across both hips.", detects: ["pelvic rotation / unilateral glute weakness"] },
+    { view: "side",  label: "Side view",  cue: "Get face-down with hands under your shoulders (men: thumbs at forehead; women: thumbs at chin). Feet together.", detects: ["body rises as one unit — no lag in the hips", "chest/knees leave the floor together", "no lower-back sagging"] },
+  ],
+  rotary_stability: [
+    { view: "side",  label: "Side view",  cue: "Get on all fours over a 2×6 board with your knees under your hips and hands under your shoulders. Extend your same-side arm and leg.", detects: ["arm and leg extend in line with the torso", "touch elbow to knee over the board", "no loss of balance"] },
   ],
   wall_slide: [
     { view: "side",  label: "Side view",  cue: "Stand sideways to the camera against the wall.", detects: ["lumbar arch", "wall contact quality"] },
@@ -68,23 +69,41 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
   ],
 };
 
+/**
+ * The SmartyMove Scan is a fixed 7-pattern movement screen. The internal
+ * test ids reuse the pre-existing scoring engine (squat/balance/lunge/…) so
+ * geometry + compensation detection continue to work; user-facing names,
+ * descriptions and camera guides are re-branded for the SmartyMove protocol.
+ *
+ *   Deep Squat                → id "squat"
+ *   Hurdle Step               → id "balance"
+ *   In-line Lunge             → id "lunge"
+ *   Shoulder Mobility         → id "overhead"           (front view only)
+ *   Active Straight-Leg Raise → id "hip_abd"
+ *   Trunk Stability Push-Up   → id "bridge_hold"
+ *   Rotary Stability          → id "rotary_stability"   (new — placeholder scoring)
+ *
+ * The three FMS clearing patterns (Shoulder Mobility, TSPU, Rotary
+ * Stability) surface a "any pain during that test?" prompt in the runner;
+ * pain forces the pattern to score 0 (invalid).
+ */
 export const CORE_TESTS = [
-  { id: "squat", name: "Squat", focus: ["mobility", "strength"], duration: 10 },
-  { id: "hinge", name: "Hip Hinge", focus: ["mobility", "quality"], duration: 10 },
-  { id: "balance", name: "Single-leg Balance", focus: ["balance", "stability"], duration: 10 },
-  { id: "lunge", name: "Lunge Reach", focus: ["mobility", "stability"], duration: 10 },
-  { id: "overhead", name: "Overhead Reach + Rotation", focus: ["mobility", "quality"], duration: 10 },
+  { id: "squat",            name: "Deep Squat",                 focus: ["mobility", "quality"],  duration: 10 },
+  { id: "balance",          name: "Hurdle Step",                focus: ["stability", "balance"], duration: 10 },
+  { id: "lunge",            name: "In-line Lunge",              focus: ["mobility", "stability"], duration: 10 },
+  { id: "overhead",         name: "Shoulder Mobility",          focus: ["mobility"],              duration: 10 },
+  { id: "hip_abd",          name: "Active Straight-Leg Raise",  focus: ["mobility"],              duration: 10 },
+  { id: "bridge_hold",      name: "Trunk Stability Push-Up",    focus: ["stability"],             duration: 10 },
+  { id: "rotary_stability", name: "Rotary Stability",           focus: ["stability", "quality"],  duration: 10 },
 ] as const;
 
-export const CONDITIONAL_TESTS: Record<Exclude<Joint, "none">, { id: string; name: string; note?: string }> = {
-  ankle:    { id: "ankle_df",    name: "Ankle Dorsiflexion (knee-to-wall)" },
-  knee:     { id: "knee_sld",    name: "Single-leg Step-down" },
-  hip:      { id: "hip_abd",     name: "Standing Hip Abduction" },
-  back:     { id: "bridge_hold", name: "Glute Bridge Endurance" },
-  shoulder: { id: "wall_slide",  name: "Scapular Wall Slide" },
-  elbow:    { id: "elbow_rom",   name: "Elbow Flex/Extend Range" },
-  wrist:    { id: "wrist_rom",   name: "Guided Wrist Range Check", note: "Less precise than other tests — partly self-reported." },
-};
+/** Tests that surface a "Did you feel pain during that pattern?" prompt.
+ *  Pain forces the pattern to score 0 (marked invalid + excluded from sub-scores). */
+export const CLEARING_TESTS = new Set(["overhead", "bridge_hold", "rotary_stability"]);
+
+/** Kept for back-compat with older exports; the fixed 7-pattern scan no
+ *  longer branches on joint selection. */
+export const CONDITIONAL_TESTS: Record<string, { id: string; name: string; note?: string }> = {};
 
 export function angle(a: {x:number;y:number}, b: {x:number;y:number}, c: {x:number;y:number}) {
   const ab = { x: a.x - b.x, y: a.y - b.y };
@@ -120,7 +139,8 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
     ankle_df:    ["mobility"],
     knee_sld:    ["stability"],
     hip_abd:     ["stability"],
-    bridge_hold: ["stability"],
+    bridge_hold: ["stability", "quality"],
+    rotary_stability: ["stability", "quality"],
     wall_slide:  ["mobility"],
     elbow_rom:   ["mobility"],
     wrist_rom:   [],
@@ -188,14 +208,28 @@ export type TestGuide = {
 
 export const TEST_GUIDES: Record<string, TestGuide> = {
   squat: {
-    id: "squat", name: "Squat",
-    what: "Lower your hips down as if sitting into a chair, then stand back up.",
-    why: "Shows how well your ankles, knees and hips move together under your body weight.",
-    setup: ["Stand facing the camera, full body in frame", "Feet shoulder-width apart, toes slightly out", "Arms straight out in front for balance"],
-    steps: ["Push hips back and bend knees", "Go as low as you can while keeping heels down", "Stand all the way back up", "Repeat for 3 slow reps in 10 seconds"],
-    mistakes: ["Heels lifting off the floor", "Knees caving inward", "Rounding your lower back"],
-    reps: "3 slow reps · ~10 sec",
-    libraryQuery: "bodyweight squat",
+    id: "squat", name: "Deep Squat",
+    what: "Squat as deep as you can with a dowel held straight overhead.",
+    why: "Screens full-body mechanics of the shoulders, hips, knees and ankles working together with a neutral spine.",
+    setup: [
+      "Feet shoulder-width apart, toes pointing straight forward",
+      "Grip a dowel overhead — hands wider than shoulders, elbows locked, dowel directly above your head",
+      "Stand facing the camera with your full body in frame",
+    ],
+    steps: [
+      "Keep the dowel overhead and descend as low as you can",
+      "Keep heels on the floor, torso as upright as possible, dowel over your head",
+      "Pause at the bottom, then return to standing",
+      "Perform up to 3 slow reps",
+    ],
+    mistakes: [
+      "Heels lifting off the floor",
+      "Dowel drifting forward past the feet",
+      "Thighs not reaching parallel or below",
+      "Knees caving inward",
+    ],
+    reps: "Up to 3 slow reps",
+    libraryQuery: "overhead squat",
   },
   hinge: {
     id: "hinge", name: "Hip Hinge",
@@ -208,34 +242,74 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     libraryQuery: "stiff leg deadlift",
   },
   balance: {
-    id: "balance", name: "Single-leg Balance",
-    what: "Stand on one leg without grabbing anything.",
-    why: "Measures hip stability and how steady your standing leg is.",
-    setup: ["Stand facing the camera, full body in frame", "Hands on hips or relaxed at sides", "Pick a spot on the wall to look at"],
-    steps: ["Lift your right foot a few inches off the ground", "Hold steady for 5 seconds", "Switch legs and hold the other 5 seconds"],
-    mistakes: ["Holding onto a wall or chair", "Looking down at the floor", "Hopping on the standing foot"],
-    reps: "5 sec each leg",
-    libraryQuery: "single leg balance",
+    id: "balance", name: "Hurdle Step",
+    what: "Step one leg over a shin-height hurdle (or string) and touch the heel down on the other side, without losing your posture.",
+    why: "Tests single-leg stability, stride mechanics and hip mobility while a dowel keeps your posture honest.",
+    setup: [
+      "Set a hurdle (or a string between two chairs) at the height of your tibial tuberosity (just below the knee)",
+      "Stand right behind it with your feet together",
+      "Rest a dowel across your shoulders, held in place with both hands",
+    ],
+    steps: [
+      "Slowly raise one leg and step over the hurdle — heel first",
+      "Lightly touch the heel to the floor on the other side without shifting your weight",
+      "Return the leg to the start position under control",
+      "Repeat on the other side",
+    ],
+    mistakes: [
+      "Loss of balance during the step",
+      "Stance-leg hip or knee collapsing inward",
+      "Trunk leaning or twisting to clear the hurdle",
+      "Dowel tilting off horizontal",
+    ],
+    reps: "Up to 3 slow reps each leg",
+    libraryQuery: "hurdle step",
   },
   lunge: {
-    id: "lunge", name: "Lunge Reach",
-    what: "Step one foot forward into a lunge, then return to standing.",
-    why: "Combines single-leg strength with hip and ankle mobility.",
-    setup: ["Stand facing the camera, arms at sides", "Feet together"],
-    steps: ["Take a long step forward with your right foot", "Bend both knees until your back knee almost touches the floor", "Push back up to standing", "Repeat with the left leg"],
-    mistakes: ["Front knee collapsing inward", "Leaning too far forward", "Tiny step (makes it harder, not easier)"],
-    reps: "1 rep each leg",
-    libraryQuery: "bodyweight walking lunge",
+    id: "lunge", name: "In-line Lunge",
+    what: "Split-stance lunge with both feet on a narrow line — hold a dowel behind the spine.",
+    why: "Tests hip mobility, ankle mobility and torso stability in a narrow, staggered stance.",
+    setup: [
+      "Place both feet in-line on a narrow board (or a taped line). Toes point straight ahead.",
+      "Front foot heel touches the line marking your own tibia length behind the toe of the back foot.",
+      "Hold a dowel vertically behind your back so it contacts the back of your head, upper back, and tailbone — opposite hand to the front leg on top.",
+    ],
+    steps: [
+      "Keeping the dowel in contact with all three points, lower straight down",
+      "Touch the back knee to the board just behind the front heel",
+      "Return to the start under control",
+      "Switch legs and repeat",
+    ],
+    mistakes: [
+      "Loss of balance",
+      "Torso rotating off the line",
+      "Dowel losing contact with head / back / tailbone",
+      "Back knee not touching the board behind the front heel",
+    ],
+    reps: "Up to 3 slow reps each leg",
+    libraryQuery: "in-line lunge",
   },
   overhead: {
-    id: "overhead", name: "Overhead Reach + Rotation",
-    what: "Reach both arms straight up overhead, then rotate side to side.",
-    why: "Shows shoulder mobility and how well your spine rotates.",
-    setup: ["Stand facing the camera, full body in frame", "Feet shoulder-width apart", "Arms relaxed at sides"],
-    steps: ["Raise both arms straight up overhead — try to get them next to your ears", "Hold for 2 seconds at the top", "Rotate your torso slowly to the right, then left", "Lower arms"],
-    mistakes: ["Arching the lower back to fake more reach", "Arms bending at the elbow", "Shrugging shoulders up to the ears"],
-    reps: "1 slow cycle",
-    libraryQuery: "standing overhead reach",
+    id: "overhead", name: "Shoulder Mobility",
+    what: "One hand reaches over the top and down the back, the other reaches up the back — see how close the fists get.",
+    why: "Bilateral shoulder screen: combined internal + external rotation and shoulder-blade mobility.",
+    setup: [
+      "Stand facing the camera",
+      "Make a fist around your thumb on each hand",
+      "One arm goes over the shoulder, elbow high, fist behind the neck; the other arm comes up the back, palm out, fist as high as it can go",
+    ],
+    steps: [
+      "In one smooth motion, reach both fists toward each other behind your back",
+      "Hold the position so the camera can measure the fist-to-fist distance",
+      "Return to start, then repeat with the other arm on top",
+    ],
+    mistakes: [
+      "Walking the hands together after the initial reach (must be one motion)",
+      "Twisting the torso to close the gap",
+      "Sharp pain in either shoulder — stop and report it",
+    ],
+    reps: "1 rep each side",
+    libraryQuery: "shoulder mobility reach",
   },
   ankle_df: {
     id: "ankle_df", name: "Ankle Dorsiflexion (knee-to-wall)",
@@ -258,24 +332,73 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     libraryQuery: "single leg step down",
   },
   hip_abd: {
-    id: "hip_abd", name: "Standing Hip Abduction",
-    what: "Stand on one leg and lift the other leg straight out to the side.",
-    why: "Tests the glute medius — the muscle that keeps your pelvis level when you walk and run.",
-    setup: ["Stand facing the camera, full body in frame", "Hands on hips"],
-    steps: ["Shift weight onto your right leg", "Lift your left leg straight out to the side, keep it straight", "Hold 2 seconds, lower with control", "Switch sides"],
-    mistakes: ["Leaning the upper body to the opposite side", "Letting the lifted leg drift forward instead of straight out"],
-    reps: "Both sides",
-    libraryQuery: "standing hip abduction",
+    id: "hip_abd", name: "Active Straight-Leg Raise",
+    what: "Lie on your back and raise one straight leg as high as it will go, keeping the other leg flat.",
+    why: "Isolates hamstring / posterior-chain flexibility of the moving leg AND the ability of the opposite leg to stay in extension.",
+    setup: [
+      "Lie flat on your back, arms flat at your sides with palms up",
+      "Legs straight, toes pointing up",
+      "Position sideways to the camera so it sees the full body profile",
+    ],
+    steps: [
+      "Keeping the leg straight and the opposite leg flat on the floor, raise one leg as high as you can",
+      "Ankle of the raised leg should reach at least the level of the down-leg mid-thigh",
+      "Lower under control and switch sides",
+    ],
+    mistakes: [
+      "Bending the moving-leg knee",
+      "The down leg lifting or rotating out",
+      "The pelvis rocking to help the lift",
+    ],
+    reps: "Up to 3 slow reps each leg",
+    libraryQuery: "active straight leg raise",
   },
   bridge_hold: {
-    id: "bridge_hold", name: "Glute Bridge Endurance",
-    what: "Lie on your back, knees bent, and lift your hips into a bridge — hold it.",
-    why: "Measures glute endurance, which protects the low back.",
-    setup: ["Lie on your back so the camera sees your side profile", "Knees bent, feet flat, arms relaxed at your sides"],
-    steps: ["Squeeze your glutes and lift your hips toward the ceiling", "Create a straight line from your shoulders to your knees", "Hold the position — don't let the hips sag", "Hold for the full 10 seconds"],
-    mistakes: ["Lower back arching instead of glutes squeezing", "Hips dropping before the timer ends", "Pushing through the toes instead of the heels"],
-    reps: "Hold ~10 sec",
-    libraryQuery: "glute bridge",
+    id: "bridge_hold", name: "Trunk Stability Push-Up",
+    what: "From a strict narrow-hand push-up position, press up so the whole body leaves the floor as a single rigid unit.",
+    why: "Tests whether your trunk can transfer force between the upper and lower body without the hips sagging or lagging.",
+    setup: [
+      "Lie face-down. Feet together, toes tucked",
+      "Hands under your shoulders — men: thumbs at forehead line; women: thumbs at chin line",
+      "Knees off the floor, body in one long line",
+      "Camera on your side to catch a sagging low back",
+    ],
+    steps: [
+      "Press up so your body rises as one solid piece — chest and knees leave the floor at the same instant",
+      "Hold the top for a beat, lower under control",
+      "Report if you feel any lower-back or shoulder pain — that clears this pattern to zero",
+    ],
+    mistakes: [
+      "Hips lifting first (or last) — body must move as one unit",
+      "Lower back sagging",
+      "Chest coming up while knees stay on the floor",
+    ],
+    reps: "1 clean rep",
+    libraryQuery: "push up",
+  },
+  rotary_stability: {
+    id: "rotary_stability", name: "Rotary Stability",
+    what: "On all-fours, extend the same-side arm and leg, then bring elbow to knee over a narrow line — without losing balance.",
+    why: "Screens multi-plane trunk stability: whether the core can coordinate an arm and a leg on the same side over a narrow base.",
+    setup: [
+      "Get on all fours over a narrow board or taped line",
+      "Hands directly under shoulders, knees directly under hips",
+      "Toes tucked so they can push the floor",
+    ],
+    steps: [
+      "Extend the right arm straight forward and the right leg straight back — both in line with the torso, over the board",
+      "In one motion, bring the right elbow to the right knee directly over the board",
+      "Extend back out, then return to all fours",
+      "Repeat on the left side",
+      "Report if any pain shows up during the movement — that clears this pattern to zero",
+    ],
+    mistakes: [
+      "Losing balance / dropping off the board",
+      "Arm and leg not staying in line with the torso",
+      "Elbow and knee not touching over the board",
+    ],
+    reps: "1 clean rep each side",
+    libraryQuery: "bird dog",
   },
   wall_slide: {
     id: "wall_slide", name: "Scapular Wall Slide",
