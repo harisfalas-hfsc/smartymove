@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
 import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
 import squatImg from "@/assets/fms/squat.png.asset.json";
+import hingeImg from "@/assets/fms/hinge.jpg.asset.json";
 import balanceImg from "@/assets/fms/balance.png.asset.json";
 import lungeImg from "@/assets/fms/lunge.png.asset.json";
 import overheadImg from "@/assets/fms/overhead.png.asset.json";
@@ -12,6 +13,7 @@ import rotaryImg from "@/assets/fms/rotary_stability.png.asset.json";
 
 const DEMO_IMAGES: Record<string, string> = {
   squat: squatImg.url,
+  hinge: hingeImg.url,
   balance: balanceImg.url,
   lunge: lungeImg.url,
   overhead: overheadImg.url,
