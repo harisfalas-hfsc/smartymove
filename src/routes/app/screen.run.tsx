@@ -647,6 +647,32 @@ function Runner() {
               <p className="text-sm opacity-85">Crunching your scores...</p>
             </div>
           )}
+          {phase === "painCheck" && painCheckTestId && (
+            <div className="rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
+              <div className="flex items-center gap-2 text-warning">
+                <AlertCircle className="h-5 w-5" />
+                <div className="text-[11px] font-bold uppercase tracking-widest">Pain check</div>
+              </div>
+              <div className="mt-1 text-xl font-extrabold">Did you feel pain during that pattern?</div>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                This is one of the clearing patterns. If you felt sharp pain anywhere during the movement, we clear the pattern to <strong>0</strong> so your program treats it as a red flag instead of a mobility issue.
+              </p>
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() => resolvePainCheck(false)}
+                  className="h-12 flex-1 rounded-2xl brand-gradient text-base font-bold text-primary-foreground"
+                >
+                  No pain — continue
+                </button>
+                <button
+                  onClick={() => resolvePainCheck(true)}
+                  className="h-12 flex-1 rounded-2xl bg-destructive/90 text-base font-bold text-white"
+                >
+                  Yes, there was pain
+                </button>
+              </div>
+            </div>
+          )}
           {(phase === "confirm" || phase === "submitting") && (
             <div className="rounded-3xl bg-white/10 p-5 text-center backdrop-blur-xl">
               <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-400" />
