@@ -23,7 +23,6 @@ import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
 import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal } from "lucide-react";
 import { TestPreviewSheet } from "@/components/TestPreviewSheet";
-import { CORE_TESTS } from "@/lib/movement";
 
 export const Route = createFileRoute("/app/screen/run")({
   ssr: false,
