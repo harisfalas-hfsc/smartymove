@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Camera, Activity, Target, ShieldCheck, Repeat, Compass, Users, Heart, GraduationCap, Dumbbell, Plane, Briefcase, Play, Search, Calendar, TrendingUp } from "lucide-react";
+import { Sparkles, Camera, Activity, Target, ShieldCheck, Repeat, Compass, Users, Heart, GraduationCap, Dumbbell, Plane, Briefcase, Play, Search, Calendar, TrendingUp, ListChecks, ChevronRight } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,6 +44,17 @@ function About() {
     { n: 3, Icon: Search, color: "text-purple-500", title: "See your results", body: "Score, Movement Age, and the real root cause." },
     { n: 4, Icon: Play, color: "text-emerald-500", title: "Train", body: "Your 5-minute daily routine — mobility, stability, strength." },
     { n: 5, Icon: TrendingUp, color: "text-cyan-500", title: "Rescan every 14 days", body: "Watch your score improve, your program evolve." },
+  ];
+
+  const eightPatterns = [
+    "Deep squat",
+    "Hurdle step",
+    "In-line lunge",
+    "Active straight-leg raise",
+    "Shoulder mobility",
+    "Trunk stability push-up",
+    "Rotary stability",
+    "Hip-hinge",
   ];
 
   return (
@@ -107,22 +118,67 @@ function About() {
               <h2 className="text-2xl font-bold text-foreground">
                 How <span className="text-primary">It Works</span>
               </h2>
-              <div className="space-y-3 text-left pt-2">
-                {howItWorks.map(({ n, Icon, color, title, body }) => (
-                  <div key={n} className="flex items-start gap-3">
-                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 text-sm font-extrabold text-primary">
-                      {n}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Icon className={`w-4 h-4 ${color}`} />
-                        <span className="text-sm font-bold text-foreground">{title}</span>
+              <div className="grid gap-4 pt-2 lg:grid-cols-[1fr_280px] lg:items-start">
+                <div className="space-y-3 text-left">
+                  {howItWorks.map(({ n, Icon, color, title, body }) => {
+                    const isScreen = n === 2;
+                    const row = (
+                      <div className={`flex items-start gap-3 rounded-xl ${isScreen ? "sm-step-screen p-2 -m-2 cursor-pointer transition hover:bg-primary/5" : ""}`}>
+                        <div className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-extrabold ${isScreen ? "bg-primary text-white sm-step-pulse" : "bg-primary/10 text-primary"}`}>
+                          {n}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <Icon className={`w-4 h-4 ${color}`} />
+                            <span className="text-sm font-bold text-foreground">{title}</span>
+                            {isScreen && <ChevronRight className="w-4 h-4 text-primary lg:hidden" />}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-0.5">{body}</div>
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{body}</div>
-                    </div>
+                    );
+                    return isScreen ? (
+                      <Link key={n} to="/app/screen" aria-label="See the 8 movement patterns we test">
+                        {row}
+                      </Link>
+                    ) : (
+                      <div key={n}>{row}</div>
+                    );
+                  })}
+                </div>
+                {/* Methodology mini-card — 8 movement patterns */}
+                <Link
+                  to="/app/screen"
+                  className="block rounded-2xl border-2 border-primary/40 bg-primary/5 p-4 text-left transition hover:border-primary hover:bg-primary/10"
+                >
+                  <div className="flex items-center gap-2">
+                    <ListChecks className="w-5 h-5 text-primary" />
+                    <span className="text-sm font-extrabold text-foreground">The 8 Movement Patterns</span>
                   </div>
-                ))}
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Our methodology: 8 functional tests scored by your camera — full-body mobility, stability, balance & control.
+                  </p>
+                  <ul className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
+                    {eightPatterns.map((p, i) => (
+                      <li key={p} className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
+                        <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-primary/15 text-[9px] font-extrabold text-primary">{i + 1}</span>
+                        <span className="truncate">{p}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-3 flex items-center gap-1 text-xs font-bold text-primary">
+                    See the tests <ChevronRight className="w-4 h-4" />
+                  </div>
+                </Link>
               </div>
+              <style>{`
+                @keyframes sm-step-pulse-kf {
+                  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55); }
+                  50%      { transform: scale(1.08); box-shadow: 0 0 0 8px hsl(var(--primary) / 0); }
+                }
+                .sm-step-pulse { animation: sm-step-pulse-kf 1.6s ease-in-out infinite; }
+                @media (prefers-reduced-motion: reduce) { .sm-step-pulse { animation: none; } }
+              `}</style>
             </div>
           </CardContent>
         </Card>
