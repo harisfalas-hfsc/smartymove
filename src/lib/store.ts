@@ -499,6 +499,7 @@ export function clearLocalAccountData() {
   localStorage.removeItem(KEY);
   localStorage.removeItem(DRAFT_KEY);
   localStorage.removeItem(PENDING_PROFILE_KEY);
+  localStorage.removeItem(ONBOARDING_NEXT_KEY);
   window.dispatchEvent(new Event("smartymove:user"));
 }
 
