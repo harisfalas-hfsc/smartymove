@@ -835,3 +835,33 @@ function titleCase(s: string): string {
 
 /** AREA_LABEL re-export so the UI can render focus area badges. */
 export { AREA_LABEL };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sanity check — every canonical referenced by a focus template MUST match
+// (case-insensitive) a curated name in LIBRARY. Prevents typos here from
+// silently dropping an exercise at runtime via the fuzzy resolver.
+// Runs once at module load; a mismatch throws in dev builds and logs loudly
+// in prod so it surfaces during smoke tests instead of during a real scan.
+// ─────────────────────────────────────────────────────────────────────────────
+function assertDecisionCanonicals(): void {
+  const knownNames = new Set<string>();
+  for (const area of Object.keys(LIBRARY) as Area[]) {
+    for (const cat of ["mobility", "stability", "strength"] as Category[]) {
+      for (const n of LIBRARY[area][cat]) knownNames.add(n.toLowerCase());
+    }
+  }
+  const missing: string[] = [];
+  for (const focusId of Object.keys(FOCUS_TEMPLATES) as FocusId[]) {
+    for (const ex of FOCUS_TEMPLATES[focusId].exercises) {
+      if (!knownNames.has(ex.canonical.toLowerCase())) {
+        missing.push(`${focusId} → "${ex.canonical}"`);
+      }
+    }
+  }
+  if (missing.length > 0) {
+    const msg = `[decision] canonical names not present in LIBRARY:\n  ${missing.join("\n  ")}`;
+    if (import.meta.env?.DEV) throw new Error(msg);
+    console.error(msg);
+  }
+}
+assertDecisionCanonicals();
