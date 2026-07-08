@@ -212,7 +212,7 @@ function Pricing() {
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
             <Button variant="outline" onClick={() => setSignInPromptOpen(false)}>Cancel</Button>
-            <Button onClick={() => { window.location.href = "/?auth=signin"; }}>Sign in</Button>
+            <Button onClick={() => { window.location.href = "/?auth=signin&next=%2Fpricing"; }}>Sign in</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

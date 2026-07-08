@@ -73,13 +73,14 @@ function Welcome() {
   const [verificationSent, setVerificationSent] = useState(false);
   const [resendSent, setResendSent] = useState(false);
   const [emailUnverified, setEmailUnverified] = useState(false);
+  const [nextPath, setNextPath] = useState<string | null>(null);
 
   useEffect(() => {
-    const requestedMode =
-      typeof window !== "undefined"
-        ? new URLSearchParams(window.location.search).get("auth")
-        : null;
+    const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+    const requestedMode = params?.get("auth") ?? null;
     if (requestedMode === "signin" || requestedMode === "signup") {
+      const next = sanitizeNextPath(params?.get("next"));
+      setNextPath(next);
       setMode(requestedMode);
       window.history.replaceState(null, "", "/");
       return;
@@ -115,7 +116,7 @@ function Welcome() {
     setEmailUnverified(false);
     setSubmitting(true);
     try {
-      const result = await signUpWithEmailProfile(name, email, Number(age), pw);
+      const result = await signUpWithEmailProfile(name, email, Number(age), pw, getEmailRedirectTo(nextPath));
       if (result.emailVerificationRequired) {
         setVerificationSent(true);
         return;
@@ -123,10 +124,11 @@ function Welcome() {
       const draft = getOnboardingDraft();
       clearOnboardingDraft();
       navigate({
-        to:
+        to: nextPath ?? (
           (result.user.questionnaire || draft.questionnaire) && (result.user.goal || draft.goal)
             ? "/app"
-            : "/onboarding/parq",
+            : "/onboarding/parq"
+        ),
       });
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Account creation failed. Try again.");
@@ -144,7 +146,7 @@ function Welcome() {
     setSubmitting(true);
     try {
       const u = await signInWithEmailProfile(email, pw);
-      navigate({ to: u.questionnaire && u.goal ? "/app" : "/onboarding/parq" });
+      navigate({ to: nextPath ?? (u.questionnaire && u.goal ? "/app" : "/onboarding/parq") });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Sign in failed. Check your email and password.";
       if (/email not (confirmed|verified)/i.test(message)) {
@@ -169,7 +171,7 @@ function Welcome() {
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: email.trim().toLowerCase(),
-        options: { emailRedirectTo: window.location.origin },
+        options: { emailRedirectTo: getEmailRedirectTo(nextPath) },
       });
       if (error) throw error;
       setResendSent(true);
@@ -922,6 +924,24 @@ function Welcome() {
       <SiteFooter />
     </div>
   );
+}
+
+function sanitizeNextPath(value?: string | null) {
+  if (!value) return null;
+  try {
+    const decoded = decodeURIComponent(value);
+    if (!decoded.startsWith("/") || decoded.startsWith("//")) return null;
+    if (decoded.includes("\\")) return null;
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+
+function getEmailRedirectTo(nextPath: string | null) {
+  if (typeof window === "undefined") return undefined;
+  if (!nextPath) return window.location.origin;
+  return `${window.location.origin}/?auth=signin&next=${encodeURIComponent(nextPath)}`;
 }
 
 function IconBubble({ Icon }: { Icon: LucideIcon }) {

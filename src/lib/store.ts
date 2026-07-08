@@ -330,6 +330,7 @@ export async function signUpWithEmailProfile(
   email: string,
   age: number,
   password: string,
+  emailRedirectTo?: string,
 ): Promise<{ user: User; emailVerificationRequired: boolean }> {
   const normalizedEmail = normalizeEmail(email);
   const draft = getOnboardingDraft();
@@ -338,7 +339,7 @@ export async function signUpWithEmailProfile(
     email: normalizedEmail,
     password,
     options: {
-      emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+      emailRedirectTo: emailRedirectTo ?? (typeof window !== "undefined" ? window.location.origin : undefined),
       data: { name: name.trim(), full_name: name.trim(), age },
     },
   });
