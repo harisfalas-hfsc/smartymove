@@ -763,6 +763,9 @@ function Welcome() {
             .sm-wellness-title{ font-size:42px; }
             .sm-primary-cta{ width:100%; margin-top:18px; min-height:46px; font-size:14px; }
             .sm-panel-score-picture{ min-height: 190px; }
+            .sm-panel-about,
+            .sm-panel-program,
+            .sm-panel-tools{ display: none; }
           }
           @media (min-width: 1024px){
             .sm-wellness-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
