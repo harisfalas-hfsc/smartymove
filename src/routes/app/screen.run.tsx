@@ -188,7 +188,7 @@ function mergeStepResults(stepResults: Array<TestResult & { viewIndex: number }>
   // NOT reflect the movement — it means we couldn't read that angle.
   const validViewsForScore = sorted.filter(r => r.valid !== false);
   const scoreSource = validViewsForScore.length ? validViewsForScore : [primary];
-  const scoreMin = scoreSource.reduce<1 | 2 | 3>((m, r) => (r.score < m ? r.score : m), 3);
+  const scoreMin = scoreSource.reduce<0 | 1 | 2 | 3>((m, r) => (r.score < m ? r.score : m) as 0 | 1 | 2 | 3, 3);
   const comps = Array.from(
     new Set(validViewsForScore.flatMap(r => r.compensations ?? [])),
   );
@@ -199,7 +199,7 @@ function mergeStepResults(stepResults: Array<TestResult & { viewIndex: number }>
   return {
     id: primary.id,
     name: primary.name,
-    score: primaryValid ? scoreMin : 1,
+    score: primaryValid ? scoreMin : 1 as 0 | 1 | 2 | 3,
     valid: primaryValid,
     metric: primary.metric,
     left: primary.left,
