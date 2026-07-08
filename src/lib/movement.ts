@@ -22,24 +22,23 @@ export type TestView = {
 
 export const TEST_VIEWS: Record<string, TestView[]> = {
   squat: [
-    { view: "side",  label: "Side view",  cue: "Stand sideways to the camera so your full profile is visible.", detects: ["depth", "heel rise", "trunk lean", "lumbar rounding"] },
-    { view: "front", label: "Front view", cue: "Now face the camera straight on.", detects: ["knee valgus", "knee varus", "left-right asymmetry", "hip shift"] },
+    { view: "front", label: "Front view", cue: "Face the camera, feet shoulder-width, dowel held overhead with arms straight.", detects: ["knee valgus", "left-right asymmetry"] },
+    { view: "side",  label: "Side view",  cue: "Now turn sideways so your full profile is visible.", detects: ["depth (thighs below parallel)", "heel rise", "excessive forward lean", "dowel dropping forward"] },
   ],
   hinge: [
     { view: "side",  label: "Side view",  cue: "Stand sideways to the camera so we can see the line from your head to your hips.", detects: ["spine angle", "true hip flexion", "knee bend compensation"] },
     { view: "front", label: "Front view", cue: "Now face the camera straight on.", detects: ["lateral trunk shift", "pelvic asymmetry"] },
   ],
   balance: [
-    { view: "front", label: "Front view", cue: "Face the camera. Full body in frame.", detects: ["pelvic drop", "trunk lateral lean", "knee position"] },
-    { view: "side",  label: "Side view",  cue: "Turn sideways to the camera. Do both legs from this angle too.", detects: ["forward trunk lean", "hip flexion substitution"] },
+    { view: "front", label: "Front view", cue: "Face the camera, hurdle set at your shin height, dowel across your shoulders.", detects: ["pelvis staying level", "L/R stance leg asymmetry"] },
+    { view: "side",  label: "Side view",  cue: "Now stand sideways so we can see the stepping leg clear the hurdle.", detects: ["forward trunk lean", "hip flexion range", "loss of stance-leg alignment"] },
   ],
   lunge: [
-    { view: "side",  label: "Side view",  cue: "Stand sideways to the camera so we can see the front knee angle.", detects: ["front knee angle", "front heel rise", "trunk lean"] },
-    { view: "front", label: "Front view", cue: "Now face the camera and repeat on the same leg, then switch legs.", detects: ["front knee valgus", "torso rotation", "back-leg hip drop"] },
+    { view: "side",  label: "Side view",  cue: "Stand sideways with both feet in line on a 2×6 board. Dowel behind your back (head, spine, tailbone touching).", detects: ["front knee tracks over foot", "back knee touches the board behind the front heel", "trunk stays upright"] },
+    { view: "front", label: "Front view", cue: "Now face the camera on the board and repeat, then switch legs.", detects: ["loss of balance", "torso rotation", "front-knee drift"] },
   ],
   overhead: [
-    { view: "front", label: "Front view", cue: "Face the camera, full body in frame.", detects: ["arm elevation angle", "shoulder shrug", "L/R shoulder symmetry"] },
-    { view: "side",  label: "Side view",  cue: "Turn sideways so we can see if the lower back arches.", detects: ["lumbar extension / arch", "rib-cage flare"] },
+    { view: "front", label: "Front view", cue: "Face the camera. Make a fist around your thumb on each hand.", detects: ["fist-to-fist distance (target: within one hand length)", "L/R shoulder symmetry"] },
   ],
   ankle_df: [
     { view: "side",  label: "Side view",  cue: "Kneel sideways to the camera.", detects: ["tibia forward lean", "heel lift"] },
@@ -50,11 +49,13 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
     { view: "side",  label: "Side view",  cue: "Turn sideways for the second set.", detects: ["trunk forward pitch", "heel rise", "descent control"] },
   ],
   hip_abd: [
-    { view: "front", label: "Front view", cue: "Face the camera. Full body in frame.", detects: ["hip hike", "trunk lean", "leg lift height", "pelvic drop"] },
+    { view: "side",  label: "Side view",  cue: "Lie on your back with the camera on your side. Arms flat, legs straight, toes up.", detects: ["moving-leg ankle height vs. mid-thigh of the down leg", "opposite-leg staying flat", "loss of neutral pelvis"] },
   ],
   bridge_hold: [
-    { view: "side",  label: "Side view",  cue: "Lie on your back with your side to the camera.", detects: ["hip height", "lumbar arch / hyperextension"] },
-    { view: "front", label: "Front view", cue: "Rotate so the camera can see across both hips.", detects: ["pelvic rotation / unilateral glute weakness"] },
+    { view: "side",  label: "Side view",  cue: "Get face-down with hands under your shoulders (men: thumbs at forehead; women: thumbs at chin). Feet together.", detects: ["body rises as one unit — no lag in the hips", "chest/knees leave the floor together", "no lower-back sagging"] },
+  ],
+  rotary_stability: [
+    { view: "side",  label: "Side view",  cue: "Get on all fours over a 2×6 board with your knees under your hips and hands under your shoulders. Extend your same-side arm and leg.", detects: ["arm and leg extend in line with the torso", "touch elbow to knee over the board", "no loss of balance"] },
   ],
   wall_slide: [
     { view: "side",  label: "Side view",  cue: "Stand sideways to the camera against the wall.", detects: ["lumbar arch", "wall contact quality"] },
@@ -68,23 +69,41 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
   ],
 };
 
+/**
+ * The SmartyMove Scan is a fixed 7-pattern movement screen. The internal
+ * test ids reuse the pre-existing scoring engine (squat/balance/lunge/…) so
+ * geometry + compensation detection continue to work; user-facing names,
+ * descriptions and camera guides are re-branded for the SmartyMove protocol.
+ *
+ *   Deep Squat                → id "squat"
+ *   Hurdle Step               → id "balance"
+ *   In-line Lunge             → id "lunge"
+ *   Shoulder Mobility         → id "overhead"           (front view only)
+ *   Active Straight-Leg Raise → id "hip_abd"
+ *   Trunk Stability Push-Up   → id "bridge_hold"
+ *   Rotary Stability          → id "rotary_stability"   (new — placeholder scoring)
+ *
+ * The three FMS clearing patterns (Shoulder Mobility, TSPU, Rotary
+ * Stability) surface a "any pain during that test?" prompt in the runner;
+ * pain forces the pattern to score 0 (invalid).
+ */
 export const CORE_TESTS = [
-  { id: "squat", name: "Squat", focus: ["mobility", "strength"], duration: 10 },
-  { id: "hinge", name: "Hip Hinge", focus: ["mobility", "quality"], duration: 10 },
-  { id: "balance", name: "Single-leg Balance", focus: ["balance", "stability"], duration: 10 },
-  { id: "lunge", name: "Lunge Reach", focus: ["mobility", "stability"], duration: 10 },
-  { id: "overhead", name: "Overhead Reach + Rotation", focus: ["mobility", "quality"], duration: 10 },
+  { id: "squat",            name: "Deep Squat",                 focus: ["mobility", "quality"],  duration: 10 },
+  { id: "balance",          name: "Hurdle Step",                focus: ["stability", "balance"], duration: 10 },
+  { id: "lunge",            name: "In-line Lunge",              focus: ["mobility", "stability"], duration: 10 },
+  { id: "overhead",         name: "Shoulder Mobility",          focus: ["mobility"],              duration: 10 },
+  { id: "hip_abd",          name: "Active Straight-Leg Raise",  focus: ["mobility"],              duration: 10 },
+  { id: "bridge_hold",      name: "Trunk Stability Push-Up",    focus: ["stability"],             duration: 10 },
+  { id: "rotary_stability", name: "Rotary Stability",           focus: ["stability", "quality"],  duration: 10 },
 ] as const;
 
-export const CONDITIONAL_TESTS: Record<Exclude<Joint, "none">, { id: string; name: string; note?: string }> = {
-  ankle:    { id: "ankle_df",    name: "Ankle Dorsiflexion (knee-to-wall)" },
-  knee:     { id: "knee_sld",    name: "Single-leg Step-down" },
-  hip:      { id: "hip_abd",     name: "Standing Hip Abduction" },
-  back:     { id: "bridge_hold", name: "Glute Bridge Endurance" },
-  shoulder: { id: "wall_slide",  name: "Scapular Wall Slide" },
-  elbow:    { id: "elbow_rom",   name: "Elbow Flex/Extend Range" },
-  wrist:    { id: "wrist_rom",   name: "Guided Wrist Range Check", note: "Less precise than other tests — partly self-reported." },
-};
+/** Tests that surface a "Did you feel pain during that pattern?" prompt.
+ *  Pain forces the pattern to score 0 (marked invalid + excluded from sub-scores). */
+export const CLEARING_TESTS = new Set(["overhead", "bridge_hold", "rotary_stability"]);
+
+/** Kept for back-compat with older exports; the fixed 7-pattern scan no
+ *  longer branches on joint selection. */
+export const CONDITIONAL_TESTS: Record<string, { id: string; name: string; note?: string }> = {};
 
 export function angle(a: {x:number;y:number}, b: {x:number;y:number}, c: {x:number;y:number}) {
   const ab = { x: a.x - b.x, y: a.y - b.y };
@@ -120,7 +139,8 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
     ankle_df:    ["mobility"],
     knee_sld:    ["stability"],
     hip_abd:     ["stability"],
-    bridge_hold: ["stability"],
+    bridge_hold: ["stability", "quality"],
+    rotary_stability: ["stability", "quality"],
     wall_slide:  ["mobility"],
     elbow_rom:   ["mobility"],
     wrist_rom:   [],
