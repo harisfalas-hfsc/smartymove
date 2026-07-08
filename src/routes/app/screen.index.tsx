@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { useUser } from "@/lib/store";
 import { CORE_TESTS } from "@/lib/movement";
-import { Play, Lock, Loader2, Camera, ShieldCheck, Smartphone, EyeOff, Ruler, Sparkles, Timer, HelpCircle, ListChecks } from "lucide-react";
+import { Play, Lock, Loader2, Camera, ShieldCheck, Smartphone, EyeOff, Ruler, Sparkles, Timer, HelpCircle, ListChecks, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
 import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
+import { TestPreviewSheet } from "@/components/TestPreviewSheet";
 import { isAdminEmail } from "@/lib/admin";
 
 export const Route = createFileRoute("/app/screen/")({ component: ScreenIndex });
@@ -13,6 +15,8 @@ function ScreenIndex() {
   const u = useUser();
   const navigate = useNavigate();
   const isAdmin = !!u && isAdminEmail(u.email);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewFocus, setPreviewFocus] = useState<string | undefined>(undefined);
   const access = useQuery({
     queryKey: ["scan-access", u?.id ?? "pending"],
     queryFn: () => getScanAccess(),
@@ -50,6 +54,7 @@ function ScreenIndex() {
   );
 
   return (
+    <>
     <div className="space-y-4 px-5 pb-6 pt-4" style={{ background: "#ffffff" }}>
       {/* HERO CARD */}
       <SmartyCard
@@ -84,12 +89,17 @@ function ScreenIndex() {
       </SmartyCard>
 
       {/* CORE TESTS */}
-      <SmartyCard Icon={ListChecks} iconColor="#1D4ED8" iconBg="#DBEAFE" title="The 8 movement patterns" subtitle="Everyone runs the same 8 patterns — every scan.">
+      <SmartyCard Icon={ListChecks} iconColor="#1D4ED8" iconBg="#DBEAFE" title="The 8 movement patterns" subtitle="Tap any pattern to see the reference photo, setup, cues, and common mistakes before you scan.">
         <div className="mt-2 space-y-1.5">
           {CORE_TESTS.map((t, i) => {
             const palette = ["#0E7C86", "#7A3EBA", "#C2410C", "#0F766E", "#1D4ED8", "#B45309", "#0369A1"][i % 7];
             return (
-              <div key={t.id} className="flex items-center gap-3 py-1.5">
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => { setPreviewFocus(t.id); setPreviewOpen(true); }}
+                className="flex w-full items-center gap-3 rounded-xl py-1.5 text-left transition hover:bg-secondary/40 active:scale-[0.99]"
+              >
                 <span
                   className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-sm font-extrabold text-white"
                   style={{ background: palette, boxShadow: `0 6px 14px -8px ${palette}` }}
@@ -100,10 +110,18 @@ function ScreenIndex() {
                   <div className="text-sm font-bold" style={{ color: "#14213A" }}>{t.name}</div>
                   <div className="text-xs" style={{ color: "#5A6B85" }}>⏱ {t.duration}s · {t.focus.join(" + ")}</div>
                 </div>
-              </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+              </button>
             );
           })}
         </div>
+        <button
+          type="button"
+          onClick={() => { setPreviewFocus(undefined); setPreviewOpen(true); }}
+          className="mt-3 h-10 w-full rounded-xl bg-secondary text-sm font-semibold text-foreground"
+        >
+          Preview all 8 patterns
+        </button>
       </SmartyCard>
 
       {/* PRIVACY */}
@@ -136,6 +154,13 @@ function ScreenIndex() {
         </div>
       </SmartyCard>
     </div>
+    <TestPreviewSheet
+      open={previewOpen}
+      onClose={() => setPreviewOpen(false)}
+      testIds={CORE_TESTS.map((t) => t.id)}
+      focusTestId={previewFocus}
+    />
+    </>
   );
 }
 
