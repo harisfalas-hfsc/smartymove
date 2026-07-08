@@ -29,7 +29,19 @@ export interface Questionnaire {
   unexplainedSymptoms?: boolean;
   joints: Joint[];
   disclaimerAccepted: boolean;
+  /** Body areas the user reports pain in right now. Aligned to the 8-pattern scan
+   *  so the program engine can add caution notes for movements loading those areas. */
+  painAreas?: PainArea[];
 }
+
+export type PainArea =
+  | "neck"
+  | "shoulders"
+  | "low_back"
+  | "hips"
+  | "knees"
+  | "ankles_feet"
+  | "wrists_elbows";
 
 export interface TestResult {
   id: string;
