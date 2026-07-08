@@ -291,7 +291,7 @@ function DaySheet({
   const visible = routine;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-3 sm:items-center" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative flex max-h-[88dvh] w-full max-w-[420px] flex-col overflow-hidden rounded-3xl bg-background shadow-2xl">
         <header className="brand-gradient-strong px-5 pb-5 pt-5 text-primary-foreground">
