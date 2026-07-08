@@ -164,28 +164,37 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
     balance: [] as number[],
     quality: [] as number[],
   };
-  // Every number the user sees must come from a test we actually captured
-  // cleanly. Skipped / invalid / no-clear-reading tests are excluded from
-  // every sub-score (they show "No reading" in the per-test breakdown).
-  const valid = results.filter(r => r.valid !== false && r.score > 0);
-  // score 3 → 100, score 2 → 67, score 1 → 33. Score 0 (pain) is excluded
-  // from sub-scores entirely — pain-flagged patterns are red flags, not
-  // numeric findings.
+  // Pain-cap flags: if ANY pain-scored (0) test contributes to a bucket,
+  // that bucket's final sub-score is capped at 50 — pain is a red flag,
+  // not a green light. Score-0 tests still contribute a 0 to the average
+  // (they are no longer silently excluded).
+  const painInBucket = {
+    mobility: false, stability: false, balance: false, quality: false,
+  };
+  // Camera-invalid / skipped-for-non-pain tests are still excluded — no
+  // reading, no number.
+  const valid = results.filter(r => r.valid !== false);
+  // score 3 → 100, score 2 → 67, score 1 → 33, score 0 (pain) → 0 with cap.
   const scoreToPct = (s: 0 | 1 | 2 | 3) => (s === 3 ? 100 : s === 2 ? 67 : s === 1 ? 33 : 0);
   for (const r of valid) {
     const pct = scoreToPct(r.score);
-    for (const f of focusMap[r.id] ?? []) buckets[f].push(pct);
+    for (const f of focusMap[r.id] ?? []) {
+      buckets[f].push(pct);
+      if (r.score === 0) painInBucket[f] = true;
+    }
   }
   // MIN_CONTRIBUTORS = 1: a single test IS enough for a sub-score. If nothing
   // contributed, the sub-score is marked as -1 ("Insufficient data"). This
   // matches the spec: never show a fake number when we don't have data.
   const avgOrInsufficient = (a: number[]) =>
     a.length >= 1 ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : -1;
+  const capIfPain = (v: number, painFlag: boolean) =>
+    v < 0 ? v : painFlag ? Math.min(v, 50) : v;
   const sub = {
-    mobility: avgOrInsufficient(buckets.mobility),
-    stability: avgOrInsufficient(buckets.stability),
-    balance: avgOrInsufficient(buckets.balance),
-    quality: avgOrInsufficient(buckets.quality),
+    mobility:  capIfPain(avgOrInsufficient(buckets.mobility),  painInBucket.mobility),
+    stability: capIfPain(avgOrInsufficient(buckets.stability), painInBucket.stability),
+    balance:   capIfPain(avgOrInsufficient(buckets.balance),   painInBucket.balance),
+    quality:   capIfPain(avgOrInsufficient(buckets.quality),   painInBucket.quality),
   };
   // Overall = weighted average of the four sub-scores (Mobility 30, Stability
   // 30, Balance 20, Quality 20). If a sub-score is "Insufficient data" it is
@@ -202,7 +211,10 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
   const overall = wSum > 0 ? Math.round(weighted / wSum) : 0;
   const offset = Math.round(((75 - overall) / 25) * 5);
   const movementAge = Math.max(16, Math.min(90, age + offset));
-  return { date: new Date().toISOString(), overall, sub, movementAge, tests: results, conditional };
+  const redFlags = results
+    .filter(r => r.valid !== false && r.score === 0)
+    .map(r => r.id);
+  return { date: new Date().toISOString(), overall, sub, movementAge, tests: results, conditional, redFlags };
 }
 
 /**
