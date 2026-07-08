@@ -67,7 +67,7 @@ function Pricing() {
   const paidReturn = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("paid") === "1";
 
   function handleBuy() {
-    if (!u) { window.location.href = "/"; return; }
+    if (!u) { window.location.href = "/?auth=signin"; return; }
     setCheckoutOpen(true);
   }
 
@@ -112,9 +112,13 @@ function Pricing() {
               <Button size="lg" onClick={handleBuy} className="w-full">
                 <Camera className="w-4 h-4 mr-2" /> Buy one scan · €{SCAN_PRICE_EUR.toFixed(2)}
               </Button>
-              {u && (
+              {u ? (
                 <p className="text-xs text-muted-foreground">
                   You have <strong className="text-foreground">{credits}</strong> scan{credits === 1 ? "" : "s"} available.
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Sign in to purchase — you'll be brought straight back here.
                 </p>
               )}
             </div>
