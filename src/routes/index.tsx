@@ -745,6 +745,19 @@ function Welcome() {
             border-radius:99px;
             background:linear-gradient(90deg, transparent, #4FB286 24%, #7CFFB8 50%, #4FB286 76%, transparent);
             box-shadow:0 0 16px 3px rgba(79,178,134,.72);
+            animation: sm-score-pulse 2.4s ease-in-out infinite;
+          }
+          @keyframes sm-score-pulse{
+            0%,100%{
+              opacity:.5;
+              box-shadow:0 0 8px 1px rgba(79,178,134,.35);
+              transform:translateY(0) scaleX(.9);
+            }
+            50%{
+              opacity:1;
+              box-shadow:0 0 24px 6px rgba(124,255,184,.95);
+              transform:translateY(4px) scaleX(1);
+            }
           }
           .sm-score-card div{
             color:rgba(255,255,255,.62);
