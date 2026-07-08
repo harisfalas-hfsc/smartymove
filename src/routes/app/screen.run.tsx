@@ -147,6 +147,7 @@ const TEST_CAMERA_VIEW: Record<string, "front" | "side"> = {
   hip_abd: "side",
   bridge_hold: "side",
   rotary_stability: "side",
+  sl_balance: "front",
   wall_slide: "side",
   elbow_rom: "front",
 };
@@ -165,6 +166,7 @@ const REP_PROMPT: Record<string, string> = {
   hip_abd:          "Straight-leg raise — up to 3 slow reps each leg",
   bridge_hold:      "1 strict trunk-stability push-up",
   rotary_stability: "Same-side arm + leg extend, then elbow to knee — each side",
+  sl_balance:       "Stand on one leg — 10-second hold each side",
   wall_slide:       "3 slow wall slides",
   elbow_rom:        "3 full bend + straighten reps",
   wrist_rom:        "3 slow wrist flex + extend reps",
@@ -182,6 +184,7 @@ const TEST_LANDMARKS: Record<string, number[]> = {
   hip_abd:     [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER],
   bridge_hold: [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_KNEE, PL.RIGHT_KNEE],
   rotary_stability: [PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_WRIST, PL.RIGHT_WRIST],
+  sl_balance:  [PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_ANKLE],
   wall_slide:  [PL.LEFT_EAR, PL.RIGHT_EAR, PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_HIP, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_HIP],
   elbow_rom:   [PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_WRIST, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_WRIST],
 };
