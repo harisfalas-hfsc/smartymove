@@ -180,6 +180,14 @@ function Welcome() {
                 </button>
               </section>
 
+              <div className="sm-panel-score-picture">
+                <div className="sm-score-card">
+                  <div>Movement Score</div>
+                  <strong>72<small>/100</small></strong>
+                  <p>Movement Age 41 · Chronological 47</p>
+                </div>
+              </div>
+
               <section className="sm-panel sm-panel-about sm-blue-border">
                 <div className="sm-card-topline"><span /> Assess <IconBubble Icon={Activity} /></div>
                 <h2>Smarty <span>Move</span></h2>
@@ -210,15 +218,6 @@ function Welcome() {
                   <MiniTile Icon={Dumbbell} label="Workouts" color="#4FB286" />
                   <MiniTile Icon={HeartPulse} label="Progress" color="#7A3EBA" />
                   <MiniTile Icon={CalendarCheck} label="Retest" color="#FF6B4A" />
-                </div>
-              </section>
-
-              <section className="sm-panel sm-panel-score sm-blue-border">
-                <div className="sm-card-topline"><span /> Score <IconBubble Icon={HeartPulse} /></div>
-                <div className="sm-score-card">
-                  <div>Movement Score</div>
-                  <strong>72<small>/100</small></strong>
-                  <p>Movement Age 41 · Chronological 47</p>
                 </div>
               </section>
 
@@ -593,11 +592,23 @@ function Welcome() {
           }
           .sm-panel-about,
           .sm-panel-program,
-          .sm-panel-score,
-          .sm-panel-tools{ min-height: 266px; }
+          .sm-panel-tools,
+          .sm-panel-score-picture{ min-height: 266px; }
           .sm-panel-program{ display:flex; flex-direction:column; }
           .sm-panel-program .sm-tile-grid{ flex:1; align-content:stretch; }
           .sm-panel-program .sm-mini-tile{ min-height:44px; font-size:12px; }
+          .sm-panel-score-picture{
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            box-shadow: 0 12px 36px -28px rgba(20,33,58,.45);
+          }
+          .sm-panel-score-picture .sm-score-card{
+            flex: 1;
+            min-height: 0;
+            margin-top: 0;
+            border-radius: 15px;
+          }
           .sm-feature-list{
             display:grid;
             gap:10px;
@@ -712,15 +723,16 @@ function Welcome() {
             .sm-panel-hero{ min-height:190px; }
             .sm-wellness-title{ font-size:42px; }
             .sm-primary-cta{ width:100%; margin-top:18px; min-height:46px; font-size:14px; }
+            .sm-panel-score-picture{ min-height: 190px; }
           }
           @media (min-width: 1024px){
             .sm-wellness-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .sm-panel-hero{ grid-column: span 2; }
-            .sm-panel-mobile{ grid-column: 3; }
+            .sm-panel-score-picture{ grid-column: 3; grid-row: 1; min-height: 228px; }
+            .sm-panel-mobile{ grid-column: 3; grid-row: 3; }
             .sm-panel-about{ grid-column: 1; grid-row: span 2; min-height: 548px; }
             .sm-panel-program{ grid-column: 2; grid-row: span 2; min-height: 548px; }
             .sm-panel-tools{ grid-column: 3; grid-row: 2; }
-            .sm-panel-score{ grid-column: 3; grid-row: 3; }
           }
         `}</style>
       </main>
