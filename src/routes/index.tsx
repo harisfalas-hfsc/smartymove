@@ -595,6 +595,9 @@ function Welcome() {
           .sm-panel-program,
           .sm-panel-score,
           .sm-panel-tools{ min-height: 266px; }
+          .sm-panel-program{ display:flex; flex-direction:column; }
+          .sm-panel-program .sm-tile-grid{ flex:1; align-content:stretch; }
+          .sm-panel-program .sm-mini-tile{ min-height:44px; font-size:12px; }
           .sm-feature-list{
             display:grid;
             gap:10px;
@@ -637,7 +640,7 @@ function Welcome() {
           }
           .sm-tile-grid{
             display:grid;
-            grid-template-columns: repeat(2, minmax(0,1fr));
+            grid-template-columns: minmax(0,1fr);
             gap:8px;
             margin-top:18px;
           }
@@ -715,9 +718,9 @@ function Welcome() {
             .sm-panel-hero{ grid-column: span 2; }
             .sm-panel-mobile{ grid-column: 3; }
             .sm-panel-about{ grid-column: 1; grid-row: span 2; min-height: 548px; }
-            .sm-panel-program{ grid-column: 2; }
-            .sm-panel-score{ grid-column: 3; }
-            .sm-panel-tools{ grid-column: 3; }
+            .sm-panel-program{ grid-column: 2; grid-row: span 2; min-height: 548px; }
+            .sm-panel-tools{ grid-column: 3; grid-row: 2; }
+            .sm-panel-score{ grid-column: 3; grid-row: 3; }
           }
         `}</style>
       </main>
