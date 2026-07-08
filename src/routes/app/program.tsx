@@ -89,6 +89,7 @@ function Program() {
         {recommendation && (
           <SmartyGymHandoff variant="program-complete" recommendation={recommendation} />
         )}
+        <PastPrograms currentIndex={u.sessions.length - 1} />
         <DaySheet
           dayIndex={activeDay}
           onClose={() => setActiveDay(null)}
@@ -145,6 +146,7 @@ function Program() {
             recommendation={recommendation}
           />
         )}
+        <PastPrograms currentIndex={u.sessions.length - 1} />
       </div>
 
       <DaySheet
