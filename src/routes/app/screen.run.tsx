@@ -589,6 +589,40 @@ function Runner() {
   }
 
   /**
+   * Heel-elevated squat branching. Fired from the `squat_retry` phase card
+   * after a Deep Squat that scored 1 with heels flat. Success = the user
+   * reached depth with the towel/book under their heels → upgrade to
+   * score 2 with an "ankle mobility restriction" flag (Fix 6 diagnostic
+   * branch). Failure = keep score 1 (hip/general mobility root cause).
+   * The retry is only offered once per scan.
+   */
+  function resolveSquatRetry(success: boolean) {
+    squatRetryDecidedRef.current = true;
+    const updated: TestResult[] = success
+      ? results.map((r) =>
+          r.id === "squat"
+            ? {
+                ...r,
+                score: 2 as 2,
+                compensations: [
+                  ...(r.compensations ?? []),
+                  "Passed only with heels elevated — ankle mobility restriction is the root cause of the squat failure",
+                ],
+                notes: `${r.notes ?? ""}${r.notes ? " · " : ""}Heel-elevated retry succeeded — flagged for Ankle Mobility`,
+              }
+            : r,
+        )
+      : results;
+    if (success) setResults(updated);
+    if (idx + 1 >= seq.length) {
+      finalize(updated);
+    } else {
+      setIdx((i) => i + 1);
+      setPhase("intro");
+    }
+  }
+
+  /**
    * Clearing-test pain gate. Called from the intro card before the pattern
    * runs. Records the test as score 0 / invalid (per FMS spec) and skips
    * ahead to the next group — no camera capture, no wasted rep.
