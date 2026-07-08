@@ -23,7 +23,7 @@ const DEMO_IMAGES: Record<string, string> = {
 };
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
-import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal } from "lucide-react";
+import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal, ShieldAlert, HeartPulse } from "lucide-react";
 import { TestPreviewSheet } from "@/components/TestPreviewSheet";
 
 export const Route = createFileRoute("/app/screen/run")({
@@ -287,6 +287,9 @@ function Runner() {
   // the pattern is forced to score 0 (invalid, excluded from sub-scores)
   // and the scan continues so the paid credit still yields a full result.
   const [clearingPain, setClearingPain] = useState<Set<string>>(new Set());
+  // Tests the user has explicitly cleared via the pre-test pain gate. A
+  // clearing test cannot be captured until this Set contains its id.
+  const [clearedTests, setClearedTests] = useState<Set<string>>(new Set());
   const seq = useMemo(
     () => buildSequence(u?.questionnaire?.joints ?? []),
     [u?.questionnaire?.joints?.join("|")],
