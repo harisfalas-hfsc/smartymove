@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { CalendarDays, ChevronDown, Dumbbell } from "lucide-react";
 import { SmartyCard } from "@/components/SmartyCard";
 import {
@@ -49,6 +50,31 @@ export function ProgramHistory({
           const completed = entry.index === currentIndex ? (u.programCompletedDays ?? []).length : PROGRAM_SESSIONS;
           return (
             <details key={entry.index} open={entry.index === defaultOpen} className="group overflow-hidden rounded-2xl border border-border bg-background/70">
+              <ProgramEntry entry={entry} asymByArea={asymByArea} completed={completed} fmt={fmt} />
+            </details>
+          );
+        })}
+      </div>
+    </SmartyCard>
+  );
+}
+
+type Entry = ReturnType<typeof useProgramHistory>["data"] extends (infer T)[] | undefined ? T : never;
+
+function ProgramEntry({
+  entry,
+  asymByArea,
+  completed,
+  fmt,
+}: {
+  entry: Entry;
+  asymByArea: ReturnType<typeof getAsymmetryByArea>;
+  completed: number;
+  fmt: (iso: string) => string;
+}) {
+  const [selectedDay, setSelectedDay] = useState(1);
+  return (
+    <>
               <summary className="flex list-none items-center gap-3 p-3">
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl brand-gradient-soft text-lg font-extrabold text-primary">
                   #{entry.index + 1}
@@ -67,20 +93,33 @@ export function ProgramHistory({
               <div className="space-y-3 border-t border-border/70 p-3 pt-3">
                 <div>
                   <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                    <CalendarDays className="h-3.5 w-3.5" /> 14 training days
+                    <CalendarDays className="h-3.5 w-3.5" /> 14 training days — tap a day to see its workout
                   </div>
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     {Array.from({ length: PROGRAM_LENGTH_DAYS }, (_, i) => i + 1).map((day) => (
-                      <div key={day} className="rounded-xl bg-secondary px-2.5 py-2">
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Day {day}</div>
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => setSelectedDay(day)}
+                        aria-pressed={selectedDay === day}
+                        className={`rounded-xl px-2.5 py-2 text-left transition ${
+                          selectedDay === day
+                            ? "bg-primary text-primary-foreground shadow-card"
+                            : "bg-secondary hover:bg-secondary/70"
+                        }`}
+                      >
+                        <div className={`text-[10px] font-bold uppercase tracking-wider ${selectedDay === day ? "text-primary-foreground/80" : "text-muted-foreground"}`}>Day {day}</div>
                         <div className="truncate text-xs font-semibold">{formatProgramDayDate(entry.startDate, day)}</div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <div className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">Workout</div>
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Day {selectedDay} workout</div>
+                    <div className="text-[11px] font-semibold text-muted-foreground">{formatProgramDayDate(entry.startDate, selectedDay)}</div>
+                  </div>
                   <div className="space-y-2">
                     {entry.items.map((exercise) => {
                       const bias = exercise.area ? (asymByArea as Record<string, ReturnType<typeof getAsymmetryByArea>[string]>)[exercise.area] : undefined;
@@ -118,10 +157,6 @@ export function ProgramHistory({
                   </div>
                 </div>
               </div>
-            </details>
-          );
-        })}
-      </div>
-    </SmartyCard>
+    </>
   );
 }
