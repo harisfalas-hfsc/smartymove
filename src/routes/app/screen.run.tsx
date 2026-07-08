@@ -23,7 +23,7 @@ const DEMO_IMAGES: Record<string, string> = {
 };
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
-import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal } from "lucide-react";
+import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal, ShieldAlert, HeartPulse } from "lucide-react";
 import { TestPreviewSheet } from "@/components/TestPreviewSheet";
 
 export const Route = createFileRoute("/app/screen/run")({
@@ -187,6 +187,50 @@ const TEST_LANDMARKS: Record<string, number[]> = {
 };
 
 function expandToSteps(testId: string, name: string, duration: number, conditional?: boolean): Step[] {
+  return _expandToSteps(testId, name, duration, conditional);
+}
+
+/**
+ * Copy shown on the mandatory clearing-test gate that appears before the
+ * three FMS clearing patterns. Each answer is Yes / No — pain = score 0
+ * and the pattern is skipped; no pain = proceed to the normal intro.
+ */
+function clearingPrompt(testId: string): { intro: string; action: string; question: string } {
+  switch (testId) {
+    case "overhead":
+      return {
+        intro:
+          "This checks that your shoulders can tolerate the overhead reach without pain before we score it.",
+        action:
+          "Stand tall. Press both palms together behind your back — one arm reaching over the top of your shoulder down your spine, the other reaching up from below.",
+        question: "Do you feel any sharp pain or pinching in either shoulder?",
+      };
+    case "bridge_hold":
+      return {
+        intro:
+          "This checks that your spine tolerates extension before we ask you to press up from the floor.",
+        action:
+          "Lie face down. Press your hands flat on the floor at shoulder level and push your upper body up like a cobra, keeping your hips on the floor.",
+        question: "Do you feel any pain in your spine?",
+      };
+    case "rotary_stability":
+      return {
+        intro:
+          "This checks that your spine tolerates flexion before we score the pattern.",
+        action:
+          "From hands and knees, slowly rock your hips back toward your heels (child's pose direction).",
+        question: "Do you feel any pain in your spine?",
+      };
+    default:
+      return {
+        intro: "Quick safety check before this pattern.",
+        action: "Follow the on-screen action.",
+        question: "Any pain?",
+      };
+  }
+}
+
+function _expandToSteps(testId: string, name: string, duration: number, conditional?: boolean): Step[] {
   const views = TEST_VIEWS[testId];
   if (!views || views.length === 0) {
     // Fallback to legacy single-view mapping if a test has no view definition.
@@ -287,6 +331,9 @@ function Runner() {
   // the pattern is forced to score 0 (invalid, excluded from sub-scores)
   // and the scan continues so the paid credit still yields a full result.
   const [clearingPain, setClearingPain] = useState<Set<string>>(new Set());
+  // Tests the user has explicitly cleared via the pre-test pain gate. A
+  // clearing test cannot be captured until this Set contains its id.
+  const [clearedTests, setClearedTests] = useState<Set<string>>(new Set());
   const seq = useMemo(
     () => buildSequence(u?.questionnaire?.joints ?? []),
     [u?.questionnaire?.joints?.join("|")],
@@ -652,6 +699,54 @@ function Runner() {
           )}
           {phase === "intro" && cur && (() => {
             const g = TEST_GUIDES[cur.testId];
+            const needsClearingGate =
+              CLEARING_TESTS.has(cur.testId) &&
+              cur.viewIndex === 0 &&
+              !clearedTests.has(cur.testId) &&
+              !clearingPain.has(cur.testId);
+            if (needsClearingGate) {
+              return (
+                <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-warning">
+                    <ShieldAlert className="h-4 w-4" /> Safety check · Clearing test
+                  </div>
+                  <h2 className="mt-1 text-xl font-extrabold">
+                    Before {cur.name}
+                  </h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {clearingPrompt(cur.testId).intro}
+                  </p>
+                  <div className="mt-4 rounded-2xl bg-secondary/60 p-4">
+                    <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Try this now
+                    </div>
+                    <p className="mt-1 text-sm font-semibold leading-snug">
+                      {clearingPrompt(cur.testId).action}
+                    </p>
+                  </div>
+                  <p className="mt-4 text-base font-bold">
+                    {clearingPrompt(cur.testId).question}
+                  </p>
+                  <div className="mt-3 grid grid-cols-1 gap-2">
+                    <button
+                      onClick={reportClearingPain}
+                      className="flex h-14 items-center justify-center gap-2 rounded-2xl border-2 border-destructive bg-destructive/10 text-base font-bold text-destructive active:scale-[0.99]"
+                    >
+                      <HeartPulse className="h-5 w-5" /> Yes — I felt pain
+                    </button>
+                    <button
+                      onClick={() => setClearedTests(prev => new Set(prev).add(cur.testId))}
+                      className="flex h-14 items-center justify-center gap-2 rounded-2xl brand-gradient text-base font-bold text-primary-foreground active:scale-[0.99]"
+                    >
+                      <CheckCircle2 className="h-5 w-5" /> No pain — continue
+                    </button>
+                  </div>
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    If you said yes: this pattern is scored 0 and skipped. Please consult a doctor or physiotherapist before loading this movement.
+                  </p>
+                </div>
+              );
+            }
             return (
               <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
                 <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">
@@ -730,20 +825,14 @@ function Runner() {
                     className="h-12 flex-[2] rounded-2xl brand-gradient text-base font-semibold text-primary-foreground disabled:opacity-50"
                   >{poseReady ? (isReposition ? "I'm repositioned · Start" : "I'm ready · Start") : "Loading…"}</button>
                 </div>
-                {CLEARING_TESTS.has(cur.testId) && !isReposition && (
-                  <div className="mt-3 rounded-2xl border-2 border-warning/60 bg-warning/10 p-3 text-xs text-foreground">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-warning">
-                      <AlertCircle className="h-3 w-3" /> Clearing test — pain forces a 0
+                {CLEARING_TESTS.has(cur.testId) && !isReposition && clearedTests.has(cur.testId) && (
+                  <div className="mt-3 rounded-2xl bg-success/10 p-3 text-xs text-foreground">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-success">
+                      <CheckCircle2 className="h-3 w-3" /> Clearing check passed
                     </div>
-                    <p className="mt-1">
-                      If this movement causes any pain, tap below. We'll record the pattern as a 0, skip the capture, and continue the scan. A pain-flagged pattern is a red flag — please talk to a clinician before loading it.
+                    <p className="mt-1 text-muted-foreground">
+                      You reported no pain during the pre-test. Continue with {cur.name}.
                     </p>
-                    <button
-                      onClick={reportClearingPain}
-                      className="mt-2 h-10 w-full rounded-xl bg-warning text-xs font-bold text-warning-foreground active:scale-[0.98]"
-                    >
-                      Report pain — skip and score 0
-                    </button>
                   </div>
                 )}
               </div>
