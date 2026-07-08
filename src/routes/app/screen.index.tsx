@@ -25,7 +25,6 @@ function ScreenIndex() {
   const last = u.sessions[u.sessions.length - 1];
   const canScan = isAdmin ? true : (access.data?.canScan ?? false);
   const credits = isAdmin ? 9999 : (access.data?.credits ?? 0);
-  const grandfathered = isAdmin ? true : !!access.data?.hasActiveSubscription;
   const accessLoading = !isAdmin && access.isLoading;
   function startScreen(e: React.MouseEvent) {
     if (canScan) return;
@@ -67,8 +66,6 @@ function ScreenIndex() {
             <span className="inline-flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Checking scan access…</span>
           ) : isAdmin ? (
             <><span style={{ color: "#0E7C86" }}>✓</span> <strong>Admin access</strong> — unlimited scans.</>
-          ) : grandfathered ? (
-            <><span style={{ color: "#0E7C86" }}>✓</span> <strong>Unlimited scans</strong> included with your legacy plan.</>
           ) : canScan ? (
             <>✅ You have <strong>{credits}</strong> scan{credits === 1 ? "" : "s"} available.</>
           ) : (
