@@ -6,17 +6,11 @@ import { type Pain, updateOnboardingDraft, updateUser, getOnboardingDraft, getUs
 
 export const Route = createFileRoute("/onboarding/questionnaire")({ component: Page });
 
-const PAINS: {
-  v: Pain;
-  label: string;
-  selectedBg: string;
-  selectedText: string;
-  selectedRing: string;
-}[] = [
-  { v: "none",     label: "None",     selectedBg: "#16A34A", selectedText: "#FFFFFF", selectedRing: "#16A34A" },
-  { v: "mild",     label: "Mild",     selectedBg: "#EAB308", selectedText: "#1F1300", selectedRing: "#CA8A04" },
-  { v: "moderate", label: "Moderate", selectedBg: "#F97316", selectedText: "#FFFFFF", selectedRing: "#EA580C" },
-  { v: "severe",   label: "Severe",   selectedBg: "#DC2626", selectedText: "#FFFFFF", selectedRing: "#B91C1C" },
+const PAINS: { v: Pain; label: string }[] = [
+  { v: "none",     label: "None" },
+  { v: "mild",     label: "Mild" },
+  { v: "moderate", label: "Moderate" },
+  { v: "severe",   label: "Severe" },
 ];
 
 function Page() {
@@ -78,14 +72,9 @@ function Page() {
                 type="button"
                 onClick={() => setPain(p.v)}
                 aria-pressed={isSelected}
-                style={isSelected ? {
-                  background: p.selectedBg,
-                  color: p.selectedText,
-                  boxShadow: `0 8px 20px -8px ${p.selectedRing}, 0 0 0 2px ${p.selectedRing}`,
-                } : undefined}
                 className={`rounded-2xl px-2 py-3 text-sm font-bold transition-all active:scale-[0.97] ${
                   isSelected
-                    ? "scale-[1.02]"
+                    ? "brand-gradient text-white shadow-card ring-2 ring-primary scale-[1.02]"
                     : "bg-secondary text-foreground/70 hover:bg-secondary/80 border border-border"
                 }`}
               >
@@ -104,15 +93,13 @@ function Page() {
                 type="button"
                 onClick={() => row.set(true)}
                 aria-pressed={row.v === true}
-                style={row.v === true ? { background: "#16A34A", color: "#FFFFFF", boxShadow: "0 6px 14px -6px #16A34A, 0 0 0 2px #16A34A" } : undefined}
-                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ${row.v === true ? "" : "bg-secondary text-foreground/70 border border-border hover:bg-secondary/80"}`}
+                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ${row.v === true ? "brand-gradient text-white shadow-card ring-2 ring-primary" : "bg-secondary text-foreground/70 border border-border hover:bg-secondary/80"}`}
               >Yes</button>
               <button
                 type="button"
                 onClick={() => row.set(false)}
                 aria-pressed={row.v === false}
-                style={row.v === false ? { background: "#DC2626", color: "#FFFFFF", boxShadow: "0 6px 14px -6px #DC2626, 0 0 0 2px #B91C1C" } : undefined}
-                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ${row.v === false ? "" : "bg-secondary text-foreground/70 border border-border hover:bg-secondary/80"}`}
+                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all active:scale-95 ${row.v === false ? "bg-primary text-primary-foreground shadow-card ring-2 ring-primary" : "bg-secondary text-foreground/70 border border-border hover:bg-secondary/80"}`}
               >No</button>
             </div>
           </div>
