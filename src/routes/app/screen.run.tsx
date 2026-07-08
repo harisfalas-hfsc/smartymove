@@ -490,12 +490,20 @@ function Runner() {
       stepResultsRef.current.set(test.groupId, bucket);
       const isLastView = test.viewIndex + 1 >= test.totalViews;
       let mergedForFinalize: TestResult | null = null;
+      let stallForSquatRetry = false;
       if (isLastView) {
         const merged = mergeStepResults(bucket);
         mergedForFinalize = merged;
         setResults(r => [...r, merged]);
+        if (merged.id === "squat" && merged.score === 1 && !squatRetryDecidedRef.current) {
+          stallForSquatRetry = true;
+        }
       }
       setTimeout(() => {
+        if (stallForSquatRetry) {
+          setPhase("squat_retry");
+          return;
+        }
         if (idx + 1 >= seq.length) {
           const base = mergedForFinalize ? [...results, mergedForFinalize] : results;
           finalize(base);
