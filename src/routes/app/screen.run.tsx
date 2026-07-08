@@ -272,6 +272,11 @@ function Runner() {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewedPrompt, setReviewedPrompt] = useState(false);
   const [pendingResults, setPendingResults] = useState<TestResult[] | null>(null);
+  // Clearing-test pain gate: when the user reports pain during a clearing
+  // test (Shoulder Mobility / Trunk Stability Push-Up / Rotary Stability),
+  // the pattern is forced to score 0 (invalid, excluded from sub-scores)
+  // and the scan continues so the paid credit still yields a full result.
+  const [clearingPain, setClearingPain] = useState<Set<string>>(new Set());
   const seq = useMemo(
     () => buildSequence(u?.questionnaire?.joints ?? []),
     [u?.questionnaire?.joints?.join("|")],
