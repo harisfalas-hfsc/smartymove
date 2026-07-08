@@ -720,6 +720,22 @@ function Runner() {
                     className="h-12 flex-[2] rounded-2xl brand-gradient text-base font-semibold text-primary-foreground disabled:opacity-50"
                   >{poseReady ? (isReposition ? "I'm repositioned · Start" : "I'm ready · Start") : "Loading…"}</button>
                 </div>
+                {CLEARING_TESTS.has(cur.testId) && !isReposition && (
+                  <div className="mt-3 rounded-2xl border-2 border-warning/60 bg-warning/10 p-3 text-xs text-foreground">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-warning">
+                      <AlertCircle className="h-3 w-3" /> Clearing test — pain forces a 0
+                    </div>
+                    <p className="mt-1">
+                      If this movement causes any pain, tap below. We'll record the pattern as a 0, skip the capture, and continue the scan. A pain-flagged pattern is a red flag — please talk to a clinician before loading it.
+                    </p>
+                    <button
+                      onClick={reportClearingPain}
+                      className="mt-2 h-10 w-full rounded-xl bg-warning text-xs font-bold text-warning-foreground active:scale-[0.98]"
+                    >
+                      Report pain — skip and score 0
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })()}
