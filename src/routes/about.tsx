@@ -138,7 +138,7 @@ function About() {
                       </div>
                     );
                     return isScreen ? (
-                      <Link key={n} to="/app/screen" aria-label="See the 8 movement patterns we test">
+                      <Link key={n} to="/movement-patterns" aria-label="See the 8 movement patterns we test">
                         {row}
                       </Link>
                     ) : (
@@ -148,7 +148,7 @@ function About() {
                 </div>
                 {/* Methodology mini-card — 8 movement patterns */}
                 <Link
-                  to="/app/screen"
+                  to="/movement-patterns"
                   className="block rounded-2xl border-2 border-primary/40 bg-primary/5 p-4 text-left transition hover:border-primary hover:bg-primary/10"
                 >
                   <div className="flex items-center gap-2">
