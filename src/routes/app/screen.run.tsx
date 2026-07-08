@@ -799,12 +799,13 @@ function Runner() {
           <div className="pointer-events-none absolute inset-x-0 top-16 z-10 flex flex-col items-center gap-2 px-4 text-center">
             <div className="rounded-full bg-black/70 px-5 py-2 text-2xl font-black uppercase tracking-widest text-white shadow-2xl ring-2 ring-white/30 backdrop-blur">
               {cur.cameraView === "side" ? "◐ SIDE VIEW" : "● FACE THE CAMERA"}
+              {cur.side !== "both" && (cur.side === "right" ? " · RIGHT" : " · LEFT")}
             </div>
             <div className="rounded-2xl bg-white/95 px-4 py-1.5 text-lg font-extrabold text-foreground shadow-xl">
-              {cur.name}
+              {cur.name}{cur.sideLabel ? ` · ${cur.sideLabel}` : ""}
             </div>
             <div className="rounded-2xl brand-gradient px-5 py-2 text-2xl font-black text-primary-foreground shadow-2xl ring-2 ring-white/40">
-              {REP_PROMPT[cur.testId] ?? "Perform the movement"}
+              {stepPrompt}
             </div>
             <div className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white/90 backdrop-blur">
               Then walk back and press "I'm Done"
@@ -825,7 +826,7 @@ function Runner() {
               <div className="h-full brand-gradient transition-[width]" style={{ width: `${progress}%` }} />
             </div>
             <div className="mt-1 text-[11px] font-semibold uppercase tracking-widest opacity-80">
-              {groupCount ? `Test ${Math.min(groupIndex + 1, groupCount)} of ${groupCount}` : ""}
+              {cur ? `Recording ${cur.stepIndex} of ${cur.totalSteps} · Test ${Math.min(groupIndex + 1, groupCount)} of ${groupCount}` : ""}
             </div>
           </div>
         </div>
