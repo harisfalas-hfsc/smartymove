@@ -163,13 +163,17 @@ function Welcome() {
               <section className="sm-panel sm-panel-hero sm-border-hero">
                 <div className="sm-eyebrow"><Sparkles className="h-3 w-3" /> Movement diagnostic</div>
                 <h1 className="sm-wellness-title">
-                  <span>Know how you move.</span>
-                  <span>Move smarter.</span>
+                  <span>Know How You Move.</span>
+                  <span>Move Smarter.</span>
                 </h1>
                 <div className="sm-hero-motto">
                   <Smartphone className="h-4 w-4" />
                   <span>Your pocket movement coach.</span>
                 </div>
+                <Link to="/about" className="sm-read-more-link">
+                  Read more <ArrowRight className="h-4 w-4" />
+                </Link>
+
               </section>
 
               <div className="sm-panel-score-picture sm-border-score">
@@ -577,12 +581,12 @@ function Welcome() {
           .sm-wellness-title{
             margin: 14px 0 0;
             color: #10213F;
-            font-size: 44px;
-            line-height: .96;
+            font-size: 32px;
+            line-height: 1.05;
             font-weight: 900;
             letter-spacing: 0;
           }
-          .sm-wellness-title span{ display:block; }
+          .sm-wellness-title span{ display:block; white-space:nowrap; }
           .sm-wellness-title span:nth-child(1){ color:#43AD5C; }
           .sm-wellness-title span:nth-child(2){ color:#2B8FA3; }
           .sm-hero-motto{
@@ -595,6 +599,19 @@ function Welcome() {
             font-weight: 700;
           }
           .sm-hero-motto svg{ color: #2B8FA3; }
+          .sm-read-more-link{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            color: #1D7E95;
+            font-size: 13px;
+            font-weight: 800;
+            text-decoration: none;
+          }
+          .sm-read-more-link:hover{ color: #156578; }
+          .sm-read-more-link svg{ color: #2B8FA3; }
+
           .sm-panel-mobile{
             min-height: 200px;
             display:flex;
@@ -799,8 +816,9 @@ function Welcome() {
             .sm-wellness-grid{ gap:12px; }
             .sm-panel{ padding:18px; }
             .sm-panel-hero{ min-height:190px; }
-            .sm-wellness-title{ font-size:42px; }
+            .sm-wellness-title{ font-size: 28px; }
             .sm-primary-cta{ width:100%; margin-top:18px; min-height:46px; font-size:14px; }
+
             .sm-panel-score-picture{ min-height: 190px; }
             .sm-panel-about,
             .sm-panel-program,
