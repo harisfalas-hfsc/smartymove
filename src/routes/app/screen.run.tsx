@@ -655,6 +655,54 @@ function Runner() {
           )}
           {phase === "intro" && cur && (() => {
             const g = TEST_GUIDES[cur.testId];
+            const needsClearingGate =
+              CLEARING_TESTS.has(cur.testId) &&
+              cur.viewIndex === 0 &&
+              !clearedTests.has(cur.testId) &&
+              !clearingPain.has(cur.testId);
+            if (needsClearingGate) {
+              return (
+                <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-warning">
+                    <ShieldAlert className="h-4 w-4" /> Safety check · Clearing test
+                  </div>
+                  <h2 className="mt-1 text-xl font-extrabold">
+                    Before {cur.name}
+                  </h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {clearingPrompt(cur.testId).intro}
+                  </p>
+                  <div className="mt-4 rounded-2xl bg-secondary/60 p-4">
+                    <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Try this now
+                    </div>
+                    <p className="mt-1 text-sm font-semibold leading-snug">
+                      {clearingPrompt(cur.testId).action}
+                    </p>
+                  </div>
+                  <p className="mt-4 text-base font-bold">
+                    {clearingPrompt(cur.testId).question}
+                  </p>
+                  <div className="mt-3 grid grid-cols-1 gap-2">
+                    <button
+                      onClick={reportClearingPain}
+                      className="flex h-14 items-center justify-center gap-2 rounded-2xl border-2 border-destructive bg-destructive/10 text-base font-bold text-destructive active:scale-[0.99]"
+                    >
+                      <HeartPulse className="h-5 w-5" /> Yes — I felt pain
+                    </button>
+                    <button
+                      onClick={() => setClearedTests(prev => new Set(prev).add(cur.testId))}
+                      className="flex h-14 items-center justify-center gap-2 rounded-2xl brand-gradient text-base font-bold text-primary-foreground active:scale-[0.99]"
+                    >
+                      <CheckCircle2 className="h-5 w-5" /> No pain — continue
+                    </button>
+                  </div>
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    If you said yes: this pattern is scored 0 and skipped. Please consult a doctor or physiotherapist before loading this movement.
+                  </p>
+                </div>
+              );
+            }
             return (
               <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
                 <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">
