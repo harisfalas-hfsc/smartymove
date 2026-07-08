@@ -3,12 +3,13 @@ import { useState } from "react";
 import { useUser } from "@/lib/store";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
-import { Activity, ArrowRight, Flame, Calendar, CheckCircle2, Dumbbell, Moon, LineChart, RefreshCw } from "lucide-react";
+import { Activity, ArrowRight, Flame, Calendar, CheckCircle2, Dumbbell, Moon, LineChart as LineChartIcon, RefreshCw, TrendingUp, Target, AlertCircle } from "lucide-react";
+import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { useCurrentPhase } from "@/lib/exercises";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
 import { evaluateProgress } from "@/lib/corrective/progression";
 import { getOngoingTrack } from "@/lib/corrective/phase";
-import { useProgramStatus, isTrainingDay, TRAINING_DAY_INDICES, PROGRAM_SESSIONS } from "@/lib/program";
+import { useProgramStatus, useScanDecision, isTrainingDay, TRAINING_DAY_INDICES, PROGRAM_SESSIONS, PROGRAM_LENGTH_DAYS } from "@/lib/program";
 import { evaluateRescan } from "@/lib/corrective/rescan";
 import { evaluateGraduation, recommendSmartyGym } from "@/lib/graduation";
 import { SmartyGymHandoff } from "@/components/SmartyGymHandoff";
@@ -20,8 +21,10 @@ function Home() {
   const [openId, setOpenId] = useState<string | null>(null);
   const phase = useCurrentPhase();
   const status = useProgramStatus();
+  const decision = useScanDecision();
   if (!u) return null;
   const latest = u.sessions[u.sessions.length - 1];
+  const first = u.sessions[0];
   const daysSince = latest ? Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000) : null;
   const daysUntilRetest = latest ? Math.max(0, 14 - (daysSince ?? 0)) : null;
   const progression = evaluateProgress(u.sessions);
@@ -29,6 +32,8 @@ function Home() {
   const rescan = evaluateRescan(u, status);
   const graduation = evaluateGraduation(u);
   const recommendation = graduation.status === "cleared" ? recommendSmartyGym(u.goal, graduation.status) : null;
+  const chartData = u.sessions.map((s, i) => ({ name: `#${i + 1}`, score: s.overall }));
+  const delta = latest && first ? latest.overall - first.overall : 0;
 
   return (
     <div className="pb-6">
@@ -55,8 +60,12 @@ function Home() {
           </div>
           <div className="rounded-2xl bg-white/15 p-3 text-center backdrop-blur">
             <Calendar className="mx-auto h-4 w-4" />
-            <div className="mt-1 text-xl font-extrabold">{daysUntilRetest ?? "—"}</div>
-            <div className="text-[10px] uppercase tracking-wider opacity-80">Re-test in</div>
+            <div className="mt-1 text-xl font-extrabold">
+              {daysUntilRetest ?? "—"}{daysUntilRetest != null && <span className="text-xs font-bold opacity-80">d</span>}
+            </div>
+            <div className="text-[10px] uppercase tracking-wider opacity-80">
+              {daysUntilRetest === 0 ? "Rescan today" : "Days to rescan"}
+            </div>
           </div>
         </div>
       </header>
@@ -196,9 +205,131 @@ function Home() {
             </div>
           </section>
         )}
+
+        {u.sessions.length >= 2 && (
+          <section>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-base font-bold">Score history</h3>
+              <Link to="/app/progress" className="text-xs font-semibold text-primary">Full progress →</Link>
+            </div>
+            <div className="rounded-3xl bg-card p-4 shadow-card">
+              <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+                <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                <span>{u.sessions.length} screens · <strong className={delta >= 0 ? "text-success" : "text-warning"}>{delta >= 0 ? "+" : ""}{delta}</strong> since first scan</span>
+              </div>
+              <div className="h-36">
+                <ResponsiveContainer>
+                  <LineChart data={chartData}>
+                    <CartesianGrid stroke="oklch(0.92 0.012 220)" vertical={false} />
+                    <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={10} />
+                    <YAxis domain={[0, 100]} tickLine={false} axisLine={false} fontSize={10} width={28} />
+                    <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid oklch(0.92 0.012 220)" }} />
+                    <Line type="monotone" dataKey="score" stroke="oklch(0.52 0.14 235)" strokeWidth={3} dot={{ r: 3, fill: "oklch(0.62 0.13 210)" }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {latest && status && !status.locked && status.reason === null && (
+          <section>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-base font-bold">Program schedule</h3>
+              <Link to="/app/program" className="text-xs font-semibold text-primary">Open program →</Link>
+            </div>
+            <MiniSchedule status={status} />
+          </section>
+        )}
+
+        {decision && decision.focuses.length > 0 && (
+          <section>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-base font-bold">Your focus areas</h3>
+              <Link to="/app/progress" className="text-xs font-semibold text-primary">All findings →</Link>
+            </div>
+            <div className="rounded-3xl bg-card p-4 shadow-card">
+              <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+                <Target className="h-3.5 w-3.5 text-primary" />
+                <span>What your program targets right now</span>
+              </div>
+              <ul className="space-y-2">
+                {decision.focuses.map((f) => (
+                  <li key={f.id} className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
+                    <div className="text-sm font-bold text-primary">{f.label}</div>
+                    <p className="mt-1 text-xs text-foreground/80">{f.rationale}</p>
+                  </li>
+                ))}
+              </ul>
+              {decision.findings.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {decision.findings.slice(0, 4).map((f, i) => (
+                    <span key={i} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${f.severity === "fail" ? "bg-destructive/15 text-destructive" : "bg-warning/15 text-warning"}`}>
+                      <AlertCircle className="h-3 w-3" /> {f.testName}
+                    </span>
+                  ))}
+                  {decision.findings.length > 4 && (
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">+{decision.findings.length - 4} more</span>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {decision && decision.allClean && (
+          <div className="rounded-3xl border border-success/40 bg-success/10 p-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-success" />
+              <span className="text-sm font-bold text-success">Movement screen looks solid</span>
+            </div>
+            <p className="mt-1 text-xs text-foreground/80">No major restrictions found. Your program focuses on strength and maintenance.</p>
+          </div>
+        )}
       </div>
       <ExerciseSheet exerciseId={openId} onClose={() => setOpenId(null)} />
     </div>
+  );
+}
+
+function MiniSchedule({ status }: { status: NonNullable<ReturnType<typeof useProgramStatus>> }) {
+  const days = Array.from({ length: PROGRAM_LENGTH_DAYS }, (_, i) => i + 1);
+  const completed = new Set(status.completedDays);
+  const start = new Date(status.startDate);
+  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const todayIndex = Math.floor((today - startDay) / 86400000) + 1;
+  return (
+    <Link
+      to="/app/program"
+      className="block rounded-3xl bg-card p-4 shadow-card"
+      style={{ textDecoration: "none" }}
+    >
+      <div className="mb-2 flex items-center justify-between text-xs">
+        <span className="text-muted-foreground">{status.completedDays.length} / {PROGRAM_SESSIONS} sessions</span>
+        <span className="font-semibold text-primary">{status.daysRemaining} day{status.daysRemaining === 1 ? "" : "s"} left</span>
+      </div>
+      <div className="grid grid-cols-7 gap-1.5">
+        {days.map((d) => {
+          const done = completed.has(d);
+          const isToday = d === todayIndex;
+          const missed = !done && d < todayIndex;
+          const tile = done
+            ? "bg-success text-white"
+            : isToday
+              ? "brand-gradient text-primary-foreground ring-2 ring-primary/40"
+              : missed
+                ? "bg-warning/20 text-warning"
+                : "bg-secondary text-muted-foreground";
+          return (
+            <div key={d} className={`grid aspect-square place-items-center rounded-lg text-[11px] font-bold ${tile}`}>
+              {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : d}
+            </div>
+          );
+        })}
+      </div>
+    </Link>
   );
 }
 
