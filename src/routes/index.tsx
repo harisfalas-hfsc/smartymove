@@ -180,22 +180,12 @@ function Welcome() {
                 </button>
               </section>
 
-              <section className="sm-panel sm-panel-about sm-blue-border">
-                <div className="sm-card-topline"><span /> Assess <IconBubble Icon={Activity} /></div>
-                <h2>Smarty <span>Move</span></h2>
-                <p>
-                  Your pocket movement coach. Turn your phone camera into a movement screen — get
-                  your Movement Score, Movement Age, and a 5-minute daily corrective workout built
-                  around what your body actually needs.
-                </p>
-                <div className="sm-feature-list">
-                  <FeatureLine Icon={Camera} color="#2C99B3" title="Camera-based movement scan" text="Quick guided patterns from your phone or laptop." />
-                  <FeatureLine Icon={ShieldCheck} color="#43AD5C" title="Private by design" text="Pose detection runs on your device — video stays with you." />
-                  <FeatureLine Icon={Clock} color="#FF8A4C" title="5-minute daily routine" text="Simple corrective work for mobility, stability, and strength." />
+              <section className="sm-panel-score-picture">
+                <div className="sm-score-card">
+                  <div>Movement Score</div>
+                  <strong>72<small>/100</small></strong>
+                  <p>Movement Age 41 · Chronological 47</p>
                 </div>
-                <Link to="/about" className="sm-text-link">
-                  Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
-                </Link>
               </section>
 
               <section className="sm-panel sm-panel-program sm-green-border">
@@ -213,15 +203,6 @@ function Welcome() {
                 </div>
               </section>
 
-              <section className="sm-panel sm-panel-score sm-blue-border">
-                <div className="sm-card-topline"><span /> Score <IconBubble Icon={HeartPulse} /></div>
-                <div className="sm-score-card">
-                  <div>Movement Score</div>
-                  <strong>72<small>/100</small></strong>
-                  <p>Movement Age 41 · Chronological 47</p>
-                </div>
-              </section>
-
               <section className="sm-panel sm-panel-tools sm-blue-border">
                 <div className="sm-card-topline"><span /> Routine <IconBubble Icon={Apple} /></div>
                 <h2>Daily <span>Correctives</span></h2>
@@ -229,6 +210,24 @@ function Welcome() {
                   Mobility, stability, and strength exercises selected from curated coach-built
                   libraries for your body’s top priority areas.
                 </p>
+              </section>
+
+              <section className="sm-panel sm-panel-about sm-blue-border">
+                <div className="sm-card-topline"><span /> Assess <IconBubble Icon={Activity} /></div>
+                <h2>Smarty <span>Move</span></h2>
+                <p>
+                  Your pocket movement coach. Turn your phone camera into a movement screen — get
+                  your Movement Score, Movement Age, and a 5-minute daily corrective workout built
+                  around what your body actually needs.
+                </p>
+                <div className="sm-feature-list sm-about-features">
+                  <FeatureLine Icon={Camera} color="#2C99B3" title="Camera-based movement scan" text="Quick guided patterns from your phone or laptop." />
+                  <FeatureLine Icon={ShieldCheck} color="#43AD5C" title="Private by design" text="Pose detection runs on your device — video stays with you." />
+                  <FeatureLine Icon={Clock} color="#FF8A4C" title="5-minute daily routine" text="Simple corrective work for mobility, stability, and strength." />
+                </div>
+                <Link to="/about" className="sm-text-link">
+                  Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
+                </Link>
               </section>
             </div>
           </>
