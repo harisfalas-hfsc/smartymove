@@ -15,6 +15,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as MovementIntelligenceRouteImport } from './routes/movement-intelligence'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
@@ -70,6 +71,11 @@ const PricingRoute = PricingRouteImport.update({
 const PremiumRoute = PremiumRouteImport.update({
   id: '/premium',
   path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MovementIntelligenceRoute = MovementIntelligenceRouteImport.update({
+  id: '/movement-intelligence',
+  path: '/movement-intelligence',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LearnRoute = LearnRouteImport.update({
@@ -215,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
   '/learn': typeof LearnRouteWithChildren
+  '/movement-intelligence': typeof MovementIntelligenceRoute
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -248,6 +255,7 @@ export interface FileRoutesByTo {
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
   '/learn': typeof LearnRouteWithChildren
+  '/movement-intelligence': typeof MovementIntelligenceRoute
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
   '/learn': typeof LearnRouteWithChildren
+  '/movement-intelligence': typeof MovementIntelligenceRoute
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -318,6 +327,7 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/faq'
     | '/learn'
+    | '/movement-intelligence'
     | '/premium'
     | '/pricing'
     | '/privacy'
@@ -351,6 +361,7 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/faq'
     | '/learn'
+    | '/movement-intelligence'
     | '/premium'
     | '/pricing'
     | '/privacy'
@@ -384,6 +395,7 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/faq'
     | '/learn'
+    | '/movement-intelligence'
     | '/premium'
     | '/pricing'
     | '/privacy'
@@ -419,6 +431,7 @@ export interface RootRouteChildren {
   DisclaimerRoute: typeof DisclaimerRoute
   FaqRoute: typeof FaqRoute
   LearnRoute: typeof LearnRouteWithChildren
+  MovementIntelligenceRoute: typeof MovementIntelligenceRoute
   PremiumRoute: typeof PremiumRouteWithChildren
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -472,6 +485,13 @@ declare module '@tanstack/react-router' {
       path: '/premium'
       fullPath: '/premium'
       preLoaderRoute: typeof PremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movement-intelligence': {
+      id: '/movement-intelligence'
+      path: '/movement-intelligence'
+      fullPath: '/movement-intelligence'
+      preLoaderRoute: typeof MovementIntelligenceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learn': {
@@ -744,6 +764,7 @@ const rootRouteChildren: RootRouteChildren = {
   DisclaimerRoute: DisclaimerRoute,
   FaqRoute: FaqRoute,
   LearnRoute: LearnRouteWithChildren,
+  MovementIntelligenceRoute: MovementIntelligenceRoute,
   PremiumRoute: PremiumRouteWithChildren,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
