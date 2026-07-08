@@ -128,27 +128,27 @@ function Pricing() {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 No subscription. One-time payment for a full Movement Screen plus your personalized 2-week training program — yours to keep forever.
               </p>
-              {grandfathered ? (
-                <div className="space-y-2 rounded-md bg-primary/5 p-3 text-sm">
-                  <div className="flex items-center justify-center gap-2 font-semibold text-primary">
-                    <Crown className="h-4 w-4" /> Legacy Premium — unlimited scans
+              <Button size="lg" onClick={handleBuy} className="w-full">
+                <Camera className="w-4 h-4 mr-2" /> Buy one scan · €{SCAN_PRICE_EUR.toFixed(2)}
+              </Button>
+              {u && (
+                <p className="text-xs text-muted-foreground">
+                  You have <strong className="text-foreground">{credits}</strong> scan{credits === 1 ? "" : "s"} available.
+                </p>
+              )}
+              {grandfathered && (
+                <div className="space-y-2 rounded-md bg-primary/5 p-3 text-xs text-left">
+                  <div className="flex items-center gap-2 font-semibold text-primary">
+                    <Crown className="h-3.5 w-3.5" /> Legacy monthly subscription
                   </div>
-                  <Button variant="outline" onClick={handleManage} disabled={portalLoading} className="w-full">
-                    {portalLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  <p className="text-muted-foreground">
+                    We've moved to a simple pay-per-scan model. Manage or cancel your old monthly subscription anytime.
+                  </p>
+                  <Button variant="outline" size="sm" onClick={handleManage} disabled={portalLoading} className="w-full">
+                    {portalLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : null}
                     {portalLoading ? "Opening…" : "Manage subscription"}
                   </Button>
                 </div>
-              ) : (
-                <>
-                  <Button size="lg" onClick={handleBuy} className="w-full">
-                    <Camera className="w-4 h-4 mr-2" /> Buy one scan · €{SCAN_PRICE_EUR.toFixed(2)}
-                  </Button>
-                  {u && (
-                    <p className="text-xs text-muted-foreground">
-                      You have <strong className="text-foreground">{credits}</strong> scan{credits === 1 ? "" : "s"} available.
-                    </p>
-                  )}
-                </>
               )}
             </div>
           </CardContent>
