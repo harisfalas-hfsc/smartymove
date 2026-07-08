@@ -70,18 +70,19 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
 };
 
 /**
- * The SmartyMove Scan is a fixed 7-pattern movement screen. The internal
+ * The SmartyMove Scan is a fixed 8-pattern movement screen. The internal
  * test ids reuse the pre-existing scoring engine (squat/balance/lunge/…) so
  * geometry + compensation detection continue to work; user-facing names,
  * descriptions and camera guides are re-branded for the SmartyMove protocol.
  *
  *   Deep Squat                → id "squat"
+ *   Hip Hinge                 → id "hinge"
  *   Hurdle Step               → id "balance"
  *   In-line Lunge             → id "lunge"
  *   Shoulder Mobility         → id "overhead"           (front view only)
  *   Active Straight-Leg Raise → id "hip_abd"
  *   Trunk Stability Push-Up   → id "bridge_hold"
- *   Rotary Stability          → id "rotary_stability"   (new — placeholder scoring)
+ *   Rotary Stability          → id "rotary_stability"
  *
  * The three FMS clearing patterns (Shoulder Mobility, TSPU, Rotary
  * Stability) surface a "any pain during that test?" prompt in the runner;
@@ -102,7 +103,7 @@ export const CORE_TESTS = [
  *  Pain forces the pattern to score 0 (marked invalid + excluded from sub-scores). */
 export const CLEARING_TESTS = new Set(["overhead", "bridge_hold", "rotary_stability"]);
 
-/** Kept for back-compat with older exports; the fixed 7-pattern scan no
+/** Kept for back-compat with older exports; the fixed 8-pattern scan no
  *  longer branches on joint selection. */
 export const CONDITIONAL_TESTS: Record<string, { id: string; name: string; note?: string }> = {};
 
@@ -179,7 +180,7 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
     quality: avgOrInsufficient(buckets.quality),
   };
   // Overall = weighted average of the four sub-scores (Mobility 30, Stability
-  // 25, Balance 25, Quality 20). If a sub-score is "Insufficient data" it is
+  // 30, Balance 20, Quality 20). If a sub-score is "Insufficient data" it is
   // excluded from the weighting and the remaining weights are renormalized.
   const weights: Record<keyof typeof sub, number> = {
     // Per spec: Mobility 30%, Stability 30%, Balance 20%, Movement Quality 20%.
