@@ -45,7 +45,7 @@ export function ProgramHistory({
   if (entries.length === 0) return null;
 
   const fmt = (iso: string) => new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-  const activeIndex = openIndex ?? entries[0]?.index ?? null;
+  const activeIndex = openIndex;
 
   const completedDaysFor = (entry: Entry) =>
     entry.index === currentIndex ? (u.programCompletedDays ?? []) : TRAINING_DAY_INDICES;
