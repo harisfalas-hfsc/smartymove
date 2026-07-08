@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useUser } from "@/lib/store";
-import { CORE_TESTS, CONDITIONAL_TESTS } from "@/lib/movement";
+import { CORE_TESTS } from "@/lib/movement";
 import { Play, Lock, Loader2, Camera, ShieldCheck, Smartphone, EyeOff, Ruler, Sparkles, Timer, HelpCircle, ListChecks } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
@@ -20,8 +20,6 @@ function ScreenIndex() {
     staleTime: 30_000,
   });
   if (!u) return null;
-  const joints = (u.questionnaire?.joints ?? []).filter(j => j !== "none");
-  const addOns = joints.slice(0, 2).map(j => CONDITIONAL_TESTS[j as keyof typeof CONDITIONAL_TESTS]);
   const last = u.sessions[u.sessions.length - 1];
   const canScan = isAdmin ? true : (access.data?.canScan ?? false);
   const credits = isAdmin ? 9999 : (access.data?.credits ?? 0);
@@ -58,8 +56,8 @@ function ScreenIndex() {
         Icon={Camera}
         iconColor="#0E7C86"
         iconBg="#E6F5F5"
-        title="Movement Screen"
-        subtitle="A camera-based assessment. 5 core tests plus targeted add-ons — done in about 5 minutes from your phone or laptop."
+        title="SmartyMove Scan"
+        subtitle="A camera-based assessment. 7 movement patterns — done in about 7 minutes from your phone or laptop."
       >
         <div className="mt-1 rounded-2xl p-3 text-center text-sm" style={{ background: "#F1F7F8", color: "#14213A" }}>
           {accessLoading ? (
@@ -86,10 +84,10 @@ function ScreenIndex() {
       </SmartyCard>
 
       {/* CORE TESTS */}
-      <SmartyCard Icon={ListChecks} iconColor="#1D4ED8" iconBg="#DBEAFE" title="Core Tests · 5" subtitle="Everyone runs the same 5 fundamentals — every scan.">
+      <SmartyCard Icon={ListChecks} iconColor="#1D4ED8" iconBg="#DBEAFE" title="The 7 movement patterns" subtitle="Everyone runs the same 7 patterns — every scan.">
         <div className="mt-2 space-y-1.5">
           {CORE_TESTS.map((t, i) => {
-            const palette = ["#0E7C86", "#7A3EBA", "#C2410C", "#0F766E", "#1D4ED8"][i % 5];
+            const palette = ["#0E7C86", "#7A3EBA", "#C2410C", "#0F766E", "#1D4ED8", "#B45309", "#0369A1"][i % 7];
             return (
               <div key={t.id} className="flex items-center gap-3 py-1.5">
                 <span
@@ -107,27 +105,6 @@ function ScreenIndex() {
           })}
         </div>
       </SmartyCard>
-
-      {addOns.length > 0 && (
-        <SmartyCard Icon={Sparkles} iconColor="#7A3EBA" iconBg="#F1E9FA" title={`Add-on Tests · ${addOns.length}`} subtitle="Targeted checks based on the areas you flagged.">
-          <div className="mt-2 space-y-1.5">
-            {addOns.map((t, i) => (
-              <div key={t.id} className="flex items-center gap-3 py-1.5">
-                <span
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-sm font-extrabold text-white"
-                  style={{ background: "#7A3EBA", boxShadow: "0 6px 14px -8px #7A3EBA" }}
-                >
-                  +{i + 1}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-bold" style={{ color: "#14213A" }}>{t.name}</div>
-                  {t.note && <div className="text-xs" style={{ color: "#C2410C" }}>⚠ {t.note}</div>}
-                </div>
-              </div>
-            ))}
-          </div>
-        </SmartyCard>
-      )}
 
       {/* PRIVACY */}
       <SmartyCard Icon={EyeOff} iconColor="#0F766E" iconBg="#DCFCE7" title="Private by design" subtitle="Pose detection runs on your device. Raw video never leaves your phone — only the numeric scores are saved.">
@@ -163,7 +140,7 @@ function ScreenIndex() {
 }
 
 const SCREEN_FAQ = [
-  { q: "How long does a scan take?", a: "About 5 minutes for the 5 core tests, plus 1–2 minutes if you have add-on tests for a flagged joint." },
+  { q: "How long does a scan take?", a: "About 7 minutes for the 7 movement patterns." },
   { q: "Do I need any equipment?", a: "No. Just your phone or laptop camera, a bit of clear floor space, and fitted clothes so your joints are visible." },
   { q: "What happens after the scan?", a: "You get a Movement Score, Movement Age, sub-scores, and a 2-week corrective program built from your weakest areas." },
   { q: "Is my video uploaded?", a: "No. Pose detection runs on your device. Only numeric scores and joint-angle summaries are saved to your account." },
