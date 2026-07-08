@@ -21,6 +21,7 @@ import { SmartyCard } from "@/components/SmartyCard";
 import { Sparkles, Dumbbell, Flame, Target } from "lucide-react";
 import { evaluateGraduation, recommendSmartyGym } from "@/lib/graduation";
 import { SmartyGymHandoff } from "@/components/SmartyGymHandoff";
+import { ProgramHistory } from "@/components/ProgramHistory";
 // Program access is unlocked once the user has completed a scan — no paywall gating here.
 
 export const Route = createFileRoute("/app/program")({ component: Program });
@@ -89,7 +90,7 @@ function Program() {
         {recommendation && (
           <SmartyGymHandoff variant="program-complete" recommendation={recommendation} />
         )}
-        <PastPrograms currentIndex={u.sessions.length - 1} />
+        <ProgramHistory />
         <DaySheet
           dayIndex={activeDay}
           onClose={() => setActiveDay(null)}
@@ -146,7 +147,7 @@ function Program() {
             recommendation={recommendation}
           />
         )}
-        <PastPrograms currentIndex={u.sessions.length - 1} />
+        <ProgramHistory />
       </div>
 
       <DaySheet
@@ -168,58 +169,6 @@ function MiniStat({ Icon, tint, bg, label, value }: { Icon: any; tint: string; b
       <div className="mt-1 text-base font-extrabold" style={{ color: "#14213A" }}>{value}</div>
       <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: tint }}>{label}</div>
     </div>
-  );
-}
-
-function PastPrograms({ currentIndex }: { currentIndex: number }) {
-  const u = useUser();
-  if (!u) return null;
-  const sessions = u.sessions ?? [];
-  const past = sessions.slice(0, currentIndex);
-  if (past.length === 0) return null;
-  const fmt = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-  return (
-    <SmartyCard
-      Icon={CalendarDays}
-      iconColor="#1D4ED8"
-      iconBg="#DBEAFE"
-      title="Past programs"
-      subtitle={`${past.length} completed cycle${past.length === 1 ? "" : "s"} — one program per scan.`}
-    >
-      <ul className="mt-1 space-y-2">
-        {past.map((s, i) => {
-          const start = new Date(s.date);
-          const end = new Date(start.getTime() + PROGRAM_LENGTH_DAYS * 86400000);
-          return (
-            <li key={i} className="rounded-2xl border border-border bg-background/60 p-3">
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold">Program #{i + 1}</div>
-                  <div className="text-[11px] text-muted-foreground">
-                    {fmt(s.date)} → {fmt(end.toISOString())}
-                  </div>
-                </div>
-                <span className="shrink-0 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-success">
-                  <CheckCircle2 className="mr-1 inline h-3 w-3" /> Completed
-                </span>
-              </div>
-              <div className="mt-2 flex items-center gap-2">
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full brand-gradient" style={{ width: "100%" }} />
-                </div>
-                <span className="shrink-0 text-[11px] font-semibold text-muted-foreground">
-                  {PROGRAM_SESSIONS}/{PROGRAM_SESSIONS} sessions
-                </span>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-      <p className="mt-3 text-[11px] leading-snug text-muted-foreground">
-        Detailed session breakdowns for each past program live in your <Link to="/app/progress" className="font-semibold text-primary underline">Progress</Link> history.
-      </p>
-    </SmartyCard>
   );
 }
 
@@ -339,7 +288,7 @@ function DaySheet({
       : isMissed
         ? "Missed workout"
         : `Day ${dayIndex} workout`;
-  const visible = u?.premium ? routine : routine.slice(0, 3);
+  const visible = routine;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center p-3 sm:items-center" role="dialog" aria-modal="true">
@@ -423,11 +372,6 @@ function DaySheet({
               </div>
             );
           })}
-          {!u?.premium && routine.length > visible.length && (
-            <div className="rounded-2xl bg-secondary p-3 text-center text-xs text-muted-foreground">
-              {routine.length - visible.length} more exercises with Premium.
-            </div>
-          )}
         </div>
 
         <div className="border-t border-border bg-card p-3">

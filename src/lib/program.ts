@@ -157,6 +157,16 @@ export interface ProgramStatus {
   totalSessions: number;
 }
 
+export interface ProgramHistoryEntry {
+  index: number;
+  session: ScreenSession;
+  startDate: string;
+  endDate: string;
+  items: RoutineItem[];
+  phase: ReturnType<typeof buildCorrectiveRoutine>["phase"];
+  decision: ScanDecision | null;
+}
+
 export function getProgramStatus(): ProgramStatus | null {
   const u = getUser();
   if (!u) return null;
@@ -260,8 +270,8 @@ export function useProgramRoutine() {
           goal,
           joints,
           programStartDate: programStart,
-          // Seed by program start so the routine is the same all 2 weeks.
-          dateISO: programStart.slice(0, 10),
+          // Seed by the scan date so each paid scan owns its own stable 14-day program.
+          dateISO: (latest?.date ?? programStart).slice(0, 10),
           phaseOverride,
           sessionSub,
         },
@@ -283,6 +293,67 @@ export function useProgramRoutine() {
         items = built.picks.map(pickToRoutineItem);
       }
       return { items: await attachSignedUrls(items), phase: built.phase, decision };
+    },
+    staleTime: 30 * 60 * 1000,
+  });
+}
+
+/** Returns the actual generated routine for every scan, so old paid programs remain viewable. */
+export function useProgramHistory() {
+  const u = useUser();
+  const userId = u?.id ?? "anon";
+  const goal = u?.goal;
+  const joints = (u?.questionnaire?.joints ?? []) as Joint[];
+  const jointsKey = [...joints].sort().join(",");
+  const programStart = u?.programStartDate ?? u?.createdAt ?? new Date().toISOString();
+  const phaseOverride = u?.phaseOverride;
+  const sessionsKey = (u?.sessions ?? []).map((s) => `${s.date}:${s.overall}`).join("|");
+
+  return useQuery({
+    queryKey: ["program-history", userId, goal ?? "none", jointsKey, programStart, phaseOverride ?? "auto", sessionsKey],
+    enabled: !!u && (u.sessions?.length ?? 0) > 0,
+    queryFn: async (): Promise<ProgramHistoryEntry[]> => {
+      if (!u) return [];
+      const library = await fetchLibrary();
+      return Promise.all(
+        u.sessions.map(async (session, index) => {
+          const scanJoints = ((session.conditional?.length ? session.conditional : joints) ?? []) as Joint[];
+          const built = buildCorrectiveRoutine(
+            {
+              userId,
+              goal: session.goalAtScan ?? goal,
+              joints: scanJoints,
+              programStartDate: programStart,
+              dateISO: session.date.slice(0, 10),
+              phaseOverride,
+              sessionSub: session.sub,
+            },
+            library,
+          );
+          let decision: ScanDecision | null = null;
+          let items: RoutineItem[];
+          if (session.tests.length > 0) {
+            decision = analyzeScan(session.tests, scanJoints, session.goalAtScan ?? goal);
+            const focusPicks = buildPicksFromDecision(decision, library);
+            items = focusPicks.length > 0
+              ? focusPicks.map(focusPickToRoutineItem)
+              : built.picks.map(pickToRoutineItem);
+          } else {
+            items = built.picks.map(pickToRoutineItem);
+          }
+          const start = new Date(session.date);
+          const end = new Date(start.getTime() + PROGRAM_LENGTH_DAYS * 86400000);
+          return {
+            index,
+            session,
+            startDate: start.toISOString(),
+            endDate: end.toISOString(),
+            items: await attachSignedUrls(items),
+            phase: built.phase,
+            decision,
+          };
+        }),
+      );
     },
     staleTime: 30 * 60 * 1000,
   });

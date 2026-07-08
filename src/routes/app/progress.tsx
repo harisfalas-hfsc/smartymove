@@ -4,11 +4,11 @@ import { useUser } from "@/lib/store";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
-import { Calendar, ChevronDown, Dumbbell, ShieldAlert } from "lucide-react";
+import { Calendar, ChevronDown, ShieldAlert } from "lucide-react";
 import { evaluateGraduation, recommendSmartyGym } from "@/lib/graduation";
 import { SmartyGymHandoff } from "@/components/SmartyGymHandoff";
 import { TEST_GUIDES } from "@/lib/movement";
-import { PROGRAM_LENGTH_DAYS, PROGRAM_SESSIONS } from "@/lib/program";
+import { ProgramHistory } from "@/components/ProgramHistory";
 
 export const Route = createFileRoute("/app/progress")({ component: Progress });
 
@@ -257,54 +257,7 @@ function Progress() {
           </div>
         )}
 
-        {sessions.length > 0 && (
-          <section className="rounded-3xl bg-card p-5 shadow-card">
-            <div className="mb-1 flex items-center gap-2">
-              <Dumbbell className="h-4 w-4 text-primary" />
-              <h3 className="text-base font-bold">🏋️ Training programs</h3>
-            </div>
-            <p className="mb-3 text-[11px] text-muted-foreground">
-              Every scan starts a new {PROGRAM_LENGTH_DAYS}-day program. Your history:
-            </p>
-            <ul className="space-y-2">
-              {sessions.map((s, i) => {
-                const isCurrent = i === sessions.length - 1;
-                const done = isCurrent ? completedDays.length : PROGRAM_SESSIONS;
-                const start = new Date(s.date);
-                const end = new Date(start.getTime() + PROGRAM_LENGTH_DAYS * 86400000);
-                const active = isCurrent && Date.now() < end.getTime();
-                return (
-                  <li key={i} className="rounded-2xl border border-border bg-background/60 p-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold">Program #{i + 1}</div>
-                        <div className="text-[11px] text-muted-foreground">
-                          {fmtDate(s.date)} → {fmtDate(end.toISOString())}
-                        </div>
-                      </div>
-                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                        active ? "bg-primary/15 text-primary" : "bg-success/15 text-success"
-                      }`}>
-                        {active ? "In progress" : "Completed"}
-                      </span>
-                    </div>
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                        <div
-                          className="h-full brand-gradient"
-                          style={{ width: `${Math.min(100, (done / PROGRAM_SESSIONS) * 100)}%` }}
-                        />
-                      </div>
-                      <span className="shrink-0 text-[11px] font-semibold text-muted-foreground">
-                        {done}/{PROGRAM_SESSIONS} sessions
-                      </span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        )}
+        <ProgramHistory includeCurrent title="🏋️ Training programs" subtitle="Every scan has its own full workout. Open any program to view it again." />
       </div>
     </div>
   );
