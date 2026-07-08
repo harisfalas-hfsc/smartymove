@@ -549,14 +549,38 @@ function Runner() {
         <div className="absolute inset-x-0 bottom-0 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
           {phase === "setup" && (
             <div className="rounded-3xl bg-white/10 p-5 text-center backdrop-blur-xl">
-              <Camera className="mx-auto mb-2 h-7 w-7" />
-              <div className="text-lg font-bold">Position yourself in frame</div>
-              <p className="mt-1 text-sm opacity-85">Stand 6–8 feet back so your full body fits inside the silhouette guide.</p>
-              {error && <div className="mt-3 flex items-center gap-2 rounded-xl bg-destructive/30 p-2 text-xs"><AlertTriangle className="h-4 w-4" />{error}</div>}
-              <button onClick={start} disabled={starting} className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-semibold disabled:opacity-60">
-                {starting ? (statusMsg || "Starting...") : "Enable camera"}
-              </button>
-              {starting && statusMsg && <p className="mt-2 text-[11px] opacity-70">{statusMsg}</p>}
+              {!reviewedPrompt && !starting ? (
+                <>
+                  <BookOpen className="mx-auto mb-2 h-7 w-7" />
+                  <div className="text-lg font-bold">Review the 8 patterns first?</div>
+                  <p className="mt-1 text-sm opacity-85">
+                    Each pattern has a reference photo and setup cues. Taking a minute to skim them makes for a cleaner scan.
+                  </p>
+                  <button
+                    onClick={() => setReviewOpen(true)}
+                    className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-semibold"
+                  >
+                    Review the movements
+                  </button>
+                  <button
+                    onClick={() => setReviewedPrompt(true)}
+                    className="mt-2 h-11 w-full rounded-2xl bg-white/10 text-sm font-semibold"
+                  >
+                    Skip · I know the movements
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Camera className="mx-auto mb-2 h-7 w-7" />
+                  <div className="text-lg font-bold">Position yourself in frame</div>
+                  <p className="mt-1 text-sm opacity-85">Stand 6–8 feet back so your full body fits inside the silhouette guide.</p>
+                  {error && <div className="mt-3 flex items-center gap-2 rounded-xl bg-destructive/30 p-2 text-xs"><AlertTriangle className="h-4 w-4" />{error}</div>}
+                  <button onClick={start} disabled={starting} className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-semibold disabled:opacity-60">
+                    {starting ? (statusMsg || "Starting...") : "Enable camera"}
+                  </button>
+                  {starting && statusMsg && <p className="mt-2 text-[11px] opacity-70">{statusMsg}</p>}
+                </>
+              )}
             </div>
           )}
           {phase === "intro" && cur && (() => {
