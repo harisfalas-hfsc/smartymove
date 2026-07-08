@@ -3,12 +3,13 @@ import { useState } from "react";
 import { useUser } from "@/lib/store";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
-import { Activity, ArrowRight, Flame, Calendar, CheckCircle2, Dumbbell, Moon, LineChart, RefreshCw } from "lucide-react";
+import { Activity, ArrowRight, Flame, Calendar, CheckCircle2, Dumbbell, Moon, LineChart as LineChartIcon, RefreshCw, TrendingUp, Target, AlertCircle } from "lucide-react";
+import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { useCurrentPhase } from "@/lib/exercises";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
 import { evaluateProgress } from "@/lib/corrective/progression";
 import { getOngoingTrack } from "@/lib/corrective/phase";
-import { useProgramStatus, isTrainingDay, TRAINING_DAY_INDICES, PROGRAM_SESSIONS } from "@/lib/program";
+import { useProgramStatus, useScanDecision, isTrainingDay, TRAINING_DAY_INDICES, PROGRAM_SESSIONS, PROGRAM_LENGTH_DAYS } from "@/lib/program";
 import { evaluateRescan } from "@/lib/corrective/rescan";
 import { evaluateGraduation, recommendSmartyGym } from "@/lib/graduation";
 import { SmartyGymHandoff } from "@/components/SmartyGymHandoff";
@@ -20,8 +21,10 @@ function Home() {
   const [openId, setOpenId] = useState<string | null>(null);
   const phase = useCurrentPhase();
   const status = useProgramStatus();
+  const decision = useScanDecision();
   if (!u) return null;
   const latest = u.sessions[u.sessions.length - 1];
+  const first = u.sessions[0];
   const daysSince = latest ? Math.floor((Date.now() - new Date(latest.date).getTime()) / 86400000) : null;
   const daysUntilRetest = latest ? Math.max(0, 14 - (daysSince ?? 0)) : null;
   const progression = evaluateProgress(u.sessions);
@@ -29,6 +32,8 @@ function Home() {
   const rescan = evaluateRescan(u, status);
   const graduation = evaluateGraduation(u);
   const recommendation = graduation.status === "cleared" ? recommendSmartyGym(u.goal, graduation.status) : null;
+  const chartData = u.sessions.map((s, i) => ({ name: `#${i + 1}`, score: s.overall }));
+  const delta = latest && first ? latest.overall - first.overall : 0;
 
   return (
     <div className="pb-6">
@@ -55,8 +60,12 @@ function Home() {
           </div>
           <div className="rounded-2xl bg-white/15 p-3 text-center backdrop-blur">
             <Calendar className="mx-auto h-4 w-4" />
-            <div className="mt-1 text-xl font-extrabold">{daysUntilRetest ?? "—"}</div>
-            <div className="text-[10px] uppercase tracking-wider opacity-80">Re-test in</div>
+            <div className="mt-1 text-xl font-extrabold">
+              {daysUntilRetest ?? "—"}{daysUntilRetest != null && <span className="text-xs font-bold opacity-80">d</span>}
+            </div>
+            <div className="text-[10px] uppercase tracking-wider opacity-80">
+              {daysUntilRetest === 0 ? "Rescan today" : "Days to rescan"}
+            </div>
           </div>
         </div>
       </header>
