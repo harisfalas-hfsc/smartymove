@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useUser } from "@/lib/store";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
-import { Activity, ArrowRight, Flame, Calendar, CheckCircle2, Dumbbell, Moon, LineChart as LineChartIcon, RefreshCw, TrendingUp, Target, AlertCircle } from "lucide-react";
+import { Activity, ArrowRight, Flame, Calendar, CheckCircle2, Dumbbell, Moon, LineChart as LineChartIcon, RefreshCw, TrendingUp, Target } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { useCurrentPhase } from "@/lib/exercises";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
