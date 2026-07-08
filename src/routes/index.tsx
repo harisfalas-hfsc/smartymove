@@ -28,6 +28,11 @@ import {
   Clock,
   ArrowRight,
   Sparkles,
+  Target,
+  Repeat,
+  Monitor,
+  Smartphone,
+  BookOpen,
   type LucideIcon,
 } from "lucide-react";
 
