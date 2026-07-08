@@ -110,7 +110,6 @@ function NavDrawer({ onClose, isAuthed }: { onClose: () => void; isAuthed: boole
             { to: "/app/screen", label: "Movement Screen", Icon: Activity },
             { to: "/app/program", label: "Training Program", Icon: Dumbbell },
             { to: "/app/progress", label: "Progress", Icon: LineChart },
-            { to: "/app/profile", label: "Profile", Icon: UserIcon },
           ],
         }]
       : []),

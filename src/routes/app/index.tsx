@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useUser } from "@/lib/store";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
-import { Activity, ArrowRight, Flame, Calendar, CheckCircle2, Dumbbell, Moon } from "lucide-react";
+import { Activity, ArrowRight, Flame, Calendar, CheckCircle2, Dumbbell, Moon, LineChart, RefreshCw } from "lucide-react";
 import { useCurrentPhase } from "@/lib/exercises";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
 import { evaluateProgress } from "@/lib/corrective/progression";
@@ -135,10 +135,55 @@ function Home() {
               </div>
             </div>
             <p className="mt-3 text-[11px] text-muted-foreground">Movement Age is a motivational estimate, not a medical measurement.</p>
+            <Link
+              to="/app/screen"
+              className="mt-4 flex items-center justify-center gap-2 rounded-2xl brand-gradient px-4 py-3 text-sm font-semibold text-primary-foreground shadow-soft"
+              style={{ textDecoration: "none" }}
+            >
+              <RefreshCw className="h-4 w-4" /> Rescan &amp; update your score
+            </Link>
           </div>
         )}
 
         {latest && status && <ProgramCta status={status} />}
+
+        {latest && (
+          <section>
+            <h3 className="mb-2 text-base font-bold">Quick actions</h3>
+            <div className="grid grid-cols-3 gap-2">
+              <Link
+                to="/app/screen"
+                className="flex flex-col items-center gap-2 rounded-2xl bg-card p-3 text-center shadow-card"
+                style={{ textDecoration: "none" }}
+              >
+                <span className="grid h-10 w-10 place-items-center rounded-xl brand-gradient-soft text-primary">
+                  <Activity className="h-5 w-5" />
+                </span>
+                <span className="text-xs font-bold text-foreground">Rescan</span>
+              </Link>
+              <Link
+                to="/app/program"
+                className="flex flex-col items-center gap-2 rounded-2xl bg-card p-3 text-center shadow-card"
+                style={{ textDecoration: "none" }}
+              >
+                <span className="grid h-10 w-10 place-items-center rounded-xl brand-gradient-soft text-primary">
+                  <Dumbbell className="h-5 w-5" />
+                </span>
+                <span className="text-xs font-bold text-foreground">Program</span>
+              </Link>
+              <Link
+                to="/app/progress"
+                className="flex flex-col items-center gap-2 rounded-2xl bg-card p-3 text-center shadow-card"
+                style={{ textDecoration: "none" }}
+              >
+                <span className="grid h-10 w-10 place-items-center rounded-xl brand-gradient-soft text-primary">
+                  <LineChart className="h-5 w-5" />
+                </span>
+                <span className="text-xs font-bold text-foreground">Progress</span>
+              </Link>
+            </div>
+          </section>
+        )}
 
         {latest && (
           <section>
