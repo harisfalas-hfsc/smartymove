@@ -267,6 +267,24 @@ function Progress() {
                         <span className={flag ? "text-warning font-semibold" : ""}>Asymmetry {t.asymmetry}°</span>
                       </div>
                     )}
+                    {t.sideScores && (t.sideScores.right || t.sideScores.left) && (
+                      <div className="mt-1.5 space-y-1">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+                          {t.sideScores.right && (
+                            <span className="text-muted-foreground">Right <strong className="text-foreground">{t.sideScores.right.score}/3</strong></span>
+                          )}
+                          {t.sideScores.left && (
+                            <span className="text-muted-foreground">Left <strong className="text-foreground">{t.sideScores.left.score}/3</strong></span>
+                          )}
+                          <span className="text-muted-foreground">Overall <strong className="text-foreground">{t.score}/3</strong> (lower side)</span>
+                        </div>
+                        {t.asymmetryFlag && (
+                          <div className="rounded-lg bg-warning/10 px-2 py-1.5 text-[11px] font-medium text-warning">
+                            Left/right difference detected — your {(t.sideScores.right?.score ?? 3) < (t.sideScores.left?.score ?? 3) ? "right" : "left"} side is significantly weaker than your {(t.sideScores.right?.score ?? 3) < (t.sideScores.left?.score ?? 3) ? "left" : "right"} side. Your program will prioritise the weaker side.
+                          </div>
+                        )}
+                      </div>
+                    )}
                     {t.viewFindings && t.viewFindings.length > 1 ? (
                       <div className="mt-2 space-y-1.5">
                         {t.viewFindings.map((v, vi) => (

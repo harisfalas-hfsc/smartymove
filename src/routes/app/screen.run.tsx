@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
-import { angle, CORE_TESTS, CONDITIONAL_TESTS, CLEARING_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
+import { angle, CORE_TESTS, CONDITIONAL_TESTS, CLEARING_TESTS, BILATERAL_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
 import squatImg from "@/assets/fms/squat.png.asset.json";
 import hingeImg from "@/assets/fms/hinge.jpg.asset.json";
 import balanceImg from "@/assets/fms/balance.png.asset.json";
@@ -47,6 +47,18 @@ type Step = {
   totalViews: number;        // >=1
   viewLabel: string;         // e.g. "Side view"
   viewCue: string;           // reposition hint
+  /**
+   * "both" for tests that move both sides together (Deep Squat, Hip Hinge,
+   * Trunk Stability Push-Up). "right" / "left" for bilateral tests where
+   * each side is captured and scored separately.
+   */
+  side: "both" | "right" | "left";
+  /** Human copy for which side/limb to use — empty for "both". */
+  sideLabel: string;
+  /** 1-based position across the entire scan sequence (for "Recording X of Y"). */
+  stepIndex: number;
+  /** Total number of recordings in the scan (all tests × sides × views). */
+  totalSteps: number;
   conditional?: boolean;
 };
 
@@ -195,6 +207,38 @@ function expandToSteps(testId: string, name: string, duration: number, condition
 }
 
 /**
+ * Per-test, per-side copy for the intro card, running banner and rep
+ * prompt. Only referenced for tests in BILATERAL_TESTS — non-bilateral
+ * tests use their normal `REP_PROMPT` unchanged.
+ */
+const SIDE_COPY: Record<string, { right: { label: string; prompt: string }; left: { label: string; prompt: string } }> = {
+  balance: {
+    right: { label: "Right leg", prompt: "Step over with your RIGHT leg" },
+    left:  { label: "Left leg",  prompt: "Step over with your LEFT leg"  },
+  },
+  lunge: {
+    right: { label: "Right foot forward", prompt: "Lunge with the RIGHT foot forward" },
+    left:  { label: "Left foot forward",  prompt: "Lunge with the LEFT foot forward"  },
+  },
+  overhead: {
+    right: { label: "Right arm overhead", prompt: "RIGHT arm reaches over the top, LEFT arm reaches up from below" },
+    left:  { label: "Left arm overhead",  prompt: "LEFT arm reaches over the top, RIGHT arm reaches up from below" },
+  },
+  hip_abd: {
+    right: { label: "Right leg raise", prompt: "Raise your RIGHT leg — keep it straight" },
+    left:  { label: "Left leg raise",  prompt: "Raise your LEFT leg — keep it straight"  },
+  },
+  rotary_stability: {
+    right: { label: "Right arm + right leg", prompt: "Extend RIGHT arm and RIGHT leg, then elbow-to-knee" },
+    left:  { label: "Left arm + left leg",   prompt: "Extend LEFT arm and LEFT leg, then elbow-to-knee"   },
+  },
+  sl_balance: {
+    right: { label: "Balance right leg", prompt: "Balance on your RIGHT leg — 10-second hold" },
+    left:  { label: "Balance left leg",  prompt: "Balance on your LEFT leg — 10-second hold"  },
+  },
+};
+
+/**
  * Copy shown on the mandatory clearing-test gate that appears before the
  * three FMS clearing patterns. Each answer is Yes / No — pain = score 0
  * and the pattern is skipped; no pain = proceed to the normal intro.
@@ -236,62 +280,126 @@ function clearingPrompt(testId: string): { intro: string; action: string; questi
 
 function _expandToSteps(testId: string, name: string, duration: number, conditional?: boolean): Step[] {
   const views = TEST_VIEWS[testId];
-  if (!views || views.length === 0) {
-    // Fallback to legacy single-view mapping if a test has no view definition.
-    const cv = TEST_CAMERA_VIEW[testId] ?? "front";
-    return [{
-      key: `${testId}:0`, groupId: testId, testId, name, duration, cameraView: cv,
-      viewIndex: 0, totalViews: 1,
-      viewLabel: cv === "side" ? "Side view" : "Front view",
-      viewCue: cv === "side" ? "Stand sideways to the camera." : "Face the camera straight on.",
-      conditional,
-    }];
+  const resolvedViews =
+    views && views.length > 0
+      ? views
+      : [{
+          view: (TEST_CAMERA_VIEW[testId] ?? "front") as "front" | "side",
+          label: (TEST_CAMERA_VIEW[testId] ?? "front") === "side" ? "Side view" : "Front view",
+          cue: (TEST_CAMERA_VIEW[testId] ?? "front") === "side"
+            ? "Stand sideways to the camera."
+            : "Face the camera straight on.",
+          detects: [] as string[],
+        }];
+  const isBilateral = BILATERAL_TESTS.has(testId);
+  const sides: Array<"both" | "right" | "left"> = isBilateral ? ["right", "left"] : ["both"];
+  const totalViews = sides.length * resolvedViews.length;
+  const steps: Step[] = [];
+  for (const side of sides) {
+    for (const v of resolvedViews) {
+      const sideLabel =
+        side === "both" ? "" : (SIDE_COPY[testId]?.[side]?.label ?? (side === "right" ? "Right side" : "Left side"));
+      steps.push({
+        key: `${testId}:${side}:${v.view}`,
+        groupId: testId,
+        testId,
+        name,
+        duration,
+        cameraView: v.view,
+        viewIndex: steps.length,
+        totalViews,
+        viewLabel: v.label,
+        viewCue: v.cue,
+        side,
+        sideLabel,
+        stepIndex: 0,       // set by buildSequence
+        totalSteps: 0,      // set by buildSequence
+        conditional,
+      });
+    }
   }
-  return views.map((v, i) => ({
-    key: `${testId}:${i}`, groupId: testId, testId, name, duration,
-    cameraView: v.view, viewIndex: i, totalViews: views.length,
-    viewLabel: v.label, viewCue: v.cue, conditional,
-  }));
+  return steps;
 }
 
 function buildSequence(_joints: Joint[]): Step[] {
-  // SmartyMove Scan is a fixed 8-pattern set — no joint-based branching.
-  return CORE_TESTS.flatMap(t => expandToSteps(t.id, t.name, t.duration));
+  // SmartyMove Scan is a fixed 9-pattern set — no joint-based branching.
+  // Bilateral tests expand to right-then-left recordings. Total = 23 recordings.
+  const raw = CORE_TESTS.flatMap(t => expandToSteps(t.id, t.name, t.duration));
+  return raw.map((s, i) => ({ ...s, stepIndex: i + 1, totalSteps: raw.length }));
 }
 
-/** Merge per-view step results for a single test into one TestResult. */
-function mergeStepResults(stepResults: Array<TestResult & { viewIndex: number }>): TestResult {
+/**
+ * Merge per-view / per-side step results for a single test into one
+ * TestResult. For bilateral tests, right and left are scored independently
+ * (min score across that side's views), and the final `score` is the lower
+ * of the two sides — matching the spec that the weaker side sets the
+ * program priority. Side-to-side gap > 1 point sets `asymmetryFlag`.
+ */
+function mergeStepResults(
+  stepResults: Array<TestResult & { viewIndex: number; sideKey: "both" | "right" | "left" }>,
+): TestResult {
   const sorted = [...stepResults].sort((a, b) => a.viewIndex - b.viewIndex);
   const primary = sorted[0];
-  // The primary view carries the range-of-motion reading and IS the test.
-  // Secondary views only detect compensations. So the merged test is valid
-  // whenever the primary view is valid — a poor secondary reading must never
-  // downgrade a good primary reading to "No reading".
-  const primaryValid = primary.valid !== false;
-  // Only cap the score using views that actually got a clean reading. An
-  // invalid secondary view returns score 1 by convention, but that 1 does
-  // NOT reflect the movement — it means we couldn't read that angle.
-  const validViewsForScore = sorted.filter(r => r.valid !== false);
-  const scoreSource = validViewsForScore.length ? validViewsForScore : [primary];
-  const scoreMin = scoreSource.reduce<0 | 1 | 2 | 3>((m, r) => (r.score < m ? r.score : m) as 0 | 1 | 2 | 3, 3);
-  const comps = Array.from(
-    new Set(validViewsForScore.flatMap(r => r.compensations ?? [])),
-  );
+
+  const collapseSide = (arr: typeof stepResults) => {
+    if (!arr.length) return null;
+    const validArr = arr.filter(r => r.valid !== false);
+    const src = validArr.length ? validArr : arr;
+    const score = src.reduce<0 | 1 | 2 | 3>((m, r) => (r.score < m ? r.score : m) as 0 | 1 | 2 | 3, 3);
+    const compensations = Array.from(new Set(src.flatMap(r => r.compensations ?? [])));
+    return { score, valid: validArr.length > 0, compensations };
+  };
+
+  const right = collapseSide(sorted.filter(r => r.sideKey === "right"));
+  const left  = collapseSide(sorted.filter(r => r.sideKey === "left"));
+  const both  = collapseSide(sorted.filter(r => r.sideKey === "both"));
+
+  let finalScore: 0 | 1 | 2 | 3;
+  let finalValid: boolean;
+  let mergedComps: string[];
+  let sideScores: TestResult["sideScores"];
+  let asymmetryFlag = false;
+
+  if (right || left) {
+    // Bilateral — final = lower of the two sides.
+    const scores = [right?.score, left?.score].filter((x): x is 0 | 1 | 2 | 3 => x != null);
+    finalScore = (scores.length ? Math.min(...scores) : 1) as 0 | 1 | 2 | 3;
+    finalValid = Boolean(right?.valid || left?.valid);
+    mergedComps = Array.from(new Set([
+      ...(right?.compensations ?? []),
+      ...(left?.compensations ?? []),
+    ]));
+    sideScores = {
+      right: right ? { score: right.score, valid: right.valid, compensations: right.compensations.length ? right.compensations : undefined } : undefined,
+      left:  left  ? { score: left.score,  valid: left.valid,  compensations: left.compensations.length  ? left.compensations  : undefined } : undefined,
+    };
+    if (right && left) asymmetryFlag = Math.abs(right.score - left.score) > 1;
+  } else {
+    finalScore = (both?.score ?? 1) as 0 | 1 | 2 | 3;
+    finalValid = Boolean(both?.valid);
+    mergedComps = both?.compensations ?? [];
+  }
+
   const notes = sorted
-    .map(r => `${r.cameraView === "side" ? "Side" : "Front"}: ${r.notes ?? ""}`)
-    .filter(n => n.length > 6)
+    .map(r => {
+      const sideTag = r.sideKey === "right" ? "R " : r.sideKey === "left" ? "L " : "";
+      const viewTag = r.cameraView === "side" ? "Side" : "Front";
+      return `${sideTag}${viewTag}: ${r.notes ?? ""}`;
+    })
+    .filter(n => n.length > 8)
     .join(" · ");
+
   return {
     id: primary.id,
     name: primary.name,
-    score: primaryValid ? scoreMin : 1 as 0 | 1 | 2 | 3,
-    valid: primaryValid,
+    score: finalScore,
+    valid: finalValid,
     metric: primary.metric,
     left: primary.left,
     right: primary.right,
     asymmetry: primary.asymmetry,
     cameraView: primary.cameraView,
-    compensations: comps.length ? comps : undefined,
+    compensations: mergedComps.length ? mergedComps : undefined,
     frameValidRatio: primary.frameValidRatio,
     notes: notes || primary.notes,
     viewFindings: sorted.map(r => ({
@@ -301,6 +409,8 @@ function mergeStepResults(stepResults: Array<TestResult & { viewIndex: number }>
       metric: r.metric,
       compensations: r.compensations,
     })),
+    sideScores,
+    asymmetryFlag,
   };
 }
 
@@ -360,7 +470,7 @@ function Runner() {
   const finishHandlerRef = useRef<((skipped?: boolean) => void) | null>(null);
   // Per-view step results buffered per test groupId until all its views
   // are captured, then merged into one TestResult and pushed into `results`.
-  const stepResultsRef = useRef<Map<string, Array<TestResult & { viewIndex: number }>>>(new Map());
+  const stepResultsRef = useRef<Map<string, Array<TestResult & { viewIndex: number; sideKey: "both" | "right" | "left" }>>>(new Map());
   const [paused, setPaused] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [restartKey, setRestartKey] = useState(0);
@@ -486,7 +596,7 @@ function Runner() {
       // Buffer per-view results; on the last view of the group, merge into
       // one TestResult and push to the top-level results.
       const bucket = stepResultsRef.current.get(test.groupId) ?? [];
-      bucket.push({ ...scored, viewIndex: test.viewIndex });
+      bucket.push({ ...scored, viewIndex: test.viewIndex, sideKey: test.side });
       stepResultsRef.current.set(test.groupId, bucket);
       const isLastView = test.viewIndex + 1 >= test.totalViews;
       let mergedForFinalize: TestResult | null = null;
@@ -667,7 +777,15 @@ function Runner() {
   const progress = seq.length ? ((idx + (phase === "running" ? Math.min(1, countdown / (cur?.duration ?? 1)) : 0)) / seq.length) * 100 : 0;
   const groupIndex = cur ? groupIds.indexOf(cur.groupId) : -1;
   const groupCount = groupIds.length;
-  const isReposition = !!cur && cur.viewIndex > 0;
+  const prev = idx > 0 ? seq[idx - 1] : null;
+  const isSameGroupAsPrev = !!prev && !!cur && prev.groupId === cur.groupId;
+  const isSideSwitch = !!prev && !!cur && isSameGroupAsPrev && prev.side !== cur.side;
+  const isReposition = !!cur && cur.viewIndex > 0 && isSameGroupAsPrev;
+  const stepPrompt = cur
+    ? (cur.side !== "both" && SIDE_COPY[cur.testId]?.[cur.side]?.prompt)
+      || REP_PROMPT[cur.testId]
+      || "Perform the movement"
+    : "";
 
   return (
     <div className="relative flex h-full min-h-[100dvh] flex-col bg-black text-white">
@@ -681,12 +799,13 @@ function Runner() {
           <div className="pointer-events-none absolute inset-x-0 top-16 z-10 flex flex-col items-center gap-2 px-4 text-center">
             <div className="rounded-full bg-black/70 px-5 py-2 text-2xl font-black uppercase tracking-widest text-white shadow-2xl ring-2 ring-white/30 backdrop-blur">
               {cur.cameraView === "side" ? "◐ SIDE VIEW" : "● FACE THE CAMERA"}
+              {cur.side !== "both" && (cur.side === "right" ? " · RIGHT" : " · LEFT")}
             </div>
             <div className="rounded-2xl bg-white/95 px-4 py-1.5 text-lg font-extrabold text-foreground shadow-xl">
-              {cur.name}
+              {cur.name}{cur.sideLabel ? ` · ${cur.sideLabel}` : ""}
             </div>
             <div className="rounded-2xl brand-gradient px-5 py-2 text-2xl font-black text-primary-foreground shadow-2xl ring-2 ring-white/40">
-              {REP_PROMPT[cur.testId] ?? "Perform the movement"}
+              {stepPrompt}
             </div>
             <div className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white/90 backdrop-blur">
               Then walk back and press "I'm Done"
@@ -707,7 +826,7 @@ function Runner() {
               <div className="h-full brand-gradient transition-[width]" style={{ width: `${progress}%` }} />
             </div>
             <div className="mt-1 text-[11px] font-semibold uppercase tracking-widest opacity-80">
-              {groupCount ? `Test ${Math.min(groupIndex + 1, groupCount)} of ${groupCount}` : ""}
+              {cur ? `Recording ${cur.stepIndex} of ${cur.totalSteps} · Test ${Math.min(groupIndex + 1, groupCount)} of ${groupCount}` : ""}
             </div>
           </div>
         </div>
@@ -802,12 +921,17 @@ function Runner() {
             return (
               <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
                 <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">
-                  Test {groupIndex + 1} of {groupCount}
+                  Recording {cur.stepIndex} of {cur.totalSteps}
+                  {` · Test ${groupIndex + 1} of ${groupCount}`}
                   {cur.totalViews > 1 ? ` · View ${cur.viewIndex + 1} of ${cur.totalViews}` : ""}
                   {" · No timer — press Done when finished"}
                 </div>
                 <div className="mt-0.5 text-xl font-extrabold">
-                  {isReposition ? `${cur.name} — reposition` : cur.name}
+                  {isSideSwitch
+                    ? `${cur.name} — switch to ${cur.side === "right" ? "RIGHT" : "LEFT"} side`
+                    : isReposition
+                      ? `${cur.name} — reposition`
+                      : `${cur.name}${cur.sideLabel ? ` — ${cur.sideLabel}` : ""}`}
                 </div>
                 <div className="mt-3 rounded-2xl bg-primary p-4 text-primary-foreground shadow-lg">
                   <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest opacity-90">
@@ -821,10 +945,17 @@ function Runner() {
                 </div>
                 <div className="mt-3 rounded-2xl border-2 border-primary bg-primary/5 p-4 text-foreground">
                   <div className="text-[11px] font-bold uppercase tracking-widest text-primary">Your task</div>
-                  <div className="mt-1 text-2xl font-black">{REP_PROMPT[cur.testId] ?? "Perform the movement"}</div>
+                  <div className="mt-1 text-2xl font-black">{stepPrompt}</div>
                   <div className="mt-1 text-xs text-muted-foreground">When finished, walk back and press "I'm Done". Your walk back is not scored.</div>
                 </div>
-                {isReposition ? (
+                {isSideSwitch ? (
+                  <div className="mt-4 rounded-2xl bg-warning/15 p-3 text-sm text-foreground">
+                    <div className="font-semibold">Switch sides — now the {cur.side === "right" ? "RIGHT" : "LEFT"} side.</div>
+                    <p className="mt-1 text-muted-foreground">
+                      Same movement, other {cur.testId === "overhead" ? "arm" : "leg"}. We score each side separately and take the lower of the two as the final test score.
+                    </p>
+                  </div>
+                ) : isReposition ? (
                   <div className="mt-4 rounded-2xl bg-secondary/50 p-3 text-sm text-foreground">
                     <div className="font-semibold">Same movement, new camera angle.</div>
                     <p className="mt-1 text-muted-foreground">
@@ -985,9 +1116,11 @@ function Runner() {
             <div className="flex items-center gap-3">
               <div className="min-w-0 flex-1">
                 <div className="text-[10px] font-semibold uppercase tracking-widest text-white/60">
-                  {paused || showInstructions ? "Paused" : "Recording"} · Test {groupIndex + 1}/{groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""}
+                  {paused || showInstructions ? "Paused" : "Recording"} {cur.stepIndex}/{cur.totalSteps} · Test {groupIndex + 1}/{groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""}
                 </div>
-                <div className="truncate text-base font-extrabold text-white">{cur.name} · press Done when finished</div>
+                <div className="truncate text-base font-extrabold text-white">
+                  {cur.name}{cur.sideLabel ? ` · ${cur.sideLabel}` : ""} · press Done when finished
+                </div>
               </div>
               <div className="w-14 text-center text-3xl font-extrabold tabular-nums brand-text">{countdown}s</div>
               <button
@@ -1034,8 +1167,8 @@ function Runner() {
             <div className="mx-auto max-h-[80vh] w-full max-w-[720px] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Test {groupIndex + 1} of {groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""} · Paused</div>
-                  <div className="mt-0.5 text-xl font-extrabold">{cur.name}</div>
+                  <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">Recording {cur.stepIndex} of {cur.totalSteps} · Test {groupIndex + 1} of {groupCount}{cur.totalViews > 1 ? ` · ${cur.viewLabel}` : ""} · Paused</div>
+                  <div className="mt-0.5 text-xl font-extrabold">{cur.name}{cur.sideLabel ? ` · ${cur.sideLabel}` : ""}</div>
                 </div>
                 <button onClick={() => setShowInstructions(false)} aria-label="Close" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground">
                   <X className="h-4 w-4" />
