@@ -7,6 +7,8 @@ import {
   markDayCompleted,
   unmarkDayCompleted,
   setsRepsFor,
+  getAsymmetryByArea,
+  type AsymmetryBias,
   PROGRAM_LENGTH_DAYS,
   PROGRAM_SESSIONS,
   TRAINING_DAY_INDICES,
@@ -259,13 +261,15 @@ function DaySheet({
 }: {
   dayIndex: number | null;
   onClose: () => void;
-  routine: { id: string; name: string; emoji: string; description: string; category?: string; bodyPart?: string | null }[];
+  routine: { id: string; name: string; emoji: string; description: string; category?: string; bodyPart?: string | null; area?: string }[];
   status: NonNullable<ReturnType<typeof useProgramStatus>>;
   onOpenExercise: (id: string) => void;
   readOnly?: boolean;
 }) {
   const u = useUser();
   if (dayIndex == null) return null;
+  const latestSession = u?.sessions?.[u.sessions.length - 1];
+  const asymByArea = getAsymmetryByArea(latestSession);
   const done = status.completedDays.includes(dayIndex);
   const programStart = new Date(status.startDate);
   const programStartDay = new Date(programStart.getFullYear(), programStart.getMonth(), programStart.getDate()).getTime();
@@ -311,7 +315,10 @@ function DaySheet({
             <div className="rounded-2xl bg-card p-4 text-center text-sm text-muted-foreground shadow-card">No exercises available.</div>
           )}
           {visible.map((e) => {
-            const sr = setsRepsFor(e.category, e.bodyPart);
+            const bias: AsymmetryBias | undefined = e.area
+              ? (asymByArea as Record<string, AsymmetryBias>)[e.area]
+              : undefined;
+            const sr = setsRepsFor(e.category, e.bodyPart, bias);
             return (
               <div key={e.id} className="rounded-2xl bg-card p-3 shadow-card">
                 <button onClick={() => onOpenExercise(e.id)} className="flex w-full items-center gap-3 text-left">
@@ -322,15 +329,43 @@ function DaySheet({
                   </div>
                   <Info className="h-4 w-4 shrink-0 text-primary" />
                 </button>
-                <div className="mt-2.5 flex items-center justify-between gap-2 rounded-xl bg-secondary px-3 py-2">
-                  <div className="text-sm font-bold tabular-nums">
-                    <span className="brand-text">{sr.sets}</span>
-                    <span className="text-muted-foreground"> sets × </span>
-                    <span className="brand-text">{sr.reps}</span>
-                    <span className="text-muted-foreground"> reps</span>
+                {sr.sideSets ? (
+                  <div className="mt-2.5 space-y-1.5 rounded-xl bg-secondary px-3 py-2">
+                    <div className="flex items-center justify-between text-sm font-bold tabular-nums">
+                      <span className="text-muted-foreground">
+                        {sr.sideSets.weakerSide === "R" ? "Right (weaker)" : "Left (weaker)"}
+                      </span>
+                      <span>
+                        <span className="brand-text">{sr.sideSets.weakSets}</span>
+                        <span className="text-muted-foreground"> × </span>
+                        <span className="brand-text">{sr.reps.replace(" / side", "")}</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm font-bold tabular-nums">
+                      <span className="text-muted-foreground">
+                        {sr.sideSets.weakerSide === "R" ? "Left (stronger)" : "Right (stronger)"}
+                      </span>
+                      <span>
+                        <span className="brand-text">{sr.sideSets.strongSets}</span>
+                        <span className="text-muted-foreground"> × </span>
+                        <span className="brand-text">{sr.reps.replace(" / side", "")}</span>
+                      </span>
+                    </div>
+                    <div className="pt-0.5 text-[11px] leading-snug text-muted-foreground">
+                      Extra volume on your weaker side to close the gap ({sr.sideSets.reason}). Start with the weaker side.
+                    </div>
                   </div>
-                  {sr.note && <div className="hidden text-[11px] text-muted-foreground sm:block">{sr.note}</div>}
-                </div>
+                ) : (
+                  <div className="mt-2.5 flex items-center justify-between gap-2 rounded-xl bg-secondary px-3 py-2">
+                    <div className="text-sm font-bold tabular-nums">
+                      <span className="brand-text">{sr.sets}</span>
+                      <span className="text-muted-foreground"> sets × </span>
+                      <span className="brand-text">{sr.reps}</span>
+                      <span className="text-muted-foreground"> reps</span>
+                    </div>
+                    {sr.note && <div className="hidden text-[11px] text-muted-foreground sm:block">{sr.note}</div>}
+                  </div>
+                )}
               </div>
             );
           })}
