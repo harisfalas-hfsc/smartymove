@@ -300,6 +300,11 @@ export async function restoreUserFromBackend(): Promise<User | null> {
     cacheOnly(null);
     return null;
   }
+  if (!authUser.email_confirmed_at && !authUser.confirmed_at) {
+    await supabase.auth.signOut();
+    cacheOnly(null);
+    return null;
+  }
 
   const { data, error } = await (supabase as any)
     .from("profiles")
