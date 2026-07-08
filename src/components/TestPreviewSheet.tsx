@@ -52,7 +52,7 @@ export function TestPreviewSheet({ open, onClose, testIds, focusTestId, title }:
   return (
     <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative flex max-h-[86dvh] w-full max-w-[440px] flex-col overflow-hidden rounded-3xl bg-background shadow-2xl">
+      <div className="relative flex max-h-[86dvh] w-full max-w-[440px] flex-col overflow-hidden rounded-3xl bg-background text-foreground shadow-2xl">
         <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div className="min-w-0 flex-1">
             <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">SmartyMove Scan</div>
