@@ -609,6 +609,31 @@ function Runner() {
               <p className="text-sm opacity-85">Crunching your scores...</p>
             </div>
           )}
+          {(phase === "confirm" || phase === "submitting") && (
+            <div className="rounded-3xl bg-white/10 p-5 text-center backdrop-blur-xl">
+              <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-400" />
+              <div className="mt-2 text-lg font-bold">Ready to submit your scan?</div>
+              <p className="mt-2 text-sm opacity-90 leading-relaxed">
+                Submitting will use <strong>1 scan credit</strong> and lock in these results as your official Movement Screen. We'll build your personalized <strong>2-week training program</strong> from them.
+                <br /><br />
+                Once submitted this can't be undone — if you'd rather practice first, you can redo the scan without spending your credit.
+              </p>
+              <button
+                onClick={submitScan}
+                disabled={phase === "submitting"}
+                className="mt-4 h-12 w-full rounded-2xl brand-gradient text-base font-bold text-white disabled:opacity-60"
+              >
+                {phase === "submitting" ? "Submitting…" : "Yes, submit my scan"}
+              </button>
+              <button
+                onClick={retryScan}
+                disabled={phase === "submitting"}
+                className="mt-2 h-11 w-full rounded-2xl bg-white/10 text-sm font-semibold disabled:opacity-60"
+              >
+                Redo the scan (no credit used)
+              </button>
+            </div>
+          )}
           {phase === "failed" && (
             <div className="rounded-3xl bg-destructive/30 p-5 text-center backdrop-blur-xl">
               <AlertTriangle className="mx-auto h-8 w-8" />
