@@ -324,21 +324,25 @@ function MiniSchedule({ status }: { status: NonNullable<ReturnType<typeof usePro
         <span className="text-muted-foreground">{status.completedDays.length} / {PROGRAM_SESSIONS} sessions</span>
         <span className="font-semibold text-primary">{status.daysRemaining} day{status.daysRemaining === 1 ? "" : "s"} left</span>
       </div>
-      <div className="grid grid-cols-7 gap-1.5">
+      <div className="grid grid-cols-7 gap-1">
         {days.map((d) => {
           const done = completed.has(d);
           const isToday = d === todayIndex;
           const missed = !done && d < todayIndex;
+          const dayDate = new Date(startDay + (d - 1) * 86400000);
+          const dayNum = dayDate.getDate();
           const tile = done
-            ? "bg-success text-white"
+            ? "bg-success/15 text-success ring-1 ring-success/40"
             : isToday
               ? "brand-gradient text-primary-foreground ring-2 ring-primary/40"
               : missed
-                ? "bg-warning/20 text-warning"
-                : "bg-secondary text-muted-foreground";
+                ? "bg-warning/15 text-warning ring-1 ring-warning/40"
+                : "bg-secondary text-foreground/80";
           return (
-            <div key={d} className={`grid aspect-square place-items-center rounded-lg text-[11px] font-bold ${tile}`}>
-              {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : d}
+            <div key={d} className={`flex flex-col items-center justify-center rounded-lg py-1 leading-tight ${tile}`}>
+              <span className="text-[9px] font-bold uppercase opacity-70">D{d}</span>
+              <span className="text-sm font-extrabold">{dayNum}</span>
+              {done && <CheckCircle2 className="h-2.5 w-2.5" />}
             </div>
           );
         })}
