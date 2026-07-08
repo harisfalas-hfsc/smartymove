@@ -53,7 +53,7 @@ export function evaluateRescan(user: User, status: ProgramStatus | null): Rescan
       urgency: "medium",
       title: "Take your first Movement Screen",
       message: "We can't build a personalised program until we've seen how you move. It takes about 5 minutes.",
-      cta: "Start Movement Screen",
+      cta: "Start Movement Screen · €9.99",
     };
   }
 
@@ -67,8 +67,8 @@ export function evaluateRescan(user: User, status: ProgramStatus | null): Rescan
       reason: "goal-changed",
       urgency: "high",
       title: "Your goal changed — let's re-scan",
-      message: "Your new goal changes what we're looking for in your movement. A fresh scan gives your program a clean starting point.",
-      cta: "Re-scan now",
+      message: "Your new goal changes what we're looking for in your movement. A fresh 8-minute scan (€9.99, one-time) unlocks a brand-new 14-day training program built around your updated priorities.",
+      cta: "Re-scan now · €9.99",
     };
   }
 
@@ -80,8 +80,8 @@ export function evaluateRescan(user: User, status: ProgramStatus | null): Rescan
       reason: "self-reported-change",
       urgency: "high",
       title: "Sounds like something has shifted",
-      message: "You mentioned something felt different after your last session — a quick re-scan will show whether your scores have moved.",
-      cta: "Re-scan now",
+      message: "You mentioned something felt different after your last session — a quick re-scan (€9.99, one-time) will show whether your scores have moved and generate a fresh 14-day training program.",
+      cta: "Re-scan now · €9.99",
     };
   }
 
@@ -103,8 +103,8 @@ export function evaluateRescan(user: User, status: ProgramStatus | null): Rescan
       reason: "foundation-complete",
       urgency: "high",
       title: "You've finished your Foundation phase",
-      message: `Great work. Let's re-scan to see if your ${areaLabel} has improved and whether you're ready to move to the Build stage.`,
-      cta: "Re-scan and progress",
+      message: `Great work. Re-scan now (€9.99, one-time) to see if your ${areaLabel} has improved and unlock your next personalised 14-day training program in the Build stage.`,
+      cta: "Re-scan and progress · €9.99",
     };
   }
 
@@ -119,8 +119,8 @@ export function evaluateRescan(user: User, status: ProgramStatus | null): Rescan
         reason: "no-improvement",
         urgency: "medium",
         title: "Your scores haven't shifted yet",
-        message: "That's okay — some restrictions take longer. Consider a conversation with a movement specialist, or we can adjust your program focus and try again.",
-        cta: "Re-scan and adjust",
+        message: "That's okay — some restrictions take longer. A fresh scan (€9.99, one-time) will re-focus your next 14-day training program on what's still stuck.",
+        cta: "Re-scan and adjust · €9.99",
       };
     }
   }
@@ -132,8 +132,8 @@ export function evaluateRescan(user: User, status: ProgramStatus | null): Rescan
       reason: "cadence",
       urgency: "medium",
       title: "Time to re-scan",
-      message: "Your 2-week program is complete. Rescan now to measure your progress and unlock your next program.",
-      cta: "Start Movement Screen",
+      message: "Your 14-day program is complete. Rescan now (€9.99, one-time) to measure your progress and unlock your next personalised 14-day training program.",
+      cta: "Rescan · €9.99",
     };
   }
 
