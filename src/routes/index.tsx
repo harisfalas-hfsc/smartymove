@@ -166,6 +166,10 @@ function Welcome() {
                   <span>Know how you move.</span>
                   <span>Move smarter.</span>
                 </h1>
+                <div className="sm-hero-motto">
+                  <Smartphone className="h-4 w-4" />
+                  <span>Your pocket movement coach.</span>
+                </div>
               </section>
 
               <div className="sm-panel-score-picture sm-border-score">
