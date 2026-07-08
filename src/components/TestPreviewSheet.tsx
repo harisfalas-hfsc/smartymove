@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { X, AlertCircle } from "lucide-react";
 import { TEST_GUIDES } from "@/lib/movement";
 import squatImg from "@/assets/fms/squat.png.asset.json";
+import hingeImg from "@/assets/fms/hinge.jpg.asset.json";
 import balanceImg from "@/assets/fms/balance.png.asset.json";
 import lungeImg from "@/assets/fms/lunge.png.asset.json";
 import overheadImg from "@/assets/fms/overhead.png.asset.json";
@@ -11,6 +12,7 @@ import rotaryImg from "@/assets/fms/rotary_stability.png.asset.json";
 
 export const TEST_DEMO_IMAGES: Record<string, string> = {
   squat: squatImg.url,
+  hinge: hingeImg.url,
   balance: balanceImg.url,
   lunge: lungeImg.url,
   overhead: overheadImg.url,
