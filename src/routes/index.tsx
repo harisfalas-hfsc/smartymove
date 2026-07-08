@@ -155,7 +155,7 @@ function Welcome() {
         onBack={mode === "intro" ? undefined : () => setMode("intro")}
       />
       <main
-        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "sm-home-shell max-w-[430px] lg:max-w-[866px] lg:px-0" : "max-w-[420px]"}`}
+        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "sm-home-shell max-w-[430px] lg:max-w-[1240px] lg:px-6" : "max-w-[420px]"}`}
       >
         {mode === "intro" ? (
           <>
@@ -227,6 +227,9 @@ function Welcome() {
                   <MiniTile Icon={HeartPulse} label="Progress" color="#7A3EBA" />
                   <MiniTile Icon={CalendarCheck} label="Retest" color="#FF6B4A" />
                 </div>
+                <Link to="/about" className="sm-text-link">
+                  See how workouts are built <ArrowRight className="h-4 w-4" />
+                </Link>
               </section>
 
               <section className="sm-panel sm-panel-tools sm-border-tools">
@@ -243,6 +246,9 @@ function Welcome() {
                   <FeatureLine Icon={BookOpen} color="#7A3EBA" title="Curated exercise library" text="Coach-built exercises organized by body area and goal." />
                   <FeatureLine Icon={Repeat} color="#38A5C7" title="Evolves with you" text="Your routine updates as your retests show improvement." />
                 </div>
+                <Link to="/about" className="sm-text-link">
+                  Explore the corrective library <ArrowRight className="h-4 w-4" />
+                </Link>
               </section>
             </div>
           </>
@@ -544,10 +550,13 @@ function Welcome() {
           }
           .sm-panel h2{
             color: #10213F;
-            font-size: 24px;
+            font-size: 22px;
             line-height: 1.05;
             font-weight: 900;
-            margin: 16px 0 8px;
+            margin: 14px 0 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
           .sm-panel h2 span{ color: #2B8FA3; }
           .sm-panel p{
@@ -557,15 +566,15 @@ function Welcome() {
             margin: 0;
           }
           .sm-panel-hero{
-            min-height: 228px;
+            min-height: 200px;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
+            justify-content: center;
           }
           .sm-wellness-title{
             margin: 18px 0 0;
             color: #10213F;
-            font-size: 48px;
+            font-size: 44px;
             line-height: .96;
             font-weight: 900;
             letter-spacing: 0;
@@ -574,7 +583,7 @@ function Welcome() {
           .sm-wellness-title span:nth-child(1){ color:#43AD5C; }
           .sm-wellness-title span:nth-child(2){ color:#2B8FA3; }
           .sm-panel-mobile{
-            min-height: 228px;
+            min-height: 200px;
             display:flex;
             flex-direction:column;
             align-items:flex-start;
@@ -626,7 +635,7 @@ function Welcome() {
           .sm-panel-about,
           .sm-panel-program,
           .sm-panel-tools,
-          .sm-panel-score-picture{ min-height: 266px; }
+          .sm-panel-score-picture{ min-height: 240px; }
           .sm-panel-about{
             display: flex;
             flex-direction: column;
@@ -634,8 +643,12 @@ function Welcome() {
           .sm-panel-about .sm-feature-list{ flex: 1 0 auto; }
           .sm-panel-about .sm-text-link{ margin-top: auto; }
           .sm-panel-program{ display:flex; flex-direction:column; }
-          .sm-panel-program .sm-tile-grid{ flex:1; align-content:stretch; }
-          .sm-panel-program .sm-mini-tile{ min-height:44px; font-size:12px; }
+          .sm-panel-program .sm-tile-grid{ flex:1 0 auto; align-content:stretch; }
+          .sm-panel-program .sm-mini-tile{ min-height:40px; font-size:12px; }
+          .sm-panel-program .sm-text-link{ margin-top:auto; }
+          .sm-panel-tools{ display:flex; flex-direction:column; }
+          .sm-panel-tools .sm-feature-list{ flex:1 0 auto; }
+          .sm-panel-tools .sm-text-link{ margin-top:auto; }
           .sm-panel-score-picture{
             border-radius: 15px;
             overflow: hidden;
@@ -768,13 +781,14 @@ function Welcome() {
             .sm-panel-tools{ display: none; }
           }
           @media (min-width: 1024px){
-            .sm-wellness-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
-            .sm-panel-hero{ grid-column: span 2; }
-            .sm-panel-score-picture{ grid-column: 3; grid-row: 1; min-height: 228px; }
-            .sm-panel-mobile{ grid-column: 3; grid-row: 3; }
-            .sm-panel-about{ grid-column: 1; grid-row: span 2; min-height: 548px; }
-            .sm-panel-program{ grid-column: 2; grid-row: span 2; min-height: 548px; }
-            .sm-panel-tools{ grid-column: 3; grid-row: 2; }
+            .sm-wellness-grid{ grid-template-columns: repeat(12, minmax(0, 1fr)); gap:16px; }
+            .sm-panel-hero{ grid-column: 1 / span 6; grid-row: 1; min-height: 200px; }
+            .sm-panel-score-picture{ grid-column: 7 / span 3; grid-row: 1; min-height: 200px; }
+            .sm-panel-mobile{ grid-column: 10 / span 3; grid-row: 1; min-height: 200px; }
+            .sm-panel-about{ grid-column: 1 / span 4; grid-row: 2; min-height: 420px; }
+            .sm-panel-program{ grid-column: 5 / span 4; grid-row: 2; min-height: 420px; }
+            .sm-panel-tools{ grid-column: 9 / span 4; grid-row: 2; min-height: 420px; }
+            .sm-panel h2{ font-size: 22px; }
           }
         `}</style>
       </main>
