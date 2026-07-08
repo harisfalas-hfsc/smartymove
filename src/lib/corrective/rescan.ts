@@ -52,7 +52,7 @@ export function evaluateRescan(user: User, status: ProgramStatus | null): Rescan
       reason: "first-scan",
       urgency: "medium",
       title: "Take your first Movement Screen",
-      message: "We can't build a personalised program until we've seen how you move. It takes about 5 minutes.",
+      message: "We can't build a personalised program until we've seen how you move. The scan takes about 8 minutes and costs €9.99 (one-time) — it unlocks a 14-day training program built around your results.",
       cta: "Start Movement Screen · €9.99",
     };
   }
