@@ -471,6 +471,35 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
       "0": "Any pain in the low back, hips or shoulders during the pattern (clearing test — forces a 0).",
     },
   },
+  sl_balance: {
+    id: "sl_balance", name: "Single-Leg Balance",
+    what: "Stand on one leg for 10 seconds without pelvic drop, trunk lean, or knee wobble. Test both sides.",
+    why: "Single-leg stance exposes hip stability, ankle strategy and postural control — the base of every gait, sport and injury-prevention program.",
+    setup: [
+      "Face the camera, arms folded across your chest",
+      "Feet under your hips, look straight ahead at a fixed point",
+      "Rear the room so your full body is visible in the frame",
+    ],
+    steps: [
+      "Lift one foot just off the floor (knee softly bent)",
+      "Hold for 10 seconds without touching down or shifting your weight",
+      "Return under control, then repeat on the other leg",
+      "Turn sideways and repeat both legs — the side view catches forward trunk pitch",
+    ],
+    mistakes: [
+      "Pelvis drops on the lifted side (>5° = compensation)",
+      "Trunk leans to the side or pitches forward (>20°)",
+      "Stance knee wobbles or foot has to touch down",
+    ],
+    reps: "10-second hold each leg · both views",
+    libraryQuery: "single leg balance",
+    scoring: {
+      "3": "Full 10-second hold, pelvis level within 5°, trunk stays upright.",
+      "2": "Holds but with pelvic drop 5–10°, trunk lean, or visible knee wobble.",
+      "1": "Balance lost before 10 s, or pelvic drop over 10°.",
+      "0": "Any pain in the stance-leg hip, knee or ankle during the hold.",
+    },
+  },
   wall_slide: {
     id: "wall_slide", name: "Scapular Wall Slide",
     what: "Stand against a wall and slide your forearms up and down without losing contact.",
