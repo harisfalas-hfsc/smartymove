@@ -4,7 +4,7 @@ import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib
 import { isAdminEmail } from "@/lib/admin";
 
 export const SCAN_PRICE_ID = "smartymove_scan_single";
-export const SCAN_PRICE_EUR = 3.99;
+export const SCAN_PRICE_EUR = 5.99;
 
 type ScanAccessResult = {
   credits: number;

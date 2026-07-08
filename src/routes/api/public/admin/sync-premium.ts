@@ -25,7 +25,7 @@ async function archivePremiumCatalog(stripe: ReturnType<typeof createStripeClien
         await stripe.products.update(productId, {
           active: false,
           description:
-            "Legacy SmartyMove Premium. Replaced by pay-per-scan (€3.99). Existing subscribers keep access until their subscription ends.",
+            "Legacy SmartyMove Premium. Replaced by pay-per-scan (€5.99). Existing subscribers keep access until their subscription ends.",
           metadata: {
             app: "smartymove",
             plan: "legacy_premium_monthly",
@@ -52,7 +52,7 @@ async function archivePremiumCatalog(stripe: ReturnType<typeof createStripeClien
     await stripe.products.update(product.id, {
       active: false,
       description:
-        "Legacy SmartyMove Premium. Replaced by pay-per-scan (€3.99). Existing subscribers keep access until their subscription ends.",
+        "Legacy SmartyMove Premium. Replaced by pay-per-scan (€5.99). Existing subscribers keep access until their subscription ends.",
       metadata: {
         ...product.metadata,
         app: "smartymove",
@@ -81,7 +81,7 @@ async function ensureScanProduct(stripe: ReturnType<typeof createStripeClient>) 
       active: true,
       name: "SmartyMove Movement Scan",
       description:
-        "One movement scan (€3.99) with a personalized 2-week corrective training program and permanent access to scan history and program results.",
+        "One movement scan (€5.99) with a personalized 2-week corrective training program and permanent access to scan history and program results.",
       images: [BRAND_IMAGE_URL],
       tax_code: "txcd_10000000",
       metadata: {
@@ -99,7 +99,7 @@ async function ensureScanProduct(stripe: ReturnType<typeof createStripeClient>) 
     active: true,
     name: "SmartyMove Movement Scan",
     description:
-      "One movement scan (€3.99) with a personalized 2-week corrective training program and permanent access to scan history and program results.",
+      "One movement scan (€5.99) with a personalized 2-week corrective training program and permanent access to scan history and program results.",
     images: [BRAND_IMAGE_URL],
     tax_code: "txcd_10000000",
     metadata: {
@@ -112,7 +112,7 @@ async function ensureScanProduct(stripe: ReturnType<typeof createStripeClient>) 
   const price = await stripe.prices.create({
     active: true,
     currency: "eur",
-    unit_amount: 399,
+    unit_amount: 599,
     product: product.id,
     lookup_key: SCAN_LOOKUP_KEY,
     metadata: {
@@ -135,7 +135,7 @@ async function sync(env: StripeEnv) {
     results.premiumError = getStripeErrorMessage(e);
   }
 
-  // 2) Create/update the SmartyMove Scan product and €3.99 one-time price.
+  // 2) Create/update the SmartyMove Scan product and €5.99 one-time price.
   try {
     results.scan = await ensureScanProduct(stripe);
   } catch (e) {
