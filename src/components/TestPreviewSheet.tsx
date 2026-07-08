@@ -126,6 +126,26 @@ export function TestPreviewSheet({ open, onClose, testIds, focusTestId, title }:
                           </ul>
                         </div>
                       )}
+                      {g.scoring && (
+                        <div>
+                          <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">How it's scored</div>
+                          <ul className="mt-1 space-y-1 text-sm">
+                            {(["3", "2", "1", "0"] as const).map((k) => {
+                              const color =
+                                k === "3" ? "bg-success text-success-foreground" :
+                                k === "2" ? "bg-primary text-primary-foreground" :
+                                k === "1" ? "bg-warning text-warning-foreground" :
+                                "bg-destructive text-destructive-foreground";
+                              return (
+                                <li key={k} className="flex gap-2">
+                                  <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-md text-[10px] font-black ${color}`}>{k}</span>
+                                  <span className="flex-1">{g.scoring![k]}</span>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

@@ -35,34 +35,38 @@ function Page() {
   const [jump, setJump] = useState<boolean | null>(existing?.canJump ?? null);
   const [injury, setInjury] = useState<boolean | null>(existing?.recentInjury ?? null);
   const [painAreas, setPainAreas] = useState<PainArea[]>(existing?.painAreas ?? []);
-  // One combined red-flag question per spec: numbness / night pain / unexplained symptoms.
-  const [redFlag, setRedFlag] = useState<boolean | null>(
-    existing?.numbness || existing?.nightPain || existing?.unexplainedSymptoms ? true :
-    (existing && (existing.numbness === false && existing.nightPain === false && existing.unexplainedSymptoms === false) ? false : null)
-  );
+  // Three separate red-flag questions (numbness / night pain / unexplained
+  // symptoms) — each is a clinically distinct signal, so we store them
+  // independently instead of collapsing to one shared boolean.
+  const [numbness, setNumbness] = useState<boolean | null>(existing?.numbness ?? null);
+  const [nightPain, setNightPain] = useState<boolean | null>(existing?.nightPain ?? null);
+  const [unexplained, setUnexplained] = useState<boolean | null>(existing?.unexplainedSymptoms ?? null);
 
   const yesNoRows: { key: string; label: string; v: boolean | null; set: (b: boolean) => void }[] = [
     { key: "walk", label: "I can walk without pain", v: walk, set: setWalk },
     { key: "run", label: "I can run without pain", v: run, set: setRun },
     { key: "jump", label: "I can jump and land without pain", v: jump, set: setJump },
     { key: "injury", label: "I had a recent injury or surgery", v: injury, set: setInjury },
-    { key: "flag", label: "Any numbness, night pain, or unexplained symptoms", v: redFlag, set: setRedFlag },
+    { key: "numbness",    label: "Any numbness, tingling, or pins-and-needles",      v: numbness,    set: setNumbness },
+    { key: "night_pain",  label: "Pain that wakes you at night",                     v: nightPain,   set: setNightPain },
+    { key: "unexplained", label: "Any unexplained weight loss or other symptoms",    v: unexplained, set: setUnexplained },
   ];
 
   const allAnswered = pain !== null && yesNoRows.every(r => r.v !== null);
   const painAreasRequired = pain !== null && pain !== "none";
   const painAreasOk = !painAreasRequired || painAreas.length > 0;
   const canContinue = allAnswered && painAreasOk;
+  const anyRedFlag = numbness === true || nightPain === true || unexplained === true;
   const showWarning =
-    pain === "severe" || injury === true || redFlag === true;
+    pain === "severe" || injury === true || anyRedFlag;
 
   function next() {
     if (!canContinue) return;
     const questionnaire = {
       pain: pain as Pain,
       canWalk: walk!, canRun: run!, canJump: jump!,
-      recentInjury: injury!, redFlags: redFlag!,
-      numbness: redFlag!, nightPain: redFlag!, unexplainedSymptoms: redFlag!,
+      recentInjury: injury!, redFlags: anyRedFlag,
+      numbness: numbness!, nightPain: nightPain!, unexplainedSymptoms: unexplained!,
       joints: existing?.joints ?? [],
       painAreas: pain === "none" ? [] : painAreas,
       disclaimerAccepted: existing?.disclaimerAccepted ?? false,

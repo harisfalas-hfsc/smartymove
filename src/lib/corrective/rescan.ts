@@ -86,9 +86,16 @@ export function evaluateRescan(user: User, status: ProgramStatus | null): Rescan
   }
 
   // ─── 3. Foundation-phase complete ────────────────────────────────────────
+  // Both clocks must agree: (a) the week-based phase engine says the user
+  // has reached the end of the Foundation window (weekIndex >= 2), AND
+  // (b) the user has completed the full 14-session Foundation block. This
+  // avoids the "user crushed 14 sessions in 4 days → premature rescan"
+  // and the inverse "week 2 hit but only 3 sessions done → premature".
   const phase = getPhaseInfo(user.programStartDate ?? user.createdAt, user.phaseOverride);
   const completedInProgram = status?.completedDays.length ?? 0;
-  if (phase.phase === "restore" && completedInProgram >= (status?.totalSessions ?? 14)) {
+  const foundationWeeksDone = phase.weekIndex >= 2;
+  const foundationSessionsDone = completedInProgram >= (status?.totalSessions ?? 14);
+  if (phase.phase === "restore" && foundationWeeksDone && foundationSessionsDone) {
     const areas = (user.questionnaire?.joints ?? []).filter((j) => j && j !== "none");
     const areaLabel = areas.length > 0 ? areas.join(" / ") : "movement";
     return {

@@ -70,18 +70,19 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
 };
 
 /**
- * The SmartyMove Scan is a fixed 7-pattern movement screen. The internal
+ * The SmartyMove Scan is a fixed 8-pattern movement screen. The internal
  * test ids reuse the pre-existing scoring engine (squat/balance/lunge/…) so
  * geometry + compensation detection continue to work; user-facing names,
  * descriptions and camera guides are re-branded for the SmartyMove protocol.
  *
  *   Deep Squat                → id "squat"
+ *   Hip Hinge                 → id "hinge"
  *   Hurdle Step               → id "balance"
  *   In-line Lunge             → id "lunge"
  *   Shoulder Mobility         → id "overhead"           (front view only)
  *   Active Straight-Leg Raise → id "hip_abd"
  *   Trunk Stability Push-Up   → id "bridge_hold"
- *   Rotary Stability          → id "rotary_stability"   (new — placeholder scoring)
+ *   Rotary Stability          → id "rotary_stability"
  *
  * The three FMS clearing patterns (Shoulder Mobility, TSPU, Rotary
  * Stability) surface a "any pain during that test?" prompt in the runner;
@@ -102,7 +103,7 @@ export const CORE_TESTS = [
  *  Pain forces the pattern to score 0 (marked invalid + excluded from sub-scores). */
 export const CLEARING_TESTS = new Set(["overhead", "bridge_hold", "rotary_stability"]);
 
-/** Kept for back-compat with older exports; the fixed 7-pattern scan no
+/** Kept for back-compat with older exports; the fixed 8-pattern scan no
  *  longer branches on joint selection. */
 export const CONDITIONAL_TESTS: Record<string, { id: string; name: string; note?: string }> = {};
 
@@ -179,7 +180,7 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
     quality: avgOrInsufficient(buckets.quality),
   };
   // Overall = weighted average of the four sub-scores (Mobility 30, Stability
-  // 25, Balance 25, Quality 20). If a sub-score is "Insufficient data" it is
+  // 30, Balance 20, Quality 20). If a sub-score is "Insufficient data" it is
   // excluded from the weighting and the remaining weights are renormalized.
   const weights: Record<keyof typeof sub, number> = {
     // Per spec: Mobility 30%, Stability 30%, Balance 20%, Movement Quality 20%.
@@ -211,6 +212,13 @@ export type TestGuide = {
   reps: string;
   /** Search string used to find a real demo GIF in the exercise library. */
   libraryQuery: string;
+  /** Plain-language 0/1/2/3 scoring rubric shown in the preview sheet. */
+  scoring?: {
+    "3": string;
+    "2": string;
+    "1": string;
+    "0": string;
+  };
 };
 
 export const TEST_GUIDES: Record<string, TestGuide> = {
@@ -237,6 +245,12 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     ],
     reps: "Up to 3 slow reps",
     libraryQuery: "overhead squat",
+    scoring: {
+      "3": "Thighs below parallel, dowel stays over the feet, torso stays upright, heels stay on the floor.",
+      "2": "Same, but only after raising the heels onto a 2×6 board (limited ankle mobility).",
+      "1": "Heels lift on the floor OR dowel drops forward OR thighs never reach parallel OR knees cave inward.",
+      "0": "Any pain at any point during the pattern.",
+    },
   },
   hinge: {
     id: "hinge", name: "Hip Hinge",
@@ -247,6 +261,12 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     mistakes: ["Rounding the upper back", "Bending the knees a lot (that's a squat, not a hinge)", "Looking up — keep your neck neutral"],
     reps: "3 slow reps · ~10 sec",
     libraryQuery: "stiff leg deadlift",
+    scoring: {
+      "3": "Long flat back, hips travel back with legs nearly straight, chest tips well forward from the hip.",
+      "2": "Some hip travel but knees bend to help, or the back rounds slightly at the bottom.",
+      "1": "Movement comes from the spine (rounding) or the knees (turns into a squat) — no true hip hinge.",
+      "0": "Any pain in the low back, hips or hamstrings during the movement.",
+    },
   },
   balance: {
     id: "balance", name: "Hurdle Step",
@@ -271,6 +291,12 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     ],
     reps: "Up to 3 slow reps each leg",
     libraryQuery: "hurdle step",
+    scoring: {
+      "3": "Hips, knees and ankles stay aligned. Minimal trunk motion. Dowel and hurdle stay level.",
+      "2": "Movement completes but with visible alignment loss (knee/hip drift, trunk tilt, dowel tilt).",
+      "1": "Contact between the foot and the hurdle, loss of balance, or the step can't be completed.",
+      "0": "Any pain during the step.",
+    },
   },
   lunge: {
     id: "lunge", name: "In-line Lunge",
@@ -295,6 +321,12 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     ],
     reps: "Up to 3 slow reps each leg",
     libraryQuery: "in-line lunge",
+    scoring: {
+      "3": "Dowel stays in contact with head/back/tailbone, torso stays vertical, back knee touches the board behind the front heel, no balance loss.",
+      "2": "Movement completes but with loss of dowel contact, slight torso rotation or an imperfect back-knee touch.",
+      "1": "Loss of balance, back knee doesn't touch, or the pattern can't be completed on the line.",
+      "0": "Any pain during the lunge.",
+    },
   },
   overhead: {
     id: "overhead", name: "Shoulder Mobility",
@@ -317,6 +349,12 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     ],
     reps: "1 rep each side",
     libraryQuery: "shoulder mobility reach",
+    scoring: {
+      "3": "Fists finish within one hand-length of each other on both sides.",
+      "2": "Fists finish within 1.5 hand-lengths on both sides.",
+      "1": "Gap greater than 1.5 hand-lengths on either side.",
+      "0": "Any shoulder pain during the reach (clearing test — forces a 0).",
+    },
   },
   ankle_df: {
     id: "ankle_df", name: "Ankle Dorsiflexion (knee-to-wall)",
@@ -359,6 +397,12 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     ],
     reps: "Up to 3 slow reps each leg",
     libraryQuery: "active straight leg raise",
+    scoring: {
+      "3": "Moving-leg ankle reaches above the mid-thigh of the down leg with the down leg staying flat.",
+      "2": "Moving-leg ankle reaches between mid-thigh and knee-joint line of the down leg.",
+      "1": "Moving-leg ankle stays below the knee-joint line of the down leg.",
+      "0": "Any pain in the hip, low back or hamstring during the raise.",
+    },
   },
   bridge_hold: {
     id: "bridge_hold", name: "Trunk Stability Push-Up",
@@ -382,6 +426,12 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     ],
     reps: "1 clean rep",
     libraryQuery: "push up",
+    scoring: {
+      "3": "One clean rep from the men's / women's starting hand position — body rises as one rigid unit, no lag, no sag.",
+      "2": "One clean rep from the easier (chin / clavicle) hand position — same rigid form required.",
+      "1": "Cannot perform a rep in the correct form (hips lag, back sags, or chest/knees leave at different times).",
+      "0": "Any pain in the low back, shoulders or wrists during the push-up (clearing test — forces a 0).",
+    },
   },
   rotary_stability: {
     id: "rotary_stability", name: "Rotary Stability",
@@ -406,6 +456,12 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
     ],
     reps: "1 clean rep each side",
     libraryQuery: "bird dog",
+    scoring: {
+      "3": "Unilateral (same-side arm + leg) rep: elbow touches knee over the board with no loss of balance, on both sides.",
+      "2": "Diagonal (opposite-side arm + leg) rep: elbow touches knee over the board with no loss of balance, on both sides.",
+      "1": "Cannot perform a diagonal rep, or loses balance during the movement.",
+      "0": "Any pain in the low back, hips or shoulders during the pattern (clearing test — forces a 0).",
+    },
   },
   wall_slide: {
     id: "wall_slide", name: "Scapular Wall Slide",
