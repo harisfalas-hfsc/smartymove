@@ -15,9 +15,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "SmartyMove Pricing — €3.99 per Movement Scan" },
-      { name: "description", content: "Pay only when you scan. €3.99 per Movement Screen with a personalized 2-week training program you keep forever." },
-      { property: "og:title", content: "SmartyMove — €3.99 per scan" },
+      { title: "SmartyMove Pricing — €5.99 per Movement Scan" },
+      { name: "description", content: "Pay only when you scan. €5.99 per Movement Screen with a personalized 2-week training program you keep forever." },
+      { property: "og:title", content: "SmartyMove — €5.99 per scan" },
       { property: "og:description", content: "Pay per scan. Keep your program forever. Rescan anytime to update your plan." },
       { property: "og:url", content: "https://smartymove.com/pricing" },
     ],
