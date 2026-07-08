@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
-import { angle, CORE_TESTS, CONDITIONAL_TESTS, CLEARING_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
+import { angle, CORE_TESTS, CONDITIONAL_TESTS, CLEARING_TESTS, BILATERAL_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
 import squatImg from "@/assets/fms/squat.png.asset.json";
 import hingeImg from "@/assets/fms/hinge.jpg.asset.json";
 import balanceImg from "@/assets/fms/balance.png.asset.json";
@@ -47,6 +47,18 @@ type Step = {
   totalViews: number;        // >=1
   viewLabel: string;         // e.g. "Side view"
   viewCue: string;           // reposition hint
+  /**
+   * "both" for tests that move both sides together (Deep Squat, Hip Hinge,
+   * Trunk Stability Push-Up). "right" / "left" for bilateral tests where
+   * each side is captured and scored separately.
+   */
+  side: "both" | "right" | "left";
+  /** Human copy for which side/limb to use — empty for "both". */
+  sideLabel: string;
+  /** 1-based position across the entire scan sequence (for "Recording X of Y"). */
+  stepIndex: number;
+  /** Total number of recordings in the scan (all tests × sides × views). */
+  totalSteps: number;
   conditional?: boolean;
 };
 
