@@ -110,6 +110,22 @@ export const CORE_TESTS = [
  *  Pain forces the pattern to score 0 (marked invalid + excluded from sub-scores). */
 export const CLEARING_TESTS = new Set(["overhead", "bridge_hold", "rotary_stability"]);
 
+/**
+ * Tests that must be captured and scored per side (right, then left).
+ * Final test score = the lower of the two side scores. A side-to-side
+ * difference > 1 point flags the test as asymmetric on the results screen.
+ * Non-bilateral tests (Deep Squat, Hip Hinge, Trunk Stability Push-Up) run
+ * as a single movement with the sides moving together.
+ */
+export const BILATERAL_TESTS = new Set([
+  "balance",           // Hurdle Step
+  "lunge",             // In-line Lunge
+  "overhead",          // Shoulder Mobility
+  "hip_abd",           // Active Straight-Leg Raise
+  "rotary_stability",  // Rotary Stability
+  "sl_balance",        // Single-Leg Balance
+]);
+
 /** Kept for back-compat with older exports; the fixed 8-pattern scan no
  *  longer branches on joint selection. */
 export const CONDITIONAL_TESTS: Record<string, { id: string; name: string; note?: string }> = {};

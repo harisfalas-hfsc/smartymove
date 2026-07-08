@@ -77,6 +77,19 @@ export interface TestResult {
     metric?: number;
     compensations?: string[];
   }>;
+  /**
+   * Bilateral tests (Hurdle Step, In-line Lunge, Shoulder Mobility,
+   * Active SLR, Rotary Stability, Single-Leg Balance) capture right and
+   * left sides separately. Each side is scored independently; the top-level
+   * `score` is the lower of the two. Absent for tests that run as a single
+   * movement (Deep Squat, Hip Hinge, Trunk Stability Push-Up).
+   */
+  sideScores?: {
+    right?: { score: 0 | 1 | 2 | 3; valid?: boolean; compensations?: string[] };
+    left?:  { score: 0 | 1 | 2 | 3; valid?: boolean; compensations?: string[] };
+  };
+  /** True when |right − left| > 1 point on a bilateral test — surfaces on the results screen. */
+  asymmetryFlag?: boolean;
 }
 
 export interface ScreenSession {
