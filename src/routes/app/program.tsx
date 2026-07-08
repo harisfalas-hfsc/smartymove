@@ -341,5 +341,3 @@ function MarkDoneButton({ dayIndex, onClose }: { dayIndex: number; onClose: () =
   );
 }
 
-// Silence unused-import warnings for icons referenced conditionally.
-void Circle;
