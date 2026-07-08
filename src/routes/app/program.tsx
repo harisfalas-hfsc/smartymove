@@ -21,6 +21,7 @@ import { SmartyCard } from "@/components/SmartyCard";
 import { Sparkles, Dumbbell, Flame, Target } from "lucide-react";
 import { evaluateGraduation, recommendSmartyGym } from "@/lib/graduation";
 import { SmartyGymHandoff } from "@/components/SmartyGymHandoff";
+import { CheckCircle2 as CheckIcon } from "lucide-react";
 // Program access is unlocked once the user has completed a scan — no paywall gating here.
 
 export const Route = createFileRoute("/app/program")({ component: Program });
