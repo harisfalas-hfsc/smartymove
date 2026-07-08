@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useUser } from "@/lib/store";
+import { getFirstIncompleteOnboardingPath, isOnboardingComplete, setOnboardingNextPath, useUser } from "@/lib/store";
 import { CORE_TESTS } from "@/lib/movement";
 import { Play, Lock, Loader2, Camera, ShieldCheck, Smartphone, EyeOff, Ruler, Sparkles, Timer, HelpCircle, ListChecks, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -31,6 +31,12 @@ function ScreenIndex() {
   const credits = isAdmin ? 9999 : (access.data?.credits ?? 0);
   const accessLoading = !isAdmin && access.isLoading;
   function startScreen(e: React.MouseEvent) {
+    if (!isOnboardingComplete(u)) {
+      e.preventDefault();
+      setOnboardingNextPath("/app/screen/run");
+      navigate({ to: getFirstIncompleteOnboardingPath(u) ?? "/onboarding/parq" });
+      return;
+    }
     if (canScan) return;
     e.preventDefault();
     void openBuyScan();

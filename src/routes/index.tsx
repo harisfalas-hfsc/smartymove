@@ -5,8 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   clearOnboardingDraft,
+  clearOnboardingNextPath,
+  getFirstIncompleteOnboardingPath,
   getOnboardingDraft,
+  getOnboardingNextPath,
   getUser,
+  isOnboardingComplete,
   restoreUserFromBackend,
   signInWithEmailProfile,
   signUpWithEmailProfile,
@@ -86,10 +90,10 @@ function Welcome() {
       return;
     }
     const cached = getUser();
-    if (cached && cached.questionnaire && cached.goal) navigate({ to: "/app" });
+    if (isOnboardingComplete(cached)) navigate({ to: "/app/screen" });
     void restoreUserFromBackend()
       .then((u) => {
-        if (u?.questionnaire && u.goal) navigate({ to: "/app" });
+        if (isOnboardingComplete(u)) navigate({ to: "/app/screen" });
       })
       .catch(() => undefined);
   }, [navigate]);
@@ -123,13 +127,10 @@ function Welcome() {
       }
       const draft = getOnboardingDraft();
       clearOnboardingDraft();
-      navigate({
-        to: nextPath ?? (
-          (result.user.questionnaire || draft.questionnaire) && (result.user.goal || draft.goal)
-            ? "/app"
-            : "/onboarding/parq"
-        ),
-      });
+      const merged = { ...result.user, parq: result.user.parq ?? draft.parq, questionnaire: result.user.questionnaire ?? draft.questionnaire, goal: result.user.goal ?? draft.goal };
+      const destination = nextPath ?? (isOnboardingComplete(merged) ? getOnboardingNextPath("/app/screen") : (getFirstIncompleteOnboardingPath(merged) ?? "/app/screen"));
+      if (isOnboardingComplete(merged)) clearOnboardingNextPath();
+      navigate({ to: destination });
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Account creation failed. Try again.");
     } finally {
@@ -146,7 +147,9 @@ function Welcome() {
     setSubmitting(true);
     try {
       const u = await signInWithEmailProfile(email, pw);
-      navigate({ to: nextPath ?? (u.questionnaire && u.goal ? "/app" : "/onboarding/parq") });
+      const destination = nextPath ?? (isOnboardingComplete(u) ? getOnboardingNextPath("/app/screen") : (getFirstIncompleteOnboardingPath(u) ?? "/app/screen"));
+      if (isOnboardingComplete(u)) clearOnboardingNextPath();
+      navigate({ to: destination });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Sign in failed. Check your email and password.";
       if (/email not (confirmed|verified)/i.test(message)) {

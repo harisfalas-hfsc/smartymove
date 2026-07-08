@@ -169,12 +169,20 @@ export interface User {
 const KEY = "smartymove.user";
 const DRAFT_KEY = "smartymove.onboardingDraft";
 const PENDING_PROFILE_KEY = "smartymove.pendingProfile";
+const ONBOARDING_NEXT_KEY = "smartymove.onboardingNext";
 
 export interface OnboardingDraft {
   questionnaire?: Questionnaire;
   goal?: Goal;
   parq?: ParqAnswers;
 }
+
+export type OnboardingPath =
+  | "/onboarding/parq"
+  | "/onboarding/questionnaire"
+  | "/onboarding/joints"
+  | "/onboarding/disclaimer"
+  | "/onboarding/goal";
 
 export function getUser(): User | null {
   if (typeof window === "undefined") return null;
@@ -214,6 +222,78 @@ export function updateOnboardingDraft(patch: Partial<OnboardingDraft> | ((draft:
 export function clearOnboardingDraft() {
   if (typeof window === "undefined") return;
   localStorage.removeItem(DRAFT_KEY);
+}
+export function isParqComplete(parq?: ParqAnswers | null) {
+  if (!parq) return false;
+  return [
+    parq.heartCondition,
+    parq.chestPainActivity,
+    parq.chestPainRest,
+    parq.balanceLoss,
+    parq.boneJoint,
+    parq.bpMedication,
+    parq.otherReason,
+    parq.acknowledgedWarning,
+  ].every((value) => typeof value === "boolean");
+}
+export function isQuestionnaireComplete(questionnaire?: Questionnaire | null) {
+  if (!questionnaire) return false;
+  const hasPainAreas = questionnaire.pain === "none" || ((questionnaire.painAreas?.length ?? 0) > 0);
+  return (
+    !!questionnaire.pain &&
+    typeof questionnaire.canWalk === "boolean" &&
+    typeof questionnaire.canRun === "boolean" &&
+    typeof questionnaire.canJump === "boolean" &&
+    typeof questionnaire.recentInjury === "boolean" &&
+    typeof questionnaire.redFlags === "boolean" &&
+    typeof questionnaire.numbness === "boolean" &&
+    typeof questionnaire.nightPain === "boolean" &&
+    typeof questionnaire.unexplainedSymptoms === "boolean" &&
+    hasPainAreas &&
+    Array.isArray(questionnaire.joints) &&
+    questionnaire.joints.length > 0 &&
+    questionnaire.disclaimerAccepted === true
+  );
+}
+export function getFirstIncompleteOnboardingPath(user?: Partial<User> | null): OnboardingPath | null {
+  if (!isParqComplete(user?.parq)) return "/onboarding/parq";
+  const questionnaire = user?.questionnaire;
+  if (!questionnaire || !questionnaire.pain) return "/onboarding/questionnaire";
+  const hasPainAreas = questionnaire.pain === "none" || ((questionnaire.painAreas?.length ?? 0) > 0);
+  const coreAnswered =
+    typeof questionnaire.canWalk === "boolean" &&
+    typeof questionnaire.canRun === "boolean" &&
+    typeof questionnaire.canJump === "boolean" &&
+    typeof questionnaire.recentInjury === "boolean" &&
+    typeof questionnaire.numbness === "boolean" &&
+    typeof questionnaire.nightPain === "boolean" &&
+    typeof questionnaire.unexplainedSymptoms === "boolean" &&
+    hasPainAreas;
+  if (!coreAnswered) return "/onboarding/questionnaire";
+  if (!Array.isArray(questionnaire.joints) || questionnaire.joints.length === 0) return "/onboarding/joints";
+  if (questionnaire.disclaimerAccepted !== true) return "/onboarding/disclaimer";
+  if (!user?.goal) return "/onboarding/goal";
+  return null;
+}
+export function isOnboardingComplete(user?: Partial<User> | null) {
+  return getFirstIncompleteOnboardingPath(user) === null;
+}
+export function setOnboardingNextPath(path: string | null | undefined) {
+  if (typeof window === "undefined") return;
+  if (!path || !path.startsWith("/") || path.startsWith("//") || path.includes("\\")) {
+    localStorage.removeItem(ONBOARDING_NEXT_KEY);
+    return;
+  }
+  localStorage.setItem(ONBOARDING_NEXT_KEY, path);
+}
+export function getOnboardingNextPath(defaultPath = "/app/screen") {
+  if (typeof window === "undefined") return defaultPath;
+  const path = localStorage.getItem(ONBOARDING_NEXT_KEY);
+  return path && path.startsWith("/") && !path.startsWith("//") && !path.includes("\\") ? path : defaultPath;
+}
+export function clearOnboardingNextPath() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(ONBOARDING_NEXT_KEY);
 }
 export function useUser() {
   const [u, setU] = useState<User | null>(null);
@@ -277,6 +357,34 @@ function fromProfile(row: ProfileRow): User {
   return makeUser(row.id, row.name, row.email, row.age, row.app_user);
 }
 
+function localOnboardingFor(email: string): Pick<Partial<User>, "parq" | "questionnaire" | "goal"> {
+  const pending = getPendingProfile(email);
+  const draft = getOnboardingDraft();
+  return {
+    parq: pending?.parq ?? draft.parq,
+    questionnaire: pending?.questionnaire ?? draft.questionnaire,
+    goal: pending?.goal ?? draft.goal,
+  };
+}
+
+function mergeMissingOnboarding(user: User, local: Pick<Partial<User>, "parq" | "questionnaire" | "goal">) {
+  let changed = false;
+  const next: User = { ...user };
+  if (!isParqComplete(next.parq) && isParqComplete(local.parq)) {
+    next.parq = local.parq;
+    changed = true;
+  }
+  if (!isQuestionnaireComplete(next.questionnaire) && isQuestionnaireComplete(local.questionnaire)) {
+    next.questionnaire = local.questionnaire;
+    changed = true;
+  }
+  if (!next.goal && local.goal) {
+    next.goal = local.goal;
+    changed = true;
+  }
+  return { user: next, changed };
+}
+
 async function saveProfile(user: User) {
   const { data: sessionData } = await supabase.auth.getSession();
   const authUser = sessionData.session?.user;
@@ -314,6 +422,13 @@ export async function restoreUserFromBackend(): Promise<User | null> {
   if (error) throw error;
   if (data) {
     const user = fromProfile(data as ProfileRow);
+    const merged = mergeMissingOnboarding(user, localOnboardingFor(authUser.email ?? user.email));
+    if (merged.changed) {
+      await saveProfile(merged.user);
+      clearOnboardingDraft();
+      clearPendingProfile();
+      return merged.user;
+    }
     cacheOnly(user);
     return user;
   }
@@ -339,7 +454,7 @@ export async function signUpWithEmailProfile(
 ): Promise<{ user: User; emailVerificationRequired: boolean }> {
   const normalizedEmail = normalizeEmail(email);
   const draft = getOnboardingDraft();
-  const partial: Partial<User> = { questionnaire: draft.questionnaire, goal: draft.goal };
+  const partial: Partial<User> = { parq: draft.parq, questionnaire: draft.questionnaire, goal: draft.goal };
   const { data, error } = await supabase.auth.signUp({
     email: normalizedEmail,
     password,

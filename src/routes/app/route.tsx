@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { BottomTabs } from "@/components/BottomTabs";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { getUser, restoreUserFromBackend } from "@/lib/store";
+import { getFirstIncompleteOnboardingPath, getUser, restoreUserFromBackend, setOnboardingNextPath } from "@/lib/store";
 
 export const Route = createFileRoute("/app")({ component: AppLayout });
 
@@ -22,9 +22,13 @@ function AppLayout() {
         if (!u) navigate({ to: "/" });
         return;
       }
-      else if (!restored.questionnaire || !restored.goal) navigate({ to: "/onboarding/questionnaire" });
+      const incompletePath = getFirstIncompleteOnboardingPath(restored);
+      if (incompletePath) {
+        setOnboardingNextPath(location.pathname.startsWith("/app/screen") ? location.pathname : "/app/screen");
+        navigate({ to: incompletePath });
+      }
     }).catch(() => navigate({ to: "/" }));
-  }, [navigate]);
+  }, [location.pathname, navigate]);
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
       {!isScreenRun && <SiteHeader showBack={!isAppHome} />}

@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { clearLocalAccountData, useUser } from "@/lib/store";
+import { useUser } from "@/lib/store";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,6 @@ export function useBuyScan(returnPath: string = "/pricing?paid=1") {
     const { data } = await supabase.auth.getSession();
     const authUser = data.session?.user;
     if (!u || !authUser) {
-      clearLocalAccountData();
       setSignInPromptOpen(true);
       return;
     }

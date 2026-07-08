@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { type Goal, updateOnboardingDraft, updateUser, getOnboardingDraft, getUser, restoreUserFromBackend, useUser } from "@/lib/store";
+import { type Goal, clearOnboardingNextPath, getOnboardingNextPath, updateOnboardingDraft, updateUser, getOnboardingDraft, getUser, restoreUserFromBackend, useUser } from "@/lib/store";
 
 export const Route = createFileRoute("/onboarding/goal")({ component: Page });
 
@@ -34,11 +34,14 @@ function Page() {
     if (!g) return;
     if (getUser()) {
       updateUser({ goal: g });
-      navigate({ to: "/app" });
+      const nextPath = getOnboardingNextPath("/app/screen");
+      clearOnboardingNextPath();
+      navigate({ to: nextPath });
       return;
     }
     updateOnboardingDraft({ goal: g });
-    window.location.assign("/?auth=signup");
+    const nextPath = getOnboardingNextPath("/app/screen");
+    window.location.assign(`/?auth=signup&next=${encodeURIComponent(nextPath)}`);
   }
   return (
     <div className="space-y-6 pb-6">
@@ -62,7 +65,7 @@ function Page() {
         })}
       </div>
       <Button disabled={!g || !authChecked} onClick={next} className="h-12 w-full rounded-2xl brand-gradient text-base font-semibold shadow-soft disabled:opacity-50">
-        {!authChecked ? "Checking account…" : (user || hasAccount) ? "Save goal" : "Create account to continue"}
+        {!authChecked ? "Checking account…" : (user || hasAccount) ? "Save goal" : "Create verified account"}
       </Button>
     </div>
   );
