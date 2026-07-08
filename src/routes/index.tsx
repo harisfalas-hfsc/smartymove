@@ -550,10 +550,13 @@ function Welcome() {
           }
           .sm-panel h2{
             color: #10213F;
-            font-size: 24px;
+            font-size: 22px;
             line-height: 1.05;
             font-weight: 900;
-            margin: 16px 0 8px;
+            margin: 14px 0 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
           .sm-panel h2 span{ color: #2B8FA3; }
           .sm-panel p{
@@ -563,15 +566,15 @@ function Welcome() {
             margin: 0;
           }
           .sm-panel-hero{
-            min-height: 228px;
+            min-height: 200px;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
+            justify-content: center;
           }
           .sm-wellness-title{
             margin: 18px 0 0;
             color: #10213F;
-            font-size: 48px;
+            font-size: 44px;
             line-height: .96;
             font-weight: 900;
             letter-spacing: 0;
@@ -580,7 +583,7 @@ function Welcome() {
           .sm-wellness-title span:nth-child(1){ color:#43AD5C; }
           .sm-wellness-title span:nth-child(2){ color:#2B8FA3; }
           .sm-panel-mobile{
-            min-height: 228px;
+            min-height: 200px;
             display:flex;
             flex-direction:column;
             align-items:flex-start;
@@ -632,7 +635,7 @@ function Welcome() {
           .sm-panel-about,
           .sm-panel-program,
           .sm-panel-tools,
-          .sm-panel-score-picture{ min-height: 266px; }
+          .sm-panel-score-picture{ min-height: 240px; }
           .sm-panel-about{
             display: flex;
             flex-direction: column;
@@ -640,8 +643,12 @@ function Welcome() {
           .sm-panel-about .sm-feature-list{ flex: 1 0 auto; }
           .sm-panel-about .sm-text-link{ margin-top: auto; }
           .sm-panel-program{ display:flex; flex-direction:column; }
-          .sm-panel-program .sm-tile-grid{ flex:1; align-content:stretch; }
-          .sm-panel-program .sm-mini-tile{ min-height:44px; font-size:12px; }
+          .sm-panel-program .sm-tile-grid{ flex:1 0 auto; align-content:stretch; }
+          .sm-panel-program .sm-mini-tile{ min-height:40px; font-size:12px; }
+          .sm-panel-program .sm-text-link{ margin-top:auto; }
+          .sm-panel-tools{ display:flex; flex-direction:column; }
+          .sm-panel-tools .sm-feature-list{ flex:1 0 auto; }
+          .sm-panel-tools .sm-text-link{ margin-top:auto; }
           .sm-panel-score-picture{
             border-radius: 15px;
             overflow: hidden;
@@ -774,13 +781,14 @@ function Welcome() {
             .sm-panel-tools{ display: none; }
           }
           @media (min-width: 1024px){
-            .sm-wellness-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
-            .sm-panel-hero{ grid-column: span 2; }
-            .sm-panel-score-picture{ grid-column: 3; grid-row: 1; min-height: 228px; }
-            .sm-panel-mobile{ grid-column: 3; grid-row: 3; }
-            .sm-panel-about{ grid-column: 1; grid-row: span 2; min-height: 548px; }
-            .sm-panel-program{ grid-column: 2; grid-row: span 2; min-height: 548px; }
-            .sm-panel-tools{ grid-column: 3; grid-row: 2; }
+            .sm-wellness-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); gap:16px; }
+            .sm-panel-hero{ grid-column: span 2; min-height: 200px; }
+            .sm-panel-score-picture{ grid-column: 3; grid-row: 1; min-height: 200px; }
+            .sm-panel-mobile{ grid-column: 3; grid-row: 2; min-height: 420px; }
+            .sm-panel-about{ grid-column: 1; grid-row: 2; min-height: 420px; }
+            .sm-panel-program{ grid-column: 2; grid-row: 2; min-height: 420px; }
+            .sm-panel-tools{ display: none; }
+            .sm-panel h2{ font-size: 24px; }
           }
         `}</style>
       </main>
