@@ -163,8 +163,7 @@ function Welcome() {
               <section className="sm-panel sm-panel-hero sm-border-hero">
                 <div className="sm-eyebrow"><Sparkles className="h-3 w-3" /> Movement diagnostic</div>
                 <h1 className="sm-wellness-title">
-                  <span>Know how</span>
-                  <span>you move.</span>
+                  <span>Know how you move.</span>
                   <span>Move smarter.</span>
                 </h1>
               </section>
@@ -746,6 +745,19 @@ function Welcome() {
             border-radius:99px;
             background:linear-gradient(90deg, transparent, #4FB286 24%, #7CFFB8 50%, #4FB286 76%, transparent);
             box-shadow:0 0 16px 3px rgba(79,178,134,.72);
+            animation: sm-score-pulse 2.4s ease-in-out infinite;
+          }
+          @keyframes sm-score-pulse{
+            0%,100%{
+              opacity:.5;
+              box-shadow:0 0 8px 1px rgba(79,178,134,.35);
+              transform:translateY(0) scaleX(.9);
+            }
+            50%{
+              opacity:1;
+              box-shadow:0 0 24px 6px rgba(124,255,184,.95);
+              transform:translateY(4px) scaleX(1);
+            }
           }
           .sm-score-card div{
             color:rgba(255,255,255,.62);
@@ -783,8 +795,8 @@ function Welcome() {
           @media (min-width: 1024px){
             .sm-wellness-grid{ grid-template-columns: repeat(12, minmax(0, 1fr)); gap:16px; }
             .sm-panel-hero{ grid-column: 1 / span 6; grid-row: 1; min-height: 200px; }
-            .sm-panel-score-picture{ grid-column: 7 / span 3; grid-row: 1; min-height: 200px; }
-            .sm-panel-mobile{ grid-column: 10 / span 3; grid-row: 1; min-height: 200px; }
+            .sm-panel-mobile{ grid-column: 7 / span 3; grid-row: 1; min-height: 200px; }
+            .sm-panel-score-picture{ grid-column: 10 / span 3; grid-row: 1; min-height: 200px; }
             .sm-panel-about{ grid-column: 1 / span 4; grid-row: 2; min-height: 420px; }
             .sm-panel-program{ grid-column: 5 / span 4; grid-row: 2; min-height: 420px; }
             .sm-panel-tools{ grid-column: 9 / span 4; grid-row: 2; min-height: 420px; }
