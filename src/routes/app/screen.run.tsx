@@ -233,7 +233,8 @@ function Runner() {
   const rafRef = useRef<number>(0);
   const latestLandmarksRef = useRef<any[] | null>(null);
 
-  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "done" | "failed">("setup");
+  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "confirm" | "submitting" | "done" | "failed">("setup");
+  const [pendingResults, setPendingResults] = useState<TestResult[] | null>(null);
   const seq = useMemo(
     () => buildSequence(u?.questionnaire?.joints ?? []),
     [u?.questionnaire?.joints?.join("|")],
@@ -418,7 +419,15 @@ function Runner() {
       setPhase("failed");
       return;
     }
-    // Consume one scan credit (grandfathered subscribers are skipped server-side).
+    // Ask the user to confirm before we spend their paid scan credit.
+    setPendingResults(allResults);
+    setPhase("confirm");
+  }
+
+  async function submitScan() {
+    if (!u || !pendingResults) return;
+    setPhase("submitting");
+    // Consume one scan credit. Every scan costs exactly one credit.
     try {
       const res = await consumeScanCredit();
       if (!res.ok) {
@@ -430,7 +439,7 @@ function Runner() {
       console.error("consumeScanCredit failed", e);
     }
     const joints = (u.questionnaire?.joints ?? []).filter(j => j !== "none") as Joint[];
-    const session = computeSession(allResults, joints, u.age);
+    const session = computeSession(pendingResults, joints, u.age);
     // Stamp the goal at time of scan so the rescan engine can detect goal changes later.
     session.goalAtScan = u.goal;
     const wasReTest = u.sessions.length > 0;
@@ -448,6 +457,14 @@ function Runner() {
     }));
     setPhase("done");
     setTimeout(() => navigate({ to: "/app/progress" }), 1200);
+  }
+
+  function retryScan() {
+    setPendingResults(null);
+    setResults([]);
+    stepResultsRef.current = new Map();
+    setIdx(0);
+    setPhase("intro");
   }
 
   // Group-level "test N of M" — the user thinks of the squat + its two views
