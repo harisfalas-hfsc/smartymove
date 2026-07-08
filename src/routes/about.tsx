@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Camera, Activity, Target, ShieldCheck, Repeat, Compass, Users, Heart, GraduationCap, Dumbbell, Plane, Briefcase, Play, Search, Calendar, TrendingUp, ListChecks, ChevronRight } from "lucide-react";
+import { Sparkles, Camera, Activity, Target, ShieldCheck, Repeat, Compass, Users, Heart, GraduationCap, Dumbbell, Plane, Briefcase, Play, Search, Calendar, TrendingUp, ListChecks, ChevronRight, ArrowRight } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -106,6 +106,14 @@ function About() {
                 picture of how you move and a short daily routine that targets the{" "}
                 <strong className="text-primary">root cause</strong> — not just the symptoms.
               </p>
+              <div className="pt-1 text-left">
+                <Link
+                  to="/why-movement-matters"
+                  className="inline-flex items-center gap-1 text-sm font-extrabold text-primary hover:underline"
+                >
+                  Learn more <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
             </div>
           </CardContent>
         </Card>
