@@ -35,6 +35,7 @@ import {
   CATEGORY_EMOJI,
   CATEGORY_LABEL,
   GOAL_DEFAULT_AREAS,
+  LIBRARY,
   jointToArea,
   type Area,
   type Category,
