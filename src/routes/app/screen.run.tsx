@@ -897,6 +897,40 @@ function Runner() {
               <p className="text-sm opacity-85">Crunching your scores...</p>
             </div>
           )}
+          {phase === "squat_retry" && (
+            <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
+              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-primary">
+                <RotateCcw className="h-4 w-4" /> Diagnostic retest · Heels elevated
+              </div>
+              <h2 className="mt-1 text-xl font-extrabold">Try the squat once more — with heels elevated</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Your deep squat couldn't reach depth with heels flat. This retry tells us whether your ankles are the limit (score improves to 2) or your hips/general mobility are (stays at 1).
+              </p>
+              <ol className="mt-4 space-y-2 text-sm text-foreground/85">
+                <li><strong>1.</strong> Place both heels on the rolled towel or book you set aside during setup (2–3 cm high).</li>
+                <li><strong>2.</strong> Perform the deep squat again. Aim for hip crease at or below the knee.</li>
+                <li><strong>3.</strong> Stand back up and answer below — no camera needed for this retest.</li>
+              </ol>
+              <p className="mt-4 text-base font-bold">Could you reach squat depth with your heels elevated?</p>
+              <div className="mt-3 grid grid-cols-1 gap-2">
+                <button
+                  onClick={() => resolveSquatRetry(true)}
+                  className="flex h-14 items-center justify-center gap-2 rounded-2xl brand-gradient text-base font-bold text-primary-foreground active:scale-[0.99]"
+                >
+                  <CheckCircle2 className="h-5 w-5" /> Yes — I reached depth
+                </button>
+                <button
+                  onClick={() => resolveSquatRetry(false)}
+                  className="flex h-14 items-center justify-center gap-2 rounded-2xl border-2 border-border bg-background text-base font-bold text-foreground active:scale-[0.99]"
+                >
+                  <X className="h-5 w-5" /> No — still couldn't reach depth
+                </button>
+              </div>
+              <p className="mt-3 text-xs text-muted-foreground">
+                Yes = your program will prioritize <strong>Ankle Mobility</strong> work. No = the root cause is likely hip or general mobility — we'll target that instead.
+              </p>
+            </div>
+          )}
           {(phase === "confirm" || phase === "submitting") && (
             <div className="rounded-3xl bg-white/10 p-5 text-center backdrop-blur-xl">
               <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-400" />
