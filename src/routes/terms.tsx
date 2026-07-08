@@ -113,7 +113,7 @@ function Terms() {
         <li>
           SmartyMove operates on a <strong>pay-per-scan</strong> model. There is no subscription
           and no recurring billing. Each movement scan is purchased as a one-time payment
-          (currently €5.99 per scan).
+          (currently €9.99 per scan, one-time payment — no subscription).
         </li>
         <li>
           Once purchased, a scan credit is added to your account. After running the scan, your

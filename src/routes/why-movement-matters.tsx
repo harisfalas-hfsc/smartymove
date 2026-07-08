@@ -421,7 +421,7 @@ function WhyMovementMatters() {
                 Ready to see <span className="text-primary">how you move</span>?
               </h2>
               <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-                Take a 5-minute camera-based screen. Get your Movement Score. Fix the root cause.
+                Take an 8-minute camera-based screen. Get your Movement Score. Fix the root cause.
               </p>
               <div className="flex flex-col sm:flex-row gap-2 justify-center pt-1">
                 <Link to="/pricing">

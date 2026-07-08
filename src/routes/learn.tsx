@@ -27,7 +27,7 @@ const ARTICLES = [
   {
     slug: "what-is-a-movement-score",
     title: "What Is a Movement Score?",
-    blurb: "How SmartyMove turns a 5-minute camera test into a single 0–100 number you can actually improve.",
+    blurb: "How SmartyMove turns an 8-minute camera test into a single 0–100 number you can actually improve.",
   },
   {
     slug: "functional-movement-screening-explained",

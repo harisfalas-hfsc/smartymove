@@ -16,7 +16,7 @@ const ARTICLES: Record<string, Article> = {
     body: [
       {
         h: "The short answer",
-        p: "A Movement Score is a single 0–100 number that summarizes how well you move across a short set of functional tests — squat, hinge, balance, lunge, and overhead reach. SmartyMove generates it from your phone camera in about 5 minutes.",
+        p: "A Movement Score is a single 0–100 number that summarizes how well you move across a short set of functional tests — squat, hinge, balance, lunge, and overhead reach. SmartyMove generates it from your phone camera in about 8 minutes.",
       },
       {
         h: "What gets measured",
