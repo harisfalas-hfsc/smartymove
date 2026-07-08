@@ -169,6 +169,14 @@ function Welcome() {
                 </h1>
               </section>
 
+              <div className="sm-panel-score-picture sm-border-score">
+                <div className="sm-score-card">
+                  <div>Movement Score</div>
+                  <strong>72<small>/100</small></strong>
+                  <p>Movement Age 41 · Chronological 47</p>
+                </div>
+              </div>
+
               <section className="sm-panel sm-panel-mobile sm-border-mobile">
                 <div className="sm-eyebrow">Best experience</div>
                 <h2><span>SMARTY</span> MOVE</h2>
@@ -184,14 +192,6 @@ function Welcome() {
                   Get started <ArrowRight className="h-4 w-4" />
                 </button>
               </section>
-
-              <div className="sm-panel-score-picture sm-border-score">
-                <div className="sm-score-card">
-                  <div>Movement Score</div>
-                  <strong>72<small>/100</small></strong>
-                  <p>Movement Age 41 · Chronological 47</p>
-                </div>
-              </div>
 
               <section className="sm-panel sm-panel-about sm-border-about">
                 <div className="sm-card-topline"><span /> Assess <IconBubble Icon={Activity} /></div>
