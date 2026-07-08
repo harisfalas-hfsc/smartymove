@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getUser, updateUser, useUser } from "./store";
+import { getUser, updateUser, useUser, type ScreenSession, type TestResult } from "./store";
 import { supabase } from "@/integrations/supabase/client";
 import { buildCorrectiveRoutine, pickToRoutineItem } from "./corrective/engine";
 import { analyzeScan, buildPicksFromDecision, focusPickToRoutineItem, type ScanDecision } from "./corrective/decision";
@@ -18,21 +18,131 @@ export interface SetsReps {
   sets: number;
   reps: string; // "10", "8-12", "10 / side"
   note?: string;
+  /**
+   * Populated only when the target area of the exercise was flagged as
+   * asymmetric on the latest Movement Screen (side-to-side score gap ≥ 1).
+   * Weaker side stays at (or above) the base dose; stronger side is
+   * de-loaded proportionally to how big the gap is. The user still gets
+   * targeted volume where they need it without hammering the strong side.
+   */
+  sideSets?: {
+    weakerSide: "R" | "L";
+    weakSets: number;
+    strongSets: number;
+    reason: string;
+  };
+}
+
+/**
+ * Per-side asymmetry bias for one movement area, extracted from a scan.
+ * `diff` = |right − left| in FMS-style 0–3 points (already ≥ 1).
+ * `weakerSide` = the side whose score was strictly lower.
+ */
+export interface AsymmetryBias {
+  weakerSide: "R" | "L";
+  diff: number;
+  /** Human-readable source, e.g. "Hurdle Step: R 3 / L 1". */
+  source: string;
+}
+
+/**
+ * Rule (evidence-informed unilateral bias for corrective work):
+ *   diff = 1  →  weakSets = base,      strongSets = base − 1  (min 1)
+ *   diff = 2  →  weakSets = base,      strongSets = ceil(base / 2)
+ *   diff ≥ 3  →  weakSets = base + 1,  strongSets = ceil(base / 2)
+ * Rationale: keep the weak side at (or above) full dose so we drive the
+ * adaptation that closes the gap; reduce the strong side just enough that
+ * total session time stays reasonable and the athlete doesn't over-train
+ * the pattern that's already strong.
+ */
+function biasedSets(baseSets: number, diff: number): { weak: number; strong: number } {
+  if (diff <= 0) return { weak: baseSets, strong: baseSets };
+  if (diff === 1) return { weak: baseSets, strong: Math.max(1, baseSets - 1) };
+  if (diff === 2) return { weak: baseSets, strong: Math.max(1, Math.ceil(baseSets / 2)) };
+  return { weak: baseSets + 1, strong: Math.max(1, Math.ceil(baseSets / 2)) };
 }
 
 /** Default sets × reps per category. No timers — reps & sets only. */
-export function setsRepsFor(category: string | undefined, bodyPart?: string | null): SetsReps {
+export function setsRepsFor(
+  category: string | undefined,
+  bodyPart?: string | null,
+  bias?: AsymmetryBias | null,
+): SetsReps {
   const bilateral = !!bodyPart && /leg|arm|shoulder|hip/i.test(bodyPart);
+  let base: SetsReps;
   switch (category) {
     case "mobility":
-      return { sets: 2, reps: bilateral ? "10 / side" : "10", note: "Slow and controlled" };
+      base = { sets: 2, reps: bilateral ? "10 / side" : "10", note: "Slow and controlled" };
+      break;
     case "stability":
-      return { sets: 3, reps: bilateral ? "8 / side" : "10", note: "Pause 2s each rep" };
+      base = { sets: 3, reps: bilateral ? "8 / side" : "10", note: "Pause 2s each rep" };
+      break;
     case "strength":
-      return { sets: 3, reps: "8-12", note: "Stop 1-2 reps short of failure" };
+      base = { sets: 3, reps: "8-12", note: "Stop 1-2 reps short of failure" };
+      break;
     default:
-      return { sets: 3, reps: "10" };
+      base = { sets: 3, reps: "10" };
   }
+  // Only apply a side-bias on truly bilateral exercises (per-side dose).
+  if (bias && bilateral) {
+    const { weak, strong } = biasedSets(base.sets, bias.diff);
+    if (weak !== strong) {
+      base = {
+        ...base,
+        sets: weak, // headline shows weaker-side dose so we never under-prescribe
+        sideSets: {
+          weakerSide: bias.weakerSide,
+          weakSets: weak,
+          strongSets: strong,
+          reason: bias.source,
+        },
+      };
+    }
+  }
+  return base;
+}
+
+/**
+ * Map bilateral test id → the corrective-engine area whose exercises should
+ * inherit that test's asymmetry. Bilateral tests only.
+ */
+const TEST_ID_TO_AREA: Record<string, RoutineItem["area"]> = {
+  balance: "hip",           // Hurdle Step
+  lunge: "hip",             // In-line Lunge (hip drives stance-leg asymmetry)
+  overhead: "shoulder",     // Shoulder Mobility
+  hip_abd: "hip",           // Active SLR
+  rotary_stability: "low_back",
+  sl_balance: "ankle",      // Single-Leg Balance
+  ankle_df: "ankle",        // Knee-to-Wall (dorsiflexion)
+  knee_sld: "knee",         // Single-leg step-down
+};
+
+/**
+ * Reduce a session's per-test side scores into a single per-area bias.
+ * When multiple tests hit the same area, keep the largest diff and use
+ * that test's weaker side.
+ */
+export function getAsymmetryByArea(
+  session: ScreenSession | undefined | null,
+): Partial<Record<NonNullable<RoutineItem["area"]>, AsymmetryBias>> {
+  const out: Partial<Record<NonNullable<RoutineItem["area"]>, AsymmetryBias>> = {};
+  if (!session) return out;
+  for (const t of session.tests as TestResult[]) {
+    const area = TEST_ID_TO_AREA[t.id];
+    if (!area) continue;
+    const r = t.sideScores?.right?.score;
+    const l = t.sideScores?.left?.score;
+    if (r == null || l == null) continue;
+    const diff = Math.abs(r - l);
+    if (diff < 1) continue;
+    const weakerSide: "R" | "L" = r < l ? "R" : "L";
+    const source = `${t.name}: R ${r} / L ${l}`;
+    const prev = out[area];
+    if (!prev || diff > prev.diff) {
+      out[area] = { weakerSide, diff, source };
+    }
+  }
+  return out;
 }
 
 export interface ProgramStatus {
