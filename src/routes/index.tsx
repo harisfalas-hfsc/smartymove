@@ -705,6 +705,11 @@ function Welcome() {
             font-size:12px;
             margin-top:8px;
           }
+          .sm-panel-score-picture .sm-score-card{
+            min-height:100%;
+            height:100%;
+            flex:1;
+          }
           @media (max-width: 1023px){
             .sm-wellness-grid{ gap:12px; }
             .sm-panel{ padding:18px; }
