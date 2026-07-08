@@ -425,17 +425,6 @@ function Runner() {
   // Pain gating happens once in the onboarding questionnaire (see
   // `painAreas`). The in-scan pain gate was removed so a paid scan always
   // produces a full 8-pattern result — no wasted tokens.
-    setResults(updated);
-    // Skip all remaining views of the same test.
-    let nextIdx = idx + 1;
-    while (nextIdx < seq.length && seq[nextIdx].groupId === step.groupId) nextIdx++;
-    if (nextIdx >= seq.length) {
-      finalize(updated);
-    } else {
-      setIdx(nextIdx);
-      setPhase("intro");
-    }
-  }
 
   async function submitScan() {
     if (!u || !pendingResults) return;
