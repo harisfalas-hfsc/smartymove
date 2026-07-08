@@ -80,14 +80,14 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
               <button
                 type="button"
                 onClick={handleSignIn}
-                className="inline-flex h-7 items-center justify-center rounded-full px-3 text-xs font-semibold text-foreground/80 hover:text-primary"
+                className="inline-flex h-7 shrink-0 items-center justify-center whitespace-nowrap rounded-full px-3 text-xs font-semibold text-foreground/80 hover:text-primary"
               >
                 Sign in
               </button>
               <button
                 type="button"
                 onClick={handleSignUp}
-                className="inline-flex h-7 items-center justify-center rounded-full border-2 border-primary px-3 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                className="inline-flex h-7 shrink-0 items-center justify-center whitespace-nowrap rounded-full border-2 border-primary px-3 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
               >
                 Sign up
               </button>
