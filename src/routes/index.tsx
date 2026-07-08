@@ -90,6 +90,16 @@ function Welcome() {
       .catch(() => undefined);
   }, [navigate]);
 
+  useEffect(() => {
+    const handler = () => {
+      setMode("intro");
+      setAuthError("");
+      setResetSent(false);
+    };
+    window.addEventListener("smartymove:home", handler);
+    return () => window.removeEventListener("smartymove:home", handler);
+  }, []);
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!name || !email || !age || !pw) return;

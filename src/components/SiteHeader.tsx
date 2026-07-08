@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUser } from "@/lib/store";
@@ -13,6 +13,7 @@ type Props = {
 export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Props) {
   const navigate = useNavigate();
   const user = useUser();
+  const pathname = useRouterState({ select: s => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     if (!menuOpen) return;
@@ -60,6 +61,11 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
             aria-label="SmartyMove home"
             className="text-lg font-extrabold tracking-tight leading-none"
             style={{ textDecoration: "none" }}
+            onClick={() => {
+              if (pathname === "/") {
+                window.dispatchEvent(new CustomEvent("smartymove:home"));
+              }
+            }}
           >
             <span className="text-primary">SMARTY</span>
             <span className="text-green-500">MOVE</span>
