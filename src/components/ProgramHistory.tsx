@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarDays, ChevronDown, Dumbbell } from "lucide-react";
+import { CalendarDays, CheckCircle2, ChevronDown, Dumbbell } from "lucide-react";
 import { SmartyCard } from "@/components/SmartyCard";
 import { DayWorkoutSheet } from "@/components/DayWorkoutSheet";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
@@ -27,6 +27,7 @@ export function ProgramHistory({
   const { data = [], isLoading } = useProgramHistory();
   const [openDay, setOpenDay] = useState<{ entry: Entry; day: number } | null>(null);
   const [openExerciseId, setOpenExerciseId] = useState<string | null>(null);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   if (!u) return null;
 
@@ -44,7 +45,7 @@ export function ProgramHistory({
   if (entries.length === 0) return null;
 
   const fmt = (iso: string) => new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-  const defaultOpen = entries[0]?.index;
+  const activeIndex = openIndex ?? entries[0]?.index ?? null;
 
   const completedDaysFor = (entry: Entry) =>
     entry.index === currentIndex ? (u.programCompletedDays ?? []) : TRAINING_DAY_INDICES;
@@ -57,10 +58,24 @@ export function ProgramHistory({
       <div className="space-y-3">
         {entries.map((entry) => {
           const completed = entry.index === currentIndex ? (u.programCompletedDays ?? []).length : PROGRAM_SESSIONS;
+          const completedDays = completedDaysFor(entry);
+          const isOpen = entry.index === activeIndex;
           return (
-            <details key={entry.index} open={entry.index === defaultOpen} className="group overflow-hidden rounded-2xl border border-border bg-background/70">
-              <ProgramEntry entry={entry} completed={completed} fmt={fmt} onDayClick={(day) => setOpenDay({ entry, day })} />
-            </details>
+            <div
+              key={entry.index}
+              data-open={isOpen ? "true" : "false"}
+              className="group overflow-hidden rounded-2xl border border-border bg-background/70"
+            >
+              <ProgramEntry
+                entry={entry}
+                completed={completed}
+                completedDays={completedDays}
+                fmt={fmt}
+                isOpen={isOpen}
+                onToggle={() => setOpenIndex(isOpen ? null : entry.index)}
+                onDayClick={(day) => setOpenDay({ entry, day })}
+              />
+            </div>
           );
         })}
       </div>
@@ -87,17 +102,28 @@ type Entry = ReturnType<typeof useProgramHistory>["data"] extends (infer T)[] | 
 function ProgramEntry({
   entry,
   completed,
+  completedDays,
   fmt,
+  isOpen,
+  onToggle,
   onDayClick,
 }: {
   entry: Entry;
   completed: number;
+  completedDays: number[];
   fmt: (iso: string) => string;
+  isOpen: boolean;
+  onToggle: () => void;
   onDayClick: (day: number) => void;
 }) {
   return (
     <>
-      <summary className="flex list-none items-center gap-3 p-3">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        className="flex w-full items-center gap-3 p-3 text-left"
+      >
         <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl brand-gradient-soft text-lg font-extrabold text-primary">
           #{entry.index + 1}
         </span>
@@ -109,29 +135,41 @@ function ProgramEntry({
             <span>{completed}/{PROGRAM_SESSIONS} days</span>
           </div>
         </div>
-        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
-      </summary>
+        <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
+      </button>
 
+      {isOpen && (
       <div className="space-y-3 border-t border-border/70 p-3 pt-3">
         <div>
           <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             <CalendarDays className="h-3.5 w-3.5" /> 14 training days — tap a day to open its workout
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {Array.from({ length: PROGRAM_LENGTH_DAYS }, (_, i) => i + 1).map((day) => (
-              <button
-                key={day}
-                type="button"
-                onClick={() => onDayClick(day)}
-                className="rounded-xl bg-secondary px-2.5 py-2 text-left transition hover:bg-secondary/70"
-              >
-                <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Day {day}</div>
-                <div className="truncate text-xs font-semibold">{formatProgramDayDate(entry.startDate, day)}</div>
-              </button>
-            ))}
+            {Array.from({ length: PROGRAM_LENGTH_DAYS }, (_, i) => i + 1).map((day) => {
+              const isDone = completedDays.includes(day);
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => onDayClick(day)}
+                  className={`relative rounded-xl px-2.5 py-2 text-left transition ${
+                    isDone
+                      ? "bg-success/15 text-foreground hover:bg-success/25"
+                      : "bg-secondary hover:bg-secondary/70"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Day {day}</div>
+                    {isDone && <CheckCircle2 className="h-3.5 w-3.5 text-success" />}
+                  </div>
+                  <div className="truncate text-xs font-semibold">{formatProgramDayDate(entry.startDate, day)}</div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
+      )}
     </>
   );
 }
