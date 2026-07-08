@@ -1271,7 +1271,8 @@ function secondaryViewResult(testId: string, name: string, samples: Frame[], val
       break;
     }
     case "hinge":
-    case "balance": {
+    case "balance":
+    case "sl_balance": {
       const shoulderTilts = samples.map(shoulderTilt);
       const hipTilts = samples.map(hipTilt);
       const baseShoulder = shoulderTilts.slice(0, Math.min(5, shoulderTilts.length)).reduce((a, b) => a + b, 0) / Math.min(5, shoulderTilts.length);
