@@ -816,8 +816,9 @@ function Welcome() {
             .sm-wellness-grid{ gap:12px; }
             .sm-panel{ padding:18px; }
             .sm-panel-hero{ min-height:190px; }
-            .sm-wellness-title{ font-size:42px; }
+            .sm-wellness-title{ font-size: 28px; }
             .sm-primary-cta{ width:100%; margin-top:18px; min-height:46px; font-size:14px; }
+
             .sm-panel-score-picture{ min-height: 190px; }
             .sm-panel-about,
             .sm-panel-program,
