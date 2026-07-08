@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, useSearch, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, Ruler, StretchHorizontal, MoveVertical, Package, ShieldCheck } from "lucide-react";
-import { updateUser, useUser } from "@/lib/store";
+import { getFirstIncompleteOnboardingPath, isOnboardingComplete, setOnboardingNextPath, updateUser, useUser } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,6 +49,11 @@ function SetupScreen() {
   }, [tibia]);
 
   if (!u) return null;
+  if (!isOnboardingComplete(u)) {
+    setOnboardingNextPath(next ?? "/app/screen/run");
+    navigate({ to: getFirstIncompleteOnboardingPath(u) ?? "/onboarding/parq", replace: true });
+    return null;
+  }
 
   const step = STEP_ORDER[stepIdx];
   const isLast = stepIdx === STEP_ORDER.length - 1;

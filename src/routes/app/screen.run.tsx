@@ -22,7 +22,7 @@ const DEMO_IMAGES: Record<string, string> = {
   rotary_stability: rotaryImg.url,
   sl_balance: balanceImg.url,
 };
-import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
+import { getFirstIncompleteOnboardingPath, isOnboardingComplete, setOnboardingNextPath, updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
 import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal, ShieldAlert, HeartPulse } from "lucide-react";
 import { TestPreviewSheet } from "@/components/TestPreviewSheet";
@@ -431,10 +431,15 @@ function Runner() {
   // Once completed we never ask again unless the user resets their profile.
   useEffect(() => {
     if (!u) return;
+    if (!isOnboardingComplete(u)) {
+      setOnboardingNextPath("/app/screen/run");
+      navigate({ to: getFirstIncompleteOnboardingPath(u) ?? "/onboarding/parq", replace: true });
+      return;
+    }
     if (!u.scanSetup?.tibialHeightCm) {
       navigate({ to: "/app/screen/setup", replace: true, search: { next: "/app/screen/run" } });
     }
-  }, [u?.scanSetup?.tibialHeightCm]);
+  }, [navigate, u]);
 
   const [phase, setPhase] = useState<"setup" | "intro" | "running" | "squat_retry" | "confirm" | "submitting" | "done" | "failed">("setup");
   const [reviewOpen, setReviewOpen] = useState(false);
