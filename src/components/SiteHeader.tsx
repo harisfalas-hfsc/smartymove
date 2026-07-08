@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, User as UserIcon, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle } from "lucide-react";
+import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUser } from "@/lib/store";
 
@@ -110,7 +110,6 @@ function NavDrawer({ onClose, isAuthed }: { onClose: () => void; isAuthed: boole
             { to: "/app/screen", label: "Movement Screen", Icon: Activity },
             { to: "/app/program", label: "Training Program", Icon: Dumbbell },
             { to: "/app/progress", label: "Progress", Icon: LineChart },
-            { to: "/app/profile", label: "Profile", Icon: UserIcon },
           ],
         }]
       : []),
