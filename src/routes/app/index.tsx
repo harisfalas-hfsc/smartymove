@@ -248,32 +248,46 @@ function Home() {
               <h3 className="text-base font-bold">Your focus areas</h3>
               <Link to="/app/progress" className="text-xs font-semibold text-primary">All findings →</Link>
             </div>
-            <div className="rounded-3xl bg-card p-4 shadow-card">
-              <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
-                <Target className="h-3.5 w-3.5 text-primary" />
-                <span>What your program targets right now</span>
-              </div>
-              <ul className="space-y-2">
-                {decision.focuses.map((f) => (
-                  <li key={f.id} className="rounded-2xl border border-primary/30 bg-primary/5 p-3">
-                    <div className="text-sm font-bold text-primary">{f.label}</div>
-                    <p className="mt-1 text-xs text-foreground/80">{f.rationale}</p>
-                  </li>
-                ))}
-              </ul>
-              {decision.findings.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {decision.findings.slice(0, 4).map((f, i) => (
-                    <span key={i} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${f.severity === "fail" ? "bg-destructive/15 text-destructive" : "bg-warning/15 text-warning"}`}>
-                      <AlertCircle className="h-3 w-3" /> {f.testName}
-                    </span>
-                  ))}
-                  {decision.findings.length > 4 && (
-                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">+{decision.findings.length - 4} more</span>
-                  )}
-                </div>
-              )}
+            <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+              <Target className="h-3.5 w-3.5 text-primary" />
+              <span>What your program targets right now</span>
             </div>
+            <ul className="space-y-3">
+              {decision.focuses.map((f, idx) => {
+                const relatedTests = Array.from(
+                  new Map(f.signals.map((s) => [s.testName, s.severity])).entries(),
+                );
+                return (
+                  <li key={f.id} className="rounded-3xl bg-card p-4 shadow-card">
+                    <div className="flex items-start gap-3">
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl brand-gradient text-sm font-extrabold text-primary-foreground">
+                        {idx + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-extrabold text-foreground">{f.label}</div>
+                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{f.rationale}</p>
+                      </div>
+                    </div>
+                    {relatedTests.length > 0 && (
+                      <div className="mt-3 border-t border-border/60 pt-3">
+                        <div className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Flagged in</div>
+                        <ul className="space-y-1">
+                          {relatedTests.map(([name, sev]) => (
+                            <li key={name} className="flex items-center gap-2 text-xs">
+                              <span className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${sev === "fail" ? "bg-destructive" : "bg-warning"}`} />
+                              <span className="truncate text-foreground/90">{name}</span>
+                              <span className={`ml-auto shrink-0 text-[10px] font-semibold uppercase tracking-wide ${sev === "fail" ? "text-destructive" : "text-warning"}`}>
+                                {sev === "fail" ? "Fail" : "Borderline"}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </section>
         )}
 
