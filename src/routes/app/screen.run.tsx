@@ -513,6 +513,39 @@ function Runner() {
     setPhase("intro");
   }
 
+  /**
+   * Clearing-test pain gate. Called from the intro card before the pattern
+   * runs. Records the test as score 0 / invalid (per FMS spec) and skips
+   * ahead to the next group — no camera capture, no wasted rep.
+   */
+  function reportClearingPain() {
+    const test = seq[idx];
+    if (!test) return;
+    if (!CLEARING_TESTS.has(test.testId)) return;
+    setClearingPain(prev => new Set(prev).add(test.testId));
+    const painResult: TestResult = {
+      id: test.testId,
+      name: test.name,
+      score: 0,
+      valid: false,
+      cameraView: test.cameraView,
+      compensations: ["Pain reported during clearing test — pattern scored 0 per FMS spec"],
+      notes: "Pain reported during clearing test — pattern scored 0 (excluded from sub-scores). We recommend a medical assessment before loading this pattern.",
+    };
+    // Skip past every remaining view of this same group.
+    let nextIdx = idx + 1;
+    while (nextIdx < seq.length && seq[nextIdx].groupId === test.groupId) nextIdx++;
+    stepResultsRef.current.delete(test.groupId);
+    const nextResults = [...results, painResult];
+    setResults(nextResults);
+    if (nextIdx >= seq.length) {
+      finalize(nextResults);
+    } else {
+      setIdx(nextIdx);
+      setPhase("intro");
+    }
+  }
+
   // Group-level "test N of M" — the user thinks of the squat + its two views
   // as one test, not two.
   const groupIds = useMemo(() => {
