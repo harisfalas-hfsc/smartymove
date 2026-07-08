@@ -270,74 +270,11 @@ function DesktopProfileInner() {
             </div>
           </div>
 
-          <div className="rounded-3xl bg-card p-6 shadow-card">
-            <h2 className="text-lg font-bold">Subscription</h2>
-            <div className="mt-3 flex items-center justify-between gap-4 rounded-2xl brand-gradient-soft p-4">
-              <div>
-                <div className="font-bold">{u.premium ? "Premium" : "Free"}</div>
-                <div className="text-xs text-muted-foreground">
-                  {u.premium
-                    ? "Manage billing, invoices, payment card, and cancellation"
-                    : "Upgrade for daily routines, re-tests, joint tests, Movement Age, projections"}
-                </div>
-              </div>
-              {u.premium ? (
-                <div className="flex flex-wrap justify-end gap-2">
-                  <Button
-                    onClick={manageSubscription}
-                    disabled={loading === "portal"}
-                    className="rounded-2xl"
-                  >
-                    {loading === "portal" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />} Manage billing
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        disabled={loading === "cancel"}
-                        variant="destructive"
-                        className="rounded-2xl"
-                      >
-                        {loading === "cancel" && <Loader2 className="h-4 w-4 animate-spin" />}{" "}
-                        Cancel
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="rounded-3xl">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Cancel Premium?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Your subscription will stop renewing. You keep Premium until the end of
-                          the paid period.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Keep Premium</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={cancelPlan}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          Cancel plan
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              ) : (
-                <Button
-                  onClick={() => {
-                    window.location.href = "/pricing";
-                  }}
-                  className="rounded-2xl"
-                >
-                  Upgrade
-                </Button>
-              )}
+          {message && (
+            <div className="rounded-2xl bg-secondary p-3 text-sm font-semibold text-foreground">
+              {message}
             </div>
-            {message && (
-              <div className="mt-3 rounded-2xl bg-secondary p-3 text-sm font-semibold text-foreground">
-                {message}
-              </div>
-            )}
-          </div>
+          )}
 
           <div className="rounded-3xl bg-card p-6 shadow-card">
             <h2 className="text-lg font-bold">Account data</h2>
