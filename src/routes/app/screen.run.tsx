@@ -432,6 +432,36 @@ function Runner() {
     setPhase("confirm");
   }
 
+  /** Resolve a clearing-test pain check. If painful, rewrite the merged
+   *  test result to a hard 0 (invalid) so it drops out of scoring, then
+   *  advance to the next test or finalize. */
+  function resolvePainCheck(painful: boolean) {
+    const testId = painCheckTestId;
+    if (!testId) return;
+    let updated = results;
+    if (painful) {
+      updated = results.map(r =>
+        r.id === testId
+          ? {
+              ...r,
+              score: 1,
+              valid: false,
+              compensations: [...(r.compensations ?? []), "Pain reported during clearing test — pattern cleared to 0."],
+              notes: "Cleared to 0 — pain reported during the pattern.",
+            }
+          : r,
+      );
+      setResults(updated);
+    }
+    setPainCheckTestId(null);
+    if (idx + 1 >= seq.length) {
+      finalize(updated);
+    } else {
+      setIdx(i => i + 1);
+      setPhase("intro");
+    }
+  }
+
   async function submitScan() {
     if (!u || !pendingResults) return;
     setPhase("submitting");
