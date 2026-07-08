@@ -151,7 +151,7 @@ function Welcome() {
         {mode === "intro" ? (
           <>
             <div className="grid gap-8 lg:grid-cols-[560px_minmax(0,1fr)] lg:items-start lg:gap-9 lg:pt-4">
-              <div className="sm-hero-left order-2 lg:order-1">
+              <div className="sm-hero-left order-2 lg:order-none lg:col-start-1 lg:row-start-1">
                 <div
                   className="flex items-center gap-2"
                   style={{
@@ -255,46 +255,9 @@ function Welcome() {
                   Get started
                 </button>
 
-                <SmartyCard
-                  Icon={Target}
-                  iconColor="#0E7C86"
-                  iconBg="#E6F5F5"
-                  title="What is SmartyMove?"
-                  subtitle="Your pocket movement coach that scans your body, scores your movement, and builds a daily routine."
-                >
-                  <div className="mt-1 space-y-1">
-                    <SmartyRow
-                      Icon={Camera}
-                      color="#0E7C86"
-                      label="📸 Camera-based movement scan"
-                      sub="8 quick patterns from your phone or laptop."
-                    />
-                    <SmartyRow
-                      Icon={ShieldCheck}
-                      color="#0F766E"
-                      label="🔒 Private by design"
-                      sub="Pose detection runs on your device — video stays with you."
-                    />
-                    <SmartyRow
-                      Icon={Clock}
-                      color="#7A3EBA"
-                      label="⏱ 5-minute daily routine"
-                      sub="Built around your weakest movement patterns."
-                    />
-                  </div>
-                  <div className="mt-4 text-center">
-                    <Link
-                      to="/about"
-                      className="inline-flex items-center gap-1 text-sm font-bold"
-                      style={{ color: "#0E7C86", textDecoration: "none" }}
-                    >
-                      Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </SmartyCard>
               </div>
 
-              <div className="sm-hero-right order-1 lg:order-2 flex w-full lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
+              <div className="sm-hero-right order-1 lg:order-none lg:col-start-2 lg:row-start-1 flex w-full lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
                 {/* Scan viewfinder card */}
                 <div
                   className="relative w-full overflow-hidden sm-hero-card flex flex-col justify-center lg:ml-auto"
@@ -382,6 +345,46 @@ function Welcome() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="order-3 lg:order-none lg:col-start-2 lg:row-start-2 w-full">
+                <SmartyCard
+                  Icon={Target}
+                  iconColor="#0E7C86"
+                  iconBg="#E6F5F5"
+                  title="What is SmartyMove?"
+                  subtitle="Your pocket movement coach that scans your body, scores your movement, and builds a daily routine."
+                >
+                  <div className="mt-1 space-y-1">
+                    <SmartyRow
+                      Icon={Camera}
+                      color="#0E7C86"
+                      label="📸 Camera-based movement scan"
+                      sub="8 quick patterns from your phone or laptop."
+                    />
+                    <SmartyRow
+                      Icon={ShieldCheck}
+                      color="#0F766E"
+                      label="🔒 Private by design"
+                      sub="Pose detection runs on your device — video stays with you."
+                    />
+                    <SmartyRow
+                      Icon={Clock}
+                      color="#7A3EBA"
+                      label="⏱ 5-minute daily routine"
+                      sub="Built around your weakest movement patterns."
+                    />
+                  </div>
+                  <div className="mt-4 text-center">
+                    <Link
+                      to="/about"
+                      className="inline-flex items-center gap-1 text-sm font-bold"
+                      style={{ color: "#0E7C86", textDecoration: "none" }}
+                    >
+                      Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                </SmartyCard>
               </div>
             </div>
           </>
