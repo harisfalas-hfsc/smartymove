@@ -10,6 +10,7 @@ import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -30,6 +31,7 @@ function Pricing() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [signInPromptOpen, setSignInPromptOpen] = useState(false);
   const access = useQuery({
     queryKey: ["scan-access", u?.id ?? "anon"],
     queryFn: () => getScanAccess(),
@@ -67,7 +69,7 @@ function Pricing() {
   const paidReturn = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("paid") === "1";
 
   function handleBuy() {
-    if (!u) { window.location.href = "/?auth=signin"; return; }
+    if (!u) { setSignInPromptOpen(true); return; }
     setCheckoutOpen(true);
   }
 
