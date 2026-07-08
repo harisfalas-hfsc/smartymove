@@ -16,16 +16,20 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
 import {
+  Activity,
+  Apple,
+  CalendarCheck,
   Eye,
   EyeOff,
   Smartphone,
   Camera,
   ShieldCheck,
-  Target,
+  Dumbbell,
+  HeartPulse,
   Clock,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
-import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -146,246 +150,86 @@ function Welcome() {
         onBack={mode === "intro" ? undefined : () => setMode("intro")}
       />
       <main
-        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "max-w-[420px] lg:max-w-[1196px] lg:px-0" : "max-w-[420px]"}`}
+        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "sm-home-shell max-w-[430px] lg:max-w-[866px] lg:px-0" : "max-w-[420px]"}`}
       >
         {mode === "intro" ? (
           <>
-            <div className="grid gap-8 lg:grid-cols-[560px_minmax(0,1fr)] lg:items-start lg:gap-9 lg:pt-4">
-              <div className="sm-hero-left order-2 lg:order-none lg:col-start-1 lg:row-start-1">
-                <div
-                  className="flex items-center gap-2"
-                  style={{
-                    fontSize: 11,
-                    letterSpacing: ".14em",
-                    textTransform: "uppercase",
-                    color: "#0E7C86",
-                    fontWeight: 700,
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      background: "#FF6B4A",
-                      boxShadow: "0 0 0 3px rgba(255,107,74,0.18)",
-                    }}
-                  />
-                  Movement Diagnostic
-                </div>
-
-                <h1
-                  className="sm-hero-title"
-                  style={{
-                    fontWeight: 800,
-                    fontSize: 32,
-                    lineHeight: 1.05,
-                    letterSpacing: "-0.02em",
-                    margin: "14px 0 16px",
-                  }}
-                >
-                  Know how you move.
-                  <br />
-                  <span style={{ color: "#0E7C86" }}>Move smarter.</span>
+            <div className="sm-wellness-grid">
+              <section className="sm-panel sm-panel-hero sm-blue-border">
+                <div className="sm-eyebrow"><Sparkles className="h-3 w-3" /> Movement diagnostic</div>
+                <h1 className="sm-wellness-title">
+                  <span>Know how</span>
+                  <span>you move.</span>
+                  <span>Move smarter.</span>
                 </h1>
+              </section>
 
-                <p
-                  style={{ fontSize: 15, lineHeight: 1.55, color: "#3B4A63", margin: "4px 0 18px" }}
-                >
-                  <b style={{ color: "#14213A" }}>Your pocket movement coach.</b> Scan your movement
-                  with your camera, get your score, and a 5-minute daily routine built around what
-                  your body actually needs.
+              <section className="sm-panel sm-panel-mobile sm-green-border">
+                <div className="sm-eyebrow">Best experience</div>
+                <h2><span>SMARTY</span> MOVE</h2>
+                <p className="hidden lg:block">
+                  For better results, open SmartyMove on your phone. The camera scan is easier,
+                  the movement test fits naturally in your space, and your daily training sessions
+                  stay with you wherever you are.
                 </p>
-
-                <div className="mb-[22px] flex flex-wrap gap-2">
-                  {["5 core tests", "On-device", "Private by design"].map((p) => (
-                    <span key={p} style={pillStyle}>
-                      <span
-                        style={{ width: 6, height: 6, borderRadius: "50%", background: "#4FB286" }}
-                      />
-                      {p}
-                    </span>
-                  ))}
-                </div>
-
-                {!user && (
-                  <div
-                    className="hidden lg:flex items-start gap-3 rounded-2xl p-3.5"
-                    style={{
-                      background: "#F1F7F8",
-                      border: "1px solid #CDE6EB",
-                      color: "#14213A",
-                      marginBottom: 14,
-                    }}
-                  >
-                    <span
-                      className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
-                      style={{ background: "#E6F5F5", color: "#0E7C86" }}
-                    >
-                      <Smartphone className="h-4 w-4" />
-                    </span>
-                    <div className="text-sm" style={{ lineHeight: 1.5 }}>
-                      <strong>For the best experience, open SmartyMove on your phone.</strong>
-                      <br />
-                      The camera scan is smoother, the daily routine fits your pocket, and reminders
-                      feel natural on mobile. You can still continue here on desktop if you prefer.
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  onClick={() => navigate({ to: "/onboarding/parq" })}
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    textAlign: "center",
-                    background: "#FF6B4A",
-                    color: "#fff",
-                    fontWeight: 700,
-                    fontSize: 16,
-                    padding: "16px 0",
-                    borderRadius: 16,
-                    border: "none",
-                    boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)",
-                    marginBottom: 14,
-                    cursor: "pointer",
-                  }}
-                  className="sm-hero-cta"
-                >
-                  Get started
+                <p className="lg:hidden">
+                  Scan movement, get your score, and follow your corrective workout from your pocket.
+                </p>
+                <button className="sm-primary-cta" onClick={() => navigate({ to: "/onboarding/parq" })}>
+                  Get started <ArrowRight className="h-4 w-4" />
                 </button>
+              </section>
 
-              </div>
-
-              <div className="sm-hero-right order-1 lg:order-none lg:col-start-2 lg:row-start-1 flex w-full lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
-                {/* Scan viewfinder card */}
-                <div
-                  className="relative w-full overflow-hidden sm-hero-card flex flex-col justify-center lg:ml-auto"
-                  style={{
-                    background: "linear-gradient(160deg,#13283A 0%, #0E1D2B 100%)",
-                    borderRadius: 22,
-                    padding: "22px 18px 20px",
-                    color: "#fff",
-                    marginBottom: 0,
-                  }}
-                >
-                  <span
-                    style={cornerStyle({
-                      top: 14,
-                      left: 14,
-                      borderRight: "none",
-                      borderBottom: "none",
-                      borderRadius: "6px 0 0 0",
-                    })}
-                  />
-                  <span
-                    style={cornerStyle({
-                      top: 14,
-                      right: 14,
-                      borderLeft: "none",
-                      borderBottom: "none",
-                      borderRadius: "0 6px 0 0",
-                    })}
-                  />
-                  <span
-                    style={cornerStyle({
-                      bottom: 14,
-                      left: 14,
-                      borderRight: "none",
-                      borderTop: "none",
-                      borderRadius: "0 0 0 6px",
-                    })}
-                  />
-                  <span
-                    style={cornerStyle({
-                      bottom: 14,
-                      right: 14,
-                      borderLeft: "none",
-                      borderTop: "none",
-                      borderRadius: "0 0 6px 0",
-                    })}
-                  />
-                  <span className="sm-scanline" />
-                  <div
-                    className="relative text-center"
-                    style={{ zIndex: 2, padding: "14px 0 6px" }}
-                  >
-                    <div
-                      style={{
-                        fontSize: 11,
-                        letterSpacing: ".14em",
-                        textTransform: "uppercase",
-                        color: "rgba(255,255,255,0.6)",
-                        fontWeight: 700,
-                      }}
-                    >
-                      Movement Score
-                    </div>
-                    <div
-                      className="sm-hero-score"
-                      style={{
-                        fontWeight: 800,
-                        fontSize: 56,
-                        lineHeight: 1,
-                        margin: "4px 0 10px",
-                        letterSpacing: "-0.02em",
-                      }}
-                    >
-                      72
-                      <sup style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", marginLeft: 2 }}>
-                        /100
-                      </sup>
-                    </div>
-                    <div
-                      className="flex items-baseline justify-center gap-1.5"
-                      style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", fontWeight: 500 }}
-                    >
-                      Movement Age <b style={{ color: "#4FB286", fontSize: 15 }}>41</b> ·
-                      Chronological 47
-                    </div>
-                  </div>
+              <section className="sm-panel sm-panel-about sm-blue-border">
+                <div className="sm-card-topline"><span /> Assess <IconBubble Icon={Activity} /></div>
+                <h2>Smarty <span>Move</span></h2>
+                <p>
+                  Your pocket movement coach. Turn your phone camera into a movement screen — get
+                  your Movement Score, Movement Age, and a 5-minute daily corrective workout built
+                  around what your body actually needs.
+                </p>
+                <div className="sm-feature-list">
+                  <FeatureLine Icon={Camera} color="#2C99B3" title="Camera-based movement scan" text="Quick guided patterns from your phone or laptop." />
+                  <FeatureLine Icon={ShieldCheck} color="#43AD5C" title="Private by design" text="Pose detection runs on your device — video stays with you." />
+                  <FeatureLine Icon={Clock} color="#FF8A4C" title="5-minute daily routine" text="Simple corrective work for mobility, stability, and strength." />
                 </div>
-              </div>
+                <Link to="/about" className="sm-text-link">
+                  Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
+                </Link>
+              </section>
 
-              <div className="order-3 lg:order-none lg:col-start-2 lg:row-start-2 w-full">
-                <SmartyCard
-                  Icon={Target}
-                  iconColor="#0E7C86"
-                  iconBg="#E6F5F5"
-                  title="What is SmartyMove?"
-                  subtitle="Your pocket movement coach that scans your body, scores your movement, and builds a daily routine."
-                >
-                  <div className="mt-1 space-y-1">
-                    <SmartyRow
-                      Icon={Camera}
-                      color="#0E7C86"
-                      label="📸 Camera-based movement scan"
-                      sub="8 quick patterns from your phone or laptop."
-                    />
-                    <SmartyRow
-                      Icon={ShieldCheck}
-                      color="#0F766E"
-                      label="🔒 Private by design"
-                      sub="Pose detection runs on your device — video stays with you."
-                    />
-                    <SmartyRow
-                      Icon={Clock}
-                      color="#7A3EBA"
-                      label="⏱ 5-minute daily routine"
-                      sub="Built around your weakest movement patterns."
-                    />
-                  </div>
-                  <div className="mt-4 text-center">
-                    <Link
-                      to="/about"
-                      className="inline-flex items-center gap-1 text-sm font-bold"
-                      style={{ color: "#0E7C86", textDecoration: "none" }}
-                    >
-                      Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </SmartyCard>
-              </div>
+              <section className="sm-panel sm-panel-program sm-green-border">
+                <div className="sm-card-topline"><span /> Train <IconBubble Icon={Dumbbell} /></div>
+                <h2>Movement <span>Workouts</span></h2>
+                <p>
+                  A corrective exercise engine that builds Training Sessions from your real movement
+                  limits — no guessing, no random routines.
+                </p>
+                <div className="sm-tile-grid">
+                  <MiniTile Icon={Activity} label="Screen" color="#38A5C7" />
+                  <MiniTile Icon={Dumbbell} label="Workouts" color="#4FB286" />
+                  <MiniTile Icon={HeartPulse} label="Progress" color="#7A3EBA" />
+                  <MiniTile Icon={CalendarCheck} label="Retest" color="#FF6B4A" />
+                </div>
+              </section>
+
+              <section className="sm-panel sm-panel-score sm-blue-border">
+                <div className="sm-card-topline"><span /> Score <IconBubble Icon={HeartPulse} /></div>
+                <div className="sm-score-card">
+                  <div>Movement Score</div>
+                  <strong>72<small>/100</small></strong>
+                  <p>Movement Age 41 · Chronological 47</p>
+                </div>
+              </section>
+
+              <section className="sm-panel sm-panel-tools sm-blue-border">
+                <div className="sm-card-topline"><span /> Routine <IconBubble Icon={Apple} /></div>
+                <h2>Daily <span>Correctives</span></h2>
+                <p>
+                  Mobility, stability, and strength exercises selected from curated coach-built
+                  libraries for your body’s top priority areas.
+                </p>
+              </section>
             </div>
           </>
         ) : mode === "signup" ? (
