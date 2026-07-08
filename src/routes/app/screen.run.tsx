@@ -2,6 +2,23 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
 import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
+import squatVid from "@/assets/fms/squat.mp4.asset.json";
+import balanceVid from "@/assets/fms/balance.mp4.asset.json";
+import lungeVid from "@/assets/fms/lunge.mp4.asset.json";
+import overheadVid from "@/assets/fms/overhead.mp4.asset.json";
+import hipAbdVid from "@/assets/fms/hip_abd.mp4.asset.json";
+import bridgeHoldVid from "@/assets/fms/bridge_hold.mp4.asset.json";
+import rotaryVid from "@/assets/fms/rotary_stability.mp4.asset.json";
+
+const DEMO_VIDEOS: Record<string, string> = {
+  squat: squatVid.url,
+  balance: balanceVid.url,
+  lunge: lungeVid.url,
+  overhead: overheadVid.url,
+  hip_abd: hipAbdVid.url,
+  bridge_hold: bridgeHoldVid.url,
+  rotary_stability: rotaryVid.url,
+};
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
 import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal } from "lucide-react";
