@@ -572,10 +572,10 @@ function Welcome() {
             min-height: 200px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
           }
           .sm-wellness-title{
-            margin: 18px 0 0;
+            margin: 14px 0 0;
             color: #10213F;
             font-size: 44px;
             line-height: .96;
@@ -585,6 +585,16 @@ function Welcome() {
           .sm-wellness-title span{ display:block; }
           .sm-wellness-title span:nth-child(1){ color:#43AD5C; }
           .sm-wellness-title span:nth-child(2){ color:#2B8FA3; }
+          .sm-hero-motto{
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            color: #4A5971;
+            font-size: 14px;
+            font-weight: 700;
+          }
+          .sm-hero-motto svg{ color: #2B8FA3; }
           .sm-panel-mobile{
             min-height: 200px;
             display:flex;
