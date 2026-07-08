@@ -163,13 +163,17 @@ function Welcome() {
               <section className="sm-panel sm-panel-hero sm-border-hero">
                 <div className="sm-eyebrow"><Sparkles className="h-3 w-3" /> Movement diagnostic</div>
                 <h1 className="sm-wellness-title">
-                  <span>Know how you move.</span>
-                  <span>Move smarter.</span>
+                  <span>Know How You Move.</span>
+                  <span>Move Smarter.</span>
                 </h1>
                 <div className="sm-hero-motto">
                   <Smartphone className="h-4 w-4" />
                   <span>Your pocket movement coach.</span>
                 </div>
+                <Link to="/about" className="sm-read-more-link">
+                  Read more <ArrowRight className="h-4 w-4" />
+                </Link>
+
               </section>
 
               <div className="sm-panel-score-picture sm-border-score">
