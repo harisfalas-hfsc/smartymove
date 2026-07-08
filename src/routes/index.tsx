@@ -164,6 +164,14 @@ function Welcome() {
                 </h1>
               </section>
 
+              <div className="sm-panel-score-picture">
+                <div className="sm-score-card">
+                  <div>Movement Score</div>
+                  <strong>72<small>/100</small></strong>
+                  <p>Movement Age 41 · Chronological 47</p>
+                </div>
+              </div>
+
               <section className="sm-panel sm-panel-mobile sm-green-border">
                 <div className="sm-eyebrow">Best experience</div>
                 <h2><span>SMARTY</span> MOVE</h2>
@@ -210,15 +218,6 @@ function Welcome() {
                   <MiniTile Icon={Dumbbell} label="Workouts" color="#4FB286" />
                   <MiniTile Icon={HeartPulse} label="Progress" color="#7A3EBA" />
                   <MiniTile Icon={CalendarCheck} label="Retest" color="#FF6B4A" />
-                </div>
-              </section>
-
-              <section className="sm-panel sm-panel-score sm-blue-border">
-                <div className="sm-card-topline"><span /> Score <IconBubble Icon={HeartPulse} /></div>
-                <div className="sm-score-card">
-                  <div>Movement Score</div>
-                  <strong>72<small>/100</small></strong>
-                  <p>Movement Age 41 · Chronological 47</p>
                 </div>
               </section>
 
