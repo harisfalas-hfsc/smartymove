@@ -447,9 +447,9 @@ function Runner() {
         r.id === testId
           ? {
               ...r,
-              score: 1,
+              score: 0,
               valid: false,
-              compensations: [...(r.compensations ?? []), "Pain reported during clearing test — pattern cleared to 0."],
+              compensations: [...(r.compensations ?? []), "Pain reported during this movement — scored 0. Please consult a doctor or physiotherapist before continuing with this test."],
               notes: "Cleared to 0 — pain reported during the pattern.",
             }
           : r,
@@ -461,6 +461,39 @@ function Runner() {
       finalize(updated);
     } else {
       setIdx(i => i + 1);
+      setPhase("intro");
+    }
+  }
+
+  /** Pre-test pain gate: ask before EVERY test whether the user currently
+   *  has pain in the target area. Yes → push a score-0 invalid result and
+   *  advance to the next test (or finalize). No → proceed to running. */
+  function resolvePrePain(painful: boolean) {
+    const step = seq[idx];
+    if (!step) return;
+    askedPainRef.current.add(step.groupId);
+    if (!painful) {
+      setPhase("running");
+      return;
+    }
+    const painResult: TestResult = {
+      id: step.testId,
+      name: step.name,
+      score: 0,
+      valid: false,
+      cameraView: step.cameraView,
+      compensations: ["Pain reported before this movement — scored 0. Please consult a doctor or physiotherapist before continuing with this test."],
+      notes: "Skipped — pain reported before the movement.",
+    };
+    const updated = [...results, painResult];
+    setResults(updated);
+    // Skip all remaining views of the same test.
+    let nextIdx = idx + 1;
+    while (nextIdx < seq.length && seq[nextIdx].groupId === step.groupId) nextIdx++;
+    if (nextIdx >= seq.length) {
+      finalize(updated);
+    } else {
+      setIdx(nextIdx);
       setPhase("intro");
     }
   }
