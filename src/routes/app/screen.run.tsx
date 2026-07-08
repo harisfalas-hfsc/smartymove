@@ -87,6 +87,12 @@ const REFERENCE_RANGES = {
 
   // Knee single-leg step-down — uses the same min-knee thresholds as lunge.
   knee_sld: { passMin: 80, passMax: 100, borderlineMax: 120 },
+
+  // Rotary Stability — placeholder v1 scoring. The user will supply the
+  // final scoring rules; until then we accept the movement as clean if the
+  // camera sees enough valid frames with meaningful motion. No angle-based
+  // thresholds are asserted here on purpose.
+  rotary_stability: { placeholder: true },
 } as const;
 
 const VISIBILITY_THRESHOLD = 0.6;
