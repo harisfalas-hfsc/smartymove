@@ -505,9 +505,27 @@ function Welcome() {
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0 12px 36px -28px rgba(20,33,58,.45);
+            transition: transform .2s ease, box-shadow .2s ease;
+            will-change: transform;
           }
-          .sm-blue-border{ border: 1.5px solid #86D0EF; }
-          .sm-green-border{ border: 1.5px solid #43AD5C; }
+          .sm-panel:hover{
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 20px 40px -20px rgba(20,33,58,.35);
+          }
+          .sm-border-hero{ border: 1.5px solid #86D0EF; }
+          .sm-border-score{ border: 1.5px solid #43AD5C; }
+          .sm-border-mobile{ border: 1.5px solid #FF8A4C; }
+          .sm-border-about{ border: 1.5px solid #7A3EBA; }
+          .sm-border-program{ border: 1.5px solid #2C99B3; }
+          .sm-border-tools{ border: 1.5px solid #F59E0B; }
+          .sm-panel-score-picture{
+            transition: transform .2s ease, box-shadow .2s ease;
+            will-change: transform;
+          }
+          .sm-panel-score-picture:hover{
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 20px 40px -20px rgba(20,33,58,.35);
+          }
           .sm-eyebrow{
             width: fit-content;
             display: inline-flex;
