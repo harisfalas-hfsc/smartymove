@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
-import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
+import { angle, CORE_TESTS, CONDITIONAL_TESTS, CLEARING_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
 import squatImg from "@/assets/fms/squat.png.asset.json";
 import hingeImg from "@/assets/fms/hinge.jpg.asset.json";
 import balanceImg from "@/assets/fms/balance.png.asset.json";
@@ -112,7 +112,24 @@ const REFERENCE_RANGES = {
   // final scoring rules; until then we accept the movement as clean if the
   // camera sees enough valid frames with meaningful motion. No angle-based
   // thresholds are asserted here on purpose.
-  rotary_stability: { placeholder: true },
+  //
+  // Rotary Stability — v2 scoring using shoulder-hip torso stability, arm/leg
+  // reach coverage (both wrists extended forward beyond the shoulders in the
+  // window), and wrist-to-knee proximity as a proxy for the elbow-to-knee
+  // touch (elbow landmark isn't in the tracked set for this test).
+  //
+  //   wobble   — max std of the shoulder-hip midpoint over the window.
+  //              Above ~0.04 (~4% of frame height) = balance lost.
+  //   reachThr — a wrist counts as "reached" once its x-distance from body
+  //              midline exceeds shoulder-width (~0.15 in normalised coords).
+  //   touchThr — min normalised wrist↔knee distance ≤ 0.10 counts as an
+  //              elbow-to-knee touch attempt.
+  rotary_stability: {
+    wobbleFail: 0.055,
+    wobbleBorderline: 0.035,
+    reachThresh: 0.12,
+    touchThresh: 0.11,
+  },
 } as const;
 
 const VISIBILITY_THRESHOLD = 0.6;
@@ -190,7 +207,7 @@ function expandToSteps(testId: string, name: string, duration: number, condition
 }
 
 function buildSequence(_joints: Joint[]): Step[] {
-  // SmartyMove Scan is a fixed 7-pattern set — no joint-based branching.
+  // SmartyMove Scan is a fixed 8-pattern set — no joint-based branching.
   return CORE_TESTS.flatMap(t => expandToSteps(t.id, t.name, t.duration));
 }
 
