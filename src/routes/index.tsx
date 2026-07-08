@@ -35,6 +35,7 @@ export const Route = createFileRoute("/")({
 
 function Welcome() {
   const navigate = useNavigate();
+  const user = useUser();
   const [mode, setMode] = useState<"intro" | "signup" | "signin" | "forgot">("intro");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
