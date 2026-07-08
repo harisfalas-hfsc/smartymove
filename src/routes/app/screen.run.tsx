@@ -722,6 +722,32 @@ function Runner() {
               </div>
             </div>
           )}
+          {phase === "prePain" && cur && (
+            <div className="rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
+              <div className="flex items-center gap-2 text-warning">
+                <AlertCircle className="h-5 w-5" />
+                <div className="text-[11px] font-bold uppercase tracking-widest">Before we start</div>
+              </div>
+              <div className="mt-1 text-xl font-extrabold">Do you currently have any pain in this area?</div>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                We're about to test <strong>{cur.name}</strong>. If you have pain here <em>right now</em>, we'll skip this test and record it as a 0 — so your program treats it as something to see a doctor or physio about, not something to train through.
+              </p>
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() => resolvePrePain(false)}
+                  className="h-12 flex-1 rounded-2xl brand-gradient text-base font-bold text-primary-foreground"
+                >
+                  No pain — start test
+                </button>
+                <button
+                  onClick={() => resolvePrePain(true)}
+                  className="h-12 flex-1 rounded-2xl bg-destructive/90 text-base font-bold text-white"
+                >
+                  Yes, skip this test
+                </button>
+              </div>
+            </div>
+          )}
           {(phase === "confirm" || phase === "submitting") && (
             <div className="rounded-3xl bg-white/10 p-5 text-center backdrop-blur-xl">
               <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-400" />
