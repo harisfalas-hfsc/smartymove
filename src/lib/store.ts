@@ -100,6 +100,12 @@ export interface ScreenSession {
   conditional: Joint[];
   /** Goal at time of scan — used by rescan engine to detect goal changes. */
   goalAtScan?: Goal;
+  /**
+   * Test IDs where the user reported pain during the scan. Pain is a red
+   * flag, not a numeric finding — surfaced as a banner on the results
+   * screen and used to cap the corresponding sub-scores at 50.
+   */
+  redFlags?: string[];
 }
 
 export interface ProgramDay { date: string; completed: boolean; }
