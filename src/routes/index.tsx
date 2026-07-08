@@ -212,6 +212,7 @@ function Welcome() {
                 </Link>
               </div>
             </SmartyCard>
+          </div>
 
           <div className="sm-hero-right order-1 lg:order-2 flex w-full lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
             {/* Scan viewfinder card */}
