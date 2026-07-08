@@ -782,8 +782,8 @@ function Welcome() {
           @media (min-width: 1024px){
             .sm-wellness-grid{ grid-template-columns: repeat(12, minmax(0, 1fr)); gap:16px; }
             .sm-panel-hero{ grid-column: 1 / span 6; grid-row: 1; min-height: 200px; }
-            .sm-panel-score-picture{ grid-column: 7 / span 3; grid-row: 1; min-height: 200px; }
-            .sm-panel-mobile{ grid-column: 10 / span 3; grid-row: 1; min-height: 200px; }
+            .sm-panel-mobile{ grid-column: 7 / span 3; grid-row: 1; min-height: 200px; }
+            .sm-panel-score-picture{ grid-column: 10 / span 3; grid-row: 1; min-height: 200px; }
             .sm-panel-about{ grid-column: 1 / span 4; grid-row: 2; min-height: 420px; }
             .sm-panel-program{ grid-column: 5 / span 4; grid-row: 2; min-height: 420px; }
             .sm-panel-tools{ grid-column: 9 / span 4; grid-row: 2; min-height: 420px; }
