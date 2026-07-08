@@ -160,7 +160,7 @@ function Welcome() {
         {mode === "intro" ? (
           <>
             <div className="sm-wellness-grid">
-              <section className="sm-panel sm-panel-hero sm-blue-border">
+              <section className="sm-panel sm-panel-hero sm-border-hero">
                 <div className="sm-eyebrow"><Sparkles className="h-3 w-3" /> Movement diagnostic</div>
                 <h1 className="sm-wellness-title">
                   <span>Know how</span>
@@ -169,7 +169,7 @@ function Welcome() {
                 </h1>
               </section>
 
-              <section className="sm-panel sm-panel-mobile sm-green-border">
+              <section className="sm-panel sm-panel-mobile sm-border-mobile">
                 <div className="sm-eyebrow">Best experience</div>
                 <h2><span>SMARTY</span> MOVE</h2>
                 <p className="hidden lg:block">
@@ -185,7 +185,7 @@ function Welcome() {
                 </button>
               </section>
 
-              <div className="sm-panel-score-picture">
+              <div className="sm-panel-score-picture sm-border-score">
                 <div className="sm-score-card">
                   <div>Movement Score</div>
                   <strong>72<small>/100</small></strong>
@@ -193,7 +193,7 @@ function Welcome() {
                 </div>
               </div>
 
-              <section className="sm-panel sm-panel-about sm-blue-border">
+              <section className="sm-panel sm-panel-about sm-border-about">
                 <div className="sm-card-topline"><span /> Assess <IconBubble Icon={Activity} /></div>
                 <h2>Smarty <span>Move</span></h2>
                 <p>
@@ -214,7 +214,7 @@ function Welcome() {
                 </Link>
               </section>
 
-              <section className="sm-panel sm-panel-program sm-green-border">
+              <section className="sm-panel sm-panel-program sm-border-program">
                 <div className="sm-card-topline"><span /> Train <IconBubble Icon={Dumbbell} /></div>
                 <h2>Movement <span>Workouts</span></h2>
                 <p>
@@ -222,20 +222,27 @@ function Welcome() {
                   limits — no guessing, no random routines.
                 </p>
                 <div className="sm-tile-grid">
-                  <MiniTile Icon={Activity} label="Screen" color="#38A5C7" />
-                  <MiniTile Icon={Dumbbell} label="Workouts" color="#4FB286" />
+                  <MiniTile Icon={Activity} label="Assess" color="#38A5C7" />
+                  <MiniTile Icon={Dumbbell} label="Corrective Workouts" color="#4FB286" />
                   <MiniTile Icon={HeartPulse} label="Progress" color="#7A3EBA" />
                   <MiniTile Icon={CalendarCheck} label="Retest" color="#FF6B4A" />
                 </div>
               </section>
 
-              <section className="sm-panel sm-panel-tools sm-blue-border">
+              <section className="sm-panel sm-panel-tools sm-border-tools">
                 <div className="sm-card-topline"><span /> Routine <IconBubble Icon={Apple} /></div>
                 <h2>Daily <span>Correctives</span></h2>
                 <p>
                   Mobility, stability, and strength exercises selected from curated coach-built
                   libraries for your body’s top priority areas.
                 </p>
+                <div className="sm-feature-list">
+                  <FeatureLine Icon={Activity} color="#2C99B3" title="Mobility focus" text="Open tight joints and restore range of motion." />
+                  <FeatureLine Icon={ShieldCheck} color="#43AD5C" title="Stability focus" text="Build control and balance around key areas." />
+                  <FeatureLine Icon={Dumbbell} color="#FF8A4C" title="Strength focus" text="Low-load strength work that supports clean movement." />
+                  <FeatureLine Icon={BookOpen} color="#7A3EBA" title="Curated exercise library" text="Coach-built exercises organized by body area and goal." />
+                  <FeatureLine Icon={Repeat} color="#38A5C7" title="Evolves with you" text="Your routine updates as your retests show improvement." />
+                </div>
               </section>
             </div>
           </>
@@ -498,9 +505,27 @@ function Welcome() {
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0 12px 36px -28px rgba(20,33,58,.45);
+            transition: transform .2s ease, box-shadow .2s ease;
+            will-change: transform;
           }
-          .sm-blue-border{ border: 1.5px solid #86D0EF; }
-          .sm-green-border{ border: 1.5px solid #43AD5C; }
+          .sm-panel:hover{
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 20px 40px -20px rgba(20,33,58,.35);
+          }
+          .sm-border-hero{ border: 1.5px solid #86D0EF; }
+          .sm-border-score{ border: 1.5px solid #43AD5C; }
+          .sm-border-mobile{ border: 1.5px solid #FF8A4C; }
+          .sm-border-about{ border: 1.5px solid #7A3EBA; }
+          .sm-border-program{ border: 1.5px solid #2C99B3; }
+          .sm-border-tools{ border: 1.5px solid #F59E0B; }
+          .sm-panel-score-picture{
+            transition: transform .2s ease, box-shadow .2s ease;
+            will-change: transform;
+          }
+          .sm-panel-score-picture:hover{
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 20px 40px -20px rgba(20,33,58,.35);
+          }
           .sm-eyebrow{
             width: fit-content;
             display: inline-flex;
