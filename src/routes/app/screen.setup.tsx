@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, useSearch, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, Ruler, StretchHorizontal, MoveVertical, Package, ShieldCheck } from "lucide-react";
 import { getFirstIncompleteOnboardingPath, isOnboardingComplete, setOnboardingNextPath, updateUser, useUser } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -48,10 +48,14 @@ function SetupScreen() {
     return Number.isFinite(n) ? Math.round(n * 10) / 10 : 0;
   }, [tibia]);
 
-  if (!u) return null;
-  if (!isOnboardingComplete(u)) {
+  useEffect(() => {
+    if (!u || isOnboardingComplete(u)) return;
     setOnboardingNextPath(next ?? "/app/screen/run");
     navigate({ to: getFirstIncompleteOnboardingPath(u) ?? "/onboarding/parq", replace: true });
+  }, [navigate, next, u]);
+
+  if (!u) return null;
+  if (!isOnboardingComplete(u)) {
     return null;
   }
 
