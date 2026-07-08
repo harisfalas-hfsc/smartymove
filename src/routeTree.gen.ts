@@ -43,6 +43,7 @@ import { Route as AppProgramRouteImport } from './routes/app/program'
 import { Route as AppProfileRouteImport } from './routes/app/profile'
 import { Route as AdminExercisesRouteImport } from './routes/admin.exercises'
 import { Route as AppScreenIndexRouteImport } from './routes/app/screen.index'
+import { Route as AppScreenSetupRouteImport } from './routes/app/screen.setup'
 import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicAdminSyncPremiumRouteImport } from './routes/api/public/admin/sync-premium'
@@ -217,6 +218,11 @@ const AppScreenIndexRoute = AppScreenIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppScreenRoute,
 } as any)
+const AppScreenSetupRoute = AppScreenSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => AppScreenRoute,
+} as any)
 const AppScreenRunRoute = AppScreenRunRouteImport.update({
   id: '/run',
   path: '/run',
@@ -270,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/premium/return': typeof PremiumReturnRoute
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
+  '/app/screen/setup': typeof AppScreenSetupRoute
   '/app/screen/': typeof AppScreenIndexRoute
   '/api/public/admin/sync-premium': typeof ApiPublicAdminSyncPremiumRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -307,6 +314,7 @@ export interface FileRoutesByTo {
   '/premium/return': typeof PremiumReturnRoute
   '/app': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
+  '/app/screen/setup': typeof AppScreenSetupRoute
   '/app/screen': typeof AppScreenIndexRoute
   '/api/public/admin/sync-premium': typeof ApiPublicAdminSyncPremiumRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -347,6 +355,7 @@ export interface FileRoutesById {
   '/premium/return': typeof PremiumReturnRoute
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
+  '/app/screen/setup': typeof AppScreenSetupRoute
   '/app/screen/': typeof AppScreenIndexRoute
   '/api/public/admin/sync-premium': typeof ApiPublicAdminSyncPremiumRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -388,6 +397,7 @@ export interface FileRouteTypes {
     | '/premium/return'
     | '/app/'
     | '/app/screen/run'
+    | '/app/screen/setup'
     | '/app/screen/'
     | '/api/public/admin/sync-premium'
     | '/api/public/payments/webhook'
@@ -425,6 +435,7 @@ export interface FileRouteTypes {
     | '/premium/return'
     | '/app'
     | '/app/screen/run'
+    | '/app/screen/setup'
     | '/app/screen'
     | '/api/public/admin/sync-premium'
     | '/api/public/payments/webhook'
@@ -464,6 +475,7 @@ export interface FileRouteTypes {
     | '/premium/return'
     | '/app/'
     | '/app/screen/run'
+    | '/app/screen/setup'
     | '/app/screen/'
     | '/api/public/admin/sync-premium'
     | '/api/public/payments/webhook'
@@ -735,6 +747,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppScreenIndexRouteImport
       parentRoute: typeof AppScreenRoute
     }
+    '/app/screen/setup': {
+      id: '/app/screen/setup'
+      path: '/setup'
+      fullPath: '/app/screen/setup'
+      preLoaderRoute: typeof AppScreenSetupRouteImport
+      parentRoute: typeof AppScreenRoute
+    }
     '/app/screen/run': {
       id: '/app/screen/run'
       path: '/run'
@@ -761,11 +780,13 @@ declare module '@tanstack/react-router' {
 
 interface AppScreenRouteChildren {
   AppScreenRunRoute: typeof AppScreenRunRoute
+  AppScreenSetupRoute: typeof AppScreenSetupRoute
   AppScreenIndexRoute: typeof AppScreenIndexRoute
 }
 
 const AppScreenRouteChildren: AppScreenRouteChildren = {
   AppScreenRunRoute: AppScreenRunRoute,
+  AppScreenSetupRoute: AppScreenSetupRoute,
   AppScreenIndexRoute: AppScreenIndexRoute,
 }
 
