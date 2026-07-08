@@ -1503,7 +1503,8 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
         notes: `Hip lean L ${Math.round(180 - hipMinL)}° / R ${Math.round(180 - hipMinR)}° · spine Δ ${Math.round(spineLoss)}° · knee flex ${Math.round(kneeFlex)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
       };
     }
-    case "balance": {
+    case "balance":
+    case "sl_balance": {
       // Pelvic-drop angle: deviation of the hip line from horizontal.
       const angles: number[] = [];
       const shoulderTilts: number[] = [];
