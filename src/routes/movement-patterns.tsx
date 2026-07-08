@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ListChecks, ArrowDownWideNarrow, Footprints, Activity, ArrowUpDown, Dumbbell, RotateCw, Anchor, Target, Play } from "lucide-react";
+import { ListChecks, ArrowDownWideNarrow, Footprints, Activity, ArrowUpDown, Dumbbell, RotateCw, Anchor, Target, Play, ChevronRight } from "lucide-react";
+import { TestPreviewSheet } from "@/components/TestPreviewSheet";
+import { CORE_TESTS } from "@/lib/movement";
 
 const URL = "https://smartymove.com/movement-patterns";
 
@@ -22,17 +25,19 @@ export const Route = createFileRoute("/movement-patterns")({
 });
 
 const patterns = [
-  { n: 1, Icon: ArrowDownWideNarrow, color: "text-blue-500", name: "Deep squat", tests: "Full-body mobility", body: "Hips, knees and ankles moving together with upright trunk and overhead shoulders." },
-  { n: 2, Icon: Footprints, color: "text-orange-500", name: "Hurdle step", tests: "Single-leg stability", body: "Stride mechanics and pelvis control while stepping over an obstacle." },
-  { n: 3, Icon: Activity, color: "text-purple-500", name: "In-line lunge", tests: "Hip / ankle mobility & balance", body: "Split-stance control challenging opposite-side hip and ankle." },
-  { n: 4, Icon: ArrowUpDown, color: "text-emerald-500", name: "Active straight-leg raise", tests: "Hamstring & hip mobility", body: "Active hip flexion of one leg while the other stays extended and stable." },
-  { n: 5, Icon: Dumbbell, color: "text-cyan-500", name: "Shoulder mobility", tests: "Shoulder range & symmetry", body: "Reciprocal shoulder range — reaching up-and-behind vs down-and-behind." },
-  { n: 6, Icon: Anchor, color: "text-pink-500", name: "Trunk stability push-up", tests: "Core & anti-extension strength", body: "Symmetrical push-up with the spine holding a rigid line." },
-  { n: 7, Icon: RotateCw, color: "text-indigo-500", name: "Rotary stability", tests: "Multi-plane core control", body: "Coordinated arm and leg motion on all fours without rotation of the trunk." },
-  { n: 8, Icon: Target, color: "text-amber-500", name: "Hip-hinge", tests: "Posterior chain pattern", body: "Bending from the hips with a neutral spine — the foundation of lifting." },
+  { n: 1, id: "squat",            Icon: ArrowDownWideNarrow, color: "text-blue-500",    name: "Deep squat",                 tests: "Full-body mobility",        body: "Hips, knees and ankles moving together with upright trunk and overhead shoulders." },
+  { n: 2, id: "balance",          Icon: Footprints,          color: "text-orange-500",  name: "Hurdle step",                tests: "Single-leg stability",      body: "Stride mechanics and pelvis control while stepping over an obstacle." },
+  { n: 3, id: "lunge",            Icon: Activity,            color: "text-purple-500",  name: "In-line lunge",              tests: "Hip / ankle mobility & balance", body: "Split-stance control challenging opposite-side hip and ankle." },
+  { n: 4, id: "hip_abd",          Icon: ArrowUpDown,         color: "text-emerald-500", name: "Active straight-leg raise",  tests: "Hamstring & hip mobility",  body: "Active hip flexion of one leg while the other stays extended and stable." },
+  { n: 5, id: "overhead",         Icon: Dumbbell,            color: "text-cyan-500",    name: "Shoulder mobility",          tests: "Shoulder range & symmetry", body: "Reciprocal shoulder range — reaching up-and-behind vs down-and-behind." },
+  { n: 6, id: "bridge_hold",      Icon: Anchor,              color: "text-pink-500",    name: "Trunk stability push-up",    tests: "Core & anti-extension strength", body: "Symmetrical push-up with the spine holding a rigid line." },
+  { n: 7, id: "rotary_stability", Icon: RotateCw,            color: "text-indigo-500",  name: "Rotary stability",           tests: "Multi-plane core control",  body: "Coordinated arm and leg motion on all fours without rotation of the trunk." },
+  { n: 8, id: "hinge",            Icon: Target,              color: "text-amber-500",   name: "Hip-hinge",                  tests: "Posterior chain pattern",   body: "Bending from the hips with a neutral spine — the foundation of lifting." },
 ];
 
 function MovementPatternsPage() {
+  const [openId, setOpenId] = useState<string | null>(null);
+  const allIds = CORE_TESTS.map((t) => t.id);
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
       <SiteHeader showBack />
@@ -52,35 +57,49 @@ function MovementPatternsPage() {
                 <strong className="text-foreground">balance</strong>, and{" "}
                 <strong className="text-foreground">motor control</strong>.
               </p>
-              <Link to="/app/screen">
-                <Button size="lg" className="w-full mt-2">
+              <Button size="lg" className="w-full mt-2" onClick={() => setOpenId(allIds[0])}>
+                <ListChecks className="w-4 h-4 mr-2" /> Preview all 8 tests
+              </Button>
+              <Link to="/app/screen" className="block">
+                <Button size="lg" variant="outline" className="w-full">
                   <Play className="w-4 h-4 mr-2" /> Start your Movement Scan
                 </Button>
               </Link>
+              <p className="text-[11px] text-muted-foreground">Free to preview — no sign-in needed.</p>
             </div>
           </CardContent>
         </Card>
 
         {/* Patterns grid */}
         <div className="grid gap-4 lg:grid-cols-2">
-          {patterns.map(({ n, Icon, color, name, tests, body }) => (
-            <Card key={n} className="border-2 border-primary/40 hover:border-primary transition-colors">
-              <CardContent className="p-5">
-                <div className="flex items-start gap-3">
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-base font-extrabold text-primary">
-                    {n}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Icon className={`w-5 h-5 ${color} shrink-0`} />
-                      <span className="text-base font-bold text-foreground truncate">{name}</span>
+          {patterns.map(({ n, id, Icon, color, name, tests, body }) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => setOpenId(id)}
+              className="text-left"
+              aria-label={`Preview the ${name} test`}
+            >
+              <Card className="border-2 border-primary/40 hover:border-primary hover:shadow-md transition-all cursor-pointer">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-base font-extrabold text-primary">
+                      {n}
                     </div>
-                    <div className="text-[11px] uppercase tracking-wider font-bold text-primary mt-1">{tests}</div>
-                    <p className="text-xs text-muted-foreground leading-relaxed mt-1">{body}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Icon className={`w-5 h-5 ${color} shrink-0`} />
+                        <span className="text-base font-bold text-foreground truncate">{name}</span>
+                        <ChevronRight className="w-4 h-4 text-primary ml-auto shrink-0" />
+                      </div>
+                      <div className="text-[11px] uppercase tracking-wider font-bold text-primary mt-1">{tests}</div>
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-1">{body}</p>
+                      <div className="mt-2 text-[11px] font-bold text-primary">Tap to see the test →</div>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </button>
           ))}
         </div>
 
@@ -100,6 +119,13 @@ function MovementPatternsPage() {
         </Card>
       </main>
       <SiteFooter />
+      <TestPreviewSheet
+        open={openId !== null}
+        onClose={() => setOpenId(null)}
+        testIds={allIds}
+        focusTestId={openId ?? undefined}
+        title="The 8 Movement Patterns"
+      />
     </div>
   );
 }
