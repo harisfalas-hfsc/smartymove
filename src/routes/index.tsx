@@ -3,11 +3,28 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { clearOnboardingDraft, getOnboardingDraft, getUser, restoreUserFromBackend, signInWithEmailProfile, signUpWithEmailProfile, useUser } from "@/lib/store";
+import {
+  clearOnboardingDraft,
+  getOnboardingDraft,
+  getUser,
+  restoreUserFromBackend,
+  signInWithEmailProfile,
+  signUpWithEmailProfile,
+  useUser,
+} from "@/lib/store";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff, Smartphone, Camera, ShieldCheck, Target, Clock, ArrowRight } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Smartphone,
+  Camera,
+  ShieldCheck,
+  Target,
+  Clock,
+  ArrowRight,
+} from "lucide-react";
 import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
 
 export const Route = createFileRoute("/")({
@@ -32,7 +49,6 @@ export const Route = createFileRoute("/")({
   component: Welcome,
 });
 
-
 function Welcome() {
   const navigate = useNavigate();
   const user = useUser();
@@ -47,7 +63,10 @@ function Welcome() {
   const [resetSent, setResetSent] = useState(false);
 
   useEffect(() => {
-    const requestedMode = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("auth") : null;
+    const requestedMode =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("auth")
+        : null;
     if (requestedMode === "signin" || requestedMode === "signup") {
       setMode(requestedMode);
       window.history.replaceState(null, "", "/");
@@ -56,7 +75,9 @@ function Welcome() {
     const cached = getUser();
     if (cached && cached.questionnaire && cached.goal) navigate({ to: "/app" });
     void restoreUserFromBackend()
-      .then((u) => { if (u?.questionnaire && u.goal) navigate({ to: "/app" }); })
+      .then((u) => {
+        if (u?.questionnaire && u.goal) navigate({ to: "/app" });
+      })
       .catch(() => undefined);
   }, [navigate]);
 
@@ -69,7 +90,12 @@ function Welcome() {
       const u = await signUpWithEmailProfile(name, email, Number(age), pw);
       const draft = getOnboardingDraft();
       clearOnboardingDraft();
-      navigate({ to: (u.questionnaire || draft.questionnaire) && (u.goal || draft.goal) ? "/app" : "/onboarding/parq" });
+      navigate({
+        to:
+          (u.questionnaire || draft.questionnaire) && (u.goal || draft.goal)
+            ? "/app"
+            : "/onboarding/parq",
+      });
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Account creation failed. Try again.");
     } finally {
@@ -86,7 +112,9 @@ function Welcome() {
       const u = await signInWithEmailProfile(email, pw);
       navigate({ to: u.questionnaire && u.goal ? "/app" : "/onboarding/parq" });
     } catch (error) {
-      setAuthError(error instanceof Error ? error.message : "Sign in failed. Check your email and password.");
+      setAuthError(
+        error instanceof Error ? error.message : "Sign in failed. Check your email and password.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -111,225 +139,429 @@ function Welcome() {
   }
 
   return (
-    <div
-      className="flex min-h-[100dvh] w-full flex-col"
-     
-    >
+    <div className="flex min-h-[100dvh] w-full flex-col">
       <SiteHeader
         onSignIn={() => setMode("signin")}
         onSignUp={() => setMode("signup")}
         onBack={mode === "intro" ? undefined : () => setMode("intro")}
       />
-      <main className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "max-w-[420px] lg:max-w-[1196px] lg:px-0" : "max-w-[420px]"}`}>
-
+      <main
+        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "max-w-[420px] lg:max-w-[1196px] lg:px-0" : "max-w-[420px]"}`}
+      >
         {mode === "intro" ? (
           <>
-          <div className="grid gap-8 lg:grid-cols-[560px_minmax(0,1fr)] lg:items-start lg:gap-9 lg:pt-4">
-          <div className="sm-hero-left order-2 lg:order-1">
-            <div
-              className="flex items-center gap-2"
-              style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "#0E7C86", fontWeight: 700 }}
-            >
-              <span
-                style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF6B4A", boxShadow: "0 0 0 3px rgba(255,107,74,0.18)" }}
-              />
-              Movement Diagnostic
-            </div>
-
-            <h1
-              className="sm-hero-title"
-              style={{ fontWeight: 800, fontSize: 32, lineHeight: 1.05, letterSpacing: "-0.02em", margin: "14px 0 16px" }}
-            >
-              Know how you move.<br />
-              <span style={{ color: "#0E7C86" }}>Move smarter.</span>
-            </h1>
-
-            <p style={{ fontSize: 15, lineHeight: 1.55, color: "#3B4A63", margin: "4px 0 18px" }}>
-              <b style={{ color: "#14213A" }}>Your pocket movement coach.</b> Scan your movement with your camera, get your score, and a 5-minute daily routine built around what your body actually needs.
-            </p>
-
-            <div className="mb-[22px] flex flex-wrap gap-2">
-              {["5 core tests", "On-device", "Private by design"].map((p) => (
-                <span key={p} style={pillStyle}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4FB286" }} />
-                  {p}
-                </span>
-              ))}
-            </div>
-
-            {!user && (
-              <div
-                className="hidden lg:flex items-start gap-3 rounded-2xl p-3.5"
-                style={{ background: "#F1F7F8", border: "1px solid #CDE6EB", color: "#14213A", marginBottom: 14 }}
-              >
-                <span
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
-                  style={{ background: "#E6F5F5", color: "#0E7C86" }}
+            <div className="grid gap-8 lg:grid-cols-[560px_minmax(0,1fr)] lg:items-start lg:gap-9 lg:pt-4">
+              <div className="sm-hero-left order-2 lg:order-1">
+                <div
+                  className="flex items-center gap-2"
+                  style={{
+                    fontSize: 11,
+                    letterSpacing: ".14em",
+                    textTransform: "uppercase",
+                    color: "#0E7C86",
+                    fontWeight: 700,
+                  }}
                 >
-                  <Smartphone className="h-4 w-4" />
-                </span>
-                <div className="text-sm" style={{ lineHeight: 1.5 }}>
-                  <strong>For the best experience, open SmartyMove on your phone.</strong>
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: "#FF6B4A",
+                      boxShadow: "0 0 0 3px rgba(255,107,74,0.18)",
+                    }}
+                  />
+                  Movement Diagnostic
+                </div>
+
+                <h1
+                  className="sm-hero-title"
+                  style={{
+                    fontWeight: 800,
+                    fontSize: 32,
+                    lineHeight: 1.05,
+                    letterSpacing: "-0.02em",
+                    margin: "14px 0 16px",
+                  }}
+                >
+                  Know how you move.
                   <br />
-                  The camera scan is smoother, the daily routine fits your pocket, and reminders feel natural on mobile. You can still continue here on desktop if you prefer.
-                </div>
-              </div>
-            )}
+                  <span style={{ color: "#0E7C86" }}>Move smarter.</span>
+                </h1>
 
-            <button
-              onClick={() => navigate({ to: "/onboarding/parq" })}
-              style={{
-                display: "block", width: "100%", textAlign: "center",
-                background: "#FF6B4A", color: "#fff",
-                fontWeight: 700, fontSize: 16,
-                padding: "16px 0", borderRadius: 16, border: "none",
-                boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)",
-                marginBottom: 14, cursor: "pointer",
-              }}
-              className="sm-hero-cta"
-            >
-              Get started
-            </button>
-
-            <SmartyCard
-              Icon={Target}
-              iconColor="#0E7C86"
-              iconBg="#E6F5F5"
-              title="What is SmartyMove?"
-              subtitle="Your pocket movement coach that scans your body, scores your movement, and builds a daily routine."
-            >
-              <div className="mt-1 space-y-1">
-                <SmartyRow Icon={Camera} color="#0E7C86" label="📸 Camera-based movement scan" sub="8 quick patterns from your phone or laptop." />
-                <SmartyRow Icon={ShieldCheck} color="#0F766E" label="🔒 Private by design" sub="Pose detection runs on your device — video stays with you." />
-                <SmartyRow Icon={Clock} color="#7A3EBA" label="⏱ 5-minute daily routine" sub="Built around your weakest movement patterns." />
-              </div>
-              <div className="mt-4 text-center">
-                <Link
-                  to="/about"
-                  className="inline-flex items-center gap-1 text-sm font-bold"
-                  style={{ color: "#0E7C86", textDecoration: "none" }}
+                <p
+                  style={{ fontSize: 15, lineHeight: 1.55, color: "#3B4A63", margin: "4px 0 18px" }}
                 >
-                  Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </SmartyCard>
-          </div>
+                  <b style={{ color: "#14213A" }}>Your pocket movement coach.</b> Scan your movement
+                  with your camera, get your score, and a 5-minute daily routine built around what
+                  your body actually needs.
+                </p>
 
-          <div className="sm-hero-right order-1 lg:order-2 flex w-full lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
-            {/* Scan viewfinder card */}
-            <div
-              className="relative w-full overflow-hidden sm-hero-card flex flex-col justify-center lg:ml-auto"
-              style={{
-                background: "linear-gradient(160deg,#13283A 0%, #0E1D2B 100%)",
-                borderRadius: 22,
-                padding: "22px 18px 20px",
-                color: "#fff",
-                marginBottom: 0,
-              }}
-            >
-              <span style={cornerStyle({ top: 14, left: 14, borderRight: "none", borderBottom: "none", borderRadius: "6px 0 0 0" })} />
-              <span style={cornerStyle({ top: 14, right: 14, borderLeft: "none", borderBottom: "none", borderRadius: "0 6px 0 0" })} />
-              <span style={cornerStyle({ bottom: 14, left: 14, borderRight: "none", borderTop: "none", borderRadius: "0 0 0 6px" })} />
-              <span style={cornerStyle({ bottom: 14, right: 14, borderLeft: "none", borderTop: "none", borderRadius: "0 0 6px 0" })} />
-              <span className="sm-scanline" />
-              <div className="relative text-center" style={{ zIndex: 2, padding: "14px 0 6px" }}>
-                <div style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)", fontWeight: 700 }}>
-                  Movement Score
+                <div className="mb-[22px] flex flex-wrap gap-2">
+                  {["5 core tests", "On-device", "Private by design"].map((p) => (
+                    <span key={p} style={pillStyle}>
+                      <span
+                        style={{ width: 6, height: 6, borderRadius: "50%", background: "#4FB286" }}
+                      />
+                      {p}
+                    </span>
+                  ))}
                 </div>
-                <div className="sm-hero-score" style={{ fontWeight: 800, fontSize: 56, lineHeight: 1, margin: "4px 0 10px", letterSpacing: "-0.02em" }}>
-                  72<sup style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", marginLeft: 2 }}>/100</sup>
-                </div>
-                <div className="flex items-baseline justify-center gap-1.5" style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", fontWeight: 500 }}>
-                  Movement Age <b style={{ color: "#4FB286", fontSize: 15 }}>41</b> · Chronological 47
+
+                {!user && (
+                  <div
+                    className="hidden lg:flex items-start gap-3 rounded-2xl p-3.5"
+                    style={{
+                      background: "#F1F7F8",
+                      border: "1px solid #CDE6EB",
+                      color: "#14213A",
+                      marginBottom: 14,
+                    }}
+                  >
+                    <span
+                      className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
+                      style={{ background: "#E6F5F5", color: "#0E7C86" }}
+                    >
+                      <Smartphone className="h-4 w-4" />
+                    </span>
+                    <div className="text-sm" style={{ lineHeight: 1.5 }}>
+                      <strong>For the best experience, open SmartyMove on your phone.</strong>
+                      <br />
+                      The camera scan is smoother, the daily routine fits your pocket, and reminders
+                      feel natural on mobile. You can still continue here on desktop if you prefer.
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => navigate({ to: "/onboarding/parq" })}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    textAlign: "center",
+                    background: "#FF6B4A",
+                    color: "#fff",
+                    fontWeight: 700,
+                    fontSize: 16,
+                    padding: "16px 0",
+                    borderRadius: 16,
+                    border: "none",
+                    boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)",
+                    marginBottom: 14,
+                    cursor: "pointer",
+                  }}
+                  className="sm-hero-cta"
+                >
+                  Get started
+                </button>
+
+                <SmartyCard
+                  Icon={Target}
+                  iconColor="#0E7C86"
+                  iconBg="#E6F5F5"
+                  title="What is SmartyMove?"
+                  subtitle="Your pocket movement coach that scans your body, scores your movement, and builds a daily routine."
+                >
+                  <div className="mt-1 space-y-1">
+                    <SmartyRow
+                      Icon={Camera}
+                      color="#0E7C86"
+                      label="📸 Camera-based movement scan"
+                      sub="8 quick patterns from your phone or laptop."
+                    />
+                    <SmartyRow
+                      Icon={ShieldCheck}
+                      color="#0F766E"
+                      label="🔒 Private by design"
+                      sub="Pose detection runs on your device — video stays with you."
+                    />
+                    <SmartyRow
+                      Icon={Clock}
+                      color="#7A3EBA"
+                      label="⏱ 5-minute daily routine"
+                      sub="Built around your weakest movement patterns."
+                    />
+                  </div>
+                  <div className="mt-4 text-center">
+                    <Link
+                      to="/about"
+                      className="inline-flex items-center gap-1 text-sm font-bold"
+                      style={{ color: "#0E7C86", textDecoration: "none" }}
+                    >
+                      Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                </SmartyCard>
+              </div>
+
+              <div className="sm-hero-right order-1 lg:order-2 flex w-full lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
+                {/* Scan viewfinder card */}
+                <div
+                  className="relative w-full overflow-hidden sm-hero-card flex flex-col justify-center lg:ml-auto"
+                  style={{
+                    background: "linear-gradient(160deg,#13283A 0%, #0E1D2B 100%)",
+                    borderRadius: 22,
+                    padding: "22px 18px 20px",
+                    color: "#fff",
+                    marginBottom: 0,
+                  }}
+                >
+                  <span
+                    style={cornerStyle({
+                      top: 14,
+                      left: 14,
+                      borderRight: "none",
+                      borderBottom: "none",
+                      borderRadius: "6px 0 0 0",
+                    })}
+                  />
+                  <span
+                    style={cornerStyle({
+                      top: 14,
+                      right: 14,
+                      borderLeft: "none",
+                      borderBottom: "none",
+                      borderRadius: "0 6px 0 0",
+                    })}
+                  />
+                  <span
+                    style={cornerStyle({
+                      bottom: 14,
+                      left: 14,
+                      borderRight: "none",
+                      borderTop: "none",
+                      borderRadius: "0 0 0 6px",
+                    })}
+                  />
+                  <span
+                    style={cornerStyle({
+                      bottom: 14,
+                      right: 14,
+                      borderLeft: "none",
+                      borderTop: "none",
+                      borderRadius: "0 0 6px 0",
+                    })}
+                  />
+                  <span className="sm-scanline" />
+                  <div
+                    className="relative text-center"
+                    style={{ zIndex: 2, padding: "14px 0 6px" }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 11,
+                        letterSpacing: ".14em",
+                        textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.6)",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Movement Score
+                    </div>
+                    <div
+                      className="sm-hero-score"
+                      style={{
+                        fontWeight: 800,
+                        fontSize: 56,
+                        lineHeight: 1,
+                        margin: "4px 0 10px",
+                        letterSpacing: "-0.02em",
+                      }}
+                    >
+                      72
+                      <sup style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", marginLeft: 2 }}>
+                        /100
+                      </sup>
+                    </div>
+                    <div
+                      className="flex items-baseline justify-center gap-1.5"
+                      style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", fontWeight: 500 }}
+                    >
+                      Movement Age <b style={{ color: "#4FB286", fontSize: 15 }}>41</b> ·
+                      Chronological 47
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          </div>
-
           </>
         ) : mode === "signup" ? (
           <form onSubmit={submit} className="mt-2 flex flex-col gap-3">
-            <h2 style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}>
+            <h2
+              style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}
+            >
               Create your account
             </h2>
-            <p className="-mt-1 text-sm" style={{ color: "#6B7A90" }}>Saved securely to your account.</p>
+            <p className="-mt-1 text-sm" style={{ color: "#6B7A90" }}>
+              Saved securely to your account.
+            </p>
             <div className="space-y-1.5">
               <Label htmlFor="n">Name</Label>
-              <Input id="n" value={name} onChange={(e) => setName(e.target.value)} required className="h-11 rounded-xl" />
+              <Input
+                id="n"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="h-11 rounded-xl"
+              />
             </div>
             <div className="grid grid-cols-[1fr_90px] gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="e">Email</Label>
-                <Input id="e" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 rounded-xl" />
+                <Input
+                  id="e"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="h-11 rounded-xl"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="a">Age</Label>
-                <Input id="a" type="number" min={12} max={100} value={age} onChange={(e) => setAge(e.target.value ? Number(e.target.value) : "")} required className="h-11 rounded-xl" />
+                <Input
+                  id="a"
+                  type="number"
+                  min={12}
+                  max={100}
+                  value={age}
+                  onChange={(e) => setAge(e.target.value ? Number(e.target.value) : "")}
+                  required
+                  className="h-11 rounded-xl"
+                />
               </div>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="p">Password</Label>
-              <PasswordField id="p" value={pw} onChange={setPw} show={showPw} onToggle={() => setShowPw((s) => !s)} />
+              <PasswordField
+                id="p"
+                value={pw}
+                onChange={setPw}
+                show={showPw}
+                onToggle={() => setShowPw((s) => !s)}
+              />
             </div>
             <Button
               type="submit"
               disabled={submitting}
-              style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
+              style={{
+                background: "#FF6B4A",
+                boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)",
+              }}
               className="mt-2 h-12 w-full rounded-2xl text-base font-semibold text-white hover:opacity-95"
             >
               {submitting ? "Saving..." : "Continue"}
             </Button>
-            {authError && <p className="text-center text-sm font-semibold text-destructive">{authError}</p>}
+            {authError && (
+              <p className="text-center text-sm font-semibold text-destructive">{authError}</p>
+            )}
             <p className="mt-1 text-center text-sm" style={{ color: "#6B7A90" }}>
               Have an account?{" "}
-              <button type="button" onClick={() => setMode("signin")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+              <button
+                type="button"
+                onClick={() => setMode("signin")}
+                style={{
+                  color: "#0E7C86",
+                  fontWeight: 700,
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                }}
+              >
                 Sign in
               </button>
             </p>
           </form>
         ) : mode === "signin" ? (
           <form onSubmit={submitSignin} className="mt-2 flex flex-col gap-3">
-            <h2 style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}>
+            <h2
+              style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}
+            >
               Welcome back
             </h2>
-            <p className="-mt-1 text-sm" style={{ color: "#6B7A90" }}>Sign in to continue your movement journey.</p>
+            <p className="-mt-1 text-sm" style={{ color: "#6B7A90" }}>
+              Sign in to continue your movement journey.
+            </p>
             <div className="space-y-1.5">
               <Label htmlFor="se">Email</Label>
-              <Input id="se" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 rounded-xl" />
+              <Input
+                id="se"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-11 rounded-xl"
+              />
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <Label htmlFor="sp">Password</Label>
                 <button
                   type="button"
-                  onClick={() => { setAuthError(""); setResetSent(false); setMode("forgot"); }}
-                  style={{ color: "#0E7C86", fontWeight: 700, fontSize: 13, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                  onClick={() => {
+                    setAuthError("");
+                    setResetSent(false);
+                    setMode("forgot");
+                  }}
+                  style={{
+                    color: "#0E7C86",
+                    fontWeight: 700,
+                    fontSize: 13,
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
                 >
                   Forgot password?
                 </button>
               </div>
-              <PasswordField id="sp" value={pw} onChange={setPw} show={showPw} onToggle={() => setShowPw((s) => !s)} />
+              <PasswordField
+                id="sp"
+                value={pw}
+                onChange={setPw}
+                show={showPw}
+                onToggle={() => setShowPw((s) => !s)}
+              />
             </div>
             <Button
               type="submit"
               disabled={submitting}
-              style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
+              style={{
+                background: "#FF6B4A",
+                boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)",
+              }}
               className="mt-2 h-12 w-full rounded-2xl text-base font-semibold text-white hover:opacity-95"
             >
               {submitting ? "Signing in..." : "Sign in"}
             </Button>
-            {authError && <p className="text-center text-sm font-semibold text-destructive">{authError}</p>}
+            {authError && (
+              <p className="text-center text-sm font-semibold text-destructive">{authError}</p>
+            )}
             <p className="mt-1 text-center text-sm" style={{ color: "#6B7A90" }}>
               New here?{" "}
-              <button type="button" onClick={() => setMode("signup")} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+              <button
+                type="button"
+                onClick={() => setMode("signup")}
+                style={{
+                  color: "#0E7C86",
+                  fontWeight: 700,
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                }}
+              >
                 Create an account
               </button>
             </p>
           </form>
         ) : (
           <form onSubmit={submitForgot} className="mt-2 flex flex-col gap-3">
-            <h2 style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}>
+            <h2
+              style={{ fontWeight: 800, fontSize: 24, color: "#14213A", letterSpacing: "-0.01em" }}
+            >
               Reset your password
             </h2>
             <p className="-mt-1 text-sm" style={{ color: "#6B7A90" }}>
@@ -337,12 +569,22 @@ function Welcome() {
             </p>
             <div className="space-y-1.5">
               <Label htmlFor="fe">Email</Label>
-              <Input id="fe" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 rounded-xl" />
+              <Input
+                id="fe"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-11 rounded-xl"
+              />
             </div>
             <Button
               type="submit"
               disabled={submitting || resetSent}
-              style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
+              style={{
+                background: "#FF6B4A",
+                boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)",
+              }}
               className="mt-2 h-12 w-full rounded-2xl text-base font-semibold text-white hover:opacity-95"
             >
               {resetSent ? "Email sent ✓" : submitting ? "Sending..." : "Send reset link"}
@@ -352,10 +594,27 @@ function Welcome() {
                 Check your inbox (and spam folder) for the reset link.
               </p>
             )}
-            {authError && <p className="text-center text-sm font-semibold text-destructive">{authError}</p>}
+            {authError && (
+              <p className="text-center text-sm font-semibold text-destructive">{authError}</p>
+            )}
             <p className="mt-1 text-center text-sm" style={{ color: "#6B7A90" }}>
               Remembered it?{" "}
-              <button type="button" onClick={() => { setAuthError(""); setResetSent(false); setMode("signin"); }} style={{ color: "#0E7C86", fontWeight: 700, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthError("");
+                  setResetSent(false);
+                  setMode("signin");
+                }}
+                style={{
+                  color: "#0E7C86",
+                  fontWeight: 700,
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                }}
+              >
                 Back to sign in
               </button>
             </p>
@@ -401,21 +660,40 @@ function Welcome() {
 function cornerStyle(extra: React.CSSProperties): React.CSSProperties {
   return {
     position: "absolute",
-    width: 22, height: 22,
+    width: 22,
+    height: 22,
     border: "2.5px solid rgba(255,255,255,0.55)",
     ...extra,
   };
 }
 
 const pillStyle: React.CSSProperties = {
-  fontSize: 12, fontWeight: 600, letterSpacing: ".01em",
-  padding: "7px 11px", borderRadius: 999,
-  background: "#fff", border: "1px solid #D9E0E2",
-  color: "#3B4A63", display: "inline-flex",
-  alignItems: "center", gap: 6,
+  fontSize: 12,
+  fontWeight: 600,
+  letterSpacing: ".01em",
+  padding: "7px 11px",
+  borderRadius: 999,
+  background: "#fff",
+  border: "1px solid #D9E0E2",
+  color: "#3B4A63",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 6,
 };
 
-function PasswordField({ id, value, onChange, show, onToggle }: { id: string; value: string; onChange: (v: string) => void; show: boolean; onToggle: () => void }) {
+function PasswordField({
+  id,
+  value,
+  onChange,
+  show,
+  onToggle,
+}: {
+  id: string;
+  value: string;
+  onChange: (v: string) => void;
+  show: boolean;
+  onToggle: () => void;
+}) {
   return (
     <div className="relative">
       <Input
