@@ -814,6 +814,11 @@ function Runner() {
           </div>
         );
       })()}
+      <TestPreviewSheet
+        open={reviewOpen}
+        onClose={() => { setReviewOpen(false); setReviewedPrompt(true); }}
+        testIds={CORE_TESTS.map((t) => t.id)}
+      />
     </div>
   );
 }
