@@ -156,6 +156,25 @@ function Welcome() {
               ))}
             </div>
 
+            {!user && (
+              <div
+                className="hidden lg:flex items-start gap-3 rounded-2xl p-3.5"
+                style={{ background: "#F1F7F8", border: "1px solid #CDE6EB", color: "#14213A", marginBottom: 14 }}
+              >
+                <span
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
+                  style={{ background: "#E6F5F5", color: "#0E7C86" }}
+                >
+                  <Smartphone className="h-4 w-4" />
+                </span>
+                <div className="text-sm" style={{ lineHeight: 1.5 }}>
+                  <strong>For the best experience, open SmartyMove on your phone.</strong>
+                  <br />
+                  The camera scan is smoother, the daily routine fits your pocket, and reminders feel natural on mobile. You can still continue here on desktop if you prefer.
+                </div>
+              </div>
+            )}
+
             <button
               onClick={() => navigate({ to: "/onboarding/parq" })}
               style={{
@@ -170,7 +189,29 @@ function Welcome() {
             >
               Get started
             </button>
-          </div>
+
+            <SmartyCard
+              Icon={Target}
+              iconColor="#0E7C86"
+              iconBg="#E6F5F5"
+              title="What is SmartyMove?"
+              subtitle="Your pocket movement coach that scans your body, scores your movement, and builds a daily routine."
+            >
+              <div className="mt-1 space-y-1">
+                <SmartyRow Icon={Camera} color="#0E7C86" label="📸 Camera-based movement scan" sub="8 quick patterns from your phone or laptop." />
+                <SmartyRow Icon={ShieldCheck} color="#0F766E" label="🔒 Private by design" sub="Pose detection runs on your device — video stays with you." />
+                <SmartyRow Icon={Clock} color="#7A3EBA" label="⏱ 5-minute daily routine" sub="Built around your weakest movement patterns." />
+              </div>
+              <div className="mt-4 text-center">
+                <Link
+                  to="/about"
+                  className="inline-flex items-center gap-1 text-sm font-bold"
+                  style={{ color: "#0E7C86", textDecoration: "none" }}
+                >
+                  Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </SmartyCard>
 
           <div className="sm-hero-right order-1 lg:order-2 flex w-full lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
             {/* Scan viewfinder card */}
