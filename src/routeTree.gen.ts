@@ -12,10 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ResearchRouteImport } from './routes/research'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as MovementIntelligenceRouteImport } from './routes/movement-intelligence'
 import { Route as LearnRouteImport } from './routes/learn'
+import { Route as GlossaryRouteImport } from './routes/glossary'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as DesktopRouteImport } from './routes/desktop'
@@ -57,6 +60,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResearchRoute = ResearchRouteImport.update({
+  id: '/research',
+  path: '/research',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -72,9 +80,19 @@ const PremiumRoute = PremiumRouteImport.update({
   path: '/premium',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MovementIntelligenceRoute = MovementIntelligenceRouteImport.update({
+  id: '/movement-intelligence',
+  path: '/movement-intelligence',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearnRoute = LearnRouteImport.update({
   id: '/learn',
   path: '/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GlossaryRoute = GlossaryRouteImport.update({
+  id: '/glossary',
+  path: '/glossary',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -214,10 +232,13 @@ export interface FileRoutesByFullPath {
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
+  '/glossary': typeof GlossaryRoute
   '/learn': typeof LearnRouteWithChildren
+  '/movement-intelligence': typeof MovementIntelligenceRoute
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/research': typeof ResearchRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
@@ -247,10 +268,13 @@ export interface FileRoutesByTo {
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
+  '/glossary': typeof GlossaryRoute
   '/learn': typeof LearnRouteWithChildren
+  '/movement-intelligence': typeof MovementIntelligenceRoute
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/research': typeof ResearchRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
@@ -281,10 +305,13 @@ export interface FileRoutesById {
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
+  '/glossary': typeof GlossaryRoute
   '/learn': typeof LearnRouteWithChildren
+  '/movement-intelligence': typeof MovementIntelligenceRoute
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/research': typeof ResearchRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
@@ -317,10 +344,13 @@ export interface FileRouteTypes {
     | '/desktop'
     | '/disclaimer'
     | '/faq'
+    | '/glossary'
     | '/learn'
+    | '/movement-intelligence'
     | '/premium'
     | '/pricing'
     | '/privacy'
+    | '/research'
     | '/reset-password'
     | '/sitemap.xml'
     | '/terms'
@@ -350,10 +380,13 @@ export interface FileRouteTypes {
     | '/desktop'
     | '/disclaimer'
     | '/faq'
+    | '/glossary'
     | '/learn'
+    | '/movement-intelligence'
     | '/premium'
     | '/pricing'
     | '/privacy'
+    | '/research'
     | '/reset-password'
     | '/sitemap.xml'
     | '/terms'
@@ -383,10 +416,13 @@ export interface FileRouteTypes {
     | '/desktop'
     | '/disclaimer'
     | '/faq'
+    | '/glossary'
     | '/learn'
+    | '/movement-intelligence'
     | '/premium'
     | '/pricing'
     | '/privacy'
+    | '/research'
     | '/reset-password'
     | '/sitemap.xml'
     | '/terms'
@@ -418,10 +454,13 @@ export interface RootRouteChildren {
   DesktopRoute: typeof DesktopRoute
   DisclaimerRoute: typeof DisclaimerRoute
   FaqRoute: typeof FaqRoute
+  GlossaryRoute: typeof GlossaryRoute
   LearnRoute: typeof LearnRouteWithChildren
+  MovementIntelligenceRoute: typeof MovementIntelligenceRoute
   PremiumRoute: typeof PremiumRouteWithChildren
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
+  ResearchRoute: typeof ResearchRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
@@ -453,6 +492,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/research': {
+      id: '/research'
+      path: '/research'
+      fullPath: '/research'
+      preLoaderRoute: typeof ResearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -474,11 +520,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PremiumRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/movement-intelligence': {
+      id: '/movement-intelligence'
+      path: '/movement-intelligence'
+      fullPath: '/movement-intelligence'
+      preLoaderRoute: typeof MovementIntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/learn': {
       id: '/learn'
       path: '/learn'
       fullPath: '/learn'
       preLoaderRoute: typeof LearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/glossary': {
+      id: '/glossary'
+      path: '/glossary'
+      fullPath: '/glossary'
+      preLoaderRoute: typeof GlossaryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -743,10 +803,13 @@ const rootRouteChildren: RootRouteChildren = {
   DesktopRoute: DesktopRoute,
   DisclaimerRoute: DisclaimerRoute,
   FaqRoute: FaqRoute,
+  GlossaryRoute: GlossaryRoute,
   LearnRoute: LearnRouteWithChildren,
+  MovementIntelligenceRoute: MovementIntelligenceRoute,
   PremiumRoute: PremiumRouteWithChildren,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
+  ResearchRoute: ResearchRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,

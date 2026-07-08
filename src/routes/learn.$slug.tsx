@@ -107,12 +107,37 @@ export const Route = createFileRoute("/learn/$slug")({
           type: "application/ld+json",
           children: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "Article",
-            headline: a.title,
-            description: a.description,
-            mainEntityOfPage: url,
-            author: { "@type": "Organization", name: "SmartyMove" },
-            publisher: { "@type": "Organization", name: "SmartyMove" },
+            "@graph": [
+              {
+                "@type": "Article",
+                headline: a.title,
+                description: a.description,
+                mainEntityOfPage: url,
+                url,
+                inLanguage: "en",
+                articleSection: "Movement Intelligence",
+                keywords: [
+                  "movement screening", "movement analysis", "movement score",
+                  "functional movement", "corrective exercise", "mobility",
+                  "stability", "biomechanics", "AI movement coach"
+                ],
+                author: { "@type": "Organization", name: "SmartyMove", url: "https://smartymove.com" },
+                publisher: { "@id": "https://smartymove.com/#organization" },
+                isPartOf: { "@id": "https://smartymove.com/#website" },
+              },
+              {
+                "@type": "BreadcrumbList",
+                itemListElement: [
+                  { "@type": "ListItem", position: 1, name: "Home", item: "https://smartymove.com/" },
+                  { "@type": "ListItem", position: 2, name: "Learn", item: "https://smartymove.com/learn" },
+                  { "@type": "ListItem", position: 3, name: a.title, item: url },
+                ],
+              },
+              {
+                "@type": "SpeakableSpecification",
+                cssSelector: ["h1", "article p"],
+              },
+            ],
           }),
         },
       ],

@@ -1,48 +1,56 @@
 # SmartyMove
 
-> SmartyMove is a camera-based movement screening and corrective exercise app. It turns a smartphone camera into a 5-minute functional movement test, produces a Movement Score (0–100) and a Movement Age, identifies the root cause of any failed test, and prescribes a short daily corrective program. Built by the Smarty team as a pocket movement coach for people who want to move better, prevent injury, and reduce pain — without booking a clinic visit.
+> SmartyMove is the AI Movement Intelligence Platform. It turns a smartphone camera into a functional movement screen, produces the Smarty Movement Score™ (0–100) and Smarty Movement Age™, identifies the root cause of any failed test, and prescribes a personalized 5-minute daily corrective exercise program that progresses every 14 days.
 
 ## What SmartyMove is
 
-SmartyMove is a mobile-first movement screening app and corrective exercise coach. Users perform a short series of guided movement tests (squat, hinge, single-leg balance, lunge, overhead reach, plus ankle, hip, shoulder, core and scapular sub-tests) in front of their phone camera. On-device pose detection scores each rep, flags compensations (heel rise, spine rounding, knee valgus, left/right asymmetry), and clusters failures into root causes (Ankle, Hip, Core, Scapular). The app then prescribes a personalized 14-day corrective training program in three phases — Foundation, Build, Maintain & Perform — built from a curated library of mobility, stability and strength exercises. The program rescans every 14 days and progresses automatically.
+SmartyMove is a mobile-first AI Movement Intelligence Platform. Users perform a short standardized set of eight functional movement patterns (deep squat, hurdle step, in-line lunge, active straight-leg raise, shoulder mobility, trunk-stability push-up, rotary stability, hip-hinge) in front of their phone camera. On-device AI pose detection scores each rep 0–3 against Functional Movement Screen criteria, flags compensations (heel rise, spine rounding, knee valgus, left/right asymmetry, shoulder shrug), and clusters failures into root-cause areas (Ankle, Knee, Hip, Low Back, Shoulder, Elbow, Wrist).
+
+The Corrective Decision Engine then prescribes a personalized 14-day training plan in three phases — Foundation (weeks 0–1), Build (weeks 2–5), Maintain & Perform (weeks 6+) — built from a curated library of mobility, stability, and strength exercises across seven areas × three categories. The program rescans every 14 days and progresses automatically.
+
+## Proprietary metrics
+
+- **Smarty Movement Score™** — single 0–100 score summarizing movement quality (Mobility 30%, Stability 30%, Balance 20%, Movement Quality 20%).
+- **Smarty Movement Age™** — age-equivalent derived from the Movement Score; answers whether a body moves younger or older than its chronological age.
+- **Smarty Mobility Index™** — mobility sub-score across squat, hinge, shoulder mobility, ASLR and in-line lunge.
+- **Smarty Stability Index™** — stability sub-score across hurdle step, in-line lunge, TSPU and rotary stability.
+- **Smarty Movement Intelligence™** — the combined measurable capacity of mobility, stability, balance and motor control.
 
 ## Who it's for
 
 - Desk workers with stiff hips, low back, or shoulders
-- Runners and lifters who want to keep their joints healthy
-- People recovering from minor knee, hip, ankle, low back, or shoulder issues who are cleared for general exercise
-- Anyone who wants an objective baseline of how they move and a short daily routine that actually targets their weakest link
+- Runners and lifters protecting their joints
+- Older adults maintaining independence and balance
+- Athletes chasing performance and injury prevention
+- Anyone recovering from minor musculoskeletal issues who has been cleared for exercise
 
 SmartyMove is a wellness and education tool. It is not a medical device, not a diagnosis, and not a replacement for a physiotherapist or physician.
 
-## How the movement screen works
-
-1. The user completes a PAR-Q-style readiness questionnaire and picks a goal.
-2. They prop up their phone and follow on-screen prompts for a short sequence of functional movement tests.
-3. On-device pose detection (no raw video uploaded) measures joint angles, range of motion, tempo, and compensations on each rep, comparing them to reference values for that movement.
-4. The Corrective Decision Engine clusters failures into at most two primary root causes (Ankle, Hip, Core, Scapular) so the program stays focused.
-5. The app outputs a Movement Score (0–100), a Movement Age (a motivational age estimate based on movement quality vs. chronological age), and a 14-day training plan.
-
 ## Core differentiators
 
-- **Movement Score** — a single 0–100 score summarizing movement quality across all tests, so progress is measurable.
-- **Movement Age** — translates movement quality into an intuitive age number users can lower over time.
-- **Root-cause clustering** — instead of prescribing 10 random exercises, the engine identifies the 1–2 deficits that explain the most failures and trains those first.
-- **Compensation detection** — verifies that observed range of motion is real, not faked by heel lift, spine rounding, or shoulder shrugging.
-- **Curated exercise library** — exercises come from a vetted set across 7 areas (Ankle, Knee, Hip, Low Back, Shoulder, Elbow, Wrist) × 3 categories (Mobility, Stability, Strength); nothing is invented or cross-prescribed.
-- **On-device pose detection** — camera frames are processed locally; raw video is not uploaded.
-- **14-day rescan cycle** — the program automatically progresses through Foundation → Build → Maintain & Perform phases as the user retests.
+- **AI Movement Intelligence Platform** — screening + scoring + corrective program in one system.
+- **Smarty Movement Score™ and Movement Age™** — proprietary, measurable, improvable metrics.
+- **Root-cause clustering** — trains the 1–2 deficits that explain the most failures.
+- **Compensation detection** — verifies real range of motion versus faked motion.
+- **Curated corrective library** — 7 areas × 3 categories; nothing invented or cross-prescribed.
+- **On-device pose detection** — raw video is never uploaded.
+- **14-day rescan cycle** — Foundation → Build → Maintain & Perform.
 
 ## Key pages
 
 - [Home](https://smartymove.com/): product overview and movement screen entry point
-- [About](https://smartymove.com/about): why SmartyMove exists, what it does, how it works, who it's for
-- [Premium](https://smartymove.com/premium): SmartyMove Premium subscription (€4.99/month) — full daily program, re-tests, Movement Age trajectory
+- [Movement Intelligence pillar](https://smartymove.com/movement-intelligence): definitive resource on movement intelligence, screening, scoring and corrective exercise
+- [Glossary](https://smartymove.com/glossary): definitions of every SmartyMove metric and movement term
+- [Research](https://smartymove.com/research): plain-language digest of the science behind movement screening and corrective exercise
+- [Learn](https://smartymove.com/learn): plain-language guides on movement, mobility and Movement Score
+- [FAQ](https://smartymove.com/faq): common questions about the platform, metrics and privacy
+- [About](https://smartymove.com/about): why SmartyMove exists, what it does, how it works
+- [Pricing / Premium](https://smartymove.com/pricing): SmartyMove Premium subscription (€4.99/month)
 - [Contact](https://smartymove.com/contact): support and feedback
 - [Privacy](https://smartymove.com/privacy): privacy policy
 - [Terms](https://smartymove.com/terms): terms of service
 - [Disclaimer](https://smartymove.com/disclaimer): medical and safety disclaimer
 
-## Optional
+## Topics SmartyMove covers authoritatively
 
-- [Learn — Movement guides](https://smartymove.com/learn): plain-language articles on functional movement screening, Movement Score, ankle mobility, and related topics
+Movement screening, movement analysis, movement assessment, movement intelligence, functional movement screen, mobility assessment, mobility test, joint mobility, joint stability, dynamic stability, postural assessment, movement efficiency, movement patterns, movement compensation, biomechanics, functional movement, athletic movement, AI movement analysis, AI movement coach, AI functional assessment, movement scanner, movement diagnostics, human performance assessment, corrective exercise, mobility exercises, stability exercises, movement rehabilitation, injury prevention, sports performance, movement health score, body mechanics, movement risk, movement readiness, movement balance, functional capacity, musculoskeletal assessment, movement score, movement age, digital physiotherapy, movement evaluation, movement profile, movement analytics, movement tracking, movement monitoring, movement improvement, movement education.
