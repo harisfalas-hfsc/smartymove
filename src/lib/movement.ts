@@ -89,6 +89,7 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
  */
 export const CORE_TESTS = [
   { id: "squat",            name: "Deep Squat",                 focus: ["mobility", "quality"],  duration: 10 },
+  { id: "hinge",            name: "Hip Hinge",                  focus: ["mobility", "quality"],  duration: 10 },
   { id: "balance",          name: "Hurdle Step",                focus: ["stability", "balance"], duration: 10 },
   { id: "lunge",            name: "In-line Lunge",              focus: ["mobility", "stability"], duration: 10 },
   { id: "overhead",         name: "Shoulder Mobility",          focus: ["mobility"],              duration: 10 },
@@ -131,15 +132,18 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
   //   Balance   ← single-leg balance (both sides)
   //   Quality   ← squat, hip hinge, overhead (compensation-adjusted scores)
   const focusMap: Record<string, Array<"mobility" | "stability" | "balance" | "quality">> = {
-    squat:       ["quality"],
+    // Per spec: Mobility ← Squat + Hinge + Shoulder Mobility + Active SLR.
+    // Stability ← Single-Leg Balance + Trunk Stability + Rotary Stability.
+    // Balance ← Single-Leg Balance. Quality ← composite of squat/hinge/overhead.
+    squat:       ["mobility", "quality"],
     hinge:       ["mobility", "quality"],
     balance:     ["balance", "stability"],
     lunge:       ["mobility", "stability"],
     overhead:    ["mobility", "quality"],
     ankle_df:    ["mobility"],
     knee_sld:    ["stability"],
-    hip_abd:     ["stability"],
-    bridge_hold: ["stability", "quality"],
+    hip_abd:     ["mobility"],
+    bridge_hold: ["stability"],
     rotary_stability: ["stability", "quality"],
     wall_slide:  ["mobility"],
     elbow_rom:   ["mobility"],
@@ -154,9 +158,11 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
   // Every number the user sees must come from a test we actually captured
   // cleanly. Skipped / invalid / no-clear-reading tests are excluded from
   // every sub-score (they show "No reading" in the per-test breakdown).
-  const valid = results.filter(r => r.valid !== false);
-  // score 3 → 100, score 2 → 67, score 1 → 33
-  const scoreToPct = (s: 1 | 2 | 3) => (s === 3 ? 100 : s === 2 ? 67 : 33);
+  const valid = results.filter(r => r.valid !== false && r.score > 0);
+  // score 3 → 100, score 2 → 67, score 1 → 33. Score 0 (pain) is excluded
+  // from sub-scores entirely — pain-flagged patterns are red flags, not
+  // numeric findings.
+  const scoreToPct = (s: 0 | 1 | 2 | 3) => (s === 3 ? 100 : s === 2 ? 67 : s === 1 ? 33 : 0);
   for (const r of valid) {
     const pct = scoreToPct(r.score);
     for (const f of focusMap[r.id] ?? []) buckets[f].push(pct);
@@ -176,7 +182,8 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
   // 25, Balance 25, Quality 20). If a sub-score is "Insufficient data" it is
   // excluded from the weighting and the remaining weights are renormalized.
   const weights: Record<keyof typeof sub, number> = {
-    mobility: 0.30, stability: 0.25, balance: 0.25, quality: 0.20,
+    // Per spec: Mobility 30%, Stability 30%, Balance 20%, Movement Quality 20%.
+    mobility: 0.30, stability: 0.30, balance: 0.20, quality: 0.20,
   };
   let wSum = 0, weighted = 0;
   (Object.keys(weights) as Array<keyof typeof sub>).forEach(k => {

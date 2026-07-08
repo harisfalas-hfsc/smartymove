@@ -34,7 +34,8 @@ export interface Questionnaire {
 export interface TestResult {
   id: string;
   name: string;
-  score: 1 | 2 | 3;
+  /** 0 = pain reported (test skipped, referral message shown). 1/2/3 = normal scoring. */
+  score: 0 | 1 | 2 | 3;
   metric?: number;
   side?: "L" | "R" | "both";
   notes?: string;
@@ -59,7 +60,7 @@ export interface TestResult {
    */
   viewFindings?: Array<{
     view: "front" | "side";
-    score: 1 | 2 | 3;
+    score: 0 | 1 | 2 | 3;
     valid?: boolean;
     metric?: number;
     compensations?: string[];
