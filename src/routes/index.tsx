@@ -528,7 +528,7 @@ function Welcome() {
             min-height: 228px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
           }
           .sm-wellness-title{
             margin: 18px 0 0;
