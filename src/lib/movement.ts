@@ -212,6 +212,13 @@ export type TestGuide = {
   reps: string;
   /** Search string used to find a real demo GIF in the exercise library. */
   libraryQuery: string;
+  /** Plain-language 0/1/2/3 scoring rubric shown in the preview sheet. */
+  scoring?: {
+    "3": string;
+    "2": string;
+    "1": string;
+    "0": string;
+  };
 };
 
 export const TEST_GUIDES: Record<string, TestGuide> = {
