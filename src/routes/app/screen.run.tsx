@@ -387,6 +387,14 @@ function Runner() {
         setResults(r => [...r, merged]);
       }
       setTimeout(() => {
+        // Clearing-test gate: after the last view of a clearing test, pause
+        // the flow and ask if the user felt pain. Their answer either keeps
+        // the merged result or forces it to score 0 (invalid).
+        if (isLastView && CLEARING_TESTS.has(test.testId)) {
+          setPainCheckTestId(test.testId);
+          setPhase("painCheck");
+          return;
+        }
         if (idx + 1 >= seq.length) {
           const base = mergedForFinalize ? [...results, mergedForFinalize] : results;
           finalize(base);
