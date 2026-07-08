@@ -57,6 +57,12 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
   rotary_stability: [
     { view: "side",  label: "Side view",  cue: "Get on all fours over a 2×6 board with your knees under your hips and hands under your shoulders. Extend your same-side arm and leg.", detects: ["arm and leg extend in line with the torso", "touch elbow to knee over the board", "no loss of balance"] },
   ],
+  sl_balance: [
+    { view: "front", label: "Front view", cue: "Face the camera, arms crossed on your chest, feet under your hips. Lift one foot just off the floor and hold.",
+      detects: ["pelvic drop on the lifted side", "trunk lateral lean", "stance-knee wobble"] },
+    { view: "side",  label: "Side view",  cue: "Now turn sideways so your full profile is visible. Same leg lifted, same 10-second hold.",
+      detects: ["forward trunk pitch (>20° from vertical)", "hip flexion substitution"] },
+  ],
   wall_slide: [
     { view: "side",  label: "Side view",  cue: "Stand sideways to the camera against the wall.", detects: ["lumbar arch", "wall contact quality"] },
     { view: "front", label: "Front view", cue: "Now face the camera against the wall.", detects: ["L/R shoulder height asymmetry"] },
@@ -97,6 +103,7 @@ export const CORE_TESTS = [
   { id: "hip_abd",          name: "Active Straight-Leg Raise",  focus: ["mobility"],              duration: 10 },
   { id: "bridge_hold",      name: "Trunk Stability Push-Up",    focus: ["stability"],             duration: 10 },
   { id: "rotary_stability", name: "Rotary Stability",           focus: ["stability", "quality"],  duration: 10 },
+  { id: "sl_balance",       name: "Single-Leg Balance",         focus: ["balance", "stability"], duration: 10 },
 ] as const;
 
 /** Tests that surface a "Did you feel pain during that pattern?" prompt.
@@ -146,6 +153,7 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
     hip_abd:     ["mobility"],
     bridge_hold: ["stability"],
     rotary_stability: ["stability", "quality"],
+    sl_balance:  ["balance", "stability"],
     wall_slide:  ["mobility"],
     elbow_rom:   ["mobility"],
     wrist_rom:   [],
@@ -461,6 +469,35 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
       "2": "Diagonal (opposite-side arm + leg) rep: elbow touches knee over the board with no loss of balance, on both sides.",
       "1": "Cannot perform a diagonal rep, or loses balance during the movement.",
       "0": "Any pain in the low back, hips or shoulders during the pattern (clearing test — forces a 0).",
+    },
+  },
+  sl_balance: {
+    id: "sl_balance", name: "Single-Leg Balance",
+    what: "Stand on one leg for 10 seconds without pelvic drop, trunk lean, or knee wobble. Test both sides.",
+    why: "Single-leg stance exposes hip stability, ankle strategy and postural control — the base of every gait, sport and injury-prevention program.",
+    setup: [
+      "Face the camera, arms folded across your chest",
+      "Feet under your hips, look straight ahead at a fixed point",
+      "Rear the room so your full body is visible in the frame",
+    ],
+    steps: [
+      "Lift one foot just off the floor (knee softly bent)",
+      "Hold for 10 seconds without touching down or shifting your weight",
+      "Return under control, then repeat on the other leg",
+      "Turn sideways and repeat both legs — the side view catches forward trunk pitch",
+    ],
+    mistakes: [
+      "Pelvis drops on the lifted side (>5° = compensation)",
+      "Trunk leans to the side or pitches forward (>20°)",
+      "Stance knee wobbles or foot has to touch down",
+    ],
+    reps: "10-second hold each leg · both views",
+    libraryQuery: "single leg balance",
+    scoring: {
+      "3": "Full 10-second hold, pelvis level within 5°, trunk stays upright.",
+      "2": "Holds but with pelvic drop 5–10°, trunk lean, or visible knee wobble.",
+      "1": "Balance lost before 10 s, or pelvic drop over 10°.",
+      "0": "Any pain in the stance-leg hip, knee or ankle during the hold.",
     },
   },
   wall_slide: {

@@ -20,6 +20,7 @@ const DEMO_IMAGES: Record<string, string> = {
   hip_abd: hipAbdImg.url,
   bridge_hold: bridgeHoldImg.url,
   rotary_stability: rotaryImg.url,
+  sl_balance: balanceImg.url,
 };
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
@@ -147,6 +148,7 @@ const TEST_CAMERA_VIEW: Record<string, "front" | "side"> = {
   hip_abd: "side",
   bridge_hold: "side",
   rotary_stability: "side",
+  sl_balance: "front",
   wall_slide: "side",
   elbow_rom: "front",
 };
@@ -165,6 +167,7 @@ const REP_PROMPT: Record<string, string> = {
   hip_abd:          "Straight-leg raise — up to 3 slow reps each leg",
   bridge_hold:      "1 strict trunk-stability push-up",
   rotary_stability: "Same-side arm + leg extend, then elbow to knee — each side",
+  sl_balance:       "Stand on one leg — 10-second hold each side",
   wall_slide:       "3 slow wall slides",
   elbow_rom:        "3 full bend + straighten reps",
   wrist_rom:        "3 slow wrist flex + extend reps",
@@ -182,6 +185,7 @@ const TEST_LANDMARKS: Record<string, number[]> = {
   hip_abd:     [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER],
   bridge_hold: [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_KNEE, PL.RIGHT_KNEE],
   rotary_stability: [PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_WRIST, PL.RIGHT_WRIST],
+  sl_balance:  [PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_ANKLE],
   wall_slide:  [PL.LEFT_EAR, PL.RIGHT_EAR, PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_HIP, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_HIP],
   elbow_rom:   [PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_WRIST, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_WRIST],
 };
@@ -322,7 +326,7 @@ function Runner() {
     }
   }, [u?.scanSetup?.tibialHeightCm]);
 
-  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "confirm" | "submitting" | "done" | "failed">("setup");
+  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "squat_retry" | "confirm" | "submitting" | "done" | "failed">("setup");
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewedPrompt, setReviewedPrompt] = useState(false);
   const [pendingResults, setPendingResults] = useState<TestResult[] | null>(null);
@@ -334,6 +338,12 @@ function Runner() {
   // Tests the user has explicitly cleared via the pre-test pain gate. A
   // clearing test cannot be captured until this Set contains its id.
   const [clearedTests, setClearedTests] = useState<Set<string>>(new Set());
+  // Heel-elevated squat branching: if the standard Deep Squat scores 1
+  // (cannot reach depth heels flat), we prompt for a heel-elevated retry.
+  // Passing with heels up = score 2 and flags Ankle Mobility. Failing again
+  // = keep score 1 (hip/general mobility). Recorded once per scan so a
+  // subsequent user "re-do" of the squat can't retrigger the prompt.
+  const squatRetryDecidedRef = useRef(false);
   const seq = useMemo(
     () => buildSequence(u?.questionnaire?.joints ?? []),
     [u?.questionnaire?.joints?.join("|")],
@@ -480,12 +490,20 @@ function Runner() {
       stepResultsRef.current.set(test.groupId, bucket);
       const isLastView = test.viewIndex + 1 >= test.totalViews;
       let mergedForFinalize: TestResult | null = null;
+      let stallForSquatRetry = false;
       if (isLastView) {
         const merged = mergeStepResults(bucket);
         mergedForFinalize = merged;
         setResults(r => [...r, merged]);
+        if (merged.id === "squat" && merged.score === 1 && !squatRetryDecidedRef.current) {
+          stallForSquatRetry = true;
+        }
       }
       setTimeout(() => {
+        if (stallForSquatRetry) {
+          setPhase("squat_retry");
+          return;
+        }
         if (idx + 1 >= seq.length) {
           const base = mergedForFinalize ? [...results, mergedForFinalize] : results;
           finalize(base);
@@ -568,6 +586,40 @@ function Runner() {
     stepResultsRef.current = new Map();
     setIdx(0);
     setPhase("intro");
+  }
+
+  /**
+   * Heel-elevated squat branching. Fired from the `squat_retry` phase card
+   * after a Deep Squat that scored 1 with heels flat. Success = the user
+   * reached depth with the towel/book under their heels → upgrade to
+   * score 2 with an "ankle mobility restriction" flag (Fix 6 diagnostic
+   * branch). Failure = keep score 1 (hip/general mobility root cause).
+   * The retry is only offered once per scan.
+   */
+  function resolveSquatRetry(success: boolean) {
+    squatRetryDecidedRef.current = true;
+    const updated: TestResult[] = success
+      ? results.map((r) =>
+          r.id === "squat"
+            ? {
+                ...r,
+                score: 2 as 2,
+                compensations: [
+                  ...(r.compensations ?? []),
+                  "Passed only with heels elevated — ankle mobility restriction is the root cause of the squat failure",
+                ],
+                notes: `${r.notes ?? ""}${r.notes ? " · " : ""}Heel-elevated retry succeeded — flagged for Ankle Mobility`,
+              }
+            : r,
+        )
+      : results;
+    if (success) setResults(updated);
+    if (idx + 1 >= seq.length) {
+      finalize(updated);
+    } else {
+      setIdx((i) => i + 1);
+      setPhase("intro");
+    }
   }
 
   /**
@@ -843,6 +895,40 @@ function Runner() {
               <CheckCircle2 className="mx-auto h-8 w-8" />
               <div className="mt-1 text-lg font-bold">Screen complete</div>
               <p className="text-sm opacity-85">Crunching your scores...</p>
+            </div>
+          )}
+          {phase === "squat_retry" && (
+            <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
+              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-primary">
+                <RotateCcw className="h-4 w-4" /> Diagnostic retest · Heels elevated
+              </div>
+              <h2 className="mt-1 text-xl font-extrabold">Try the squat once more — with heels elevated</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Your deep squat couldn't reach depth with heels flat. This retry tells us whether your ankles are the limit (score improves to 2) or your hips/general mobility are (stays at 1).
+              </p>
+              <ol className="mt-4 space-y-2 text-sm text-foreground/85">
+                <li><strong>1.</strong> Place both heels on the rolled towel or book you set aside during setup (2–3 cm high).</li>
+                <li><strong>2.</strong> Perform the deep squat again. Aim for hip crease at or below the knee.</li>
+                <li><strong>3.</strong> Stand back up and answer below — no camera needed for this retest.</li>
+              </ol>
+              <p className="mt-4 text-base font-bold">Could you reach squat depth with your heels elevated?</p>
+              <div className="mt-3 grid grid-cols-1 gap-2">
+                <button
+                  onClick={() => resolveSquatRetry(true)}
+                  className="flex h-14 items-center justify-center gap-2 rounded-2xl brand-gradient text-base font-bold text-primary-foreground active:scale-[0.99]"
+                >
+                  <CheckCircle2 className="h-5 w-5" /> Yes — I reached depth
+                </button>
+                <button
+                  onClick={() => resolveSquatRetry(false)}
+                  className="flex h-14 items-center justify-center gap-2 rounded-2xl border-2 border-border bg-background text-base font-bold text-foreground active:scale-[0.99]"
+                >
+                  <X className="h-5 w-5" /> No — still couldn't reach depth
+                </button>
+              </div>
+              <p className="mt-3 text-xs text-muted-foreground">
+                Yes = your program will prioritize <strong>Ankle Mobility</strong> work. No = the root cause is likely hip or general mobility — we'll target that instead.
+              </p>
             </div>
           )}
           {(phase === "confirm" || phase === "submitting") && (
@@ -1267,7 +1353,8 @@ function secondaryViewResult(testId: string, name: string, samples: Frame[], val
       break;
     }
     case "hinge":
-    case "balance": {
+    case "balance":
+    case "sl_balance": {
       const shoulderTilts = samples.map(shoulderTilt);
       const hipTilts = samples.map(hipTilt);
       const baseShoulder = shoulderTilts.slice(0, Math.min(5, shoulderTilts.length)).reduce((a, b) => a + b, 0) / Math.min(5, shoulderTilts.length);
@@ -1499,7 +1586,8 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
         notes: `Hip lean L ${Math.round(180 - hipMinL)}° / R ${Math.round(180 - hipMinR)}° · spine Δ ${Math.round(spineLoss)}° · knee flex ${Math.round(kneeFlex)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
       };
     }
-    case "balance": {
+    case "balance":
+    case "sl_balance": {
       // Pelvic-drop angle: deviation of the hip line from horizontal.
       const angles: number[] = [];
       const shoulderTilts: number[] = [];
