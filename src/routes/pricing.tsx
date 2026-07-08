@@ -5,9 +5,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
-import { useUser } from "@/lib/store";
+import { clearLocalAccountData, useUser } from "@/lib/store";
 import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
-import { getStripeEnvironment } from "@/lib/stripe";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -37,6 +37,7 @@ function Pricing() {
     queryFn: () => getScanAccess(),
     enabled: !!u,
     staleTime: 30_000,
+    retry: false,
   });
   const credits = access.data?.credits ?? 0;
 
@@ -68,8 +69,18 @@ function Pricing() {
 
   const paidReturn = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("paid") === "1";
 
-  function handleBuy() {
-    if (!u) { setSignInPromptOpen(true); return; }
+  async function handleBuy() {
+    const { data } = await supabase.auth.getSession();
+    const authUser = data.session?.user;
+    if (!u || !authUser) {
+      clearLocalAccountData();
+      setSignInPromptOpen(true);
+      return;
+    }
+    if (!authUser.email_confirmed_at && !authUser.confirmed_at) {
+      setSignInPromptOpen(true);
+      return;
+    }
     setCheckoutOpen(true);
   }
 
@@ -196,12 +207,12 @@ function Pricing() {
           <DialogHeader>
             <DialogTitle>Sign in required</DialogTitle>
             <DialogDescription>
-              You must sign in to purchase a scan. It only takes a moment — we'll bring you right back here to complete your purchase.
+              You must sign in with a verified email to purchase a scan. It only takes a moment — we'll bring you right back here to complete your purchase.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
             <Button variant="outline" onClick={() => setSignInPromptOpen(false)}>Cancel</Button>
-            <Button onClick={() => { window.location.href = "/?auth=signin"; }}>Sign in</Button>
+            <Button onClick={() => { window.location.href = "/?auth=signin&next=%2Fpricing"; }}>Sign in</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
