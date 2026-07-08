@@ -166,7 +166,7 @@ function Welcome() {
 
               <section className="sm-panel sm-panel-mobile sm-green-border">
                 <div className="sm-eyebrow">Best experience</div>
-                <h2><span>Open</span> on mobile</h2>
+                <h2><span>SMARTY</span> MOVE</h2>
                 <p className="hidden lg:block">
                   For better results, open SmartyMove on your phone. The camera scan is easier,
                   the movement test fits naturally in your space, and your daily training sessions
@@ -180,12 +180,22 @@ function Welcome() {
                 </button>
               </section>
 
-              <section className="sm-panel-score-picture">
-                <div className="sm-score-card">
-                  <div>Movement Score</div>
-                  <strong>72<small>/100</small></strong>
-                  <p>Movement Age 41 · Chronological 47</p>
+              <section className="sm-panel sm-panel-about sm-blue-border">
+                <div className="sm-card-topline"><span /> Assess <IconBubble Icon={Activity} /></div>
+                <h2>Smarty <span>Move</span></h2>
+                <p>
+                  Your pocket movement coach. Turn your phone camera into a movement screen — get
+                  your Movement Score, Movement Age, and a 5-minute daily corrective workout built
+                  around what your body actually needs.
+                </p>
+                <div className="sm-feature-list">
+                  <FeatureLine Icon={Camera} color="#2C99B3" title="Camera-based movement scan" text="Quick guided patterns from your phone or laptop." />
+                  <FeatureLine Icon={ShieldCheck} color="#43AD5C" title="Private by design" text="Pose detection runs on your device — video stays with you." />
+                  <FeatureLine Icon={Clock} color="#FF8A4C" title="5-minute daily routine" text="Simple corrective work for mobility, stability, and strength." />
                 </div>
+                <Link to="/about" className="sm-text-link">
+                  Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
+                </Link>
               </section>
 
               <section className="sm-panel sm-panel-program sm-green-border">
@@ -203,6 +213,15 @@ function Welcome() {
                 </div>
               </section>
 
+              <section className="sm-panel sm-panel-score sm-blue-border">
+                <div className="sm-card-topline"><span /> Score <IconBubble Icon={HeartPulse} /></div>
+                <div className="sm-score-card">
+                  <div>Movement Score</div>
+                  <strong>72<small>/100</small></strong>
+                  <p>Movement Age 41 · Chronological 47</p>
+                </div>
+              </section>
+
               <section className="sm-panel sm-panel-tools sm-blue-border">
                 <div className="sm-card-topline"><span /> Routine <IconBubble Icon={Apple} /></div>
                 <h2>Daily <span>Correctives</span></h2>
@@ -210,24 +229,6 @@ function Welcome() {
                   Mobility, stability, and strength exercises selected from curated coach-built
                   libraries for your body’s top priority areas.
                 </p>
-              </section>
-
-              <section className="sm-panel sm-panel-about sm-blue-border">
-                <div className="sm-card-topline"><span /> Assess <IconBubble Icon={Activity} /></div>
-                <h2>Smarty <span>Move</span></h2>
-                <p>
-                  Your pocket movement coach. Turn your phone camera into a movement screen — get
-                  your Movement Score, Movement Age, and a 5-minute daily corrective workout built
-                  around what your body actually needs.
-                </p>
-                <div className="sm-feature-list sm-about-features">
-                  <FeatureLine Icon={Camera} color="#2C99B3" title="Camera-based movement scan" text="Quick guided patterns from your phone or laptop." />
-                  <FeatureLine Icon={ShieldCheck} color="#43AD5C" title="Private by design" text="Pose detection runs on your device — video stays with you." />
-                  <FeatureLine Icon={Clock} color="#FF8A4C" title="5-minute daily routine" text="Simple corrective work for mobility, stability, and strength." />
-                </div>
-                <Link to="/about" className="sm-text-link">
-                  Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
-                </Link>
               </section>
             </div>
           </>
@@ -592,8 +593,8 @@ function Welcome() {
           }
           .sm-panel-about,
           .sm-panel-program,
+          .sm-panel-score,
           .sm-panel-tools{ min-height: 266px; }
-          .sm-panel-score-picture{ min-height: 266px; }
           .sm-panel-program{ display:flex; flex-direction:column; }
           .sm-panel-program .sm-tile-grid{ flex:1; align-content:stretch; }
           .sm-panel-program .sm-mini-tile{ min-height:44px; font-size:12px; }
@@ -705,11 +706,6 @@ function Welcome() {
             font-size:12px;
             margin-top:8px;
           }
-          .sm-panel-score-picture .sm-score-card{
-            min-height:100%;
-            height:100%;
-            flex:1;
-          }
           @media (max-width: 1023px){
             .sm-wellness-grid{ gap:12px; }
             .sm-panel{ padding:18px; }
@@ -721,11 +717,10 @@ function Welcome() {
             .sm-wellness-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .sm-panel-hero{ grid-column: span 2; }
             .sm-panel-mobile{ grid-column: 3; }
-            .sm-panel-score-picture{ grid-column: 1; grid-row: span 2; min-height: 548px; }
+            .sm-panel-about{ grid-column: 1; grid-row: span 2; min-height: 548px; }
             .sm-panel-program{ grid-column: 2; grid-row: span 2; min-height: 548px; }
             .sm-panel-tools{ grid-column: 3; grid-row: 2; }
-            .sm-panel-about{ grid-column: 3; grid-row: 3; min-height: 266px; }
-            .sm-panel-about .sm-about-features{ display: none; }
+            .sm-panel-score{ grid-column: 3; grid-row: 3; }
           }
         `}</style>
       </main>
