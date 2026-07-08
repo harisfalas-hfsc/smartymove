@@ -3,12 +3,12 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { clearOnboardingDraft, getOnboardingDraft, getUser, restoreUserFromBackend, signInWithEmailProfile, signUpWithEmailProfile } from "@/lib/store";
+import { clearOnboardingDraft, getOnboardingDraft, getUser, restoreUserFromBackend, signInWithEmailProfile, signUpWithEmailProfile, useUser } from "@/lib/store";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff } from "lucide-react";
-import { SmartyCard } from "@/components/SmartyCard";
+import { Eye, EyeOff, Smartphone, Camera, ShieldCheck, Target, Clock, ArrowRight } from "lucide-react";
+import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
 
 export const Route = createFileRoute("/")({
   head: () => ({
