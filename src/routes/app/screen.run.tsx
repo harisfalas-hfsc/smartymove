@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getPoseLandmarker, maybeFallbackToLite, PL } from "@/lib/pose";
-import { angle, CORE_TESTS, CONDITIONAL_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
+import { angle, CORE_TESTS, CONDITIONAL_TESTS, CLEARING_TESTS, computeSession, TEST_GUIDES, TEST_VIEWS } from "@/lib/movement";
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
 import { ChevronLeft, Camera, CheckCircle2, AlertTriangle, AlertCircle, SkipForward, BookOpen, RotateCcw, Pause, Play, X, RotateCw, MoveHorizontal } from "lucide-react";
@@ -101,8 +101,9 @@ const TEST_CAMERA_VIEW: Record<string, "front" | "side"> = {
   overhead: "front",
   ankle_df: "side",
   knee_sld: "front",
-  hip_abd: "front",
+  hip_abd: "side",
   bridge_hold: "side",
+  rotary_stability: "side",
   wall_slide: "side",
   elbow_rom: "front",
 };
@@ -111,18 +112,19 @@ const TEST_CAMERA_VIEW: Record<string, "front" | "side"> = {
 // on the intro screen AND overlaid on the live camera so the user knows
 // exactly what to do without walking back to read small text.
 const REP_PROMPT: Record<string, string> = {
-  squat:       "Give me 3 slow squats",
-  hinge:       "Give me 3 slow hip hinges",
-  balance:     "Balance on each leg for ~5 seconds",
-  lunge:       "1 lunge on each leg",
-  overhead:    "Reach arms overhead, then rotate L + R",
-  ankle_df:    "3 slow knee-to-wall reps each side",
-  knee_sld:    "3 slow step-downs each leg",
-  hip_abd:     "3 slow leg raises each side",
-  bridge_hold: "Hold the bridge ~10 seconds",
-  wall_slide:  "3 slow wall slides",
-  elbow_rom:   "3 full bend + straighten reps",
-  wrist_rom:   "3 slow wrist flex + extend reps",
+  squat:            "Overhead squat — up to 3 slow reps",
+  hinge:            "Give me 3 slow hip hinges",
+  balance:          "Hurdle step — up to 3 slow reps each leg",
+  lunge:            "In-line lunge — up to 3 slow reps each leg",
+  overhead:         "Reach one fist over, the other up the back — both sides",
+  ankle_df:         "3 slow knee-to-wall reps each side",
+  knee_sld:         "3 slow step-downs each leg",
+  hip_abd:          "Straight-leg raise — up to 3 slow reps each leg",
+  bridge_hold:      "1 strict trunk-stability push-up",
+  rotary_stability: "Same-side arm + leg extend, then elbow to knee — each side",
+  wall_slide:       "3 slow wall slides",
+  elbow_rom:        "3 full bend + straighten reps",
+  wrist_rom:        "3 slow wrist flex + extend reps",
 };
 
 // Landmarks required for a frame to count toward the score of each test.
@@ -136,6 +138,7 @@ const TEST_LANDMARKS: Record<string, number[]> = {
   knee_sld:    [PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_ANKLE, PL.RIGHT_ANKLE],
   hip_abd:     [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER],
   bridge_hold: [PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_KNEE, PL.RIGHT_KNEE],
+  rotary_stability: [PL.LEFT_SHOULDER, PL.RIGHT_SHOULDER, PL.LEFT_HIP, PL.RIGHT_HIP, PL.LEFT_KNEE, PL.RIGHT_KNEE, PL.LEFT_WRIST, PL.RIGHT_WRIST],
   wall_slide:  [PL.LEFT_EAR, PL.RIGHT_EAR, PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_HIP, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_HIP],
   elbow_rom:   [PL.LEFT_SHOULDER, PL.LEFT_ELBOW, PL.LEFT_WRIST, PL.RIGHT_SHOULDER, PL.RIGHT_ELBOW, PL.RIGHT_WRIST],
 };
@@ -160,20 +163,9 @@ function expandToSteps(testId: string, name: string, duration: number, condition
   }));
 }
 
-function buildSequence(joints: Joint[]): Step[] {
-  const core = CORE_TESTS.flatMap(t => expandToSteps(t.id, t.name, t.duration));
-  // Wrist test is intentionally excluded from v1 scoring — flagged "Coming
-  // soon" because the wrist landmarks are too small on camera for a reliable
-  // flexion/extension angle on phones. If the user picked wrist as a flagged
-  // joint, we still run their other selected joint's add-on (if any).
-  const cond = joints
-    .filter(j => j !== "none" && j !== "wrist")
-    .slice(0, 2)
-    .flatMap(j => {
-      const c = CONDITIONAL_TESTS[j as keyof typeof CONDITIONAL_TESTS];
-      return expandToSteps(c.id, c.name, 10, true);
-    });
-  return [...core, ...cond];
+function buildSequence(_joints: Joint[]): Step[] {
+  // SmartyMove Scan is a fixed 7-pattern set — no joint-based branching.
+  return CORE_TESTS.flatMap(t => expandToSteps(t.id, t.name, t.duration));
 }
 
 /** Merge per-view step results for a single test into one TestResult. */
