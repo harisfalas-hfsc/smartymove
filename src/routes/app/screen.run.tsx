@@ -921,12 +921,17 @@ function Runner() {
             return (
               <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
                 <div className="text-[11px] font-semibold uppercase tracking-widest text-primary">
-                  Test {groupIndex + 1} of {groupCount}
+                  Recording {cur.stepIndex} of {cur.totalSteps}
+                  {` · Test ${groupIndex + 1} of ${groupCount}`}
                   {cur.totalViews > 1 ? ` · View ${cur.viewIndex + 1} of ${cur.totalViews}` : ""}
                   {" · No timer — press Done when finished"}
                 </div>
                 <div className="mt-0.5 text-xl font-extrabold">
-                  {isReposition ? `${cur.name} — reposition` : cur.name}
+                  {isSideSwitch
+                    ? `${cur.name} — switch to ${cur.side === "right" ? "RIGHT" : "LEFT"} side`
+                    : isReposition
+                      ? `${cur.name} — reposition`
+                      : `${cur.name}${cur.sideLabel ? ` — ${cur.sideLabel}` : ""}`}
                 </div>
                 <div className="mt-3 rounded-2xl bg-primary p-4 text-primary-foreground shadow-lg">
                   <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest opacity-90">
@@ -940,10 +945,17 @@ function Runner() {
                 </div>
                 <div className="mt-3 rounded-2xl border-2 border-primary bg-primary/5 p-4 text-foreground">
                   <div className="text-[11px] font-bold uppercase tracking-widest text-primary">Your task</div>
-                  <div className="mt-1 text-2xl font-black">{REP_PROMPT[cur.testId] ?? "Perform the movement"}</div>
+                  <div className="mt-1 text-2xl font-black">{stepPrompt}</div>
                   <div className="mt-1 text-xs text-muted-foreground">When finished, walk back and press "I'm Done". Your walk back is not scored.</div>
                 </div>
-                {isReposition ? (
+                {isSideSwitch ? (
+                  <div className="mt-4 rounded-2xl bg-warning/15 p-3 text-sm text-foreground">
+                    <div className="font-semibold">Switch sides — now the {cur.side === "right" ? "RIGHT" : "LEFT"} side.</div>
+                    <p className="mt-1 text-muted-foreground">
+                      Same movement, other {cur.testId === "overhead" ? "arm" : "leg"}. We score each side separately and take the lower of the two as the final test score.
+                    </p>
+                  </div>
+                ) : isReposition ? (
                   <div className="mt-4 rounded-2xl bg-secondary/50 p-3 text-sm text-foreground">
                     <div className="font-semibold">Same movement, new camera angle.</div>
                     <p className="mt-1 text-muted-foreground">
