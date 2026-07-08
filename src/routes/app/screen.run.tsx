@@ -1573,6 +1573,20 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
         notes: `ROM L ${Math.round(rangeL)}° / R ${Math.round(rangeR)}° · ext ${Math.round(extension)}°`,
       };
     }
+    case "rotary_stability": {
+      // Placeholder v1 scoring — user will provide final scoring rules.
+      // We accept the pattern as a clean 3 when the camera saw enough valid
+      // frames with real motion (movement gate already ran above). No
+      // angle-based grading is asserted here on purpose.
+      const motion = pointMotion(samples, TEST_LANDMARKS.rotary_stability ?? []);
+      const score: 1 | 2 | 3 = motion >= 0.08 ? 3 : motion >= 0.04 ? 2 : 1;
+      return {
+        id: testId, name, score,
+        metric: Math.round(motion * 1000) / 10,
+        frameValidRatio: Math.round(validRatio * 100) / 100,
+        notes: `Rotary stability captured (motion index ${Math.round(motion * 1000) / 10}). Final scoring rules pending.`,
+      };
+    }
     // wrist_rom intentionally omitted — surfaced as "Coming soon" by being
     // excluded from buildSequence(). Defensive default in case it appears.
     default:
