@@ -20,6 +20,7 @@ const DEMO_IMAGES: Record<string, string> = {
   hip_abd: hipAbdImg.url,
   bridge_hold: bridgeHoldImg.url,
   rotary_stability: rotaryImg.url,
+  sl_balance: balanceImg.url,
 };
 import { updateUser, useUser, type Joint, type TestResult } from "@/lib/store";
 import { consumeScanCredit } from "@/lib/scans.functions";
