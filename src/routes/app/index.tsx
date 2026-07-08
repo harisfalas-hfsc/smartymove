@@ -125,7 +125,7 @@ function Home() {
               <div>
                 <div className="text-xs font-semibold uppercase tracking-widest opacity-80">Start here</div>
                 <div className="mt-1 text-xl font-extrabold">Take your first Movement Screen</div>
-                <div className="mt-1 text-sm opacity-90">~5 minutes • camera-based • on-device</div>
+                <div className="mt-1 text-sm opacity-90">~8 minutes • camera-based • on-device</div>
               </div>
               <ArrowRight className="h-6 w-6" />
             </div>

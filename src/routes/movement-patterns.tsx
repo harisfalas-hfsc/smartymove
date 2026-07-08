@@ -132,7 +132,7 @@ function MovementPatternsPage() {
           <CardContent className="p-6 text-center space-y-3">
             <h2 className="text-xl font-bold text-foreground">Ready to see how you move?</h2>
             <p className="text-sm text-muted-foreground">
-              Prop your phone, follow the prompts, and get your Smarty Movement Score™ in about 5 minutes.
+              Prop your phone, follow the prompts, and get your Smarty Movement Score™ in about 8 minutes.
             </p>
             <Link to="/app/screen">
               <Button size="lg" className="w-full mt-1">
