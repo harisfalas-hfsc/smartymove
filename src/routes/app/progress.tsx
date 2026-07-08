@@ -7,6 +7,8 @@ import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianG
 import { Calendar, TrendingUp, Share2, Lock, AlertCircle, Target, CheckCircle2, Info } from "lucide-react";
 import { evaluateGraduation, recommendSmartyGym } from "@/lib/graduation";
 import { SmartyGymHandoff } from "@/components/SmartyGymHandoff";
+import { TEST_GUIDES } from "@/lib/movement";
+import { ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/app/progress")({ component: Progress });
 
@@ -59,6 +61,27 @@ function Progress() {
               <div className="text-xs text-muted-foreground">Chronological: {u.age}</div>
               <p className="mt-2 text-[11px] text-muted-foreground">Motivational estimate, not a clinical measurement.</p>
             </div>
+          </div>
+        )}
+        {latest?.redFlags && latest.redFlags.length > 0 && (
+          <div className="rounded-3xl border-2 border-destructive/50 bg-destructive/10 p-5 shadow-card">
+            <div className="mb-2 flex items-center gap-2 text-destructive">
+              <ShieldAlert className="h-5 w-5" />
+              <h3 className="text-base font-bold">Pain reported — please read</h3>
+            </div>
+            <p className="mb-3 text-sm text-foreground/90">
+              You reported pain during {latest.redFlags.length === 1 ? "this pattern" : "these patterns"}.
+              We&apos;ve capped the affected sub-scores at 50 and paused loading exercises for the joint areas involved.
+              Please see a qualified clinician before pushing these patterns further.
+            </p>
+            <ul className="space-y-1">
+              {latest.redFlags.map(id => (
+                <li key={id} className="flex items-center gap-2 text-sm font-semibold text-destructive">
+                  <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
+                  {TEST_GUIDES[id]?.name ?? id}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
         {sessions.length >= 2 && (
