@@ -6,6 +6,7 @@ const BRAND_IMAGE_URL =
   "https://smartymove.com/__l5e/assets-v1/55cc1cbc-55bc-4e27-b23e-f04ea9e5e5b4/smartymove-social.png";
 
 const SCAN_LOOKUP_KEY = "smartymove_scan_single";
+const SCAN_UNIT_AMOUNT = 599; // €5.99
 const SCAN_PRODUCT_EXTERNAL_ID = "smartymove_scan";
 const LEGACY_PREMIUM_LOOKUP_KEYS = ["smartymove_premium_monthly", "premium_monthly"];
 
@@ -75,7 +76,7 @@ async function archivePremiumCatalog(stripe: ReturnType<typeof createStripeClien
 async function ensureScanProduct(stripe: ReturnType<typeof createStripeClient>) {
   const existingPrice = await stripe.prices.list({ lookup_keys: [SCAN_LOOKUP_KEY], expand: ["data.product"], limit: 1 });
   if (existingPrice.data.length) {
-    const price = existingPrice.data[0];
+    let price = existingPrice.data[0];
     const productId = typeof price.product === "string" ? price.product : (price.product as any).id;
     const updated = await stripe.products.update(productId, {
       active: true,
@@ -92,7 +93,29 @@ async function ensureScanProduct(stripe: ReturnType<typeof createStripeClient>) 
       },
     });
     if (!price.active) await stripe.prices.update(price.id, { active: true });
-    return { productId: updated.id, priceId: price.id, created: false };
+    // Prices are immutable in Stripe. If the amount changed, archive the old
+    // price (removing its lookup_key first) and create a new one carrying the
+    // canonical lookup_key so checkout picks up the new amount.
+    let repriced = false;
+    if (price.unit_amount !== SCAN_UNIT_AMOUNT || price.currency !== "eur") {
+      await stripe.prices.update(price.id, { lookup_key: null as any, active: false });
+      const newPrice = await stripe.prices.create({
+        active: true,
+        currency: "eur",
+        unit_amount: SCAN_UNIT_AMOUNT,
+        product: updated.id,
+        lookup_key: SCAN_LOOKUP_KEY,
+        transfer_lookup_key: true,
+        metadata: {
+          app: "smartymove",
+          type: "one_time_scan",
+          lovable_external_id: SCAN_LOOKUP_KEY,
+        },
+      } as any);
+      price = newPrice;
+      repriced = true;
+    }
+    return { productId: updated.id, priceId: price.id, created: false, repriced, unitAmount: price.unit_amount };
   }
 
   const product = await stripe.products.create({
@@ -112,7 +135,7 @@ async function ensureScanProduct(stripe: ReturnType<typeof createStripeClient>) 
   const price = await stripe.prices.create({
     active: true,
     currency: "eur",
-    unit_amount: 599,
+    unit_amount: SCAN_UNIT_AMOUNT,
     product: product.id,
     lookup_key: SCAN_LOOKUP_KEY,
     metadata: {
@@ -121,7 +144,7 @@ async function ensureScanProduct(stripe: ReturnType<typeof createStripeClient>) 
       lovable_external_id: SCAN_LOOKUP_KEY,
     },
   });
-  return { productId: product.id, priceId: price.id, created: true };
+  return { productId: product.id, priceId: price.id, created: true, unitAmount: price.unit_amount };
 }
 
 async function sync(env: StripeEnv) {
