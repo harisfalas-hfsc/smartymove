@@ -721,10 +721,11 @@ function Welcome() {
             .sm-wellness-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .sm-panel-hero{ grid-column: span 2; }
             .sm-panel-mobile{ grid-column: 3; }
-            .sm-panel-about{ grid-column: 1; grid-row: span 2; min-height: 548px; }
+            .sm-panel-score-picture{ grid-column: 1; grid-row: span 2; min-height: 548px; }
             .sm-panel-program{ grid-column: 2; grid-row: span 2; min-height: 548px; }
             .sm-panel-tools{ grid-column: 3; grid-row: 2; }
-            .sm-panel-score{ grid-column: 3; grid-row: 3; }
+            .sm-panel-about{ grid-column: 3; grid-row: 3; min-height: 266px; }
+            .sm-panel-about .sm-about-features{ display: none; }
           }
         `}</style>
       </main>
