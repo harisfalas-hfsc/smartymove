@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WhyMovementMattersRouteImport } from './routes/why-movement-matters'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -46,6 +47,11 @@ import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicAdminSyncPremiumRouteImport } from './routes/api/public/admin/sync-premium'
 
+const WhyMovementMattersRoute = WhyMovementMattersRouteImport.update({
+  id: '/why-movement-matters',
+  path: '/why-movement-matters',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/why-movement-matters': typeof WhyMovementMattersRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
@@ -286,6 +293,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/why-movement-matters': typeof WhyMovementMattersRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
@@ -324,6 +332,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/why-movement-matters': typeof WhyMovementMattersRoute
   '/admin/exercises': typeof AdminExercisesRoute
   '/app/profile': typeof AppProfileRoute
   '/app/program': typeof AppProgramRoute
@@ -364,6 +373,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sitemap.xml'
     | '/terms'
+    | '/why-movement-matters'
     | '/admin/exercises'
     | '/app/profile'
     | '/app/program'
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sitemap.xml'
     | '/terms'
+    | '/why-movement-matters'
     | '/admin/exercises'
     | '/app/profile'
     | '/app/program'
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/sitemap.xml'
     | '/terms'
+    | '/why-movement-matters'
     | '/admin/exercises'
     | '/app/profile'
     | '/app/program'
@@ -477,6 +489,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  WhyMovementMattersRoute: typeof WhyMovementMattersRoute
   AdminExercisesRoute: typeof AdminExercisesRoute
   ApiPublicAdminSyncPremiumRoute: typeof ApiPublicAdminSyncPremiumRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -484,6 +497,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/why-movement-matters': {
+      id: '/why-movement-matters'
+      path: '/why-movement-matters'
+      fullPath: '/why-movement-matters'
+      preLoaderRoute: typeof WhyMovementMattersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -834,6 +854,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  WhyMovementMattersRoute: WhyMovementMattersRoute,
   AdminExercisesRoute: AdminExercisesRoute,
   ApiPublicAdminSyncPremiumRoute: ApiPublicAdminSyncPremiumRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
