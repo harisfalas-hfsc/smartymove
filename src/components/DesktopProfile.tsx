@@ -110,9 +110,6 @@ function DesktopProfileInner() {
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw new Error("Please sign in again before managing billing or account data.");
   }
-      setLoading(null);
-    }
-  }
 
   async function downloadAccountData() {
     setLoading("export");
