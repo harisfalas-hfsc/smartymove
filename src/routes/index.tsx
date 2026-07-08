@@ -16,16 +16,20 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
 import {
+  Activity,
+  Apple,
+  CalendarCheck,
   Eye,
   EyeOff,
-  Smartphone,
   Camera,
   ShieldCheck,
-  Target,
+  Dumbbell,
+  HeartPulse,
   Clock,
   ArrowRight,
+  Sparkles,
+  type LucideIcon,
 } from "lucide-react";
-import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -146,246 +150,86 @@ function Welcome() {
         onBack={mode === "intro" ? undefined : () => setMode("intro")}
       />
       <main
-        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "max-w-[420px] lg:max-w-[1196px] lg:px-0" : "max-w-[420px]"}`}
+        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "sm-home-shell max-w-[430px] lg:max-w-[866px] lg:px-0" : "max-w-[420px]"}`}
       >
         {mode === "intro" ? (
           <>
-            <div className="grid gap-8 lg:grid-cols-[560px_minmax(0,1fr)] lg:items-start lg:gap-9 lg:pt-4">
-              <div className="sm-hero-left order-2 lg:order-none lg:col-start-1 lg:row-start-1">
-                <div
-                  className="flex items-center gap-2"
-                  style={{
-                    fontSize: 11,
-                    letterSpacing: ".14em",
-                    textTransform: "uppercase",
-                    color: "#0E7C86",
-                    fontWeight: 700,
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      background: "#FF6B4A",
-                      boxShadow: "0 0 0 3px rgba(255,107,74,0.18)",
-                    }}
-                  />
-                  Movement Diagnostic
-                </div>
-
-                <h1
-                  className="sm-hero-title"
-                  style={{
-                    fontWeight: 800,
-                    fontSize: 32,
-                    lineHeight: 1.05,
-                    letterSpacing: "-0.02em",
-                    margin: "14px 0 16px",
-                  }}
-                >
-                  Know how you move.
-                  <br />
-                  <span style={{ color: "#0E7C86" }}>Move smarter.</span>
+            <div className="sm-wellness-grid">
+              <section className="sm-panel sm-panel-hero sm-blue-border">
+                <div className="sm-eyebrow"><Sparkles className="h-3 w-3" /> Movement diagnostic</div>
+                <h1 className="sm-wellness-title">
+                  <span>Know how</span>
+                  <span>you move.</span>
+                  <span>Move smarter.</span>
                 </h1>
+              </section>
 
-                <p
-                  style={{ fontSize: 15, lineHeight: 1.55, color: "#3B4A63", margin: "4px 0 18px" }}
-                >
-                  <b style={{ color: "#14213A" }}>Your pocket movement coach.</b> Scan your movement
-                  with your camera, get your score, and a 5-minute daily routine built around what
-                  your body actually needs.
+              <section className="sm-panel sm-panel-mobile sm-green-border">
+                <div className="sm-eyebrow">Best experience</div>
+                <h2><span>SMARTY</span> MOVE</h2>
+                <p className="hidden lg:block">
+                  For better results, open SmartyMove on your phone. The camera scan is easier,
+                  the movement test fits naturally in your space, and your daily training sessions
+                  stay with you wherever you are.
                 </p>
-
-                <div className="mb-[22px] flex flex-wrap gap-2">
-                  {["5 core tests", "On-device", "Private by design"].map((p) => (
-                    <span key={p} style={pillStyle}>
-                      <span
-                        style={{ width: 6, height: 6, borderRadius: "50%", background: "#4FB286" }}
-                      />
-                      {p}
-                    </span>
-                  ))}
-                </div>
-
-                {!user && (
-                  <div
-                    className="hidden lg:flex items-start gap-3 rounded-2xl p-3.5"
-                    style={{
-                      background: "#F1F7F8",
-                      border: "1px solid #CDE6EB",
-                      color: "#14213A",
-                      marginBottom: 14,
-                    }}
-                  >
-                    <span
-                      className="grid h-9 w-9 shrink-0 place-items-center rounded-xl"
-                      style={{ background: "#E6F5F5", color: "#0E7C86" }}
-                    >
-                      <Smartphone className="h-4 w-4" />
-                    </span>
-                    <div className="text-sm" style={{ lineHeight: 1.5 }}>
-                      <strong>For the best experience, open SmartyMove on your phone.</strong>
-                      <br />
-                      The camera scan is smoother, the daily routine fits your pocket, and reminders
-                      feel natural on mobile. You can still continue here on desktop if you prefer.
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  onClick={() => navigate({ to: "/onboarding/parq" })}
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    textAlign: "center",
-                    background: "#FF6B4A",
-                    color: "#fff",
-                    fontWeight: 700,
-                    fontSize: 16,
-                    padding: "16px 0",
-                    borderRadius: 16,
-                    border: "none",
-                    boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)",
-                    marginBottom: 14,
-                    cursor: "pointer",
-                  }}
-                  className="sm-hero-cta"
-                >
-                  Get started
+                <p className="lg:hidden">
+                  Scan movement, get your score, and follow your corrective workout from your pocket.
+                </p>
+                <button className="sm-primary-cta" onClick={() => navigate({ to: "/onboarding/parq" })}>
+                  Get started <ArrowRight className="h-4 w-4" />
                 </button>
+              </section>
 
-              </div>
-
-              <div className="sm-hero-right order-1 lg:order-none lg:col-start-2 lg:row-start-1 flex w-full lg:h-auto lg:items-start lg:justify-end lg:pt-[5px]">
-                {/* Scan viewfinder card */}
-                <div
-                  className="relative w-full overflow-hidden sm-hero-card flex flex-col justify-center lg:ml-auto"
-                  style={{
-                    background: "linear-gradient(160deg,#13283A 0%, #0E1D2B 100%)",
-                    borderRadius: 22,
-                    padding: "22px 18px 20px",
-                    color: "#fff",
-                    marginBottom: 0,
-                  }}
-                >
-                  <span
-                    style={cornerStyle({
-                      top: 14,
-                      left: 14,
-                      borderRight: "none",
-                      borderBottom: "none",
-                      borderRadius: "6px 0 0 0",
-                    })}
-                  />
-                  <span
-                    style={cornerStyle({
-                      top: 14,
-                      right: 14,
-                      borderLeft: "none",
-                      borderBottom: "none",
-                      borderRadius: "0 6px 0 0",
-                    })}
-                  />
-                  <span
-                    style={cornerStyle({
-                      bottom: 14,
-                      left: 14,
-                      borderRight: "none",
-                      borderTop: "none",
-                      borderRadius: "0 0 0 6px",
-                    })}
-                  />
-                  <span
-                    style={cornerStyle({
-                      bottom: 14,
-                      right: 14,
-                      borderLeft: "none",
-                      borderTop: "none",
-                      borderRadius: "0 0 6px 0",
-                    })}
-                  />
-                  <span className="sm-scanline" />
-                  <div
-                    className="relative text-center"
-                    style={{ zIndex: 2, padding: "14px 0 6px" }}
-                  >
-                    <div
-                      style={{
-                        fontSize: 11,
-                        letterSpacing: ".14em",
-                        textTransform: "uppercase",
-                        color: "rgba(255,255,255,0.6)",
-                        fontWeight: 700,
-                      }}
-                    >
-                      Movement Score
-                    </div>
-                    <div
-                      className="sm-hero-score"
-                      style={{
-                        fontWeight: 800,
-                        fontSize: 56,
-                        lineHeight: 1,
-                        margin: "4px 0 10px",
-                        letterSpacing: "-0.02em",
-                      }}
-                    >
-                      72
-                      <sup style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", marginLeft: 2 }}>
-                        /100
-                      </sup>
-                    </div>
-                    <div
-                      className="flex items-baseline justify-center gap-1.5"
-                      style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", fontWeight: 500 }}
-                    >
-                      Movement Age <b style={{ color: "#4FB286", fontSize: 15 }}>41</b> ·
-                      Chronological 47
-                    </div>
-                  </div>
+              <section className="sm-panel sm-panel-about sm-blue-border">
+                <div className="sm-card-topline"><span /> Assess <IconBubble Icon={Activity} /></div>
+                <h2>Smarty <span>Move</span></h2>
+                <p>
+                  Your pocket movement coach. Turn your phone camera into a movement screen — get
+                  your Movement Score, Movement Age, and a 5-minute daily corrective workout built
+                  around what your body actually needs.
+                </p>
+                <div className="sm-feature-list">
+                  <FeatureLine Icon={Camera} color="#2C99B3" title="Camera-based movement scan" text="Quick guided patterns from your phone or laptop." />
+                  <FeatureLine Icon={ShieldCheck} color="#43AD5C" title="Private by design" text="Pose detection runs on your device — video stays with you." />
+                  <FeatureLine Icon={Clock} color="#FF8A4C" title="5-minute daily routine" text="Simple corrective work for mobility, stability, and strength." />
                 </div>
-              </div>
+                <Link to="/about" className="sm-text-link">
+                  Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
+                </Link>
+              </section>
 
-              <div className="order-3 lg:order-none lg:col-start-2 lg:row-start-2 w-full">
-                <SmartyCard
-                  Icon={Target}
-                  iconColor="#0E7C86"
-                  iconBg="#E6F5F5"
-                  title="What is SmartyMove?"
-                  subtitle="Your pocket movement coach that scans your body, scores your movement, and builds a daily routine."
-                >
-                  <div className="mt-1 space-y-1">
-                    <SmartyRow
-                      Icon={Camera}
-                      color="#0E7C86"
-                      label="📸 Camera-based movement scan"
-                      sub="8 quick patterns from your phone or laptop."
-                    />
-                    <SmartyRow
-                      Icon={ShieldCheck}
-                      color="#0F766E"
-                      label="🔒 Private by design"
-                      sub="Pose detection runs on your device — video stays with you."
-                    />
-                    <SmartyRow
-                      Icon={Clock}
-                      color="#7A3EBA"
-                      label="⏱ 5-minute daily routine"
-                      sub="Built around your weakest movement patterns."
-                    />
-                  </div>
-                  <div className="mt-4 text-center">
-                    <Link
-                      to="/about"
-                      className="inline-flex items-center gap-1 text-sm font-bold"
-                      style={{ color: "#0E7C86", textDecoration: "none" }}
-                    >
-                      Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </SmartyCard>
-              </div>
+              <section className="sm-panel sm-panel-program sm-green-border">
+                <div className="sm-card-topline"><span /> Train <IconBubble Icon={Dumbbell} /></div>
+                <h2>Movement <span>Workouts</span></h2>
+                <p>
+                  A corrective exercise engine that builds Training Sessions from your real movement
+                  limits — no guessing, no random routines.
+                </p>
+                <div className="sm-tile-grid">
+                  <MiniTile Icon={Activity} label="Screen" color="#38A5C7" />
+                  <MiniTile Icon={Dumbbell} label="Workouts" color="#4FB286" />
+                  <MiniTile Icon={HeartPulse} label="Progress" color="#7A3EBA" />
+                  <MiniTile Icon={CalendarCheck} label="Retest" color="#FF6B4A" />
+                </div>
+              </section>
+
+              <section className="sm-panel sm-panel-score sm-blue-border">
+                <div className="sm-card-topline"><span /> Score <IconBubble Icon={HeartPulse} /></div>
+                <div className="sm-score-card">
+                  <div>Movement Score</div>
+                  <strong>72<small>/100</small></strong>
+                  <p>Movement Age 41 · Chronological 47</p>
+                </div>
+              </section>
+
+              <section className="sm-panel sm-panel-tools sm-blue-border">
+                <div className="sm-card-topline"><span /> Routine <IconBubble Icon={Apple} /></div>
+                <h2>Daily <span>Correctives</span></h2>
+                <p>
+                  Mobility, stability, and strength exercises selected from curated coach-built
+                  libraries for your body’s top priority areas.
+                </p>
+              </section>
             </div>
           </>
         ) : mode === "signup" ? (
@@ -625,33 +469,255 @@ function Welcome() {
         )}
 
         <style>{`
+          .sm-home-shell{
+            position: relative;
+          }
+          .sm-home-shell::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: radial-gradient(circle, rgba(20,33,58,.08) 1px, transparent 1px);
+            background-size: 18px 18px;
+            opacity: .55;
+            z-index: -1;
+          }
+          .sm-wellness-grid{
+            display: grid;
+            gap: 14px;
+          }
+          .sm-panel{
+            background: rgba(255,255,255,.94);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 12px 36px -28px rgba(20,33,58,.45);
+          }
+          .sm-blue-border{ border: 1.5px solid #86D0EF; }
+          .sm-green-border{ border: 1.5px solid #43AD5C; }
+          .sm-eyebrow{
+            width: fit-content;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #A5DDF4;
+            border-radius: 999px;
+            color: #2C99B3;
+            background: #F7FCFE;
+            padding: 4px 9px;
+            font-size: 9px;
+            line-height: 1;
+            text-transform: uppercase;
+            letter-spacing: .18em;
+            font-weight: 800;
+          }
+          .sm-panel h2{
+            color: #10213F;
+            font-size: 24px;
+            line-height: 1.05;
+            font-weight: 900;
+            margin: 16px 0 8px;
+          }
+          .sm-panel h2 span{ color: #2B8FA3; }
+          .sm-panel p{
+            color: #4A5971;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 0;
+          }
+          .sm-panel-hero{
+            min-height: 228px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+          }
+          .sm-wellness-title{
+            margin: 18px 0 0;
+            color: #10213F;
+            font-size: 48px;
+            line-height: .96;
+            font-weight: 900;
+            letter-spacing: 0;
+          }
+          .sm-wellness-title span{ display:block; }
+          .sm-wellness-title span:nth-child(1){ color:#43AD5C; }
+          .sm-wellness-title span:nth-child(2){ color:#2B8FA3; }
+          .sm-panel-mobile{
+            min-height: 228px;
+            display:flex;
+            flex-direction:column;
+            align-items:flex-start;
+          }
+          .sm-panel-mobile .sm-primary-cta{ margin-top:auto; }
+          .sm-primary-cta{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 38px;
+            border: 1px solid #8FD4EA;
+            border-radius: 999px;
+            background: #F7FCFE;
+            color: #1D7E95;
+            padding: 0 16px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 18px -14px rgba(44,153,179,.7);
+          }
+          .sm-card-topline{
+            display:flex;
+            align-items:center;
+            gap: 8px;
+            color:#78BED8;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: .2em;
+            font-weight:800;
+          }
+          .sm-card-topline > span{
+            display:block;
+            width:22px;
+            height:1px;
+            background:#A5DDF4;
+          }
+          .sm-card-icon{
+            margin-left:auto;
+            display:grid;
+            height:28px;
+            width:28px;
+            place-items:center;
+            border-radius: 9px;
+            color:#2C99B3;
+            background:#F0FBFF;
+            border:1px solid #A5DDF4;
+          }
+          .sm-panel-about,
+          .sm-panel-program,
+          .sm-panel-score,
+          .sm-panel-tools{ min-height: 266px; }
+          .sm-feature-list{
+            display:grid;
+            gap:10px;
+            margin-top:18px;
+          }
+          .sm-feature-line{
+            display:grid;
+            grid-template-columns: 32px minmax(0,1fr);
+            gap:10px;
+            align-items:start;
+          }
+          .sm-feature-line-icon,
+          .sm-mini-icon{
+            display:grid;
+            place-items:center;
+            border-radius:10px;
+          }
+          .sm-feature-line-icon{ width:28px; height:28px; }
+          .sm-feature-line strong{
+            display:block;
+            color:#10213F;
+            font-size:12px;
+            line-height:1.25;
+          }
+          .sm-feature-line small{
+            display:block;
+            color:#5F6E84;
+            font-size:11px;
+            line-height:1.3;
+          }
+          .sm-text-link{
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+            color:#1D7E95;
+            text-decoration:none;
+            font-size:12px;
+            font-weight:800;
+            margin-top:18px;
+          }
+          .sm-tile-grid{
+            display:grid;
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            gap:8px;
+            margin-top:18px;
+          }
+          .sm-mini-tile{
+            display:flex;
+            min-width:0;
+            align-items:center;
+            gap:8px;
+            min-height:36px;
+            border:1px solid #E4EEF3;
+            border-radius:10px;
+            background:#fff;
+            padding:6px 8px;
+            color:#10213F;
+            font-size:11px;
+            font-weight:800;
+          }
+          .sm-mini-icon{ width:22px; height:22px; flex:0 0 auto; }
+          .sm-score-card{
+            margin-top:18px;
+            border-radius:14px;
+            background: linear-gradient(160deg,#10213F 0%, #0C1729 100%);
+            color:#fff;
+            min-height:180px;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            text-align:center;
+            overflow:hidden;
+            position:relative;
+          }
+          .sm-score-card::before{
+            content:"";
+            position:absolute;
+            left:16px;
+            right:16px;
+            top:18px;
+            height:3px;
+            border-radius:99px;
+            background:linear-gradient(90deg, transparent, #4FB286 24%, #7CFFB8 50%, #4FB286 76%, transparent);
+            box-shadow:0 0 16px 3px rgba(79,178,134,.72);
+          }
+          .sm-score-card div{
+            color:rgba(255,255,255,.62);
+            font-size:10px;
+            text-transform:uppercase;
+            letter-spacing:.16em;
+            font-weight:800;
+          }
+          .sm-score-card strong{
+            font-size:56px;
+            line-height:1;
+            font-weight:900;
+            margin-top:5px;
+          }
+          .sm-score-card small{
+            color:rgba(255,255,255,.52);
+            font-size:16px;
+          }
+          .sm-score-card p{
+            color:rgba(255,255,255,.78);
+            font-size:12px;
+            margin-top:8px;
+          }
+          @media (max-width: 1023px){
+            .sm-wellness-grid{ gap:12px; }
+            .sm-panel{ padding:18px; }
+            .sm-panel-hero{ min-height:190px; }
+            .sm-wellness-title{ font-size:42px; }
+            .sm-primary-cta{ width:100%; margin-top:18px; min-height:46px; font-size:14px; }
+          }
           @media (min-width: 1024px){
-            .sm-hero-title{ font-size: 40px !important; }
-            .sm-hero-cta{ max-width: 280px !important; }
-            .sm-hero-card{ width: 522px; max-width: 100%; height: 228px; margin-left: auto; margin-right: 0; padding: 28px 28px !important; }
-            .sm-hero-score{ font-size: 84px !important; }
-          }
-          .sm-scanline{
-            position:absolute; left:14px; right:14px; height:3px; top:18px;
-            background:linear-gradient(90deg, transparent, #4FB286 20%, #7CFFB8 50%, #4FB286 80%, transparent);
-            box-shadow:0 0 18px 3px rgba(79,178,134,0.85), 0 0 40px 6px rgba(79,178,134,0.35);
-            border-radius:2px;
-            will-change: transform;
-            transform: translate3d(0,0,0);
-            animation: sm-sweep 2.2s ease-in-out infinite;
-          }
-          @keyframes sm-sweep{
-            0%   { transform: translate3d(0, 0, 0); opacity:.95 }
-            50%  { transform: translate3d(0, 110px, 0); opacity:1 }
-            100% { transform: translate3d(0, 0, 0); opacity:.95 }
-          }
-          @media (min-width: 1024px){
-            .sm-scanline{ animation: sm-sweep-lg 2.6s ease-in-out infinite; }
-            @keyframes sm-sweep-lg{
-              0%   { transform: translate3d(0, 0, 0); opacity:.95 }
-              50%  { transform: translate3d(0, 154px, 0); opacity:1 }
-              100% { transform: translate3d(0, 0, 0); opacity:.95 }
-            }
+            .sm-wellness-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .sm-panel-hero{ grid-column: span 2; }
+            .sm-panel-mobile{ grid-column: 3; }
+            .sm-panel-about{ grid-column: 1; grid-row: span 2; min-height: 548px; }
+            .sm-panel-program{ grid-column: 2; }
+            .sm-panel-score{ grid-column: 3; }
+            .sm-panel-tools{ grid-column: 3; }
           }
         `}</style>
       </main>
@@ -660,29 +726,48 @@ function Welcome() {
   );
 }
 
-function cornerStyle(extra: React.CSSProperties): React.CSSProperties {
-  return {
-    position: "absolute",
-    width: 22,
-    height: 22,
-    border: "2.5px solid rgba(255,255,255,0.55)",
-    ...extra,
-  };
+function IconBubble({ Icon }: { Icon: LucideIcon }) {
+  return (
+    <span className="sm-card-icon">
+      <Icon className="h-4 w-4" strokeWidth={2.2} />
+    </span>
+  );
 }
 
-const pillStyle: React.CSSProperties = {
-  fontSize: 12,
-  fontWeight: 600,
-  letterSpacing: ".01em",
-  padding: "7px 11px",
-  borderRadius: 999,
-  background: "#fff",
-  border: "1px solid #D9E0E2",
-  color: "#3B4A63",
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 6,
-};
+function FeatureLine({
+  Icon,
+  color,
+  title,
+  text,
+}: {
+  Icon: LucideIcon;
+  color: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="sm-feature-line">
+      <span className="sm-feature-line-icon" style={{ background: `${color}18`, color }}>
+        <Icon className="h-4 w-4" strokeWidth={2.4} />
+      </span>
+      <span>
+        <strong>{title}</strong>
+        <small>{text}</small>
+      </span>
+    </div>
+  );
+}
+
+function MiniTile({ Icon, label, color }: { Icon: LucideIcon; label: string; color: string }) {
+  return (
+    <div className="sm-mini-tile">
+      <span className="sm-mini-icon" style={{ background: `${color}18`, color }}>
+        <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
+      </span>
+      <span className="truncate">{label}</span>
+    </div>
+  );
+}
 
 function PasswordField({
   id,
