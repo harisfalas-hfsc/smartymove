@@ -46,13 +46,9 @@ import { SubScoreBar } from "@/components/SubScoreBar";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
-import { cancelPremiumSubscription, createBillingPortalSession } from "@/lib/payments.functions";
-import { getStripeEnvironment } from "@/lib/stripe";
 import { clearLocalAccountData, signOutUser, updateUser, type Goal } from "@/lib/store";
 import { useUserPremium } from "@/lib/useUserPremium";
 
-type PortalResult = { url: string } | { error: string };
-type CancelResult = { ok: true; currentPeriodEnd: string | null } | { error: string };
 type ExportResult = { data: unknown } | { error: string };
 type DeleteResult = { ok: true; canceledSubscriptions: number } | { error: string };
 
@@ -92,9 +88,7 @@ function DesktopProfileInner() {
   const [goal, setGoal] = useState<Goal | undefined>(u?.goal);
   const [saved, setSaved] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState<"portal" | "cancel" | "export" | "delete" | null>(null);
-  const openPortal = useServerFn(createBillingPortalSession);
-  const cancelSubscription = useServerFn(cancelPremiumSubscription);
+  const [loading, setLoading] = useState<"export" | "delete" | null>(null);
   const exportData = useServerFn(exportAccountData);
   const deleteAccount = useServerFn(deleteAccountAndData);
 
@@ -116,43 +110,6 @@ function DesktopProfileInner() {
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw new Error("Please sign in again before managing billing or account data.");
   }
-
-  async function manageSubscription() {
-    setLoading("portal");
-    setMessage(null);
-    try {
-      await requireSession();
-      const result = (await openPortal({
-        data: { environment: getStripeEnvironment(), returnUrl: window.location.href },
-      })) as PortalResult;
-      if ("error" in result) throw new Error(result.error);
-      const portalWindow = window.open(result.url, "_blank", "noopener,noreferrer");
-      if (portalWindow) portalWindow.location.href = result.url;
-      else window.location.assign(result.url);
-      setMessage("Billing portal opened in a new tab. If nothing opened, allow pop-ups for this site.");
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Could not open billing portal");
-    } finally {
-      setLoading(null);
-    }
-  }
-
-  async function cancelPlan() {
-    setLoading("cancel");
-    setMessage(null);
-    try {
-      await requireSession();
-      const result = (await cancelSubscription({
-        data: { environment: getStripeEnvironment() },
-      })) as CancelResult;
-      if ("error" in result) throw new Error(result.error);
-      const date = result.currentPeriodEnd
-        ? new Date(result.currentPeriodEnd).toLocaleDateString()
-        : "the end of the paid period";
-      setMessage(`Cancellation scheduled. Premium stays active until ${date}.`);
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Could not cancel subscription");
-    } finally {
       setLoading(null);
     }
   }
