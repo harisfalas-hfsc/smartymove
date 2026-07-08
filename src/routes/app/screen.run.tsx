@@ -207,6 +207,38 @@ function expandToSteps(testId: string, name: string, duration: number, condition
 }
 
 /**
+ * Per-test, per-side copy for the intro card, running banner and rep
+ * prompt. Only referenced for tests in BILATERAL_TESTS — non-bilateral
+ * tests use their normal `REP_PROMPT` unchanged.
+ */
+const SIDE_COPY: Record<string, { right: { label: string; prompt: string }; left: { label: string; prompt: string } }> = {
+  balance: {
+    right: { label: "Right leg", prompt: "Step over with your RIGHT leg" },
+    left:  { label: "Left leg",  prompt: "Step over with your LEFT leg"  },
+  },
+  lunge: {
+    right: { label: "Right foot forward", prompt: "Lunge with the RIGHT foot forward" },
+    left:  { label: "Left foot forward",  prompt: "Lunge with the LEFT foot forward"  },
+  },
+  overhead: {
+    right: { label: "Right arm overhead", prompt: "RIGHT arm reaches over the top, LEFT arm reaches up from below" },
+    left:  { label: "Left arm overhead",  prompt: "LEFT arm reaches over the top, RIGHT arm reaches up from below" },
+  },
+  hip_abd: {
+    right: { label: "Right leg raise", prompt: "Raise your RIGHT leg — keep it straight" },
+    left:  { label: "Left leg raise",  prompt: "Raise your LEFT leg — keep it straight"  },
+  },
+  rotary_stability: {
+    right: { label: "Right arm + right leg", prompt: "Extend RIGHT arm and RIGHT leg, then elbow-to-knee" },
+    left:  { label: "Left arm + left leg",   prompt: "Extend LEFT arm and LEFT leg, then elbow-to-knee"   },
+  },
+  sl_balance: {
+    right: { label: "Balance right leg", prompt: "Balance on your RIGHT leg — 10-second hold" },
+    left:  { label: "Balance left leg",  prompt: "Balance on your LEFT leg — 10-second hold"  },
+  },
+};
+
+/**
  * Copy shown on the mandatory clearing-test gate that appears before the
  * three FMS clearing patterns. Each answer is Yes / No — pain = score 0
  * and the pattern is skipped; no pain = proceed to the normal intro.
@@ -248,27 +280,52 @@ function clearingPrompt(testId: string): { intro: string; action: string; questi
 
 function _expandToSteps(testId: string, name: string, duration: number, conditional?: boolean): Step[] {
   const views = TEST_VIEWS[testId];
-  if (!views || views.length === 0) {
-    // Fallback to legacy single-view mapping if a test has no view definition.
-    const cv = TEST_CAMERA_VIEW[testId] ?? "front";
-    return [{
-      key: `${testId}:0`, groupId: testId, testId, name, duration, cameraView: cv,
-      viewIndex: 0, totalViews: 1,
-      viewLabel: cv === "side" ? "Side view" : "Front view",
-      viewCue: cv === "side" ? "Stand sideways to the camera." : "Face the camera straight on.",
-      conditional,
-    }];
+  const resolvedViews =
+    views && views.length > 0
+      ? views
+      : [{
+          view: (TEST_CAMERA_VIEW[testId] ?? "front") as "front" | "side",
+          label: (TEST_CAMERA_VIEW[testId] ?? "front") === "side" ? "Side view" : "Front view",
+          cue: (TEST_CAMERA_VIEW[testId] ?? "front") === "side"
+            ? "Stand sideways to the camera."
+            : "Face the camera straight on.",
+          detects: [] as string[],
+        }];
+  const isBilateral = BILATERAL_TESTS.has(testId);
+  const sides: Array<"both" | "right" | "left"> = isBilateral ? ["right", "left"] : ["both"];
+  const totalViews = sides.length * resolvedViews.length;
+  const steps: Step[] = [];
+  for (const side of sides) {
+    for (const v of resolvedViews) {
+      const sideLabel =
+        side === "both" ? "" : (SIDE_COPY[testId]?.[side]?.label ?? (side === "right" ? "Right side" : "Left side"));
+      steps.push({
+        key: `${testId}:${side}:${v.view}`,
+        groupId: testId,
+        testId,
+        name,
+        duration,
+        cameraView: v.view,
+        viewIndex: steps.length,
+        totalViews,
+        viewLabel: v.label,
+        viewCue: v.cue,
+        side,
+        sideLabel,
+        stepIndex: 0,       // set by buildSequence
+        totalSteps: 0,      // set by buildSequence
+        conditional,
+      });
+    }
   }
-  return views.map((v, i) => ({
-    key: `${testId}:${i}`, groupId: testId, testId, name, duration,
-    cameraView: v.view, viewIndex: i, totalViews: views.length,
-    viewLabel: v.label, viewCue: v.cue, conditional,
-  }));
+  return steps;
 }
 
 function buildSequence(_joints: Joint[]): Step[] {
-  // SmartyMove Scan is a fixed 8-pattern set — no joint-based branching.
-  return CORE_TESTS.flatMap(t => expandToSteps(t.id, t.name, t.duration));
+  // SmartyMove Scan is a fixed 9-pattern set — no joint-based branching.
+  // Bilateral tests expand to right-then-left recordings. Total = 23 recordings.
+  const raw = CORE_TESTS.flatMap(t => expandToSteps(t.id, t.name, t.duration));
+  return raw.map((s, i) => ({ ...s, stepIndex: i + 1, totalSteps: raw.length }));
 }
 
 /** Merge per-view step results for a single test into one TestResult. */
