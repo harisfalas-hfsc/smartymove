@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useUser } from "@/lib/store";
 import { useScanDecision } from "@/lib/program";
 import { ScoreRing } from "@/components/ScoreRing";
