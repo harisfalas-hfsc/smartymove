@@ -117,20 +117,6 @@ function Pricing() {
                   You have <strong className="text-foreground">{credits}</strong> scan{credits === 1 ? "" : "s"} available.
                 </p>
               )}
-              {grandfathered && (
-                <div className="space-y-2 rounded-md bg-primary/5 p-3 text-xs text-left">
-                  <div className="flex items-center gap-2 font-semibold text-primary">
-                    <Crown className="h-3.5 w-3.5" /> Legacy monthly subscription
-                  </div>
-                  <p className="text-muted-foreground">
-                    We've moved to a simple pay-per-scan model. Manage or cancel your old monthly subscription anytime.
-                  </p>
-                  <Button variant="outline" size="sm" onClick={handleManage} disabled={portalLoading} className="w-full">
-                    {portalLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : null}
-                    {portalLoading ? "Opening…" : "Manage subscription"}
-                  </Button>
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
