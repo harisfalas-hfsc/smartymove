@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, User as UserIcon, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle } from "lucide-react";
+import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUser } from "@/lib/store";
 
