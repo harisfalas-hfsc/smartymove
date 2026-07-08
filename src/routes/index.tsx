@@ -155,7 +155,7 @@ function Welcome() {
         onBack={mode === "intro" ? undefined : () => setMode("intro")}
       />
       <main
-        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "sm-home-shell max-w-[430px] lg:max-w-[866px] lg:px-0" : "max-w-[420px]"}`}
+        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "sm-home-shell max-w-[430px] lg:max-w-[1240px] lg:px-6" : "max-w-[420px]"}`}
       >
         {mode === "intro" ? (
           <>
@@ -227,6 +227,9 @@ function Welcome() {
                   <MiniTile Icon={HeartPulse} label="Progress" color="#7A3EBA" />
                   <MiniTile Icon={CalendarCheck} label="Retest" color="#FF6B4A" />
                 </div>
+                <Link to="/about" className="sm-text-link">
+                  See how workouts are built <ArrowRight className="h-4 w-4" />
+                </Link>
               </section>
 
               <section className="sm-panel sm-panel-tools sm-border-tools">
@@ -243,6 +246,9 @@ function Welcome() {
                   <FeatureLine Icon={BookOpen} color="#7A3EBA" title="Curated exercise library" text="Coach-built exercises organized by body area and goal." />
                   <FeatureLine Icon={Repeat} color="#38A5C7" title="Evolves with you" text="Your routine updates as your retests show improvement." />
                 </div>
+                <Link to="/about" className="sm-text-link">
+                  Explore the corrective library <ArrowRight className="h-4 w-4" />
+                </Link>
               </section>
             </div>
           </>
