@@ -581,12 +581,12 @@ function Welcome() {
           .sm-wellness-title{
             margin: 14px 0 0;
             color: #10213F;
-            font-size: 44px;
-            line-height: .96;
+            font-size: 32px;
+            line-height: 1.05;
             font-weight: 900;
             letter-spacing: 0;
           }
-          .sm-wellness-title span{ display:block; }
+          .sm-wellness-title span{ display:block; white-space:nowrap; }
           .sm-wellness-title span:nth-child(1){ color:#43AD5C; }
           .sm-wellness-title span:nth-child(2){ color:#2B8FA3; }
           .sm-hero-motto{
@@ -599,6 +599,19 @@ function Welcome() {
             font-weight: 700;
           }
           .sm-hero-motto svg{ color: #2B8FA3; }
+          .sm-read-more-link{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            color: #1D7E95;
+            font-size: 13px;
+            font-weight: 800;
+            text-decoration: none;
+          }
+          .sm-read-more-link:hover{ color: #156578; }
+          .sm-read-more-link svg{ color: #2B8FA3; }
+
           .sm-panel-mobile{
             min-height: 200px;
             display:flex;
