@@ -891,7 +891,6 @@ function Welcome() {
 
             .sm-panel-score-picture{ min-height: 190px; }
             .sm-panel-about,
-            .sm-panel-program,
             .sm-panel-tools{ display: none; }
           }
           @media (min-width: 1024px){
