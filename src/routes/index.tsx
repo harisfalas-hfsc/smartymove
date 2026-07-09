@@ -738,7 +738,6 @@ function Welcome() {
             border:1px solid #A5DDF4;
           }
           .sm-panel-about,
-          .sm-panel-program,
           .sm-panel-tools,
           .sm-panel-score-picture{ min-height: 240px; }
           .sm-panel-about{
@@ -747,10 +746,6 @@ function Welcome() {
           }
           .sm-panel-about .sm-feature-list{ flex: 1 0 auto; }
           .sm-panel-about .sm-text-link{ margin-top: auto; }
-          .sm-panel-program{ display:flex; flex-direction:column; }
-          .sm-panel-program .sm-tile-grid{ flex:1 0 auto; align-content:stretch; }
-          .sm-panel-program .sm-mini-tile{ min-height:40px; font-size:12px; }
-          .sm-panel-program .sm-text-link{ margin-top:auto; }
           .sm-panel-tools{ display:flex; flex-direction:column; }
           .sm-panel-tools .sm-feature-list{ flex:1 0 auto; }
           .sm-panel-tools .sm-text-link{ margin-top:auto; }
