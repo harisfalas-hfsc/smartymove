@@ -34,6 +34,7 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
   ],
   lunge: [
     { view: "side",  label: "Side view",  cue: "Stand sideways with both feet in line on a 2×6 board. Dowel behind your back (head, spine, tailbone touching).", detects: ["front knee tracks over foot", "back knee touches the board behind the front heel", "trunk stays upright"] },
+    { view: "front", label: "Front view", cue: "Now face the camera on the board and repeat the lunge on the same leg.", detects: ["loss of balance", "torso rotation", "front-knee drift (valgus / varus)"] },
   ],
   overhead: [
     { view: "front", label: "Front view", cue: "Face the camera. Make a fist around your thumb on each hand.", detects: ["fist-to-fist distance (target: within one hand length)", "L/R shoulder symmetry"] },
