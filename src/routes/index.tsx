@@ -960,16 +960,6 @@ function FeatureLine({
   );
 }
 
-function MiniTile({ Icon, label, color }: { Icon: LucideIcon; label: string; color: string }) {
-  return (
-    <div className="sm-mini-tile">
-      <span className="sm-mini-icon" style={{ background: `${color}18`, color }}>
-        <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
-      </span>
-      <span className="truncate">{label}</span>
-    </div>
-  );
-}
 
 function PasswordField({
   id,
