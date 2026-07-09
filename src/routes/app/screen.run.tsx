@@ -1910,52 +1910,90 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       };
     }
     case "hip_abd": {
-      let maxL = 0, maxR = 0;
-      // Hip-hike: pelvis tilts up on the lifting side. We track the abduction
-      // angle achieved BEFORE hip-hike begins, not the final leg height.
-      const hipTiltBase = (() => {
-        let s = 0, n = 0;
-        for (let i = 0; i < Math.min(5, samples.length); i++) {
-          const t = hipTilt(samples[i]); s += t; n++;
+      // Active Straight-Leg Raise — supine, side camera view.
+      // Founder spec scoring (moving-leg ankle vs. DOWN-leg landmarks):
+      //   3 = moving ankle rises to or ABOVE the mid-thigh of the down leg
+      //   2 = moving ankle between mid-thigh and knee-joint line of the down leg
+      //   1 = moving ankle stays BELOW the knee-joint line of the down leg
+      // Image coordinates: y increases downward, so "higher" = smaller y.
+      //
+      // Detect the moving leg by which ankle rises furthest above its baseline
+      // (frame-0 average). The other leg is the "down" reference leg.
+      const baseline = (idxs: number[]) => {
+        const n = Math.min(5, samples.length);
+        let sum = 0, count = 0;
+        for (let i = 0; i < n; i++) {
+          for (const id of idxs) { sum += samples[i][id].y; count++; }
         }
-        return n ? s / n : 0;
-      })();
-      let preHikeMaxL = 0, preHikeMaxR = 0;
-      let hipHikeDetected = false;
-      let trunkLeanFrames = 0, abductFrames = 0;
-      for (const s of samples) {
-        const al = abductionAngle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE]);
-        const ar = abductionAngle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE]);
-        if (al > maxL) maxL = al;
-        if (ar > maxR) maxR = ar;
-        const hike = Math.abs(hipTilt(s) - hipTiltBase);
-        if (hike < 4) {
-          if (al > preHikeMaxL) preHikeMaxL = al;
-          if (ar > preHikeMaxR) preHikeMaxR = ar;
-        } else {
-          hipHikeDetected = true;
-        }
-        if (al > 10 || ar > 10) {
-          abductFrames++;
-          if (trunkLeanAngle(s) > 8) trunkLeanFrames++;
-        }
+        return count ? sum / count : 0;
+      };
+      const baseLAnkleY = baseline([PL.LEFT_ANKLE]);
+      const baseRAnkleY = baseline([PL.RIGHT_ANKLE]);
+      let minLAnkleY = Infinity, minRAnkleY = Infinity;
+      let peakLIdx = 0, peakRIdx = 0;
+      for (let i = 0; i < samples.length; i++) {
+        const ly = samples[i][PL.LEFT_ANKLE].y;
+        const ry = samples[i][PL.RIGHT_ANKLE].y;
+        if (ly < minLAnkleY) { minLAnkleY = ly; peakLIdx = i; }
+        if (ry < minRAnkleY) { minRAnkleY = ry; peakRIdx = i; }
       }
-      const r = REFERENCE_RANGES.hip_abd;
-      // Score reflects pre-hike range, per founder spec.
-      const scoreAngle = Math.max(preHikeMaxL, preHikeMaxR);
-      let score = bucketScoreRange(scoreAngle, r.passMin, r.passMax, r.borderlineMin, r.passMax);
-      if (scoreAngle < r.borderlineMin) score = 1;
+      const liftL = baseLAnkleY - minLAnkleY; // positive = rose above start
+      const liftR = baseRAnkleY - minRAnkleY;
+      const movingIsLeft = liftL >= liftR;
+      const peakIdx = movingIsLeft ? peakLIdx : peakRIdx;
+      const peakFrame = samples[peakIdx];
+      const movingAnkleY = movingIsLeft ? minLAnkleY : minRAnkleY;
+      const downHip = movingIsLeft ? peakFrame[PL.RIGHT_HIP] : peakFrame[PL.LEFT_HIP];
+      const downKnee = movingIsLeft ? peakFrame[PL.RIGHT_KNEE] : peakFrame[PL.LEFT_KNEE];
+      const downMidThighY = (downHip.y + downKnee.y) / 2;
+      const downKneeY = downKnee.y;
+      let score: 1 | 2 | 3;
+      if (movingAnkleY <= downMidThighY) score = 3;
+      else if (movingAnkleY <= downKneeY) score = 2;
+      else score = 1;
+
+      // Compensation checks (never gate the score up — only cap it down).
       const comps: string[] = [];
-      if (hipHikeDetected) comps.push("Pelvis hiked up on the lifting side — score reflects the angle before the hip-hike started, not the final leg height");
-      if (abductFrames && trunkLeanFrames / abductFrames > 0.3) { comps.push("Trunk leaned away from the lifting leg to help it rise — that extra height doesn't count"); score = cap(score, 2); }
+      // Moving-leg knee bend at peak: shoulder-hip-knee-ankle should stay
+      // near 180°. Score 3/2 stays valid only if the moving knee stayed
+      // reasonably straight — otherwise cap at 2.
+      const movingKneeAng = movingIsLeft
+        ? angle(peakFrame[PL.LEFT_HIP], peakFrame[PL.LEFT_KNEE], peakFrame[PL.LEFT_ANKLE])
+        : angle(peakFrame[PL.RIGHT_HIP], peakFrame[PL.RIGHT_KNEE], peakFrame[PL.RIGHT_ANKLE]);
+      if (movingKneeAng > 0 && movingKneeAng < 155) {
+        comps.push("Moving-leg knee bent during the raise — some of the height came from bending, not true hamstring range");
+        score = cap(score, 2);
+      }
+      // Down-leg lift-off: the resting leg should stay flat on the floor.
+      // A meaningful reduction in down-hip / down-knee y vs. baseline means
+      // the reference leg came up to help.
+      const downLegRestingY = movingIsLeft ? baseRAnkleY : baseLAnkleY;
+      const downLegPeakAnkleY = movingIsLeft ? peakFrame[PL.RIGHT_ANKLE].y : peakFrame[PL.LEFT_ANKLE].y;
+      if (downLegRestingY - downLegPeakAnkleY > 0.03) {
+        comps.push("The down leg lifted off the floor to help the raise — the opposite leg needs to stay flat");
+        score = cap(score, 2);
+      }
+      // Pelvis rocking (pelvic tilt drift from baseline) — the pelvis
+      // rocking up on the lifting side inflates the apparent height.
+      const baseHipTilt = hipTilt(samples[0]);
+      const peakHipTilt = hipTilt(peakFrame);
+      if (Math.abs(peakHipTilt - baseHipTilt) > 5) {
+        comps.push("Pelvis rocked toward the lifting leg — that pelvic tilt gave extra height that doesn't count as hip range");
+        score = cap(score, 2);
+      }
+
+      // Cross-body proportion metric (0–1): how far above the mid-thigh line
+      // the ankle actually reached, using down-hip y as the "top" reference.
+      const range = Math.max(1e-4, downKneeY - downHip.y);
+      const heightFrac = Math.max(0, (downKneeY - movingAnkleY) / range);
+      const metric = Math.round(heightFrac * 100);
+      const side = movingIsLeft ? "left" : "right";
       return {
         id: testId, name, score,
-        metric: Math.round(scoreAngle),
-        left: Math.round(preHikeMaxL), right: Math.round(preHikeMaxR),
-        asymmetry: asym(preHikeMaxL, preHikeMaxR),
+        metric,
         compensations: comps.length ? comps : undefined,
         frameValidRatio: Math.round(validRatio * 100) / 100,
-        notes: `Pre-hike abduction L ${Math.round(preHikeMaxL)}° / R ${Math.round(preHikeMaxR)}° · final L ${Math.round(maxL)}° / R ${Math.round(maxR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
+        notes: `Raised ${side} leg · moving ankle at ${metric}% of the down leg's thigh-to-knee line (100 = mid-thigh, 0 = knee)${comps.length ? ` · ${comps.join("; ")}` : ""}`,
       };
     }
     case "bridge_hold": {
