@@ -28,10 +28,6 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
   hinge: [
     { view: "side",  label: "Side view",  cue: "Stand sideways to the camera so we can see the line from your head to your hips.", detects: ["spine angle", "true hip flexion", "knee bend compensation"] },
   ],
-  balance: [
-    { view: "front", label: "Front view", cue: "Face the camera, hurdle set at your shin height, dowel across your shoulders.", detects: ["pelvis staying level", "L/R stance leg asymmetry"] },
-    { view: "side",  label: "Side view",  cue: "Now stand sideways so we can see the stepping leg clear the hurdle.", detects: ["forward trunk lean", "hip flexion range", "loss of stance-leg alignment"] },
-  ],
   lunge: [
     { view: "side",  label: "Side view",  cue: "Stand sideways with both feet in line on a 2×6 board. Dowel behind your back (head, spine, tailbone touching).", detects: ["front knee tracks over foot", "back knee touches the board behind the front heel", "trunk stays upright"] },
     { view: "front", label: "Front view", cue: "Now face the camera on the board and repeat the lunge on the same leg.", detects: ["loss of balance", "torso rotation", "front-knee drift (valgus / varus)"] },
@@ -39,38 +35,8 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
   overhead: [
     { view: "front", label: "Front view", cue: "Face the camera. Make a fist around your thumb on each hand.", detects: ["fist-to-fist distance (target: within one hand length)", "L/R shoulder symmetry"] },
   ],
-  ankle_df: [
-    { view: "side",  label: "Side view",  cue: "Kneel sideways to the camera.", detects: ["tibia forward lean", "heel lift"] },
-    { view: "front", label: "Front view", cue: "Now kneel facing the camera.", detects: ["knee collapsing inward (valgus)"] },
-  ],
-  knee_sld: [
-    { view: "front", label: "Front view", cue: "Face the camera on your step.", detects: ["knee valgus", "pelvic drop", "trunk lateral lean"] },
-    { view: "side",  label: "Side view",  cue: "Turn sideways for the second set.", detects: ["trunk forward pitch", "heel rise", "descent control"] },
-  ],
   hip_abd: [
     { view: "side",  label: "Side view",  cue: "Lie on your back with the camera on your side. Arms flat, legs straight, toes up.", detects: ["moving-leg ankle height vs. mid-thigh of the down leg", "opposite-leg staying flat", "loss of neutral pelvis"] },
-  ],
-  bridge_hold: [
-    { view: "side",  label: "Side view",  cue: "Get face-down with hands under your shoulders (men: thumbs at forehead; women: thumbs at chin). Feet together.", detects: ["body rises as one unit — no lag in the hips", "chest/knees leave the floor together", "no lower-back sagging"] },
-  ],
-  rotary_stability: [
-    { view: "side",  label: "Side view",  cue: "Get on all fours over a 2×6 board with your knees under your hips and hands under your shoulders. Extend your same-side arm and leg.", detects: ["arm and leg extend in line with the torso", "touch elbow to knee over the board", "no loss of balance"] },
-  ],
-  sl_balance: [
-    { view: "front", label: "Front view", cue: "Face the camera, arms crossed on your chest, feet under your hips. Lift one foot just off the floor and hold.",
-      detects: ["pelvic drop on the lifted side", "trunk lateral lean", "stance-knee wobble"] },
-    { view: "side",  label: "Side view",  cue: "Now turn sideways so your full profile is visible. Same leg lifted, same 10-second hold.",
-      detects: ["forward trunk pitch (>20° from vertical)", "hip flexion substitution"] },
-  ],
-  wall_slide: [
-    { view: "side",  label: "Side view",  cue: "Stand sideways to the camera against the wall.", detects: ["lumbar arch", "wall contact quality"] },
-    { view: "front", label: "Front view", cue: "Now face the camera against the wall.", detects: ["L/R shoulder height asymmetry"] },
-  ],
-  elbow_rom: [
-    { view: "front", label: "Front view", cue: "Face the camera.", detects: ["range of motion", "upper-arm compensation"] },
-  ],
-  wrist_rom: [
-    { view: "front", label: "Front view", cue: "Face the camera.", detects: ["wrist flexion/extension range (partly self-reported)"] },
   ],
 };
 
@@ -304,36 +270,6 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
       "0": "Any pain in the low back, hips or hamstrings during the movement.",
     },
   },
-  balance: {
-    id: "balance", name: "Hurdle Step",
-    what: "Step one leg over a shin-height hurdle (or string) and touch the heel down on the other side, without losing your posture.",
-    why: "Tests single-leg stability, stride mechanics and hip mobility while a dowel keeps your posture honest.",
-    setup: [
-      "Set a hurdle (or a string between two chairs) at the height of your tibial tuberosity (just below the knee)",
-      "Stand right behind it with your feet together",
-      "Rest a dowel across your shoulders, held in place with both hands",
-    ],
-    steps: [
-      "Slowly raise one leg and step over the hurdle — heel first",
-      "Lightly touch the heel to the floor on the other side without shifting your weight",
-      "Return the leg to the start position under control",
-      "Repeat on the other side",
-    ],
-    mistakes: [
-      "Loss of balance during the step",
-      "Stance-leg hip or knee collapsing inward",
-      "Trunk leaning or twisting to clear the hurdle",
-      "Dowel tilting off horizontal",
-    ],
-    reps: "Up to 3 slow reps each leg",
-    libraryQuery: "hurdle step",
-    scoring: {
-      "3": "Hips, knees and ankles stay aligned. Minimal trunk motion. Dowel and hurdle stay level.",
-      "2": "Movement completes but with visible alignment loss (knee/hip drift, trunk tilt, dowel tilt).",
-      "1": "Contact between the foot and the hurdle, loss of balance, or the step can't be completed.",
-      "0": "Any pain during the step.",
-    },
-  },
   lunge: {
     id: "lunge", name: "In-line Lunge",
     what: "Split-stance lunge with both feet on a narrow line — hold a dowel behind the spine.",
@@ -392,26 +328,6 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
       "0": "Any shoulder pain during the reach (clearing test — forces a 0).",
     },
   },
-  ankle_df: {
-    id: "ankle_df", name: "Ankle Dorsiflexion (knee-to-wall)",
-    what: "From a half-kneel, drive your front knee forward over your toes without letting the heel lift.",
-    why: "Direct test of ankle mobility — the #1 missing range for most runners and lifters.",
-    setup: ["Get into a half-kneel: one foot flat on the floor in front, the other knee on the floor behind", "Position sideways to the camera"],
-    steps: ["Slowly push your front knee forward, past your toes", "Keep your front heel pressed firmly into the floor", "Go as far as you can, then return", "Repeat slowly for 10 seconds"],
-    mistakes: ["Heel lifting off the floor (that's cheating)", "Knee caving inward instead of tracking over the toes"],
-    reps: "Slow reps",
-    libraryQuery: "ankle mobility",
-  },
-  knee_sld: {
-    id: "knee_sld", name: "Single-leg Step-down",
-    what: "Stand on one leg on a low step and slowly lower the other foot toward the floor.",
-    why: "Reveals knee control and hip strength under load on one leg.",
-    setup: ["Stand on a low step (a stair works) facing the camera", "One foot on the step, the other hanging off the edge"],
-    steps: ["Slowly bend the standing knee", "Lightly tap the other heel on the floor", "Push back up — slow and controlled", "Switch legs"],
-    mistakes: ["Standing knee caving inward", "Hip dropping on the lowering side", "Falling fast instead of controlling it"],
-    reps: "Slow reps",
-    libraryQuery: "single leg step down",
-  },
   hip_abd: {
     id: "hip_abd", name: "Active Straight-Leg Raise",
     what: "Lie on your back and raise one straight leg as high as it will go, keeping the other leg flat.",
@@ -439,123 +355,5 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
       "1": "Moving-leg ankle stays below the knee-joint line of the down leg.",
       "0": "Any pain in the hip, low back or hamstring during the raise.",
     },
-  },
-  bridge_hold: {
-    id: "bridge_hold", name: "Trunk Stability Push-Up",
-    what: "From a strict narrow-hand push-up position, press up so the whole body leaves the floor as a single rigid unit.",
-    why: "Tests whether your trunk can transfer force between the upper and lower body without the hips sagging or lagging.",
-    setup: [
-      "Lie face-down. Feet together, toes tucked",
-      "Hands under your shoulders — men: thumbs at forehead line; women: thumbs at chin line",
-      "Knees off the floor, body in one long line",
-      "Camera on your side to catch a sagging low back",
-    ],
-    steps: [
-      "Press up so your body rises as one solid piece — chest and knees leave the floor at the same instant",
-      "Hold the top for a beat, lower under control",
-      "Report if you feel any lower-back or shoulder pain — that clears this pattern to zero",
-    ],
-    mistakes: [
-      "Hips lifting first (or last) — body must move as one unit",
-      "Lower back sagging",
-      "Chest coming up while knees stay on the floor",
-    ],
-    reps: "1 clean rep",
-    libraryQuery: "push up",
-    scoring: {
-      "3": "One clean rep from the men's / women's starting hand position — body rises as one rigid unit, no lag, no sag.",
-      "2": "One clean rep from the easier (chin / clavicle) hand position — same rigid form required.",
-      "1": "Cannot perform a rep in the correct form (hips lag, back sags, or chest/knees leave at different times).",
-      "0": "Any pain in the low back, shoulders or wrists during the push-up (clearing test — forces a 0).",
-    },
-  },
-  rotary_stability: {
-    id: "rotary_stability", name: "Rotary Stability",
-    what: "On all-fours, extend the same-side arm and leg, then bring elbow to knee over a narrow line — without losing balance.",
-    why: "Screens multi-plane trunk stability: whether the core can coordinate an arm and a leg on the same side over a narrow base.",
-    setup: [
-      "Get on all fours over a narrow board or taped line",
-      "Hands directly under shoulders, knees directly under hips",
-      "Toes tucked so they can push the floor",
-    ],
-    steps: [
-      "Extend the right arm straight forward and the right leg straight back — both in line with the torso, over the board",
-      "In one motion, bring the right elbow to the right knee directly over the board",
-      "Extend back out, then return to all fours",
-      "Repeat on the left side",
-      "Report if any pain shows up during the movement — that clears this pattern to zero",
-    ],
-    mistakes: [
-      "Losing balance / dropping off the board",
-      "Arm and leg not staying in line with the torso",
-      "Elbow and knee not touching over the board",
-    ],
-    reps: "1 clean rep each side",
-    libraryQuery: "bird dog",
-    scoring: {
-      "3": "Unilateral (same-side arm + leg) rep: elbow touches knee over the board with no loss of balance, on both sides.",
-      "2": "Diagonal (opposite-side arm + leg) rep: elbow touches knee over the board with no loss of balance, on both sides.",
-      "1": "Cannot perform a diagonal rep, or loses balance during the movement.",
-      "0": "Any pain in the low back, hips or shoulders during the pattern (clearing test — forces a 0).",
-    },
-  },
-  sl_balance: {
-    id: "sl_balance", name: "Single-Leg Balance",
-    what: "Stand on one leg for 10 seconds without pelvic drop, trunk lean, or knee wobble. Test both sides.",
-    why: "Single-leg stance exposes hip stability, ankle strategy and postural control — the base of every gait, sport and injury-prevention program.",
-    setup: [
-      "Face the camera, arms folded across your chest",
-      "Feet under your hips, look straight ahead at a fixed point",
-      "Rear the room so your full body is visible in the frame",
-    ],
-    steps: [
-      "Lift one foot just off the floor (knee softly bent)",
-      "Hold for 10 seconds without touching down or shifting your weight",
-      "Return under control, then repeat on the other leg",
-      "Turn sideways and repeat both legs — the side view catches forward trunk pitch",
-    ],
-    mistakes: [
-      "Pelvis drops on the lifted side (>5° = compensation)",
-      "Trunk leans to the side or pitches forward (>20°)",
-      "Stance knee wobbles or foot has to touch down",
-    ],
-    reps: "10-second hold each leg · both views",
-    libraryQuery: "single leg balance",
-    scoring: {
-      "3": "Full 10-second hold, pelvis level within 5°, trunk stays upright.",
-      "2": "Holds but with pelvic drop 5–10°, trunk lean, or visible knee wobble.",
-      "1": "Balance lost before 10 s, or pelvic drop over 10°.",
-      "0": "Any pain in the stance-leg hip, knee or ankle during the hold.",
-    },
-  },
-  wall_slide: {
-    id: "wall_slide", name: "Scapular Wall Slide",
-    what: "Stand against a wall and slide your forearms up and down without losing contact.",
-    why: "Tests shoulder blade mobility and overhead shoulder range.",
-    setup: ["Stand with your back, head and butt against a wall", "Position sideways to the camera so we can see your arms", "Arms in a 'W' — elbows bent, forearms touching the wall"],
-    steps: ["Slide forearms up the wall toward overhead — keep contact", "Go as high as you can without losing wall contact", "Slide back down to the 'W' position", "Repeat slowly"],
-    mistakes: ["Hands or forearms peeling off the wall", "Lower back arching to fake more range", "Shrugging shoulders to the ears"],
-    reps: "Slow reps",
-    libraryQuery: "wall slide",
-  },
-  elbow_rom: {
-    id: "elbow_rom", name: "Elbow Flex/Extend Range",
-    what: "Bend and straighten your elbows fully through their range.",
-    why: "Quick check on elbow joint range.",
-    setup: ["Stand facing the camera", "Arms out in front of you, palms up"],
-    steps: ["Bend both elbows fully — try to touch your shoulders with your fingers", "Then straighten them completely", "Repeat slowly and fully"],
-    mistakes: ["Stopping short of full bend or full straight"],
-    reps: "Slow reps",
-    libraryQuery: "biceps curl",
-  },
-  wrist_rom: {
-    id: "wrist_rom", name: "Guided Wrist Range Check",
-    what: "Move your wrists through flexion and extension at full range.",
-    why: "Wrist mobility check — note: this is partly self-reported because wrists are small on camera.",
-    setup: ["Stand facing the camera", "Arms straight out in front, palms down"],
-    steps: ["Bend wrists so fingers point up at the ceiling (extension)", "Then bend so fingers point down at the floor (flexion)", "Move slowly through full range"],
-    mistakes: ["Letting elbows bend instead of moving from the wrist"],
-    reps: "Slow reps",
-    libraryQuery: "wrist stretch",
   },
 };
