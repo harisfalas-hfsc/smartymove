@@ -1724,6 +1724,27 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       // detectable.
       const heelRiseL = heelRiseFraction(samples, PL.LEFT_ANKLE);
       const heelRiseR = heelRiseFraction(samples, PL.RIGHT_ANKLE);
+      // Dowel-drop-forward check (side view): at the deepest part of the
+      // descent, the wrists (holding the dowel overhead) should stay
+      // roughly over the midfoot. If the wrist drifts forward of the ankle
+      // by more than ~15% of the hip-shoulder torso length, the dowel is
+      // dropping forward — a classic OH-squat compensation.
+      let dowelDropFrames = 0, deepFrames = 0;
+      for (const s of samples) {
+        const la = angle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE]);
+        const ra = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE], s[PL.RIGHT_ANKLE]);
+        if (Math.min(la, ra) > 130) continue; // only near/at depth
+        deepFrames++;
+        const wristX = (s[PL.LEFT_WRIST].x + s[PL.RIGHT_WRIST].x) / 2;
+        const ankleX = (s[PL.LEFT_ANKLE].x + s[PL.RIGHT_ANKLE].x) / 2;
+        const shoulderY = (s[PL.LEFT_SHOULDER].y + s[PL.RIGHT_SHOULDER].y) / 2;
+        const hipY = (s[PL.LEFT_HIP].y + s[PL.RIGHT_HIP].y) / 2;
+        const torsoLen = Math.max(0.05, Math.abs(hipY - shoulderY));
+        // Side view: forward = away from the mirrored center. We just want
+        // magnitude of drift relative to torso length.
+        if (Math.abs(wristX - ankleX) / torsoLen > 0.35) dowelDropFrames++;
+      }
+      const dowelDropRatio = deepFrames ? dowelDropFrames / deepFrames : 0;
       const r = REFERENCE_RANGES.squat;
       const minA = Math.min(minL, minR);
       let score = bucketScoreMaxOrLess(minA, r.passMax, r.borderlineMax);
@@ -1738,6 +1759,10 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       }
       if (descentFrames && trunkCollapseFrames / descentFrames > 0.2) {
         comps.push("Trunk collapsed forward at the bottom — the spine compensated for tight ankles/hips");
+        score = cap(score, 2);
+      }
+      if (dowelDropRatio > 0.3) {
+        comps.push("Dowel dropped forward at the bottom of the squat — the arms drifted ahead of the midfoot, showing shoulder/thoracic mobility limits");
         score = cap(score, 2);
       }
       return {
