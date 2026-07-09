@@ -13,10 +13,10 @@ const URL = "https://smartymove.com/movement-patterns";
 export const Route = createFileRoute("/movement-patterns")({
   head: () => ({
     meta: [
-      { title: "The 8 Movement Patterns — SmartyMove Methodology" },
-      { name: "description", content: "SmartyMove's camera-based movement screen tests 8 functional patterns — deep squat, hurdle step, in-line lunge, active straight-leg raise, shoulder mobility, trunk stability push-up, rotary stability, and hip-hinge — for full-body mobility, stability, balance, and control." },
-      { property: "og:title", content: "The 8 Movement Patterns — SmartyMove Methodology" },
-      { property: "og:description", content: "Our methodology: 8 functional tests scored by your phone camera for full-body mobility, stability, balance, and control." },
+      { title: "The 5 Movement Patterns — SmartyMove Methodology" },
+      { name: "description", content: "SmartyMove's camera-based movement screen tests 5 functional patterns — deep squat, hip hinge, active straight-leg raise, shoulder mobility, and in-line lunge — for full-body mobility, stability, and control." },
+      { property: "og:title", content: "The 5 Movement Patterns — SmartyMove Methodology" },
+      { property: "og:description", content: "Our methodology: 5 functional tests scored by your phone camera for full-body mobility, stability, and control." },
       { property: "og:url", content: URL },
     ],
     links: [{ rel: "canonical", href: URL }],
@@ -25,14 +25,11 @@ export const Route = createFileRoute("/movement-patterns")({
 });
 
 const patterns = [
-  { n: 1, id: "squat",            Icon: ArrowDownWideNarrow, color: "text-blue-500",    name: "Deep squat",                 tests: "Full-body mobility",        body: "Hips, knees and ankles moving together with upright trunk and overhead shoulders." },
-  { n: 2, id: "balance",          Icon: Footprints,          color: "text-orange-500",  name: "Hurdle step",                tests: "Single-leg stability",      body: "Stride mechanics and pelvis control while stepping over an obstacle." },
-  { n: 3, id: "lunge",            Icon: Activity,            color: "text-purple-500",  name: "In-line lunge",              tests: "Hip / ankle mobility & balance", body: "Split-stance control challenging opposite-side hip and ankle." },
-  { n: 4, id: "hip_abd",          Icon: ArrowUpDown,         color: "text-emerald-500", name: "Active straight-leg raise",  tests: "Hamstring & hip mobility",  body: "Active hip flexion of one leg while the other stays extended and stable." },
-  { n: 5, id: "overhead",         Icon: Dumbbell,            color: "text-cyan-500",    name: "Shoulder mobility",          tests: "Shoulder range & symmetry", body: "Reciprocal shoulder range — reaching up-and-behind vs down-and-behind." },
-  { n: 6, id: "bridge_hold",      Icon: Anchor,              color: "text-pink-500",    name: "Trunk stability push-up",    tests: "Core & anti-extension strength", body: "Symmetrical push-up with the spine holding a rigid line." },
-  { n: 7, id: "rotary_stability", Icon: RotateCw,            color: "text-indigo-500",  name: "Rotary stability",           tests: "Multi-plane core control",  body: "Coordinated arm and leg motion on all fours without rotation of the trunk." },
-  { n: 8, id: "hinge",            Icon: Target,              color: "text-amber-500",   name: "Hip-hinge",                  tests: "Posterior chain pattern",   body: "Bending from the hips with a neutral spine — the foundation of lifting." },
+  { n: 1, id: "squat",    Icon: ArrowDownWideNarrow, color: "text-blue-500",    name: "Deep squat",                tests: "Full-body mobility",             body: "Hips, knees and ankles moving together with upright trunk and overhead shoulders." },
+  { n: 2, id: "hinge",    Icon: Target,              color: "text-amber-500",   name: "Hip hinge",                 tests: "Posterior chain pattern",        body: "Bending from the hips with a neutral spine — the foundation of lifting." },
+  { n: 3, id: "hip_abd",  Icon: ArrowUpDown,         color: "text-emerald-500", name: "Active straight-leg raise", tests: "Hamstring & hip mobility",       body: "Active hip flexion of one leg while the other stays extended and stable." },
+  { n: 4, id: "overhead", Icon: Dumbbell,            color: "text-cyan-500",    name: "Shoulder mobility",         tests: "Shoulder range & symmetry",      body: "Reciprocal shoulder range — reaching up-and-behind vs down-and-behind." },
+  { n: 5, id: "lunge",    Icon: Activity,            color: "text-purple-500",  name: "In-line lunge",             tests: "Hip / ankle mobility & balance", body: "Split-stance control challenging opposite-side hip and ankle." },
 ];
 
 function MovementPatternsPage() {
@@ -48,17 +45,17 @@ function MovementPatternsPage() {
             <div className="text-center space-y-3">
               <ListChecks className="w-12 h-12 text-primary mx-auto" />
               <h1 className="text-2xl font-bold text-foreground">
-                The <span className="text-primary">8 Movement Patterns</span>
+                The <span className="text-primary">5 Movement Patterns</span>
               </h1>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Our methodology: 8 functional tests scored by your phone camera — together they cover full-body{" "}
+                Our methodology: 5 functional tests scored by your phone camera — together they cover full-body{" "}
                 <strong className="text-foreground">mobility</strong>,{" "}
                 <strong className="text-foreground">stability</strong>,{" "}
                 <strong className="text-foreground">balance</strong>, and{" "}
                 <strong className="text-foreground">motor control</strong>.
               </p>
               <Button size="lg" className="w-full mt-2" onClick={() => setOpenId(allIds[0])}>
-                <ListChecks className="w-4 h-4 mr-2" /> Preview all 8 tests
+                <ListChecks className="w-4 h-4 mr-2" /> Preview all 5 tests
               </Button>
               <Link to="/app/screen" className="block">
                 <Button size="lg" variant="outline" className="w-full">
@@ -132,7 +129,7 @@ function MovementPatternsPage() {
           <CardContent className="p-6 text-center space-y-3">
             <h2 className="text-xl font-bold text-foreground">Ready to see how you move?</h2>
             <p className="text-sm text-muted-foreground">
-              Prop your phone, follow the prompts, and get your Smarty Movement Score™ in about 8 minutes.
+              Prop your phone, follow the prompts, and get your Smarty Movement Score™ in about 5 minutes.
             </p>
             <Link to="/app/screen">
               <Button size="lg" className="w-full mt-1">
@@ -148,7 +145,7 @@ function MovementPatternsPage() {
         onClose={() => setOpenId(null)}
         testIds={allIds}
         focusTestId={openId ?? undefined}
-        title="The 8 Movement Patterns"
+        title="The 5 Movement Patterns"
       />
     </div>
   );
