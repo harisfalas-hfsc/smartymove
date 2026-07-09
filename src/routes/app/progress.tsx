@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useUser } from "@/lib/store";
+import type { Joint } from "@/lib/store";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
@@ -9,6 +10,7 @@ import { evaluateGraduation, recommendSmartyGym } from "@/lib/graduation";
 import { SmartyGymHandoff } from "@/components/SmartyGymHandoff";
 import { TEST_GUIDES } from "@/lib/movement";
 import { ProgramHistory } from "@/components/ProgramHistory";
+import { analyzeScan } from "@/lib/corrective/decision";
 
 export const Route = createFileRoute("/app/progress")({ component: Progress });
 
@@ -30,6 +32,17 @@ function Progress() {
   const completedDays = u.programCompletedDays ?? [];
   const fmtDate = (iso: string) =>
     new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+
+  // Plain-language findings + focus assignment for the selected session.
+  // Uses the same decision engine that drives the assigned program.
+  const joints = useMemo<Joint[]>(
+    () => (u.questionnaire?.joints ?? []) as Joint[],
+    [u.questionnaire?.joints],
+  );
+  const selectedDecision = useMemo(
+    () => (selected ? analyzeScan(selected.tests, joints, u.goal) : null),
+    [selected, joints, u.goal],
+  );
 
   return (
     <div className="pb-6">
@@ -190,6 +203,17 @@ function Progress() {
                       : t.score === 2
                         ? "🟡"
                         : "🔴";
+                const sideR = t.sideScores?.right?.score;
+                const sideL = t.sideScores?.left?.score;
+                const hasSides = sideR != null || sideL != null;
+                const weaker =
+                  sideR != null && sideL != null
+                    ? sideR < sideL
+                      ? "right"
+                      : sideL < sideR
+                        ? "left"
+                        : null
+                    : null;
                 const hasDetail = !!(
                   bilateral ||
                   (t.sideScores && (t.sideScores.right || t.sideScores.left)) ||
@@ -201,7 +225,18 @@ function Progress() {
                     <details className="group">
                       <summary className={`flex list-none items-center gap-2 p-3 ${hasDetail ? "cursor-pointer" : "cursor-default"}`}>
                         <span className="text-lg leading-none">{emoji}</span>
-                        <span className="min-w-0 flex-1 truncate text-sm font-semibold">{t.name}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-semibold">{t.name}</div>
+                          {hasSides && (
+                            <div className="mt-0.5 text-[10px] text-muted-foreground">
+                              {scoreLabel} overall
+                              {sideR != null ? ` · Right ${sideR}/3` : ""}
+                              {sideL != null ? ` · Left ${sideL}/3` : ""}
+                              {t.id === "overhead" ? " (estimated)" : ""}
+                              {t.asymmetryFlag ? " · ⚠ Asymmetry detected" : ""}
+                            </div>
+                          )}
+                        </div>
                         {t.id === "overhead" && (
                           <span className="shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">est.</span>
                         )}
@@ -229,11 +264,9 @@ function Progress() {
                                   <span>Left <strong className="text-foreground">{t.sideScores.left.score}/3</strong></span>
                                 )}
                               </div>
-                              {t.asymmetryFlag && (
+                              {t.asymmetryFlag && weaker && (
                                 <div className="rounded-lg bg-warning/10 px-2 py-1.5 font-medium text-warning">
-                                  ⚠️ Your{" "}
-                                  {(t.sideScores.right?.score ?? 3) < (t.sideScores.left?.score ?? 3) ? "right" : "left"}{" "}
-                                  side is weaker. Your program gives it extra work.
+                                  ⚠️ {t.name} asymmetry detected — your {weaker} side needs priority attention.
                                 </div>
                               )}
                             </>
@@ -258,6 +291,71 @@ function Progress() {
               })}
             </ul>
           </div>
+        )}
+
+        {selectedDecision && selectedDecision.findings.length > 0 && (
+          <section className="rounded-3xl bg-card p-5 shadow-card">
+            <h3 className="mb-1 text-base font-bold">🧠 What we found &amp; why it matters</h3>
+            <p className="mb-3 text-[11px] text-muted-foreground">
+              Plain-language explanations for every test that scored below 3.
+            </p>
+            <ul className="space-y-3">
+              {selectedDecision.findings.map((f, i) => (
+                <li key={i} className="rounded-2xl border border-border/60 bg-background/60 p-3">
+                  <div className="flex items-center gap-2">
+                    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${f.severity === "fail" ? "bg-destructive" : "bg-warning"}`} />
+                    <span className="text-xs font-bold text-foreground/90">{f.testName}</span>
+                    <span className={`ml-auto text-[10px] font-semibold uppercase tracking-wide ${f.severity === "fail" ? "text-destructive" : "text-warning"}`}>
+                      {f.severity === "fail" ? "Fail" : "Compensation"}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-xs leading-relaxed text-foreground/90"><strong>What:</strong> {f.what}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground"><strong>Why it matters:</strong> {f.why}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-foreground/80"><strong>Your program:</strong> {f.program}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {selectedDecision && selectedDecision.focuses.length > 0 && (
+          <section className="rounded-3xl bg-card p-5 shadow-card">
+            <h3 className="mb-1 text-base font-bold">🎯 Your assigned focus areas</h3>
+            <p className="mb-3 text-[11px] text-muted-foreground">
+              Root-cause clustered — max 2 focuses, so we fix the driver, not every symptom.
+            </p>
+            <ul className="space-y-3">
+              {selectedDecision.focuses.map((f, idx) => {
+                const reasonTests = Array.from(new Set(f.signals.map((s) => s.testName)));
+                return (
+                  <li key={f.id} className="rounded-2xl border border-border/60 bg-background/60 p-3">
+                    <div className="flex items-start gap-2">
+                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg brand-gradient text-[11px] font-extrabold text-primary-foreground">
+                        {idx + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-extrabold text-foreground">{f.label}</div>
+                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{f.rationale}</p>
+                        <div className="mt-2 text-[10px] text-muted-foreground">
+                          Selected because signals appeared in: <strong className="text-foreground/80">{reasonTests.join(", ")}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            {selectedDecision.otherFindings.length > 0 && (
+              <div className="mt-3 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
+                <div className="mb-1 font-semibold text-foreground/80">Also noted (not primary this cycle):</div>
+                <ul className="space-y-1">
+                  {selectedDecision.otherFindings.map((line, i) => (
+                    <li key={i}>• {line}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </section>
         )}
 
         <ProgramHistory includeCurrent title="🏋️ Training programs" subtitle="Every scan has its own full workout. Open any program to view it again." />
