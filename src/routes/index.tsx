@@ -273,6 +273,9 @@ function Welcome() {
                   <FeatureLine Icon={Target} color="#7A3EBA" title="Personalized priority areas" text="Two focus areas selected from your real movement limits." />
                   <FeatureLine Icon={Repeat} color="#38A5C7" title="Retest every 14 days" text="Track changes and evolve your program as you improve." />
                   <FeatureLine Icon={Monitor} color="#4FB286" title="Works on any screen" text="Phone, tablet, laptop, or desktop — train wherever you are." />
+                  <FeatureLine Icon={LineChartIcon} color="#3B82F6" title="Progress you can see" text="Visual score history and trend insights after each retest." />
+                  <FeatureLine Icon={HeartPulse} color="#E46B5A" title="Built on movement science" text="Rooted in functional screening, not generic fitness trends." />
+                  <FeatureLine Icon={Sparkles} color="#F59E0B" title="Small wins, daily" text="Short, achievable sessions designed to build a lasting habit." />
                 </div>
                 <Link to="/about" className="sm-text-link">
                   Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
