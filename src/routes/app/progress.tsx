@@ -202,6 +202,9 @@ function Progress() {
                       <summary className={`flex list-none items-center gap-2 p-3 ${hasDetail ? "cursor-pointer" : "cursor-default"}`}>
                         <span className="text-lg leading-none">{emoji}</span>
                         <span className="min-w-0 flex-1 truncate text-sm font-semibold">{t.name}</span>
+                        {t.id === "overhead" && (
+                          <span className="shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">est.</span>
+                        )}
                         <span className="shrink-0 text-xs font-bold tabular-nums text-foreground/80">{scoreLabel}</span>
                         {hasDetail && (
                           <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />

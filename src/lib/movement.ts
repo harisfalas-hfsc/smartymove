@@ -34,6 +34,7 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
   ],
   lunge: [
     { view: "side",  label: "Side view",  cue: "Stand sideways with both feet in line on a 2×6 board. Dowel behind your back (head, spine, tailbone touching).", detects: ["front knee tracks over foot", "back knee touches the board behind the front heel", "trunk stays upright"] },
+    { view: "front", label: "Front view", cue: "Now face the camera on the board and repeat the lunge on the same leg.", detects: ["loss of balance", "torso rotation", "front-knee drift (valgus / varus)"] },
   ],
   overhead: [
     { view: "front", label: "Front view", cue: "Face the camera. Make a fist around your thumb on each hand.", detects: ["fist-to-fist distance (target: within one hand length)", "L/R shoulder symmetry"] },
@@ -138,38 +139,36 @@ export function scoreFromRange(value: number, ideal: number, tolerance: number):
 }
 
 export function computeSession(results: TestResult[], conditional: Joint[], age: number): ScreenSession {
-  // Per-test contribution map. Each test only contributes to the dimensions
-  // it can actually measure from the camera. Strength was removed — a
-  // camera movement screen cannot measure strength capacity.
+  // Per-test contribution map for the confirmed 5-test SmartyMove Scan.
+  // Each entry is [subScoreKey, weight]. Shoulder Mobility ("overhead") is
+  // camera-estimated so it contributes to Mobility and Quality at half weight
+  // per the founder spec — the score still counts, but doesn't dominate.
   //
-  //   Mobility  ← hip hinge + overhead + ankle_df (if run) + lunge
-  //   Stability ← single-leg balance + lunge (knee tracking) + hip_abd (if run)
-  //   Balance   ← single-leg balance (both sides)
-  //   Quality   ← squat, hip hinge, overhead (compensation-adjusted scores)
-  const focusMap: Record<string, Array<"mobility" | "stability" | "balance" | "quality">> = {
-    // Per spec: Mobility ← Squat + Hinge + Shoulder Mobility + Active SLR.
-    // Stability ← Single-Leg Balance + Trunk Stability + Rotary Stability.
-    // Balance ← Single-Leg Balance. Quality ← composite of squat/hinge/overhead.
-    squat:       ["mobility", "quality"],
-    hinge:       ["mobility", "quality"],
-    balance:     ["balance", "stability"],
-    lunge:       ["mobility", "stability"],
-    overhead:    ["mobility", "quality"],
-    ankle_df:    ["mobility"],
-    knee_sld:    ["stability"],
-    hip_abd:     ["mobility"],
-    bridge_hold: ["stability"],
-    rotary_stability: ["stability", "quality"],
-    sl_balance:  ["balance", "stability"],
-    wall_slide:  ["mobility"],
-    elbow_rom:   ["mobility"],
-    wrist_rom:   [],
+  //   Mobility  ← OH Squat + Hip Hinge + Active SLR + Shoulder Mobility (0.5) + Inline Lunge
+  //   Stability ← OH Squat + Inline Lunge + Active SLR
+  //   Balance   ← Inline Lunge (lateral control)
+  //   Quality   ← OH Squat + Hip Hinge + Shoulder Mobility (0.5)
+  type SubKey = "mobility" | "stability" | "balance" | "quality";
+  const focusMap: Record<string, Array<[SubKey, number]>> = {
+    squat:    [["mobility", 1], ["stability", 1], ["quality", 1]],
+    hinge:    [["mobility", 1], ["quality", 1]],
+    hip_abd:  [["mobility", 1], ["stability", 1]],
+    overhead: [["mobility", 0.5], ["quality", 0.5]],
+    lunge:    [["mobility", 1], ["stability", 1], ["balance", 1]],
+    // Legacy IDs kept so old sessions still render sub-scores after schema
+    // history rather than blanking out.
+    balance:          [["balance", 1], ["stability", 1]],
+    ankle_df:         [["mobility", 1]],
+    knee_sld:         [["stability", 1]],
+    bridge_hold:      [["stability", 1]],
+    rotary_stability: [["stability", 1], ["quality", 1]],
+    sl_balance:       [["balance", 1], ["stability", 1]],
+    wall_slide:       [["mobility", 1]],
+    elbow_rom:        [["mobility", 1]],
+    wrist_rom:        [],
   };
-  const buckets = {
-    mobility: [] as number[],
-    stability: [] as number[],
-    balance: [] as number[],
-    quality: [] as number[],
+  const buckets: Record<SubKey, Array<{ pct: number; w: number }>> = {
+    mobility: [], stability: [], balance: [], quality: [],
   };
   // Pain-cap flags: if ANY pain-scored (0) test contributes to a bucket,
   // that bucket's final sub-score is capped at 50 — pain is a red flag,
@@ -180,21 +179,31 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
   };
   // Camera-invalid / skipped-for-non-pain tests are still excluded — no
   // reading, no number.
-  const valid = results.filter(r => r.valid !== false);
-  // score 3 → 100, score 2 → 67, score 1 → 33, score 0 (pain) → 0 with cap.
+  // Pain (score 0) is a flag, never a gate. Per founder spec the finding is
+  // included in the average (contributes 0 pct) AND caps the sub-score at 50.
+  // The rest of the scan continues normally regardless of pain reports.
   const scoreToPct = (s: 0 | 1 | 2 | 3) => (s === 3 ? 100 : s === 2 ? 67 : s === 1 ? 33 : 0);
-  for (const r of valid) {
+  for (const r of results) {
+    // Camera-invalid frames (never captured) are still excluded; pain-scored
+    // rows keep `valid: false` today, so treat score-0 rows as painful and
+    // include them, but leave other invalid rows out.
+    const isPain = r.score === 0;
+    if (r.valid === false && !isPain) continue;
     const pct = scoreToPct(r.score);
-    for (const f of focusMap[r.id] ?? []) {
-      buckets[f].push(pct);
-      if (r.score === 0) painInBucket[f] = true;
+    for (const [key, w] of focusMap[r.id] ?? []) {
+      buckets[key].push({ pct, w });
+      if (isPain) painInBucket[key] = true;
     }
   }
   // MIN_CONTRIBUTORS = 1: a single test IS enough for a sub-score. If nothing
   // contributed, the sub-score is marked as -1 ("Insufficient data"). This
   // matches the spec: never show a fake number when we don't have data.
-  const avgOrInsufficient = (a: number[]) =>
-    a.length >= 1 ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : -1;
+  const avgOrInsufficient = (a: Array<{ pct: number; w: number }>) => {
+    if (!a.length) return -1;
+    let ws = 0, sum = 0;
+    for (const { pct, w } of a) { sum += pct * w; ws += w; }
+    return ws > 0 ? Math.round(sum / ws) : -1;
+  };
   const capIfPain = (v: number, painFlag: boolean) =>
     v < 0 ? v : painFlag ? Math.min(v, 50) : v;
   const sub = {
