@@ -1724,6 +1724,27 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       // detectable.
       const heelRiseL = heelRiseFraction(samples, PL.LEFT_ANKLE);
       const heelRiseR = heelRiseFraction(samples, PL.RIGHT_ANKLE);
+      // Dowel-drop-forward check (side view): at the deepest part of the
+      // descent, the wrists (holding the dowel overhead) should stay
+      // roughly over the midfoot. If the wrist drifts forward of the ankle
+      // by more than ~15% of the hip-shoulder torso length, the dowel is
+      // dropping forward — a classic OH-squat compensation.
+      let dowelDropFrames = 0, deepFrames = 0;
+      for (const s of samples) {
+        const la = angle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE]);
+        const ra = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE], s[PL.RIGHT_ANKLE]);
+        if (Math.min(la, ra) > 130) continue; // only near/at depth
+        deepFrames++;
+        const wristX = (s[PL.LEFT_WRIST].x + s[PL.RIGHT_WRIST].x) / 2;
+        const ankleX = (s[PL.LEFT_ANKLE].x + s[PL.RIGHT_ANKLE].x) / 2;
+        const shoulderY = (s[PL.LEFT_SHOULDER].y + s[PL.RIGHT_SHOULDER].y) / 2;
+        const hipY = (s[PL.LEFT_HIP].y + s[PL.RIGHT_HIP].y) / 2;
+        const torsoLen = Math.max(0.05, Math.abs(hipY - shoulderY));
+        // Side view: forward = away from the mirrored center. We just want
+        // magnitude of drift relative to torso length.
+        if (Math.abs(wristX - ankleX) / torsoLen > 0.35) dowelDropFrames++;
+      }
+      const dowelDropRatio = deepFrames ? dowelDropFrames / deepFrames : 0;
       const r = REFERENCE_RANGES.squat;
       const minA = Math.min(minL, minR);
       let score = bucketScoreMaxOrLess(minA, r.passMax, r.borderlineMax);
@@ -1738,6 +1759,10 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       }
       if (descentFrames && trunkCollapseFrames / descentFrames > 0.2) {
         comps.push("Trunk collapsed forward at the bottom — the spine compensated for tight ankles/hips");
+        score = cap(score, 2);
+      }
+      if (dowelDropRatio > 0.3) {
+        comps.push("Dowel dropped forward at the bottom of the squat — the arms drifted ahead of the midfoot, showing shoulder/thoracic mobility limits");
         score = cap(score, 2);
       }
       return {
@@ -1855,6 +1880,16 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       // Shoulder & hip line orientation baselines for rotation detection.
       const shoulderLens: number[] = [];
       const hipLens: number[] = [];
+      // Back-knee-to-board proxy: at the deepest part of the descent, the
+      // lower knee (the "back" knee going down) should approach the ankle
+      // horizontal line (the board sits on the floor). If the lowest knee
+      // stays well above the ankle line, the back knee never touched the
+      // board — a classic FMS in-line lunge fail.
+      let minBackKneeGap = Infinity;
+      // Dowel-off-spine proxy: with the dowel held vertically behind the
+      // back touching head/upper back/tailbone, ear→shoulder→hip should
+      // stay near collinear. Track max deviation from a straight line.
+      let maxSpineBow = 0;
       for (const s of samples) {
         const al = angle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE]);
         const ar = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE], s[PL.RIGHT_ANKLE]);
@@ -1865,6 +1900,23 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
           const midAnkleX = (s[PL.LEFT_ANKLE].x + s[PL.RIGHT_ANKLE].x) / 2;
           if (Math.sign(s[PL.LEFT_KNEE].x - midAnkleX) !== Math.sign(s[PL.LEFT_ANKLE].x - midAnkleX)) valgusLFrames++;
           if (Math.sign(s[PL.RIGHT_KNEE].x - midAnkleX) !== Math.sign(s[PL.RIGHT_ANKLE].x - midAnkleX)) valgusRFrames++;
+          // Back-knee gap: lowest knee y vs. lowest ankle y (proxy for the
+          // board line). Smaller = closer to touching.
+          const lowestKneeY = Math.max(s[PL.LEFT_KNEE].y, s[PL.RIGHT_KNEE].y);
+          const lowestAnkleY = Math.max(s[PL.LEFT_ANKLE].y, s[PL.RIGHT_ANKLE].y);
+          const gap = lowestAnkleY - lowestKneeY; // + = knee above ankle
+          if (gap < minBackKneeGap) minBackKneeGap = gap;
+          // Spine bow: perpendicular distance from mid-shoulder→mid-hip
+          // line to the ear, normalized by torso length.
+          const ear = { x: (s[PL.LEFT_EAR].x + s[PL.RIGHT_EAR].x) / 2, y: (s[PL.LEFT_EAR].y + s[PL.RIGHT_EAR].y) / 2 };
+          const sh = { x: (s[PL.LEFT_SHOULDER].x + s[PL.RIGHT_SHOULDER].x) / 2, y: (s[PL.LEFT_SHOULDER].y + s[PL.RIGHT_SHOULDER].y) / 2 };
+          const hp = { x: (s[PL.LEFT_HIP].x + s[PL.RIGHT_HIP].x) / 2, y: (s[PL.LEFT_HIP].y + s[PL.RIGHT_HIP].y) / 2 };
+          const torsoLen = Math.hypot(sh.x - hp.x, sh.y - hp.y) || 1e-4;
+          // signed distance of ear from shoulder-hip line
+          const num = Math.abs((hp.y - sh.y) * ear.x - (hp.x - sh.x) * ear.y + hp.x * sh.y - hp.y * sh.x);
+          const den = Math.hypot(hp.y - sh.y, hp.x - sh.x) || 1e-4;
+          const bow = (num / den) / torsoLen;
+          if (bow > maxSpineBow) maxSpineBow = bow;
         }
         const sLen = Math.hypot(s[PL.LEFT_SHOULDER].x - s[PL.RIGHT_SHOULDER].x, s[PL.LEFT_SHOULDER].y - s[PL.RIGHT_SHOULDER].y);
         const hLen = Math.hypot(s[PL.LEFT_HIP].x - s[PL.RIGHT_HIP].x, s[PL.LEFT_HIP].y - s[PL.RIGHT_HIP].y);
@@ -1891,6 +1943,16 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       if (descentFrames && valgusRFrames / descentFrames > 0.25) { comps.push("Right front knee drifted inward (valgus)"); score = cap(score, 2); }
       if (heelRiseL > 0.15 || heelRiseR > 0.15) { comps.push("Front heel lifted — depth was bought from limited ankle mobility, not real range"); score = cap(score, 2); }
       if (shoulderRotation > 0.4 || hipRotation > 0.4) { comps.push("You rotated your torso/hips toward the camera to reach further — that invalidates the depth reading"); score = cap(score, 2); }
+      // Back-knee-to-board (only meaningful for the in-line lunge).
+      if (testId === "lunge" && Number.isFinite(minBackKneeGap) && minBackKneeGap > 0.08) {
+        comps.push("Back knee didn't reach the board behind the front heel — depth stopped short of the FMS target");
+        score = cap(score, 2);
+      }
+      // Dowel-off-spine proxy (only meaningful for the in-line lunge).
+      if (testId === "lunge" && maxSpineBow > 0.18) {
+        comps.push("Torso leaned forward — the dowel behind your back lost contact with your head/upper back/tailbone");
+        score = cap(score, 2);
+      }
       return {
         id: testId, name, score,
         metric: Math.round(minK),
@@ -1907,6 +1969,14 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       // (lumbar arch ~ trunk lean > 10° during peak overhead reach).
       let maxL = 0, maxR = 0;
       let archFrames = 0, peakFrames = 0;
+      // Fist-to-fist distance (Shoulder Mobility test proper). We measure
+      // the peak (minimum) wrist-to-wrist distance across the window and
+      // normalize by hand-length proxy = shoulderWidth / 2.
+      //   ≤ 1.0 hand-length → score 3
+      //   ≤ 1.5 hand-lengths → score 2
+      //   otherwise → score 1
+      // The peak shoulder-flexion angle stays as a secondary metric.
+      let minFistDistHands = Infinity;
       // Shoulder shrug baseline (shoulder.y - ear.y at rest). When the user
       // shrugs, shoulder rises toward the ear and this gap shrinks.
       const shoulderEarBase = (() => {
@@ -1929,11 +1999,36 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
           const g = shoulderEarGap(s);
           if (g > 0 && g < minShoulderEarGap) minShoulderEarGap = g;
         }
+        // Fist-to-fist: only meaningful for the shoulder mobility test.
+        if (testId === "overhead") {
+          const shoulderW = Math.hypot(
+            s[PL.LEFT_SHOULDER].x - s[PL.RIGHT_SHOULDER].x,
+            s[PL.LEFT_SHOULDER].y - s[PL.RIGHT_SHOULDER].y,
+          );
+          const handLen = shoulderW / 2; // proxy: 1 hand ≈ half shoulder width
+          if (handLen > 1e-4) {
+            const fistDist = Math.hypot(
+              s[PL.LEFT_WRIST].x - s[PL.RIGHT_WRIST].x,
+              s[PL.LEFT_WRIST].y - s[PL.RIGHT_WRIST].y,
+            );
+            const inHands = fistDist / handLen;
+            if (inHands < minFistDistHands) minFistDistHands = inHands;
+          }
+        }
       }
       const shrugLoss = shoulderEarBase > 0 ? (shoulderEarBase - minShoulderEarGap) / shoulderEarBase : 0;
       const r = testId === "wall_slide" ? REFERENCE_RANGES.wall_slide : REFERENCE_RANGES.overhead;
       const maxArm = Math.max(maxL, maxR);
       let score = bucketScoreMaxOrEqual(maxArm, r.passMin, r.borderlineMin);
+      // For Shoulder Mobility, the fist-to-fist distance IS the FMS score —
+      // override the angle-based reading with the direct measurement when
+      // we have a clean number.
+      if (testId === "overhead" && Number.isFinite(minFistDistHands)) {
+        const fistScore: 1 | 2 | 3 =
+          minFistDistHands <= 1.0 ? 3 :
+          minFistDistHands <= 1.5 ? 2 : 1;
+        score = fistScore;
+      }
       const comps: string[] = [];
       if (peakFrames && archFrames / peakFrames > 0.3) {
         comps.push("Lower back arched to get the arms overhead — the range came from the spine, not the shoulder");
@@ -1945,12 +2040,16 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       }
       return {
         id: testId, name, score,
-        metric: Math.round(maxArm),
+        metric: testId === "overhead" && Number.isFinite(minFistDistHands)
+          ? Math.round(minFistDistHands * 10) / 10
+          : Math.round(maxArm),
         left: Math.round(maxL), right: Math.round(maxR),
         asymmetry: asym(maxL, maxR),
         compensations: comps.length ? comps : undefined,
         frameValidRatio: Math.round(validRatio * 100) / 100,
-        notes: `Max arm angle L ${Math.round(maxL)}° / R ${Math.round(maxR)}° · asym ${asym(maxL, maxR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
+        notes: testId === "overhead" && Number.isFinite(minFistDistHands)
+          ? `Fist-to-fist ≈ ${(Math.round(minFistDistHands * 10) / 10).toFixed(1)} hand-lengths (side view) · arm angle L ${Math.round(maxL)}° / R ${Math.round(maxR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`
+          : `Max arm angle L ${Math.round(maxL)}° / R ${Math.round(maxR)}° · asym ${asym(maxL, maxR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
       };
     }
     case "ankle_df": {
