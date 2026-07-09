@@ -141,6 +141,7 @@ function Pricing() {
           </CardContent>
         </Card>
 
+      </main>
 
       {/* DESKTOP — SmartyDiet-inspired layout */}
       <main className="hidden lg:block flex-1 w-full">
