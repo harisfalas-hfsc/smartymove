@@ -270,36 +270,6 @@ export const TEST_GUIDES: Record<string, TestGuide> = {
       "0": "Any pain in the low back, hips or hamstrings during the movement.",
     },
   },
-  balance: {
-    id: "balance", name: "Hurdle Step",
-    what: "Step one leg over a shin-height hurdle (or string) and touch the heel down on the other side, without losing your posture.",
-    why: "Tests single-leg stability, stride mechanics and hip mobility while a dowel keeps your posture honest.",
-    setup: [
-      "Set a hurdle (or a string between two chairs) at the height of your tibial tuberosity (just below the knee)",
-      "Stand right behind it with your feet together",
-      "Rest a dowel across your shoulders, held in place with both hands",
-    ],
-    steps: [
-      "Slowly raise one leg and step over the hurdle — heel first",
-      "Lightly touch the heel to the floor on the other side without shifting your weight",
-      "Return the leg to the start position under control",
-      "Repeat on the other side",
-    ],
-    mistakes: [
-      "Loss of balance during the step",
-      "Stance-leg hip or knee collapsing inward",
-      "Trunk leaning or twisting to clear the hurdle",
-      "Dowel tilting off horizontal",
-    ],
-    reps: "Up to 3 slow reps each leg",
-    libraryQuery: "hurdle step",
-    scoring: {
-      "3": "Hips, knees and ankles stay aligned. Minimal trunk motion. Dowel and hurdle stay level.",
-      "2": "Movement completes but with visible alignment loss (knee/hip drift, trunk tilt, dowel tilt).",
-      "1": "Contact between the foot and the hurdle, loss of balance, or the step can't be completed.",
-      "0": "Any pain during the step.",
-    },
-  },
   lunge: {
     id: "lunge", name: "In-line Lunge",
     what: "Split-stance lunge with both feet on a narrow line — hold a dowel behind the spine.",
