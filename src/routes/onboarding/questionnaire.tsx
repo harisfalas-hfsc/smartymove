@@ -13,17 +13,17 @@ const PAINS: { v: Pain; label: string }[] = [
   { v: "severe",   label: "Severe" },
 ];
 
-// Body areas mapped to the 8 SmartyMove patterns. If the user reports pain
+// Body areas mapped to the 5 SmartyMove patterns. If the user reports pain
 // in any of these, the scan still runs (Option A) — the program engine uses
 // this list to add caution notes / avoid loading painful areas.
 const PAIN_AREAS: { v: PainArea; label: string; hint: string }[] = [
-  { v: "neck",             label: "Neck",                 hint: "Overhead reach, push-up" },
-  { v: "shoulders",        label: "Shoulders",            hint: "Shoulder mobility, push-up, rotary" },
-  { v: "low_back",         label: "Low back",             hint: "Squat, hinge, push-up, rotary" },
+  { v: "neck",             label: "Neck",                 hint: "Shoulder mobility" },
+  { v: "shoulders",        label: "Shoulders",            hint: "Shoulder mobility" },
+  { v: "low_back",         label: "Low back",             hint: "Squat, hinge, straight-leg raise" },
   { v: "hips",             label: "Hips / groin",         hint: "Squat, hinge, lunge, leg raise" },
-  { v: "knees",            label: "Knees",                hint: "Squat, hurdle step, lunge" },
-  { v: "ankles_feet",      label: "Ankles / feet",        hint: "Squat, hurdle step, lunge" },
-  { v: "wrists_elbows",    label: "Wrists / elbows",      hint: "Push-up, rotary stability" },
+  { v: "knees",            label: "Knees",                hint: "Squat, lunge" },
+  { v: "ankles_feet",      label: "Ankles / feet",        hint: "Squat, lunge" },
+  { v: "wrists_elbows",    label: "Wrists / elbows",      hint: "Shoulder mobility" },
 ];
 
 function Page() {
