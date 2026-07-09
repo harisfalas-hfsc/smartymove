@@ -801,27 +801,6 @@ function Welcome() {
             font-weight:800;
             margin-top:18px;
           }
-          .sm-tile-grid{
-            display:grid;
-            grid-template-columns: minmax(0,1fr);
-            gap:8px;
-            margin-top:18px;
-          }
-          .sm-mini-tile{
-            display:flex;
-            min-width:0;
-            align-items:center;
-            gap:8px;
-            min-height:36px;
-            border:1px solid #E4EEF3;
-            border-radius:10px;
-            background:#fff;
-            padding:6px 8px;
-            color:#10213F;
-            font-size:11px;
-            font-weight:800;
-          }
-          .sm-mini-icon{ width:22px; height:22px; flex:0 0 auto; }
           .sm-score-card{
             margin-top:18px;
             border-radius:14px;
