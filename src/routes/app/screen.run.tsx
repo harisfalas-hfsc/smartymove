@@ -749,6 +749,43 @@ function Runner() {
   }
 
   /**
+   * Shoulder-mobility self-report resolver. The camera measures
+   * fist-to-fist proximity indirectly (peak shoulder-flexion angle); this
+   * asks the user to self-report the actual fist gap in hand-lengths and
+   * blends the two 50/50 per founder spec. Blend rounds up to prefer the
+   * kinder score when the two disagree by exactly one.
+   */
+  function resolveShoulderSelfReport(selfScore: 1 | 2 | 3 | null) {
+    const merged = pendingOverheadRef.current;
+    pendingOverheadRef.current = null;
+    if (!merged) return;
+    let blended = merged;
+    if (selfScore != null) {
+      const cameraScore = merged.score as 1 | 2 | 3;
+      const avg = (cameraScore + selfScore) / 2;
+      const blendedScore = Math.round(avg) as 1 | 2 | 3;
+      const comps = [
+        ...(merged.compensations ?? []),
+        `Self-reported fist gap = ${selfScore === 3 ? "within one hand-length (score 3)" : selfScore === 2 ? "within 1.5 hand-lengths (score 2)" : "greater than 1.5 hand-lengths (score 1)"} · camera scored ${cameraScore} · blended ${blendedScore}`,
+      ];
+      blended = {
+        ...merged,
+        score: blendedScore,
+        compensations: comps,
+        notes: `${merged.notes ?? ""}${merged.notes ? " · " : ""}Blended camera (${cameraScore}) with self-report (${selfScore}) → ${blendedScore}`,
+      };
+    }
+    const updated = [...results, blended];
+    setResults(updated);
+    if (idx + 1 >= seq.length) {
+      finalize(updated);
+    } else {
+      setIdx((i) => i + 1);
+      setPhase("intro");
+    }
+  }
+
+  /**
    * Clearing-test pain gate. Called from the intro card before the pattern
    * runs. Records the test as score 0 / invalid (per FMS spec) and skips
    * ahead to the next group — no camera capture, no wasted rep.
