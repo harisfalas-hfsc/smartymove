@@ -214,11 +214,13 @@ function Welcome() {
         onBack={mode === "intro" ? undefined : () => setMode("intro")}
       />
       <main
-        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "sm-home-shell lg:flex lg:flex-col max-w-[430px] lg:max-w-[1240px] lg:px-6" : "max-w-[420px]"}`}
+        className={`mx-auto w-full flex-1 pb-6 pt-5 ${mode === "intro" ? "px-5 max-w-[430px] lg:max-w-[1080px] lg:px-6 lg:pt-16 lg:pb-20" : "px-5 max-w-[420px]"}`}
       >
         {mode === "intro" ? (
-          <div className="lg:flex lg:flex-col lg:flex-1 lg:min-h-0">
-            <div className="sm-wellness-grid lg:flex-1 lg:min-h-0">
+          <>
+          {/* MOBILE — untouched wellness grid */}
+          <div className="lg:hidden">
+            <div className="sm-wellness-grid">
               <section className="sm-panel sm-panel-hero sm-border-hero">
                 <div className="sm-eyebrow"><Sparkles className="h-3 w-3" /> Movement diagnostic</div>
                 <h1 className="sm-wellness-title">
@@ -304,6 +306,97 @@ function Welcome() {
               </section>
             </div>
           </div>
+
+          {/* DESKTOP — SmartyDiet-inspired layout */}
+          <div className="hidden lg:block">
+            <div className="text-center">
+              <div className="mx-auto grid place-items-center h-20 w-20 text-primary">
+                <Activity className="h-16 w-16" strokeWidth={1.8} />
+              </div>
+              <h1 className="mt-6 text-[52px] leading-[1.05] font-extrabold tracking-tight text-[#0f172a]">
+                Know how you move, <br />
+                <span className="text-primary">move smarter.</span>
+              </h1>
+              <p className="mt-6 text-lg text-slate-500 max-w-2xl mx-auto">
+                Run a camera-based Movement Screen. Get your Movement Score, Movement Age, and a personalized 2-week corrective program — built around your real mobility limits.
+              </p>
+              <div className="mt-8 flex items-center justify-center gap-3">
+                <button
+                  onClick={() => navigate({ to: "/onboarding/parq" })}
+                  className="h-12 px-8 rounded-full bg-primary text-primary-foreground text-base font-bold hover:opacity-95"
+                >
+                  Get started
+                </button>
+                <Link
+                  to="/about"
+                  className="h-12 px-8 rounded-full border-2 border-primary text-primary text-base font-bold inline-flex items-center hover:bg-primary/5"
+                >
+                  How it works
+                </Link>
+              </div>
+              <p className="mt-4 text-sm text-slate-400">One-time €9.99 per scan. No subscription.</p>
+            </div>
+
+            {/* Big framed card: How it works */}
+            <div className="mt-14 rounded-[32px] border-2 border-primary bg-white p-12">
+              <div className="flex items-center gap-4">
+                <div className="flex-1 inline-flex items-center gap-3 rounded-full border-2 border-primary/40 px-6 py-3">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <span className="text-[11px] font-extrabold tracking-[0.28em] uppercase text-primary">HOW IT WORKS</span>
+                </div>
+                <div className="grid place-items-center h-14 w-14 rounded-full border-2 border-primary/40 bg-primary/5">
+                  <Sparkles className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+
+              <h2 className="mt-10 text-[34px] leading-tight font-extrabold text-[#0f172a]">
+                From scan <span className="text-primary">to program.</span>
+              </h2>
+              <p className="mt-3 text-slate-500">Three steps. One payment. No subscription.</p>
+
+              <div className="mt-10 grid grid-cols-3 gap-10">
+                <div className="text-center">
+                  <div className="text-[64px] leading-none font-extrabold text-orange-500">1</div>
+                  <div className="mt-3 text-lg font-bold text-[#0f172a]">Scan</div>
+                  <p className="mt-1 text-sm text-slate-500">Run the 5-pattern Movement Screen with any camera.</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-[64px] leading-none font-extrabold text-blue-500">2</div>
+                  <div className="mt-3 text-lg font-bold text-[#0f172a]">Score</div>
+                  <p className="mt-1 text-sm text-slate-500">Get your Movement Score, Movement Age, and priority areas.</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-[64px] leading-none font-extrabold text-emerald-500">3</div>
+                  <div className="mt-3 text-lg font-bold text-[#0f172a]">Train</div>
+                  <p className="mt-1 text-sm text-slate-500">Follow a personalized 5-min daily corrective program.</p>
+                </div>
+              </div>
+
+              <div className="mt-12 border-t border-slate-200 pt-10">
+                <h3 className="text-center text-2xl font-extrabold text-[#0f172a]">What's included</h3>
+                <div className="mt-6 grid grid-cols-2 gap-x-10 gap-y-4">
+                  {[
+                    { Icon: Camera, label: "Camera movement scan" },
+                    { Icon: Sparkles, label: "Movement Score & Movement Age" },
+                    { Icon: Target, label: "Personalized focus areas" },
+                    { Icon: Clock, label: "5-minute daily corrective routine" },
+                    { Icon: Repeat, label: "Retest every 14 days" },
+                    { Icon: LineChartIcon, label: "Progress history you keep forever" },
+                    { Icon: BookOpen, label: "Curated coach-built exercise library" },
+                    { Icon: ShieldCheck, label: "Private by design — runs on your device" },
+                  ].map(({ Icon, label }) => (
+                    <div key={label} className="flex items-center gap-3">
+                      <span className="grid place-items-center h-8 w-8 rounded-full border-2 border-primary/40 bg-primary/5">
+                        <Icon className="h-4 w-4 text-primary" />
+                      </span>
+                      <span className="text-[15.5px] font-semibold text-[#0f172a]">{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          </>
         ) : mode === "signup" ? (
           <form onSubmit={submit} className="mt-2 flex flex-col gap-3">
             <h2
