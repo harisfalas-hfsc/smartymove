@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, ChevronDown } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SmartyCard } from "@/components/SmartyCard";
@@ -102,7 +102,9 @@ function Faq() {
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
       <SiteHeader showBack />
-      <main className="mx-auto w-full max-w-[760px] flex-1 px-4 pb-6 pt-4">
+
+      {/* MOBILE — untouched */}
+      <main className="mx-auto w-full max-w-[760px] flex-1 px-4 pb-6 pt-4 lg:hidden">
         <SmartyCard
           Icon={HelpCircle}
           iconColor="#C2410C"
@@ -122,6 +124,54 @@ function Faq() {
           </div>
         </SmartyCard>
       </main>
+
+      {/* DESKTOP — SmartyDiet-inspired layout */}
+      <main className="hidden lg:block flex-1 w-full">
+        <div className="mx-auto w-full max-w-[1080px] px-6 pt-16 pb-20">
+          <div className="text-center">
+            <span className="inline-block text-[11px] font-extrabold tracking-[0.28em] uppercase text-primary">FAQ</span>
+            <h1 className="mt-4 text-[52px] leading-[1.05] font-extrabold tracking-tight text-[#0f172a]">
+              Your <span className="text-primary">questions</span>, answered
+            </h1>
+            <p className="mt-5 text-lg text-slate-500">
+              The answers we get most often. Still unsure? Reach out via the footer.
+            </p>
+          </div>
+
+          <div className="mt-14 relative rounded-[32px] border-2 border-primary bg-white p-10 pt-8">
+            <div className="flex items-center gap-4">
+              <div className="flex-1 inline-flex items-center gap-3 rounded-full border-2 border-primary/40 px-6 py-3">
+                <HelpCircle className="h-4 w-4 text-primary" />
+                <span className="text-[11px] font-extrabold tracking-[0.28em] uppercase text-primary">FAQ</span>
+              </div>
+              <div className="grid place-items-center h-14 w-14 rounded-full border-2 border-primary/40 bg-primary/5">
+                <HelpCircle className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+
+            <h2 className="mt-10 text-[34px] leading-tight font-extrabold text-[#0f172a]">
+              Frequently asked <span className="text-primary">questions.</span>
+            </h2>
+            <p className="mt-3 text-slate-500">Tap a question to open the answer.</p>
+
+            <div className="mt-8">
+              {FAQ_ITEMS.map((f, i) => (
+                <details key={f.q} className="group border-t border-slate-200 py-6 first:border-t-0">
+                  <summary className="flex items-center gap-5 cursor-pointer list-none">
+                    <span className="grid place-items-center h-10 w-10 rounded-full border-2 border-primary/40 bg-primary/5 text-[11px] font-extrabold text-primary shrink-0">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="text-lg font-bold text-[#0f172a] flex-1">{f.q}</span>
+                    <ChevronDown className="h-5 w-5 text-slate-400 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <p className="mt-4 pl-[60px] pr-8 text-[15.5px] leading-relaxed text-slate-600">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+
       <SiteFooter />
     </div>
   );

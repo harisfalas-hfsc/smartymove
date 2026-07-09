@@ -58,7 +58,9 @@ function Contact() {
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
       <SiteHeader showBack />
-      <main className="mx-auto w-full max-w-[760px] lg:max-w-5xl flex-1 px-4 lg:px-8 pb-6 pt-4 lg:pt-8 space-y-6">
+
+      {/* MOBILE — untouched */}
+      <main className="mx-auto w-full max-w-[760px] flex-1 px-4 pb-6 pt-4 space-y-6 lg:hidden">
         {/* Hero card */}
         <Card className="border-2 border-primary">
           <CardContent className="p-6">
@@ -99,7 +101,77 @@ function Contact() {
                 <h2 className="text-xl font-bold text-foreground">Send us a Message</h2>
                 <p className="text-xs text-muted-foreground">Fill the form below — we'll get back to you soon.</p>
               </div>
-              <form onSubmit={onSubmit} className="space-y-4">
+              <ContactForm onSubmit={onSubmit} sending={sending} error={error} files={files} setFiles={setFiles} />
+            </CardContent>
+          </Card>
+        )}
+
+      </main>
+
+      {/* DESKTOP — SmartyDiet-inspired layout */}
+      <main className="hidden lg:block flex-1 w-full">
+        <div className="mx-auto w-full max-w-[1080px] px-6 pt-16 pb-20 space-y-12">
+          {/* Hero */}
+          <div className="rounded-[32px] border-2 border-primary bg-white p-14 text-center">
+            <div className="mx-auto grid place-items-center h-20 w-20 rounded-2xl text-primary">
+              <Mail className="h-16 w-16" strokeWidth={1.8} />
+            </div>
+            <h1 className="mt-6 text-[46px] leading-[1.05] font-extrabold tracking-tight text-[#0f172a]">
+              Get in <span className="text-primary">Touch</span>
+            </h1>
+            <p className="mt-5 text-lg text-slate-500 max-w-2xl mx-auto">
+              Questions, feedback, partnerships, or a bug? Drop us a message — we reply within{" "}
+              <strong className="text-primary">24 to 48 hours</strong>.
+            </p>
+            <div className="mt-10 grid grid-cols-3 gap-6 max-w-2xl mx-auto">
+              <DesktopBadge Icon={Clock} label="24–48h reply" />
+              <DesktopBadge Icon={MessageSquare} label="Real humans" />
+              <DesktopBadge Icon={ShieldCheck} label="Private" />
+            </div>
+          </div>
+
+          {sent ? (
+            <div className="rounded-[32px] border-2 border-primary bg-white p-14 text-center">
+              <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto" />
+              <h2 className="mt-4 text-3xl font-extrabold text-[#0f172a]">Message sent</h2>
+              <p className="mt-3 text-slate-500">Thanks — we've received your message and will reply within 24–48 hours.</p>
+              <Button onClick={() => setSent(false)} size="lg" className="mt-6">Send another</Button>
+            </div>
+          ) : (
+            <div className="rounded-[32px] border-2 border-primary bg-white p-14">
+              <div className="text-center">
+                <Send className="w-14 h-14 text-primary mx-auto" />
+                <h2 className="mt-4 text-3xl font-extrabold text-[#0f172a]">Send us a Message</h2>
+                <p className="mt-2 text-slate-500">Fill the form below — we'll get back to you soon.</p>
+              </div>
+              <div className="mt-10 max-w-2xl mx-auto">
+                <ContactForm onSubmit={onSubmit} sending={sending} error={error} files={files} setFiles={setFiles} />
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+
+      <SiteFooter />
+    </div>
+  );
+}
+
+function ContactForm({
+  onSubmit,
+  sending,
+  error,
+  files,
+  setFiles,
+}: {
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  sending: boolean;
+  error: string | null;
+  files: File[];
+  setFiles: (f: File[]) => void;
+}) {
+  return (
+    <form onSubmit={onSubmit} className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label htmlFor="name">Name *</Label>
@@ -158,13 +230,15 @@ function Contact() {
                   Or email us directly at{" "}
                   <a href="mailto:smartymove@outlook.com" className="font-semibold text-primary hover:underline">smartymove@outlook.com</a>
                 </p>
-              </form>
-            </CardContent>
-          </Card>
-        )}
+    </form>
+  );
+}
 
-      </main>
-      <SiteFooter />
+function DesktopBadge({ Icon, label }: { Icon: any; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 rounded-2xl border border-slate-200 py-5">
+      <Icon className="h-6 w-6 text-primary" />
+      <span className="text-sm font-bold text-[#0f172a]">{label}</span>
     </div>
   );
 }
