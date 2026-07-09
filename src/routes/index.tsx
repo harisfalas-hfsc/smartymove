@@ -35,6 +35,7 @@ import {
   Target,
   Repeat,
   Monitor,
+  LineChart as LineChartIcon,
   Smartphone,
   BookOpen,
   type LucideIcon,
