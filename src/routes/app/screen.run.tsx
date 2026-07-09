@@ -1969,6 +1969,14 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       // (lumbar arch ~ trunk lean > 10° during peak overhead reach).
       let maxL = 0, maxR = 0;
       let archFrames = 0, peakFrames = 0;
+      // Fist-to-fist distance (Shoulder Mobility test proper). We measure
+      // the peak (minimum) wrist-to-wrist distance across the window and
+      // normalize by hand-length proxy = shoulderWidth / 2.
+      //   ≤ 1.0 hand-length → score 3
+      //   ≤ 1.5 hand-lengths → score 2
+      //   otherwise → score 1
+      // The peak shoulder-flexion angle stays as a secondary metric.
+      let minFistDistHands = Infinity;
       // Shoulder shrug baseline (shoulder.y - ear.y at rest). When the user
       // shrugs, shoulder rises toward the ear and this gap shrinks.
       const shoulderEarBase = (() => {
@@ -1991,11 +1999,36 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
           const g = shoulderEarGap(s);
           if (g > 0 && g < minShoulderEarGap) minShoulderEarGap = g;
         }
+        // Fist-to-fist: only meaningful for the shoulder mobility test.
+        if (testId === "overhead") {
+          const shoulderW = Math.hypot(
+            s[PL.LEFT_SHOULDER].x - s[PL.RIGHT_SHOULDER].x,
+            s[PL.LEFT_SHOULDER].y - s[PL.RIGHT_SHOULDER].y,
+          );
+          const handLen = shoulderW / 2; // proxy: 1 hand ≈ half shoulder width
+          if (handLen > 1e-4) {
+            const fistDist = Math.hypot(
+              s[PL.LEFT_WRIST].x - s[PL.RIGHT_WRIST].x,
+              s[PL.LEFT_WRIST].y - s[PL.RIGHT_WRIST].y,
+            );
+            const inHands = fistDist / handLen;
+            if (inHands < minFistDistHands) minFistDistHands = inHands;
+          }
+        }
       }
       const shrugLoss = shoulderEarBase > 0 ? (shoulderEarBase - minShoulderEarGap) / shoulderEarBase : 0;
       const r = testId === "wall_slide" ? REFERENCE_RANGES.wall_slide : REFERENCE_RANGES.overhead;
       const maxArm = Math.max(maxL, maxR);
       let score = bucketScoreMaxOrEqual(maxArm, r.passMin, r.borderlineMin);
+      // For Shoulder Mobility, the fist-to-fist distance IS the FMS score —
+      // override the angle-based reading with the direct measurement when
+      // we have a clean number.
+      if (testId === "overhead" && Number.isFinite(minFistDistHands)) {
+        const fistScore: 1 | 2 | 3 =
+          minFistDistHands <= 1.0 ? 3 :
+          minFistDistHands <= 1.5 ? 2 : 1;
+        score = fistScore;
+      }
       const comps: string[] = [];
       if (peakFrames && archFrames / peakFrames > 0.3) {
         comps.push("Lower back arched to get the arms overhead — the range came from the spine, not the shoulder");
@@ -2007,12 +2040,16 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       }
       return {
         id: testId, name, score,
-        metric: Math.round(maxArm),
+        metric: testId === "overhead" && Number.isFinite(minFistDistHands)
+          ? Math.round(minFistDistHands * 10) / 10
+          : Math.round(maxArm),
         left: Math.round(maxL), right: Math.round(maxR),
         asymmetry: asym(maxL, maxR),
         compensations: comps.length ? comps : undefined,
         frameValidRatio: Math.round(validRatio * 100) / 100,
-        notes: `Max arm angle L ${Math.round(maxL)}° / R ${Math.round(maxR)}° · asym ${asym(maxL, maxR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
+        notes: testId === "overhead" && Number.isFinite(minFistDistHands)
+          ? `Fist-to-fist ≈ ${(Math.round(minFistDistHands * 10) / 10).toFixed(1)} hand-lengths (side view) · arm angle L ${Math.round(maxL)}° / R ${Math.round(maxR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`
+          : `Max arm angle L ${Math.round(maxL)}° / R ${Math.round(maxR)}° · asym ${asym(maxL, maxR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
       };
     }
     case "ankle_df": {
