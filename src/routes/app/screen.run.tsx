@@ -1880,6 +1880,16 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       // Shoulder & hip line orientation baselines for rotation detection.
       const shoulderLens: number[] = [];
       const hipLens: number[] = [];
+      // Back-knee-to-board proxy: at the deepest part of the descent, the
+      // lower knee (the "back" knee going down) should approach the ankle
+      // horizontal line (the board sits on the floor). If the lowest knee
+      // stays well above the ankle line, the back knee never touched the
+      // board — a classic FMS in-line lunge fail.
+      let minBackKneeGap = Infinity;
+      // Dowel-off-spine proxy: with the dowel held vertically behind the
+      // back touching head/upper back/tailbone, ear→shoulder→hip should
+      // stay near collinear. Track max deviation from a straight line.
+      let maxSpineBow = 0;
       for (const s of samples) {
         const al = angle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE], s[PL.LEFT_ANKLE]);
         const ar = angle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE], s[PL.RIGHT_ANKLE]);
@@ -1890,6 +1900,23 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
           const midAnkleX = (s[PL.LEFT_ANKLE].x + s[PL.RIGHT_ANKLE].x) / 2;
           if (Math.sign(s[PL.LEFT_KNEE].x - midAnkleX) !== Math.sign(s[PL.LEFT_ANKLE].x - midAnkleX)) valgusLFrames++;
           if (Math.sign(s[PL.RIGHT_KNEE].x - midAnkleX) !== Math.sign(s[PL.RIGHT_ANKLE].x - midAnkleX)) valgusRFrames++;
+          // Back-knee gap: lowest knee y vs. lowest ankle y (proxy for the
+          // board line). Smaller = closer to touching.
+          const lowestKneeY = Math.max(s[PL.LEFT_KNEE].y, s[PL.RIGHT_KNEE].y);
+          const lowestAnkleY = Math.max(s[PL.LEFT_ANKLE].y, s[PL.RIGHT_ANKLE].y);
+          const gap = lowestAnkleY - lowestKneeY; // + = knee above ankle
+          if (gap < minBackKneeGap) minBackKneeGap = gap;
+          // Spine bow: perpendicular distance from mid-shoulder→mid-hip
+          // line to the ear, normalized by torso length.
+          const ear = { x: (s[PL.LEFT_EAR].x + s[PL.RIGHT_EAR].x) / 2, y: (s[PL.LEFT_EAR].y + s[PL.RIGHT_EAR].y) / 2 };
+          const sh = { x: (s[PL.LEFT_SHOULDER].x + s[PL.RIGHT_SHOULDER].x) / 2, y: (s[PL.LEFT_SHOULDER].y + s[PL.RIGHT_SHOULDER].y) / 2 };
+          const hp = { x: (s[PL.LEFT_HIP].x + s[PL.RIGHT_HIP].x) / 2, y: (s[PL.LEFT_HIP].y + s[PL.RIGHT_HIP].y) / 2 };
+          const torsoLen = Math.hypot(sh.x - hp.x, sh.y - hp.y) || 1e-4;
+          // signed distance of ear from shoulder-hip line
+          const num = Math.abs((hp.y - sh.y) * ear.x - (hp.x - sh.x) * ear.y + hp.x * sh.y - hp.y * sh.x);
+          const den = Math.hypot(hp.y - sh.y, hp.x - sh.x) || 1e-4;
+          const bow = (num / den) / torsoLen;
+          if (bow > maxSpineBow) maxSpineBow = bow;
         }
         const sLen = Math.hypot(s[PL.LEFT_SHOULDER].x - s[PL.RIGHT_SHOULDER].x, s[PL.LEFT_SHOULDER].y - s[PL.RIGHT_SHOULDER].y);
         const hLen = Math.hypot(s[PL.LEFT_HIP].x - s[PL.RIGHT_HIP].x, s[PL.LEFT_HIP].y - s[PL.RIGHT_HIP].y);
@@ -1916,6 +1943,16 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       if (descentFrames && valgusRFrames / descentFrames > 0.25) { comps.push("Right front knee drifted inward (valgus)"); score = cap(score, 2); }
       if (heelRiseL > 0.15 || heelRiseR > 0.15) { comps.push("Front heel lifted — depth was bought from limited ankle mobility, not real range"); score = cap(score, 2); }
       if (shoulderRotation > 0.4 || hipRotation > 0.4) { comps.push("You rotated your torso/hips toward the camera to reach further — that invalidates the depth reading"); score = cap(score, 2); }
+      // Back-knee-to-board (only meaningful for the in-line lunge).
+      if (testId === "lunge" && Number.isFinite(minBackKneeGap) && minBackKneeGap > 0.08) {
+        comps.push("Back knee didn't reach the board behind the front heel — depth stopped short of the FMS target");
+        score = cap(score, 2);
+      }
+      // Dowel-off-spine proxy (only meaningful for the in-line lunge).
+      if (testId === "lunge" && maxSpineBow > 0.18) {
+        comps.push("Torso leaned forward — the dowel behind your back lost contact with your head/upper back/tailbone");
+        score = cap(score, 2);
+      }
       return {
         id: testId, name, score,
         metric: Math.round(minK),
