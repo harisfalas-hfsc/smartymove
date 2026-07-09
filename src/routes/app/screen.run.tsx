@@ -248,7 +248,7 @@ function clearingPrompt(testId: string): { intro: string; action: string; questi
     case "overhead":
       return {
         intro:
-          "This checks that your shoulders can tolerate the overhead reach without pain before we score it.",
+          "Quick pain check before we score your shoulder mobility. Pain is a flag only — the rest of your scan will continue either way.",
         action:
           "Stand tall. Press both palms together behind your back — one arm reaching over the top of your shoulder down your spine, the other reaching up from below.",
         question: "Do you feel any sharp pain or pinching in either shoulder?",
@@ -753,8 +753,8 @@ function Runner() {
       score: 0,
       valid: false,
       cameraView: test.cameraView,
-      compensations: ["Pain reported during clearing test — pattern scored 0 per FMS spec"],
-      notes: "Pain reported during clearing test — pattern scored 0 (excluded from sub-scores). We recommend a medical assessment before loading this pattern.",
+      compensations: ["Pain detected — please consult a professional before loading this movement"],
+      notes: "Pain detected — please consult a professional before loading this movement. The rest of your scan continued normally.",
     };
     // Skip past every remaining view of this same group.
     let nextIdx = idx + 1;
