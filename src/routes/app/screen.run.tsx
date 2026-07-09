@@ -1115,6 +1115,46 @@ function Runner() {
               </p>
             </div>
           )}
+          {phase === "shoulder_selfreport" && (
+            <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
+              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-primary">
+                <CheckCircle2 className="h-4 w-4" /> Sanity check · Fist-to-fist distance
+              </div>
+              <h2 className="mt-1 text-xl font-extrabold">How far apart were your fists?</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                The camera reads shoulder range from the side, but the real FMS scoring is the actual gap between your two fists behind your back. Reach behind you now and estimate the gap in <strong>hand-lengths</strong> (measured with your own hand). We blend this 50/50 with what the camera saw.
+              </p>
+              <div className="mt-4 grid grid-cols-1 gap-2">
+                <button
+                  onClick={() => resolveShoulderSelfReport(3)}
+                  className="flex h-14 items-center justify-between rounded-2xl border-2 border-emerald-500/60 bg-emerald-50 px-4 text-left text-sm font-semibold active:scale-[0.99]"
+                >
+                  <span>Touching or within one hand-length</span>
+                  <span className="text-xs font-bold text-emerald-700">Score 3</span>
+                </button>
+                <button
+                  onClick={() => resolveShoulderSelfReport(2)}
+                  className="flex h-14 items-center justify-between rounded-2xl border-2 border-amber-500/60 bg-amber-50 px-4 text-left text-sm font-semibold active:scale-[0.99]"
+                >
+                  <span>Within 1.5 hand-lengths</span>
+                  <span className="text-xs font-bold text-amber-700">Score 2</span>
+                </button>
+                <button
+                  onClick={() => resolveShoulderSelfReport(1)}
+                  className="flex h-14 items-center justify-between rounded-2xl border-2 border-destructive/60 bg-destructive/10 px-4 text-left text-sm font-semibold active:scale-[0.99]"
+                >
+                  <span>More than 1.5 hand-lengths</span>
+                  <span className="text-xs font-bold text-destructive">Score 1</span>
+                </button>
+                <button
+                  onClick={() => resolveShoulderSelfReport(null)}
+                  className="mt-1 h-11 rounded-2xl bg-muted text-sm font-semibold active:scale-[0.99]"
+                >
+                  Skip — keep the camera score only
+                </button>
+              </div>
+            </div>
+          )}
           {(phase === "confirm" || phase === "submitting") && (
             <div className="rounded-3xl bg-white/10 p-5 text-center backdrop-blur-xl">
               <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-400" />
