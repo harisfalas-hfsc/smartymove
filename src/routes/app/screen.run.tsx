@@ -441,7 +441,7 @@ function Runner() {
     }
   }, [navigate, u]);
 
-  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "squat_retry" | "confirm" | "submitting" | "done" | "failed">("setup");
+  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "squat_retry" | "shoulder_selfreport" | "confirm" | "submitting" | "done" | "failed">("setup");
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewedPrompt, setReviewedPrompt] = useState(false);
   const [pendingResults, setPendingResults] = useState<TestResult[] | null>(null);
@@ -459,6 +459,10 @@ function Runner() {
   // = keep score 1 (hip/general mobility). Recorded once per scan so a
   // subsequent user "re-do" of the squat can't retrigger the prompt.
   const squatRetryDecidedRef = useRef(false);
+  // Shoulder-mobility self-report blend: after the camera scores overhead,
+  // we ask the user to sanity-check the fist-to-fist distance and blend
+  // their answer 50/50 with the camera score (per founder spec).
+  const pendingOverheadRef = useRef<TestResult | null>(null);
   const seq = useMemo(
     () => buildSequence(u?.questionnaire?.joints ?? []),
     [u?.questionnaire?.joints?.join("|")],
@@ -609,6 +613,13 @@ function Runner() {
       if (isLastView) {
         const merged = mergeStepResults(bucket);
         mergedForFinalize = merged;
+        if (merged.id === "overhead" && merged.score !== 0 && merged.valid !== false) {
+          // Stall for self-report; don't push into results yet.
+          pendingOverheadRef.current = merged;
+          mergedForFinalize = null;
+          setTimeout(() => setPhase("shoulder_selfreport"), 400);
+          return;
+        }
         setResults(r => [...r, merged]);
         if (merged.id === "squat" && merged.score === 1 && !squatRetryDecidedRef.current) {
           stallForSquatRetry = true;
@@ -729,6 +740,43 @@ function Runner() {
         )
       : results;
     if (success) setResults(updated);
+    if (idx + 1 >= seq.length) {
+      finalize(updated);
+    } else {
+      setIdx((i) => i + 1);
+      setPhase("intro");
+    }
+  }
+
+  /**
+   * Shoulder-mobility self-report resolver. The camera measures
+   * fist-to-fist proximity indirectly (peak shoulder-flexion angle); this
+   * asks the user to self-report the actual fist gap in hand-lengths and
+   * blends the two 50/50 per founder spec. Blend rounds up to prefer the
+   * kinder score when the two disagree by exactly one.
+   */
+  function resolveShoulderSelfReport(selfScore: 1 | 2 | 3 | null) {
+    const merged = pendingOverheadRef.current;
+    pendingOverheadRef.current = null;
+    if (!merged) return;
+    let blended = merged;
+    if (selfScore != null) {
+      const cameraScore = merged.score as 1 | 2 | 3;
+      const avg = (cameraScore + selfScore) / 2;
+      const blendedScore = Math.round(avg) as 1 | 2 | 3;
+      const comps = [
+        ...(merged.compensations ?? []),
+        `Self-reported fist gap = ${selfScore === 3 ? "within one hand-length (score 3)" : selfScore === 2 ? "within 1.5 hand-lengths (score 2)" : "greater than 1.5 hand-lengths (score 1)"} · camera scored ${cameraScore} · blended ${blendedScore}`,
+      ];
+      blended = {
+        ...merged,
+        score: blendedScore,
+        compensations: comps,
+        notes: `${merged.notes ?? ""}${merged.notes ? " · " : ""}Blended camera (${cameraScore}) with self-report (${selfScore}) → ${blendedScore}`,
+      };
+    }
+    const updated = [...results, blended];
+    setResults(updated);
     if (idx + 1 >= seq.length) {
       finalize(updated);
     } else {
@@ -1065,6 +1113,46 @@ function Runner() {
               <p className="mt-3 text-xs text-muted-foreground">
                 Yes = your program will prioritize <strong>Ankle Mobility</strong> work. No = the root cause is likely hip or general mobility — we'll target that instead.
               </p>
+            </div>
+          )}
+          {phase === "shoulder_selfreport" && (
+            <div className="max-h-[78vh] overflow-y-auto rounded-3xl bg-white/95 p-5 text-foreground shadow-2xl">
+              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-primary">
+                <CheckCircle2 className="h-4 w-4" /> Sanity check · Fist-to-fist distance
+              </div>
+              <h2 className="mt-1 text-xl font-extrabold">How far apart were your fists?</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                The camera reads shoulder range from the side, but the real FMS scoring is the actual gap between your two fists behind your back. Reach behind you now and estimate the gap in <strong>hand-lengths</strong> (measured with your own hand). We blend this 50/50 with what the camera saw.
+              </p>
+              <div className="mt-4 grid grid-cols-1 gap-2">
+                <button
+                  onClick={() => resolveShoulderSelfReport(3)}
+                  className="flex h-14 items-center justify-between rounded-2xl border-2 border-emerald-500/60 bg-emerald-50 px-4 text-left text-sm font-semibold active:scale-[0.99]"
+                >
+                  <span>Touching or within one hand-length</span>
+                  <span className="text-xs font-bold text-emerald-700">Score 3</span>
+                </button>
+                <button
+                  onClick={() => resolveShoulderSelfReport(2)}
+                  className="flex h-14 items-center justify-between rounded-2xl border-2 border-amber-500/60 bg-amber-50 px-4 text-left text-sm font-semibold active:scale-[0.99]"
+                >
+                  <span>Within 1.5 hand-lengths</span>
+                  <span className="text-xs font-bold text-amber-700">Score 2</span>
+                </button>
+                <button
+                  onClick={() => resolveShoulderSelfReport(1)}
+                  className="flex h-14 items-center justify-between rounded-2xl border-2 border-destructive/60 bg-destructive/10 px-4 text-left text-sm font-semibold active:scale-[0.99]"
+                >
+                  <span>More than 1.5 hand-lengths</span>
+                  <span className="text-xs font-bold text-destructive">Score 1</span>
+                </button>
+                <button
+                  onClick={() => resolveShoulderSelfReport(null)}
+                  className="mt-1 h-11 rounded-2xl bg-muted text-sm font-semibold active:scale-[0.99]"
+                >
+                  Skip — keep the camera score only
+                </button>
+              </div>
             </div>
           )}
           {(phase === "confirm" || phase === "submitting") && (
@@ -1910,52 +1998,90 @@ function scoreSamples(testId: string, rawSamples: Frame[], duration: number, cam
       };
     }
     case "hip_abd": {
-      let maxL = 0, maxR = 0;
-      // Hip-hike: pelvis tilts up on the lifting side. We track the abduction
-      // angle achieved BEFORE hip-hike begins, not the final leg height.
-      const hipTiltBase = (() => {
-        let s = 0, n = 0;
-        for (let i = 0; i < Math.min(5, samples.length); i++) {
-          const t = hipTilt(samples[i]); s += t; n++;
+      // Active Straight-Leg Raise — supine, side camera view.
+      // Founder spec scoring (moving-leg ankle vs. DOWN-leg landmarks):
+      //   3 = moving ankle rises to or ABOVE the mid-thigh of the down leg
+      //   2 = moving ankle between mid-thigh and knee-joint line of the down leg
+      //   1 = moving ankle stays BELOW the knee-joint line of the down leg
+      // Image coordinates: y increases downward, so "higher" = smaller y.
+      //
+      // Detect the moving leg by which ankle rises furthest above its baseline
+      // (frame-0 average). The other leg is the "down" reference leg.
+      const baseline = (idxs: number[]) => {
+        const n = Math.min(5, samples.length);
+        let sum = 0, count = 0;
+        for (let i = 0; i < n; i++) {
+          for (const id of idxs) { sum += samples[i][id].y; count++; }
         }
-        return n ? s / n : 0;
-      })();
-      let preHikeMaxL = 0, preHikeMaxR = 0;
-      let hipHikeDetected = false;
-      let trunkLeanFrames = 0, abductFrames = 0;
-      for (const s of samples) {
-        const al = abductionAngle(s[PL.LEFT_HIP], s[PL.LEFT_KNEE]);
-        const ar = abductionAngle(s[PL.RIGHT_HIP], s[PL.RIGHT_KNEE]);
-        if (al > maxL) maxL = al;
-        if (ar > maxR) maxR = ar;
-        const hike = Math.abs(hipTilt(s) - hipTiltBase);
-        if (hike < 4) {
-          if (al > preHikeMaxL) preHikeMaxL = al;
-          if (ar > preHikeMaxR) preHikeMaxR = ar;
-        } else {
-          hipHikeDetected = true;
-        }
-        if (al > 10 || ar > 10) {
-          abductFrames++;
-          if (trunkLeanAngle(s) > 8) trunkLeanFrames++;
-        }
+        return count ? sum / count : 0;
+      };
+      const baseLAnkleY = baseline([PL.LEFT_ANKLE]);
+      const baseRAnkleY = baseline([PL.RIGHT_ANKLE]);
+      let minLAnkleY = Infinity, minRAnkleY = Infinity;
+      let peakLIdx = 0, peakRIdx = 0;
+      for (let i = 0; i < samples.length; i++) {
+        const ly = samples[i][PL.LEFT_ANKLE].y;
+        const ry = samples[i][PL.RIGHT_ANKLE].y;
+        if (ly < minLAnkleY) { minLAnkleY = ly; peakLIdx = i; }
+        if (ry < minRAnkleY) { minRAnkleY = ry; peakRIdx = i; }
       }
-      const r = REFERENCE_RANGES.hip_abd;
-      // Score reflects pre-hike range, per founder spec.
-      const scoreAngle = Math.max(preHikeMaxL, preHikeMaxR);
-      let score = bucketScoreRange(scoreAngle, r.passMin, r.passMax, r.borderlineMin, r.passMax);
-      if (scoreAngle < r.borderlineMin) score = 1;
+      const liftL = baseLAnkleY - minLAnkleY; // positive = rose above start
+      const liftR = baseRAnkleY - minRAnkleY;
+      const movingIsLeft = liftL >= liftR;
+      const peakIdx = movingIsLeft ? peakLIdx : peakRIdx;
+      const peakFrame = samples[peakIdx];
+      const movingAnkleY = movingIsLeft ? minLAnkleY : minRAnkleY;
+      const downHip = movingIsLeft ? peakFrame[PL.RIGHT_HIP] : peakFrame[PL.LEFT_HIP];
+      const downKnee = movingIsLeft ? peakFrame[PL.RIGHT_KNEE] : peakFrame[PL.LEFT_KNEE];
+      const downMidThighY = (downHip.y + downKnee.y) / 2;
+      const downKneeY = downKnee.y;
+      let score: 1 | 2 | 3;
+      if (movingAnkleY <= downMidThighY) score = 3;
+      else if (movingAnkleY <= downKneeY) score = 2;
+      else score = 1;
+
+      // Compensation checks (never gate the score up — only cap it down).
       const comps: string[] = [];
-      if (hipHikeDetected) comps.push("Pelvis hiked up on the lifting side — score reflects the angle before the hip-hike started, not the final leg height");
-      if (abductFrames && trunkLeanFrames / abductFrames > 0.3) { comps.push("Trunk leaned away from the lifting leg to help it rise — that extra height doesn't count"); score = cap(score, 2); }
+      // Moving-leg knee bend at peak: shoulder-hip-knee-ankle should stay
+      // near 180°. Score 3/2 stays valid only if the moving knee stayed
+      // reasonably straight — otherwise cap at 2.
+      const movingKneeAng = movingIsLeft
+        ? angle(peakFrame[PL.LEFT_HIP], peakFrame[PL.LEFT_KNEE], peakFrame[PL.LEFT_ANKLE])
+        : angle(peakFrame[PL.RIGHT_HIP], peakFrame[PL.RIGHT_KNEE], peakFrame[PL.RIGHT_ANKLE]);
+      if (movingKneeAng > 0 && movingKneeAng < 155) {
+        comps.push("Moving-leg knee bent during the raise — some of the height came from bending, not true hamstring range");
+        score = cap(score, 2);
+      }
+      // Down-leg lift-off: the resting leg should stay flat on the floor.
+      // A meaningful reduction in down-hip / down-knee y vs. baseline means
+      // the reference leg came up to help.
+      const downLegRestingY = movingIsLeft ? baseRAnkleY : baseLAnkleY;
+      const downLegPeakAnkleY = movingIsLeft ? peakFrame[PL.RIGHT_ANKLE].y : peakFrame[PL.LEFT_ANKLE].y;
+      if (downLegRestingY - downLegPeakAnkleY > 0.03) {
+        comps.push("The down leg lifted off the floor to help the raise — the opposite leg needs to stay flat");
+        score = cap(score, 2);
+      }
+      // Pelvis rocking (pelvic tilt drift from baseline) — the pelvis
+      // rocking up on the lifting side inflates the apparent height.
+      const baseHipTilt = hipTilt(samples[0]);
+      const peakHipTilt = hipTilt(peakFrame);
+      if (Math.abs(peakHipTilt - baseHipTilt) > 5) {
+        comps.push("Pelvis rocked toward the lifting leg — that pelvic tilt gave extra height that doesn't count as hip range");
+        score = cap(score, 2);
+      }
+
+      // Cross-body proportion metric (0–1): how far above the mid-thigh line
+      // the ankle actually reached, using down-hip y as the "top" reference.
+      const range = Math.max(1e-4, downKneeY - downHip.y);
+      const heightFrac = Math.max(0, (downKneeY - movingAnkleY) / range);
+      const metric = Math.round(heightFrac * 100);
+      const side = movingIsLeft ? "left" : "right";
       return {
         id: testId, name, score,
-        metric: Math.round(scoreAngle),
-        left: Math.round(preHikeMaxL), right: Math.round(preHikeMaxR),
-        asymmetry: asym(preHikeMaxL, preHikeMaxR),
+        metric,
         compensations: comps.length ? comps : undefined,
         frameValidRatio: Math.round(validRatio * 100) / 100,
-        notes: `Pre-hike abduction L ${Math.round(preHikeMaxL)}° / R ${Math.round(preHikeMaxR)}° · final L ${Math.round(maxL)}° / R ${Math.round(maxR)}°${comps.length ? ` · ${comps.join("; ")}` : ""}`,
+        notes: `Raised ${side} leg · moving ankle at ${metric}% of the down leg's thigh-to-knee line (100 = mid-thigh, 0 = knee)${comps.length ? ` · ${comps.join("; ")}` : ""}`,
       };
     }
     case "bridge_hold": {
