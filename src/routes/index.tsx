@@ -35,6 +35,7 @@ import {
   Target,
   Repeat,
   Monitor,
+  LineChart as LineChartIcon,
   Smartphone,
   BookOpen,
   type LucideIcon,
@@ -213,11 +214,11 @@ function Welcome() {
         onBack={mode === "intro" ? undefined : () => setMode("intro")}
       />
       <main
-        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "sm-home-shell max-w-[430px] lg:max-w-[1240px] lg:px-6" : "max-w-[420px]"}`}
+        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "sm-home-shell lg:flex lg:flex-col max-w-[430px] lg:max-w-[1240px] lg:px-6" : "max-w-[420px]"}`}
       >
         {mode === "intro" ? (
-          <>
-            <div className="sm-wellness-grid">
+          <div className="lg:flex lg:flex-col lg:flex-1 lg:min-h-0">
+            <div className="sm-wellness-grid lg:flex-1 lg:min-h-0">
               <section className="sm-panel sm-panel-hero sm-border-hero">
                 <div className="sm-eyebrow"><Sparkles className="h-3 w-3" /> Movement diagnostic</div>
                 <h1 className="sm-wellness-title">
@@ -273,29 +274,15 @@ function Welcome() {
                   <FeatureLine Icon={Target} color="#7A3EBA" title="Personalized priority areas" text="Two focus areas selected from your real movement limits." />
                   <FeatureLine Icon={Repeat} color="#38A5C7" title="Retest every 14 days" text="Track changes and evolve your program as you improve." />
                   <FeatureLine Icon={Monitor} color="#4FB286" title="Works on any screen" text="Phone, tablet, laptop, or desktop — train wherever you are." />
+                  <FeatureLine Icon={LineChartIcon} color="#3B82F6" title="Progress you can see" text="Visual score history and trend insights after each retest." />
+                  <FeatureLine Icon={HeartPulse} color="#E46B5A" title="Built on movement science" text="Rooted in functional screening, not generic fitness trends." />
+                  <FeatureLine Icon={Sparkles} color="#F59E0B" title="Small wins, daily" text="Short, achievable sessions designed to build a lasting habit." />
                 </div>
                 <Link to="/about" className="sm-text-link">
                   Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
                 </Link>
               </section>
 
-              <section className="sm-panel sm-panel-program sm-border-program">
-                <div className="sm-card-topline"><span /> Train <IconBubble Icon={Dumbbell} /></div>
-                <h2>Movement <span>Workouts</span></h2>
-                <p>
-                  A corrective exercise engine that builds Training Sessions from your real movement
-                  limits — no guessing, no random routines.
-                </p>
-                <div className="sm-tile-grid">
-                  <MiniTile Icon={Activity} label="Assess" color="#38A5C7" />
-                  <MiniTile Icon={Dumbbell} label="Corrective Workouts" color="#4FB286" />
-                  <MiniTile Icon={HeartPulse} label="Progress" color="#7A3EBA" />
-                  <MiniTile Icon={CalendarCheck} label="Retest" color="#FF6B4A" />
-                </div>
-                <Link to="/about" className="sm-text-link">
-                  See how workouts are built <ArrowRight className="h-4 w-4" />
-                </Link>
-              </section>
 
               <section className="sm-panel sm-panel-tools sm-border-tools">
                 <div className="sm-card-topline"><span /> Routine <IconBubble Icon={Apple} /></div>
@@ -316,7 +303,7 @@ function Welcome() {
                 </Link>
               </section>
             </div>
-          </>
+          </div>
         ) : mode === "signup" ? (
           <form onSubmit={submit} className="mt-2 flex flex-col gap-3">
             <h2
@@ -751,7 +738,6 @@ function Welcome() {
             border:1px solid #A5DDF4;
           }
           .sm-panel-about,
-          .sm-panel-program,
           .sm-panel-tools,
           .sm-panel-score-picture{ min-height: 240px; }
           .sm-panel-about{
@@ -760,10 +746,6 @@ function Welcome() {
           }
           .sm-panel-about .sm-feature-list{ flex: 1 0 auto; }
           .sm-panel-about .sm-text-link{ margin-top: auto; }
-          .sm-panel-program{ display:flex; flex-direction:column; }
-          .sm-panel-program .sm-tile-grid{ flex:1 0 auto; align-content:stretch; }
-          .sm-panel-program .sm-mini-tile{ min-height:40px; font-size:12px; }
-          .sm-panel-program .sm-text-link{ margin-top:auto; }
           .sm-panel-tools{ display:flex; flex-direction:column; }
           .sm-panel-tools .sm-feature-list{ flex:1 0 auto; }
           .sm-panel-tools .sm-text-link{ margin-top:auto; }
@@ -819,27 +801,6 @@ function Welcome() {
             font-weight:800;
             margin-top:18px;
           }
-          .sm-tile-grid{
-            display:grid;
-            grid-template-columns: minmax(0,1fr);
-            gap:8px;
-            margin-top:18px;
-          }
-          .sm-mini-tile{
-            display:flex;
-            min-width:0;
-            align-items:center;
-            gap:8px;
-            min-height:36px;
-            border:1px solid #E4EEF3;
-            border-radius:10px;
-            background:#fff;
-            padding:6px 8px;
-            color:#10213F;
-            font-size:11px;
-            font-weight:800;
-          }
-          .sm-mini-icon{ width:22px; height:22px; flex:0 0 auto; }
           .sm-score-card{
             margin-top:18px;
             border-radius:14px;
@@ -909,17 +870,16 @@ function Welcome() {
 
             .sm-panel-score-picture{ min-height: 190px; }
             .sm-panel-about,
-            .sm-panel-program,
             .sm-panel-tools{ display: none; }
           }
           @media (min-width: 1024px){
-            .sm-wellness-grid{ grid-template-columns: repeat(12, minmax(0, 1fr)); gap:16px; }
+            .sm-wellness-grid{ grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: auto 1fr; gap:16px; }
             .sm-panel-hero{ grid-column: 1 / span 6; grid-row: 1; min-height: 200px; }
             .sm-panel-mobile{ grid-column: 7 / span 3; grid-row: 1; min-height: 200px; }
             .sm-panel-score-picture{ grid-column: 10 / span 3; grid-row: 1; min-height: 200px; }
-            .sm-panel-about{ grid-column: 1 / span 4; grid-row: 2; min-height: 420px; }
-            .sm-panel-program{ grid-column: 5 / span 4; grid-row: 2; min-height: 420px; }
+            .sm-panel-about{ grid-column: 1 / span 8; grid-row: 2; min-height: 420px; }
             .sm-panel-tools{ grid-column: 9 / span 4; grid-row: 2; min-height: 420px; }
+            .sm-panel-about .sm-feature-list{ grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 18px; }
             .sm-panel h2{ font-size: 22px; }
           }
         `}</style>
@@ -979,16 +939,6 @@ function FeatureLine({
   );
 }
 
-function MiniTile({ Icon, label, color }: { Icon: LucideIcon; label: string; color: string }) {
-  return (
-    <div className="sm-mini-tile">
-      <span className="sm-mini-icon" style={{ background: `${color}18`, color }}>
-        <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
-      </span>
-      <span className="truncate">{label}</span>
-    </div>
-  );
-}
 
 function PasswordField({
   id,
