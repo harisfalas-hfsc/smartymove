@@ -873,7 +873,7 @@ function Welcome() {
             .sm-panel-tools{ display: none; }
           }
           @media (min-width: 1024px){
-            .sm-wellness-grid{ grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: auto 1fr; gap:16px; min-height: 100%; }
+            .sm-wellness-grid{ grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: auto 1fr; gap:16px; }
             .sm-panel-hero{ grid-column: 1 / span 6; grid-row: 1; min-height: 200px; }
             .sm-panel-mobile{ grid-column: 7 / span 3; grid-row: 1; min-height: 200px; }
             .sm-panel-score-picture{ grid-column: 10 / span 3; grid-row: 1; min-height: 200px; }
