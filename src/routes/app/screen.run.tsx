@@ -441,7 +441,7 @@ function Runner() {
     }
   }, [navigate, u]);
 
-  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "squat_retry" | "confirm" | "submitting" | "done" | "failed">("setup");
+  const [phase, setPhase] = useState<"setup" | "intro" | "running" | "squat_retry" | "shoulder_selfreport" | "confirm" | "submitting" | "done" | "failed">("setup");
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewedPrompt, setReviewedPrompt] = useState(false);
   const [pendingResults, setPendingResults] = useState<TestResult[] | null>(null);
@@ -459,6 +459,10 @@ function Runner() {
   // = keep score 1 (hip/general mobility). Recorded once per scan so a
   // subsequent user "re-do" of the squat can't retrigger the prompt.
   const squatRetryDecidedRef = useRef(false);
+  // Shoulder-mobility self-report blend: after the camera scores overhead,
+  // we ask the user to sanity-check the fist-to-fist distance and blend
+  // their answer 50/50 with the camera score (per founder spec).
+  const pendingOverheadRef = useRef<TestResult | null>(null);
   const seq = useMemo(
     () => buildSequence(u?.questionnaire?.joints ?? []),
     [u?.questionnaire?.joints?.join("|")],
@@ -609,6 +613,13 @@ function Runner() {
       if (isLastView) {
         const merged = mergeStepResults(bucket);
         mergedForFinalize = merged;
+        if (merged.id === "overhead" && merged.score !== 0 && merged.valid !== false) {
+          // Stall for self-report; don't push into results yet.
+          pendingOverheadRef.current = merged;
+          mergedForFinalize = null;
+          setTimeout(() => setPhase("shoulder_selfreport"), 400);
+          return;
+        }
         setResults(r => [...r, merged]);
         if (merged.id === "squat" && merged.score === 1 && !squatRetryDecidedRef.current) {
           stallForSquatRetry = true;
