@@ -69,7 +69,13 @@ export const CORE_TESTS = [
 
 /** Tests that surface a "Did you feel pain during that pattern?" prompt.
  *  Pain forces the pattern to score 0 (marked invalid + excluded from sub-scores). */
-export const CLEARING_TESTS = new Set(["overhead"]);
+/**
+ * Every test in the 5-pattern SmartyMove battery surfaces a pain check
+ * before the recording. Pain caps the associated sub-scores at 50 (via
+ * `capIfPain` in `computeSession`) and skips the recording for that test,
+ * but the scan itself continues — pain is a flag, never a gate.
+ */
+export const CLEARING_TESTS = new Set(["squat", "hinge", "hip_abd", "overhead", "lunge"]);
 
 /**
  * Tests that must be captured and scored per side (right, then left).
