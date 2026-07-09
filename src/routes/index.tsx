@@ -268,15 +268,15 @@ function Welcome() {
                   daily corrective workout built around what your body actually needs.
                 </p>
                 <div className="sm-feature-list">
-                  <FeatureLine Icon={Camera} color="#2C99B3" title="Camera-based movement scan" text="Quick guided patterns from any device with a camera." />
-                  <FeatureLine Icon={ShieldCheck} color="#43AD5C" title="Private by design" text="Pose detection runs on your device — video stays with you." />
-                  <FeatureLine Icon={Clock} color="#FF8A4C" title="5-minute daily routine" text="Simple corrective work for mobility, stability, and strength." />
-                  <FeatureLine Icon={Target} color="#7A3EBA" title="Personalized priority areas" text="Two focus areas selected from your real movement limits." />
-                  <FeatureLine Icon={Repeat} color="#38A5C7" title="Retest every 14 days" text="Track changes and evolve your program as you improve." />
-                  <FeatureLine Icon={Monitor} color="#4FB286" title="Works on any screen" text="Phone, tablet, laptop, or desktop — train wherever you are." />
-                  <FeatureLine Icon={LineChartIcon} color="#3B82F6" title="Progress you can see" text="Visual score history and trend insights after each retest." />
-                  <FeatureLine Icon={HeartPulse} color="#E46B5A" title="Built on movement science" text="Rooted in functional screening, not generic fitness trends." />
-                  <FeatureLine Icon={Sparkles} color="#F59E0B" title="Small wins, daily" text="Short, achievable sessions designed to build a lasting habit." />
+                  <FeatureLine Icon={Camera} color="#2C99B3" title="Camera movement scan" text="Guided patterns, any camera." />
+                  <FeatureLine Icon={ShieldCheck} color="#43AD5C" title="Private by design" text="Runs on your device." />
+                  <FeatureLine Icon={Clock} color="#FF8A4C" title="5-minute daily routine" text="Short corrective work." />
+                  <FeatureLine Icon={Target} color="#7A3EBA" title="Personalized focus areas" text="Built on your real limits." />
+                  <FeatureLine Icon={Repeat} color="#38A5C7" title="Retest every 14 days" text="Program evolves with you." />
+                  <FeatureLine Icon={Monitor} color="#4FB286" title="Works on any screen" text="Phone, tablet, or laptop." />
+                  <FeatureLine Icon={LineChartIcon} color="#3B82F6" title="Progress you can see" text="Score history and trends." />
+                  <FeatureLine Icon={HeartPulse} color="#E46B5A" title="Built on movement science" text="Functional screening roots." />
+                  <FeatureLine Icon={Sparkles} color="#F59E0B" title="Small wins, daily" text="A habit that lasts." />
                 </div>
                 <Link to="/about" className="sm-text-link">
                   Learn more about Smarty Move <ArrowRight className="h-4 w-4" />
@@ -292,14 +292,14 @@ function Welcome() {
                   libraries for your body’s top priority areas.
                 </p>
                 <div className="sm-feature-list">
-                  <FeatureLine Icon={Activity} color="#2C99B3" title="Mobility focus" text="Open tight joints and restore range of motion." />
-                  <FeatureLine Icon={ShieldCheck} color="#43AD5C" title="Stability focus" text="Build control and balance around key areas." />
-                  <FeatureLine Icon={Dumbbell} color="#FF8A4C" title="Strength focus" text="Low-load strength work that supports clean movement." />
-                  <FeatureLine Icon={BookOpen} color="#7A3EBA" title="Curated exercise library" text="Coach-built exercises organized by body area and goal." />
-                  <FeatureLine Icon={Repeat} color="#38A5C7" title="Evolves with you" text="Your routine updates as your retests show improvement." />
+                  <FeatureLine Icon={Activity} color="#2C99B3" title="Mobility focus" text="Restore range of motion." />
+                  <FeatureLine Icon={ShieldCheck} color="#43AD5C" title="Stability focus" text="Control around key joints." />
+                  <FeatureLine Icon={Dumbbell} color="#FF8A4C" title="Strength focus" text="Low-load, clean movement." />
+                  <FeatureLine Icon={BookOpen} color="#7A3EBA" title="Curated exercise library" text="Coach-built by body area." />
+                  <FeatureLine Icon={Repeat} color="#38A5C7" title="Evolves with you" text="Updates after each retest." />
                 </div>
-                <Link to="/about" className="sm-text-link">
-                  Explore the corrective library <ArrowRight className="h-4 w-4" />
+                <Link to="/learn" className="sm-text-link">
+                  Learn how the program works <ArrowRight className="h-4 w-4" />
                 </Link>
               </section>
             </div>
@@ -643,7 +643,7 @@ function Welcome() {
           .sm-panel h2 span{ color: #2B8FA3; }
           .sm-panel p{
             color: #4A5971;
-            font-size: 13px;
+            font-size: 15px;
             line-height: 1.6;
             margin: 0;
           }
@@ -778,18 +778,24 @@ function Welcome() {
             place-items:center;
             border-radius:10px;
           }
-          .sm-feature-line-icon{ width:28px; height:28px; }
+          .sm-feature-line-icon{ width:32px; height:32px; }
           .sm-feature-line strong{
             display:block;
             color:#10213F;
-            font-size:12px;
-            line-height:1.25;
+            font-size:14px;
+            line-height:1.3;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
           }
           .sm-feature-line small{
             display:block;
             color:#5F6E84;
-            font-size:11px;
-            line-height:1.3;
+            font-size:13px;
+            line-height:1.35;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
           }
           .sm-text-link{
             display:inline-flex;
@@ -797,7 +803,7 @@ function Welcome() {
             gap:7px;
             color:#1D7E95;
             text-decoration:none;
-            font-size:12px;
+            font-size:14px;
             font-weight:800;
             margin-top:18px;
           }
