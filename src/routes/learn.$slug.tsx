@@ -16,7 +16,7 @@ const ARTICLES: Record<string, Article> = {
     body: [
       {
         h: "The short answer",
-        p: "A Movement Score is a single 0–100 number that summarizes how well you move across a short set of functional tests — squat, hinge, balance, lunge, and overhead reach. SmartyMove generates it from your phone camera in about 8 minutes.",
+        p: "A Movement Score is a single 0–100 number that summarizes how well you move across a short set of functional tests — deep squat, hip hinge, active straight-leg raise, shoulder mobility, and in-line lunge. SmartyMove generates it from your phone camera in about 5 minutes.",
       },
       {
         h: "What gets measured",
@@ -48,7 +48,7 @@ const ARTICLES: Record<string, Article> = {
       },
       {
         h: "What SmartyMove screens",
-        p: "Squat, hinge, single-leg balance, lunge, overhead reach, plus ankle dorsiflexion, hip mobility, shoulder mobility, bridge, and wall-slide sub-tests. Each one targets a specific joint and motor pattern.",
+        p: "Deep squat, hip hinge, active straight-leg raise, shoulder mobility, and in-line lunge. Each one targets a specific joint and motor pattern.",
       },
       {
         h: "What you do with the results",
