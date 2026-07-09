@@ -28,10 +28,6 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
   hinge: [
     { view: "side",  label: "Side view",  cue: "Stand sideways to the camera so we can see the line from your head to your hips.", detects: ["spine angle", "true hip flexion", "knee bend compensation"] },
   ],
-  balance: [
-    { view: "front", label: "Front view", cue: "Face the camera, hurdle set at your shin height, dowel across your shoulders.", detects: ["pelvis staying level", "L/R stance leg asymmetry"] },
-    { view: "side",  label: "Side view",  cue: "Now stand sideways so we can see the stepping leg clear the hurdle.", detects: ["forward trunk lean", "hip flexion range", "loss of stance-leg alignment"] },
-  ],
   lunge: [
     { view: "side",  label: "Side view",  cue: "Stand sideways with both feet in line on a 2×6 board. Dowel behind your back (head, spine, tailbone touching).", detects: ["front knee tracks over foot", "back knee touches the board behind the front heel", "trunk stays upright"] },
     { view: "front", label: "Front view", cue: "Now face the camera on the board and repeat the lunge on the same leg.", detects: ["loss of balance", "torso rotation", "front-knee drift (valgus / varus)"] },
@@ -39,38 +35,8 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
   overhead: [
     { view: "front", label: "Front view", cue: "Face the camera. Make a fist around your thumb on each hand.", detects: ["fist-to-fist distance (target: within one hand length)", "L/R shoulder symmetry"] },
   ],
-  ankle_df: [
-    { view: "side",  label: "Side view",  cue: "Kneel sideways to the camera.", detects: ["tibia forward lean", "heel lift"] },
-    { view: "front", label: "Front view", cue: "Now kneel facing the camera.", detects: ["knee collapsing inward (valgus)"] },
-  ],
-  knee_sld: [
-    { view: "front", label: "Front view", cue: "Face the camera on your step.", detects: ["knee valgus", "pelvic drop", "trunk lateral lean"] },
-    { view: "side",  label: "Side view",  cue: "Turn sideways for the second set.", detects: ["trunk forward pitch", "heel rise", "descent control"] },
-  ],
   hip_abd: [
     { view: "side",  label: "Side view",  cue: "Lie on your back with the camera on your side. Arms flat, legs straight, toes up.", detects: ["moving-leg ankle height vs. mid-thigh of the down leg", "opposite-leg staying flat", "loss of neutral pelvis"] },
-  ],
-  bridge_hold: [
-    { view: "side",  label: "Side view",  cue: "Get face-down with hands under your shoulders (men: thumbs at forehead; women: thumbs at chin). Feet together.", detects: ["body rises as one unit — no lag in the hips", "chest/knees leave the floor together", "no lower-back sagging"] },
-  ],
-  rotary_stability: [
-    { view: "side",  label: "Side view",  cue: "Get on all fours over a 2×6 board with your knees under your hips and hands under your shoulders. Extend your same-side arm and leg.", detects: ["arm and leg extend in line with the torso", "touch elbow to knee over the board", "no loss of balance"] },
-  ],
-  sl_balance: [
-    { view: "front", label: "Front view", cue: "Face the camera, arms crossed on your chest, feet under your hips. Lift one foot just off the floor and hold.",
-      detects: ["pelvic drop on the lifted side", "trunk lateral lean", "stance-knee wobble"] },
-    { view: "side",  label: "Side view",  cue: "Now turn sideways so your full profile is visible. Same leg lifted, same 10-second hold.",
-      detects: ["forward trunk pitch (>20° from vertical)", "hip flexion substitution"] },
-  ],
-  wall_slide: [
-    { view: "side",  label: "Side view",  cue: "Stand sideways to the camera against the wall.", detects: ["lumbar arch", "wall contact quality"] },
-    { view: "front", label: "Front view", cue: "Now face the camera against the wall.", detects: ["L/R shoulder height asymmetry"] },
-  ],
-  elbow_rom: [
-    { view: "front", label: "Front view", cue: "Face the camera.", detects: ["range of motion", "upper-arm compensation"] },
-  ],
-  wrist_rom: [
-    { view: "front", label: "Front view", cue: "Face the camera.", detects: ["wrist flexion/extension range (partly self-reported)"] },
   ],
 };
 
