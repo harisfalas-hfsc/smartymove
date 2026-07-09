@@ -253,6 +253,38 @@ function clearingPrompt(testId: string): { intro: string; action: string; questi
           "Stand tall. Press both palms together behind your back — one arm reaching over the top of your shoulder down your spine, the other reaching up from below.",
         question: "Do you feel any sharp pain or pinching in either shoulder?",
       };
+    case "squat":
+      return {
+        intro:
+          "Quick pain check before the overhead squat. Pain is a flag only — the rest of your scan will continue either way.",
+        action:
+          "Stand tall, feet shoulder-width, arms overhead. Slowly squat down as far as feels safe, then stand back up once.",
+        question: "Did you feel any sharp pain in your knees, hips, back or shoulders during that squat?",
+      };
+    case "hinge":
+      return {
+        intro:
+          "Quick pain check before the hip hinge. Pain is a flag only — the rest of your scan will continue either way.",
+        action:
+           "Stand tall, soft knees. Push your hips back and slide your hands down your thighs toward your knees, then stand back up.",
+        question: "Did you feel any sharp pain in your low back, hips or hamstrings during that hinge?",
+      };
+    case "hip_abd":
+      return {
+        intro:
+          "Quick pain check before the active straight-leg raise. Pain is a flag only — the rest of your scan will continue either way.",
+        action:
+          "Lie on your back and lift one straight leg toward the ceiling as high as feels safe, then lower. Repeat on the other side.",
+        question: "Did you feel any sharp pain in your low back, hip or hamstring on either side?",
+      };
+    case "lunge":
+      return {
+        intro:
+          "Quick pain check before the in-line lunge. Pain is a flag only — the rest of your scan will continue either way.",
+        action:
+          "Take a split stance, hands behind your head. Lower your back knee toward the floor and stand back up. Try one rep on each side.",
+        question: "Did you feel any sharp pain in your knees, hips, back or ankles on either side?",
+      };
     case "bridge_hold":
       return {
         intro:
