@@ -141,33 +141,6 @@ function Pricing() {
           </CardContent>
         </Card>
 
-        <Card className="border-2 border-primary">
-          <CardContent className="p-6">
-            <div className="text-center space-y-3">
-              <Play className="w-12 h-12 text-primary mx-auto" />
-              <h2 className="text-2xl font-bold text-foreground">
-                How <span className="text-primary">It Works</span>
-              </h2>
-              <div className="space-y-3 text-left pt-2">
-                {steps.map(({ n, Icon, color, title, body }) => (
-                  <div key={n} className="flex items-start gap-3">
-                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 text-sm font-extrabold text-primary">
-                      {n}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Icon className={`w-4 h-4 ${color}`} />
-                        <span className="text-sm font-bold text-foreground">{title}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{body}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
       </main>
 
       {/* DESKTOP — SmartyDiet-inspired layout */}
