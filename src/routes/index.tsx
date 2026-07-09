@@ -214,7 +214,7 @@ function Welcome() {
         onBack={mode === "intro" ? undefined : () => setMode("intro")}
       />
       <main
-        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "sm-home-shell max-w-[430px] lg:max-w-[1240px] lg:px-6" : "max-w-[420px]"}`}
+        className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "sm-home-shell lg:flex lg:flex-col max-w-[430px] lg:max-w-[1240px] lg:px-6" : "max-w-[420px]"}`}
       >
         {mode === "intro" ? (
           <>
