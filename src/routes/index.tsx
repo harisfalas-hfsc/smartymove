@@ -303,7 +303,7 @@ function Welcome() {
                 </Link>
               </section>
             </div>
-          </>
+          </div>
         ) : mode === "signup" ? (
           <form onSubmit={submit} className="mt-2 flex flex-col gap-3">
             <h2
