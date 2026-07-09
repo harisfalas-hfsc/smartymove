@@ -279,23 +279,6 @@ function Welcome() {
                 </Link>
               </section>
 
-              <section className="sm-panel sm-panel-program sm-border-program">
-                <div className="sm-card-topline"><span /> Train <IconBubble Icon={Dumbbell} /></div>
-                <h2>Movement <span>Workouts</span></h2>
-                <p>
-                  A corrective exercise engine that builds Training Sessions from your real movement
-                  limits — no guessing, no random routines.
-                </p>
-                <div className="sm-tile-grid">
-                  <MiniTile Icon={Activity} label="Assess" color="#38A5C7" />
-                  <MiniTile Icon={Dumbbell} label="Corrective Workouts" color="#4FB286" />
-                  <MiniTile Icon={HeartPulse} label="Progress" color="#7A3EBA" />
-                  <MiniTile Icon={CalendarCheck} label="Retest" color="#FF6B4A" />
-                </div>
-                <Link to="/about" className="sm-text-link">
-                  See how workouts are built <ArrowRight className="h-4 w-4" />
-                </Link>
-              </section>
 
               <section className="sm-panel sm-panel-tools sm-border-tools">
                 <div className="sm-card-topline"><span /> Routine <IconBubble Icon={Apple} /></div>
