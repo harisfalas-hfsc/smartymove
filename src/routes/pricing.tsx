@@ -85,7 +85,9 @@ function Pricing() {
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
       <SiteHeader showBack />
-      <main className="mx-auto w-full max-w-[760px] lg:max-w-6xl flex-1 px-4 lg:px-8 pb-6 pt-4 lg:pt-8 space-y-6">
+
+      {/* MOBILE — untouched */}
+      <main className="mx-auto w-full max-w-[760px] flex-1 px-4 pb-6 pt-4 space-y-6 lg:hidden">
         {paidReturn && (
           <div className="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -167,6 +169,118 @@ function Pricing() {
         </Card>
 
       </main>
+
+      {/* DESKTOP — SmartyDiet-inspired layout */}
+      <main className="hidden lg:block flex-1 w-full">
+        <div className="mx-auto w-full max-w-[1080px] px-6 pt-16 pb-20">
+          {paidReturn && (
+            <div className="mb-8 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Payment received — unlocking your scan…
+            </div>
+          )}
+
+          <div className="text-center">
+            <span className="inline-block text-[11px] font-extrabold tracking-[0.28em] uppercase text-primary">PRICING</span>
+            <h1 className="mt-4 text-[52px] leading-[1.05] font-extrabold tracking-tight text-[#0f172a]">
+              Simple pricing. <span className="text-primary">No subscription.</span>
+            </h1>
+            <p className="mt-5 text-lg text-slate-500">
+              Pay once, get your Movement Screen + 2-week program. Come back only when you want to rescan.
+            </p>
+          </div>
+
+          <div className="mt-14 relative rounded-[32px] border-2 border-primary bg-white p-12">
+            <div className="flex items-center gap-4">
+              <div className="flex-1 inline-flex items-center gap-3 rounded-full border-2 border-primary/40 px-6 py-3">
+                <Camera className="h-4 w-4 text-primary" />
+                <span className="text-[11px] font-extrabold tracking-[0.28em] uppercase text-primary">ONE-TIME PAYMENT</span>
+              </div>
+              <div className="grid place-items-center h-14 w-14 rounded-full border-2 border-primary/40 bg-primary/5">
+                <Camera className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+
+            <div className="mt-10 flex items-baseline gap-3">
+              <span className="text-[64px] leading-none font-extrabold text-[#0f172a]">€{SCAN_PRICE_EUR.toFixed(2)}</span>
+              <span className="text-[32px] font-extrabold text-primary">once.</span>
+            </div>
+            <p className="mt-4 text-slate-500 text-lg">
+              One personalized Movement Screen + 2-week corrective program. Yours to keep. No subscription, no hidden add-ons, no monthly fee.
+            </p>
+
+            <div className="mt-10 grid grid-cols-2 gap-8">
+              <div className="rounded-2xl bg-primary/5 border border-primary/20 p-6">
+                <h3 className="text-xs font-extrabold tracking-[0.2em] uppercase text-[#0f172a]">Your scan includes</h3>
+                <div className="mt-4 space-y-3">
+                  {perks.slice(0, 4).map(({ Icon, label }) => (
+                    <div key={label} className="flex items-center gap-3 rounded-xl bg-white border border-slate-200 px-4 py-3">
+                      <Icon className="w-5 h-5 text-primary shrink-0" />
+                      <span className="text-sm font-semibold text-[#0f172a]">{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-primary/5 border border-primary/20 p-6">
+                <h3 className="text-xs font-extrabold tracking-[0.2em] uppercase text-[#0f172a]">Also included</h3>
+                <div className="mt-4 space-y-3">
+                  {perks.slice(4).map(({ Icon, label }) => (
+                    <div key={label} className="flex items-center gap-3 rounded-xl bg-white border border-slate-200 px-4 py-3">
+                      <Icon className="w-5 h-5 text-primary shrink-0" />
+                      <span className="text-sm font-semibold text-[#0f172a]">{label}</span>
+                    </div>
+                  ))}
+                  {u && (
+                    <div className="rounded-xl bg-white border border-slate-200 px-4 py-3 text-sm text-slate-600">
+                      You have <strong className="text-[#0f172a]">{credits}</strong> scan{credits === 1 ? "" : "s"} available.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 flex items-center gap-4">
+              <Button size="lg" onClick={openBuyScan} className="h-14 px-8 text-base rounded-2xl">
+                <Camera className="w-5 h-5 mr-2" /> Buy one scan · €{SCAN_PRICE_EUR.toFixed(2)}
+              </Button>
+              <p className="text-sm text-slate-500">
+                Not medical advice. Consult a professional for medical conditions.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-10 rounded-[32px] border-2 border-primary bg-white p-12">
+            <div className="flex items-center gap-4">
+              <div className="flex-1 inline-flex items-center gap-3 rounded-full border-2 border-primary/40 px-6 py-3">
+                <Play className="h-4 w-4 text-primary" />
+                <span className="text-[11px] font-extrabold tracking-[0.28em] uppercase text-primary">HOW IT WORKS</span>
+              </div>
+              <div className="grid place-items-center h-14 w-14 rounded-full border-2 border-primary/40 bg-primary/5">
+                <Play className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+
+            <h2 className="mt-10 text-[34px] leading-tight font-extrabold text-[#0f172a]">
+              From scan <span className="text-primary">to program.</span>
+            </h2>
+            <p className="mt-3 text-slate-500">Four steps. One payment. No subscription.</p>
+
+            <div className="mt-10 grid grid-cols-4 gap-6">
+              {steps.map(({ n, Icon, title, body }) => (
+                <div key={n} className="text-center">
+                  <div className={`text-[56px] leading-none font-extrabold ${n === 1 ? "text-orange-500" : n === 2 ? "text-blue-500" : n === 3 ? "text-purple-500" : "text-emerald-500"}`}>{n}</div>
+                  <div className="mt-2 flex items-center justify-center gap-2">
+                    <Icon className="w-4 h-4 text-primary" />
+                    <span className="text-base font-bold text-[#0f172a]">{title}</span>
+                  </div>
+                  <div className="mt-2 text-sm text-slate-500">{body}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+
       <SiteFooter />
 
       {buyScanElement}
