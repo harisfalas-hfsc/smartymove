@@ -64,8 +64,8 @@ const SECTIONS: { h: string; p: string }[] = [
     p: "Pain, injury, and lost performance rarely start where they hurt. A stiff ankle wrecks a squat, a sleepy glute overloads a low back, and a tight thoracic spine stresses a shoulder. Movement intelligence surfaces those weak links so training corrects the cause, not the symptom.",
   },
   {
-    h: "The eight movement patterns SmartyMove screens",
-    p: "Deep squat, hurdle step, in-line lunge, active straight-leg raise, shoulder mobility, trunk-stability push-up, rotary stability, and hip-hinge. Together they cover full-body mobility, stability, and motor control — the same domains a Functional Movement Screen assesses in a clinic, delivered by a phone camera.",
+    h: "The five movement patterns SmartyMove screens",
+    p: "Deep squat, hip hinge, active straight-leg raise, shoulder mobility, and in-line lunge. Together they cover full-body mobility, stability, and motor control — the same domains a Functional Movement Screen assesses in a clinic, delivered by a phone camera.",
   },
   {
     h: "How the Smarty Movement Score™ is calculated",

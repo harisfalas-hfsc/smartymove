@@ -71,7 +71,7 @@ function ScreenIndex() {
         iconColor="#0E7C86"
         iconBg="#E6F5F5"
         title="SmartyMove Scan"
-        subtitle="A camera-based assessment. 8 movement patterns — done in about 8 minutes from your phone or laptop."
+        subtitle="A camera-based assessment. 5 movement patterns — done in about 5 minutes from your phone or laptop."
       >
         <div className="mt-1 rounded-2xl p-3 text-center text-sm" style={{ background: "#F1F7F8", color: "#14213A" }}>
           {accessLoading ? (
@@ -98,7 +98,7 @@ function ScreenIndex() {
       </SmartyCard>
 
       {/* CORE TESTS */}
-      <SmartyCard Icon={ListChecks} iconColor="#1D4ED8" iconBg="#DBEAFE" title="The 8 movement patterns" subtitle="Tap any pattern to see the reference photo, setup, cues, and common mistakes before you scan.">
+      <SmartyCard Icon={ListChecks} iconColor="#1D4ED8" iconBg="#DBEAFE" title="The 5 movement patterns" subtitle="Tap any pattern to see the reference photo, setup, cues, and common mistakes before you scan.">
         <div className="mt-2 space-y-1.5">
           {CORE_TESTS.map((t, i) => {
             const palette = ["#0E7C86", "#7A3EBA", "#C2410C", "#0F766E", "#1D4ED8", "#B45309", "#0369A1"][i % 7];
@@ -129,7 +129,7 @@ function ScreenIndex() {
           onClick={() => { setPreviewFocus(undefined); setPreviewOpen(true); }}
           className="mt-3 h-10 w-full rounded-xl bg-secondary text-sm font-semibold text-foreground"
         >
-          Preview all 8 patterns
+          Preview all 5 patterns
         </button>
       </SmartyCard>
 
@@ -175,7 +175,7 @@ function ScreenIndex() {
 }
 
 const SCREEN_FAQ = [
-  { q: "How long does a scan take?", a: "About 8 minutes for the 8 movement patterns." },
+  { q: "How long does a scan take?", a: "About 5 minutes for the 5 movement patterns." },
   { q: "Do I need any equipment?", a: "No. Just your phone or laptop camera, a bit of clear floor space, and fitted clothes so your joints are visible." },
   { q: "What happens after the scan?", a: "You get a Movement Score, Movement Age, sub-scores, and a 2-week corrective program built from your weakest areas." },
   { q: "Is my video uploaded?", a: "No. Pose detection runs on your device. Only numeric scores and joint-angle summaries are saved to your account." },

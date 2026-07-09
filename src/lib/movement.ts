@@ -27,7 +27,6 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
   ],
   hinge: [
     { view: "side",  label: "Side view",  cue: "Stand sideways to the camera so we can see the line from your head to your hips.", detects: ["spine angle", "true hip flexion", "knee bend compensation"] },
-    { view: "front", label: "Front view", cue: "Now face the camera straight on.", detects: ["lateral trunk shift", "pelvic asymmetry"] },
   ],
   balance: [
     { view: "front", label: "Front view", cue: "Face the camera, hurdle set at your shin height, dowel across your shoulders.", detects: ["pelvis staying level", "L/R stance leg asymmetry"] },
@@ -35,7 +34,6 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
   ],
   lunge: [
     { view: "side",  label: "Side view",  cue: "Stand sideways with both feet in line on a 2×6 board. Dowel behind your back (head, spine, tailbone touching).", detects: ["front knee tracks over foot", "back knee touches the board behind the front heel", "trunk stays upright"] },
-    { view: "front", label: "Front view", cue: "Now face the camera on the board and repeat, then switch legs.", detects: ["loss of balance", "torso rotation", "front-knee drift"] },
   ],
   overhead: [
     { view: "front", label: "Front view", cue: "Face the camera. Make a fist around your thumb on each hand.", detects: ["fist-to-fist distance (target: within one hand length)", "L/R shoulder symmetry"] },
@@ -97,18 +95,14 @@ export const TEST_VIEWS: Record<string, TestView[]> = {
 export const CORE_TESTS = [
   { id: "squat",            name: "Deep Squat",                 focus: ["mobility", "quality"],  duration: 10 },
   { id: "hinge",            name: "Hip Hinge",                  focus: ["mobility", "quality"],  duration: 10 },
-  { id: "balance",          name: "Hurdle Step",                focus: ["stability", "balance"], duration: 10 },
-  { id: "lunge",            name: "In-line Lunge",              focus: ["mobility", "stability"], duration: 10 },
-  { id: "overhead",         name: "Shoulder Mobility",          focus: ["mobility"],              duration: 10 },
   { id: "hip_abd",          name: "Active Straight-Leg Raise",  focus: ["mobility"],              duration: 10 },
-  { id: "bridge_hold",      name: "Trunk Stability Push-Up",    focus: ["stability"],             duration: 10 },
-  { id: "rotary_stability", name: "Rotary Stability",           focus: ["stability", "quality"],  duration: 10 },
-  { id: "sl_balance",       name: "Single-Leg Balance",         focus: ["balance", "stability"], duration: 10 },
+  { id: "overhead",         name: "Shoulder Mobility",          focus: ["mobility"],              duration: 10 },
+  { id: "lunge",            name: "In-line Lunge",              focus: ["mobility", "stability"], duration: 10 },
 ] as const;
 
 /** Tests that surface a "Did you feel pain during that pattern?" prompt.
  *  Pain forces the pattern to score 0 (marked invalid + excluded from sub-scores). */
-export const CLEARING_TESTS = new Set(["overhead", "bridge_hold", "rotary_stability"]);
+export const CLEARING_TESTS = new Set(["overhead"]);
 
 /**
  * Tests that must be captured and scored per side (right, then left).
@@ -118,12 +112,9 @@ export const CLEARING_TESTS = new Set(["overhead", "bridge_hold", "rotary_stabil
  * as a single movement with the sides moving together.
  */
 export const BILATERAL_TESTS = new Set([
-  "balance",           // Hurdle Step
   "lunge",             // In-line Lunge
   "overhead",          // Shoulder Mobility
   "hip_abd",           // Active Straight-Leg Raise
-  "rotary_stability",  // Rotary Stability
-  "sl_balance",        // Single-Leg Balance
 ]);
 
 /** Kept for back-compat with older exports; the fixed 8-pattern scan no

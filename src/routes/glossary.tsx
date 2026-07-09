@@ -7,10 +7,10 @@ const URL = "https://smartymove.com/glossary";
 type Term = { term: string; definition: string; id: string };
 
 const TERMS: Term[] = [
-  { id: "smarty-movement-score", term: "Smarty Movement Score™", definition: "A single 0–100 score summarizing movement quality across the eight SmartyMove tests. Weighted from Mobility (30%), Stability (30%), Balance (20%) and Movement Quality (20%)." },
+  { id: "smarty-movement-score", term: "Smarty Movement Score™", definition: "A single 0–100 score summarizing movement quality across the five SmartyMove tests. Weighted from Mobility (30%), Stability (30%), Balance (20%) and Movement Quality (20%)." },
   { id: "smarty-movement-age", term: "Smarty Movement Age™", definition: "An age-equivalent derived from the Smarty Movement Score™. Answers whether a body moves younger or older than its chronological age." },
   { id: "smarty-mobility-index", term: "Smarty Mobility Index™", definition: "Sub-score reflecting joint range of motion across the squat, hinge, shoulder mobility, active straight-leg raise and in-line lunge patterns." },
-  { id: "smarty-stability-index", term: "Smarty Stability Index™", definition: "Sub-score reflecting motor control and joint stability across hurdle step, in-line lunge, trunk-stability push-up and rotary stability." },
+  { id: "smarty-stability-index", term: "Smarty Stability Index™", definition: "Sub-score reflecting motor control and joint stability across the in-line lunge and hip-hinge patterns." },
   { id: "smarty-movement-intelligence", term: "Smarty Movement Intelligence™", definition: "The combined measurable capacity of mobility, stability, balance and motor control that determines how efficiently and safely a body moves." },
   { id: "functional-movement-screen", term: "Functional Movement Screen (FMS)", definition: "Standardized set of seven functional movement tests used by clinicians to identify limitations and asymmetries. SmartyMove is the AI-powered app version." },
   { id: "movement-pattern", term: "Movement Pattern", definition: "A coordinated, whole-body movement — squat, hinge, lunge, push, pull, rotation, gait — used to expose mobility, stability and motor-control deficits." },

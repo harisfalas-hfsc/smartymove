@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, useSearch, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, CheckCircle2, Ruler, StretchHorizontal, MoveVertical, Package, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Ruler, StretchHorizontal, Package, ShieldCheck } from "lucide-react";
 import { getFirstIncompleteOnboardingPath, isOnboardingComplete, setOnboardingNextPath, updateUser, useUser } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,9 +23,9 @@ const tibialSchema = z
   .min(20, { message: "That looks too small — measure again in centimetres." })
   .max(70, { message: "That looks too large — measure again in centimetres." });
 
-type StepId = "tibia" | "lunge_tape" | "hurdle_mark" | "heel_lift";
+type StepId = "tibia" | "lunge_tape" | "heel_lift";
 
-const STEP_ORDER: StepId[] = ["tibia", "lunge_tape", "hurdle_mark", "heel_lift"];
+const STEP_ORDER: StepId[] = ["tibia", "lunge_tape", "heel_lift"];
 
 function SetupScreen() {
   const u = useUser();
@@ -38,7 +38,6 @@ function SetupScreen() {
   const [confirmed, setConfirmed] = useState<Record<StepId, boolean>>({
     tibia: !!existing,
     lunge_tape: false,
-    hurdle_mark: false,
     heel_lift: false,
   });
   const [stepIdx, setStepIdx] = useState(0);
@@ -119,7 +118,7 @@ function SetupScreen() {
           <StepShell
             icon={<Ruler className="h-6 w-6" />}
             title="Measure your tibial height"
-            subtitle="This one number sets your inline-lunge spacing and hurdle-step height. You only ever enter it once."
+            subtitle="This one number sets your inline-lunge foot spacing. You only ever enter it once."
           >
             <ol className="mb-4 space-y-2 text-sm text-foreground/80">
               <li><strong>1.</strong> Stand barefoot on a hard floor.</li>
@@ -178,30 +177,6 @@ function SetupScreen() {
               checked={confirmed.lunge_tape}
               onChange={(v) => setConfirmed((c) => ({ ...c, lunge_tape: v }))}
               label="Marks are placed and measured"
-            />
-          </StepShell>
-        )}
-
-        {step === "hurdle_mark" && (
-          <StepShell
-            icon={<MoveVertical className="h-6 w-6" />}
-            title="Mark the hurdle height on a wall"
-            subtitle="You'll step over an imaginary line at this height during the Hurdle Step test."
-          >
-            <ol className="mb-4 space-y-2 text-sm text-foreground/80">
-              <li>
-                <strong>1.</strong> Place a strip of tape on a wall or door frame at exactly{" "}
-                <span className="rounded-lg bg-primary/10 px-1.5 py-0.5 font-bold text-primary">
-                  {tibiaCm} cm
-                </span>{" "}
-                from the floor.
-              </li>
-              <li><strong>2.</strong> Keep it horizontal — that's your hurdle height.</li>
-            </ol>
-            <ConfirmToggle
-              checked={confirmed.hurdle_mark}
-              onChange={(v) => setConfirmed((c) => ({ ...c, hurdle_mark: v }))}
-              label="Hurdle height is marked"
             />
           </StepShell>
         )}

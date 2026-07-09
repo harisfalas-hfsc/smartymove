@@ -58,7 +58,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: "What is a movement screen and why does it matter?",
-    a: "A movement screen is a short set of standardized functional tests (squat, hinge, single-leg balance, in-line lunge, overhead reach, shoulder mobility, active straight-leg raise, trunk-stability push-up, rotary stability) that reveals where your body is restricted, unstable, or compensating. It matters because pain and injury usually start from the weakest link in your movement chain — not the spot that hurts.",
+    a: "A movement screen is a short set of standardized functional tests (deep squat, hip hinge, active straight-leg raise, shoulder mobility, in-line lunge) that reveals where your body is restricted, unstable, or compensating. It matters because pain and injury usually start from the weakest link in your movement chain — not the spot that hurts.",
   },
   {
     q: "How does SmartyMove score my movement?",
@@ -78,7 +78,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: "How is SmartyMove different from a Functional Movement Screen (FMS)?",
-    a: "The FMS is a clinician-scored, in-person seven-test protocol. SmartyMove is the AI-powered version: eight functional movement patterns scored automatically by your phone camera, delivered as an app, plus a corrective exercise engine that acts on the results. Same principles, wider access.",
+    a: "The FMS is a clinician-scored, in-person seven-test protocol. SmartyMove is the AI-powered version: five functional movement patterns scored automatically by your phone camera, delivered as an app, plus a corrective exercise engine that acts on the results. Same principles, wider access.",
   },
   {
     q: "Does SmartyMove work for knee pain, low back pain, or starting to run?",
@@ -86,7 +86,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: "Which movement patterns does SmartyMove test?",
-    a: "SmartyMove tests eight movement patterns: deep squat, hurdle step, in-line lunge, active straight-leg raise, shoulder mobility, trunk stability push-up, rotary stability, and hip-hinge. Together they cover full-body mobility, stability, balance, and motor control.",
+    a: "SmartyMove tests five movement patterns: deep squat, hip hinge, active straight-leg raise, shoulder mobility, and in-line lunge. Together they cover full-body mobility, stability, and motor control.",
   },
   {
     q: "How often should I re-scan?",

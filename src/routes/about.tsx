@@ -48,13 +48,10 @@ function About() {
 
   const eightPatterns = [
     "Deep squat",
-    "Hurdle step",
-    "In-line lunge",
+    "Hip hinge",
     "Active straight-leg raise",
     "Shoulder mobility",
-    "Trunk stability push-up",
-    "Rotary stability",
-    "Hip-hinge",
+    "In-line lunge",
   ];
 
   return (
@@ -146,7 +143,7 @@ function About() {
                       </div>
                     );
                     return isScreen ? (
-                      <Link key={n} to="/movement-patterns" aria-label="See the 8 movement patterns we test">
+                      <Link key={n} to="/movement-patterns" aria-label="See the 5 movement patterns we test">
                         {row}
                       </Link>
                     ) : (
@@ -154,17 +151,17 @@ function About() {
                     );
                   })}
                 </div>
-                {/* Methodology mini-card — 8 movement patterns */}
+                {/* Methodology mini-card — 5 movement patterns */}
                 <Link
                   to="/movement-patterns"
                   className="block rounded-2xl border-2 border-primary/40 bg-primary/5 p-4 text-left transition hover:border-primary hover:bg-primary/10"
                 >
                   <div className="flex items-center gap-2">
                     <ListChecks className="w-5 h-5 text-primary" />
-                    <span className="text-sm font-extrabold text-foreground">The 8 Movement Patterns</span>
+                    <span className="text-sm font-extrabold text-foreground">The 5 Movement Patterns</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Our methodology: 8 functional tests scored by your camera — full-body mobility, stability, balance & control.
+                    Our methodology: 5 functional tests scored by your camera — full-body mobility, stability & control.
                   </p>
                   <ul className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
                     {eightPatterns.map((p, i) => (

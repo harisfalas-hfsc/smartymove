@@ -77,7 +77,7 @@ function Pricing() {
 
   const steps = [
     { n: 1, Icon: ShoppingBag, color: "text-orange-500", title: "Buy a scan", body: `One-time €${SCAN_PRICE_EUR.toFixed(2)}. No subscription.` },
-    { n: 2, Icon: Camera, color: "text-blue-500", title: "Run your Movement Screen", body: "Phone or laptop camera. About 8 minutes for the 8 movement patterns." },
+    { n: 2, Icon: Camera, color: "text-blue-500", title: "Run your Movement Screen", body: "Phone or laptop camera. About 5 minutes for the 5 movement patterns." },
     { n: 3, Icon: Calendar, color: "text-purple-500", title: "Follow your 2-week plan", body: "Mark sessions complete as you go." },
     { n: 4, Icon: TrendingUp, color: "text-emerald-500", title: "Rescan & progress", body: "After 14 days, update your program." },
   ];
