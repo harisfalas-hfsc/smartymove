@@ -217,8 +217,8 @@ function Welcome() {
         className={`mx-auto w-full flex-1 px-5 pb-6 pt-5 ${mode === "intro" ? "sm-home-shell lg:flex lg:flex-col max-w-[430px] lg:max-w-[1240px] lg:px-6" : "max-w-[420px]"}`}
       >
         {mode === "intro" ? (
-          <>
-            <div className="sm-wellness-grid">
+          <div className="lg:flex lg:flex-col lg:flex-1 lg:min-h-0">
+            <div className="sm-wellness-grid lg:flex-1 lg:min-h-0">
               <section className="sm-panel sm-panel-hero sm-border-hero">
                 <div className="sm-eyebrow"><Sparkles className="h-3 w-3" /> Movement diagnostic</div>
                 <h1 className="sm-wellness-title">
