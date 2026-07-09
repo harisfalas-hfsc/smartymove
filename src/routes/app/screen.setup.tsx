@@ -118,7 +118,7 @@ function SetupScreen() {
           <StepShell
             icon={<Ruler className="h-6 w-6" />}
             title="Measure your tibial height"
-            subtitle="This one number sets your inline-lunge spacing and hurdle-step height. You only ever enter it once."
+            subtitle="This one number sets your inline-lunge foot spacing. You only ever enter it once."
           >
             <ol className="mb-4 space-y-2 text-sm text-foreground/80">
               <li><strong>1.</strong> Stand barefoot on a hard floor.</li>
