@@ -918,7 +918,7 @@ function Runner() {
                     </button>
                   </div>
                   <p className="mt-3 text-xs text-muted-foreground">
-                    If you said yes: this pattern is scored 0 and skipped. Please consult a doctor or physiotherapist before loading this movement.
+                    If you said yes: this pattern is scored 0 and flagged for a professional review. The rest of your scan continues — pain is a flag, not a stop.
                   </p>
                 </div>
               );
