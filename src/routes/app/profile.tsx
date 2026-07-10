@@ -263,14 +263,6 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
             </div>
           )}
         </div>
-        <button
-          onClick={() => {
-            void signOutUser().finally(() => navigate({ to: "/" }));
-          }}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-secondary p-3 font-semibold text-foreground"
-        >
-          <LogOut className="h-4 w-4" /> Sign out
-        </button>
       </div>
     </div>
   );
