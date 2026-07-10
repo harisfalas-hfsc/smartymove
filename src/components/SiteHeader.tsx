@@ -57,12 +57,12 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
             </button>
           )}
           <Link
-            to="/"
+            to={user ? "/app" : "/"}
             aria-label="SmartyMove home"
             className="text-lg font-extrabold tracking-tight leading-none"
             style={{ textDecoration: "none" }}
             onClick={() => {
-              if (pathname === "/") {
+              if (pathname === "/" || pathname === "/app" || pathname === "/app/") {
                 window.dispatchEvent(new CustomEvent("smartymove:home"));
               }
             }}
