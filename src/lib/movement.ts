@@ -1,4 +1,4 @@
-import type { Joint, TestResult, ScreenSession } from "./store";
+import type { Joint, TestResult, ScreenSession, ParqAnswers, Questionnaire, PainArea } from "./store";
 
 /**
  * Per-test camera view definition. Every core/conditional test can declare
@@ -110,7 +110,28 @@ export function scoreFromRange(value: number, ideal: number, tolerance: number):
   return 1;
 }
 
-export function computeSession(results: TestResult[], conditional: Joint[], age: number): ScreenSession {
+/**
+ * Map body-area labels from the onboarding readiness questionnaire onto
+ * the Joint enum the corrective engine works with. Keeps pain reports
+ * from the questionnaire in the same currency as joint-focus picks so
+ * `analyzeScan` boosts the matching focus areas.
+ */
+const PAIN_AREA_TO_JOINT: Record<PainArea, Joint> = {
+  neck: "shoulder",
+  shoulders: "shoulder",
+  low_back: "back",
+  hips: "hip",
+  knees: "knee",
+  ankles_feet: "ankle",
+  wrists_elbows: "wrist",
+};
+
+export function computeSession(
+  results: TestResult[],
+  conditional: Joint[],
+  age: number,
+  context?: { parq?: ParqAnswers; questionnaire?: Questionnaire },
+): ScreenSession {
   // Per-test contribution map for the confirmed 5-test SmartyMove Scan.
   // Each entry is [subScoreKey, weight]. Shoulder Mobility ("overhead") is
   // camera-estimated so it contributes to Mobility and Quality at half weight
@@ -202,7 +223,31 @@ export function computeSession(results: TestResult[], conditional: Joint[], age:
   const redFlags = results
     .filter(r => r.valid !== false && r.score === 0)
     .map(r => r.id);
-  return { date: new Date().toISOString(), overall, sub, movementAge, tests: results, conditional, redFlags };
+  // Merge questionnaire pain-area reports into the conditional joint list
+  // so the corrective engine boosts the matching focus areas. Deduped and
+  // capped at 2 to match `resolveAreas`.
+  const mergedConditional: Joint[] = (() => {
+    const set = new Set<Joint>(conditional);
+    for (const p of context?.questionnaire?.painAreas ?? []) {
+      const j = PAIN_AREA_TO_JOINT[p];
+      if (j) set.add(j);
+    }
+    // Bone/joint red flag from PAR-Q → carry through without inventing a
+    // specific area (we don't know which). Kept as a snapshot only.
+    const list = Array.from(set).filter((j) => j !== "none");
+    return list.slice(0, 2);
+  })();
+  return {
+    date: new Date().toISOString(),
+    overall,
+    sub,
+    movementAge,
+    tests: results,
+    conditional: mergedConditional.length ? mergedConditional : conditional,
+    redFlags,
+    parqAtScan: context?.parq,
+    questionnaireAtScan: context?.questionnaire,
+  };
 }
 
 /**
