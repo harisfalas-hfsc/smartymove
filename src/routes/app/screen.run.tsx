@@ -718,7 +718,10 @@ function Runner() {
       console.error("consumeScanCredit failed", e);
     }
     const joints = (u.questionnaire?.joints ?? []).filter(j => j !== "none") as Joint[];
-    const session = computeSession(pendingResults, joints, u.age);
+    const session = computeSession(pendingResults, joints, u.age, {
+      parq: u.parq,
+      questionnaire: u.questionnaire,
+    });
     // Stamp the goal at time of scan so the rescan engine can detect goal changes later.
     session.goalAtScan = u.goal;
     const wasReTest = u.sessions.length > 0;

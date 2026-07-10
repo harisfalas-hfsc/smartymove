@@ -119,6 +119,19 @@ export interface ScreenSession {
    * screen and used to cap the corresponding sub-scores at 50.
    */
   redFlags?: string[];
+  /**
+   * Snapshot of the health-and-safety (PAR-Q) answers at the time of scan.
+   * Persisted with the session so the corrective engine and the results
+   * screen can factor medical red flags (e.g. bone/joint problem) into
+   * caution notes and phase pacing without re-reading mutable user state.
+   */
+  parqAtScan?: ParqAnswers;
+  /**
+   * Snapshot of the readiness questionnaire at the time of scan (pain
+   * level, canWalk/Run/Jump, recent injury, red flags, pain areas). Used
+   * by the corrective engine to bias focus areas and starting phase.
+   */
+  questionnaireAtScan?: Questionnaire;
 }
 
 export interface ProgramDay { date: string; completed: boolean; }
