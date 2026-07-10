@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { getFirstIncompleteOnboardingPath, isOnboardingComplete, setOnboardingNextPath, useUser } from "@/lib/store";
 import { CORE_TESTS } from "@/lib/movement";
-import { Play, Lock, Loader2, Camera, ShieldCheck, Smartphone, EyeOff, Ruler, Sparkles, Timer, HelpCircle, ListChecks, ChevronRight } from "lucide-react";
+import { Play, Loader2, Camera, ShieldCheck, Smartphone, EyeOff, Ruler, Sparkles, Timer, HelpCircle, ListChecks, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
 import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
@@ -58,7 +58,7 @@ function ScreenIndex() {
       className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold text-white"
       style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
     >
-      <Lock className="h-5 w-5" /> Buy a scan · €{SCAN_PRICE_EUR.toFixed(2)}
+      <Play className="h-5 w-5" /> {last ? "Rescan" : "Start scan"}
     </button>
   );
 
