@@ -109,12 +109,15 @@ function Home() {
         )}
         {phase && (
           <div className="rounded-3xl bg-card p-4 shadow-card">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
                 <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Phase</div>
                 <div className="text-base font-extrabold capitalize">{phase.label} · Week {phase.weekInPhase}</div>
+                <div className="mt-1 text-[11px] text-muted-foreground">
+                  Program #{Math.max(1, u.sessions.length)} · {(u.programCompletedDays?.length ?? 0)} sessions this program · {u.sessions.length} scan{u.sessions.length === 1 ? "" : "s"} total
+                </div>
               </div>
-              <div className="flex gap-1.5 text-[10px] font-bold uppercase tracking-wide">
+              <div className="flex shrink-0 flex-wrap justify-end gap-1.5 text-[10px] font-bold uppercase tracking-wide">
                 <span className="rounded-full bg-accent px-2 py-1">Mob {Math.round(phase.ratios.mobility * 100)}%</span>
                 <span className="rounded-full bg-accent px-2 py-1">Stab {Math.round(phase.ratios.stability * 100)}%</span>
                 <span className="rounded-full bg-accent px-2 py-1">Str {Math.round(phase.ratios.strength * 100)}%</span>
@@ -203,7 +206,7 @@ function Home() {
                 style={{ textDecoration: "none" }}
               >
                 <span className="grid h-10 w-10 place-items-center rounded-xl brand-gradient-soft text-primary">
-                  <LineChart className="h-5 w-5" />
+                  <LineChartIcon className="h-5 w-5" />
                 </span>
                 <span className="text-xs font-bold text-foreground">Progress</span>
               </Link>
@@ -211,17 +214,48 @@ function Home() {
           </section>
         )}
 
-        {latest && (
-          <section>
-            <h3 className="mb-2 text-base font-bold">Sub-scores</h3>
-            <div className="space-y-3 rounded-3xl bg-card p-5 shadow-card">
-              <SubScoreBar label="Mobility" value={latest.sub.mobility} />
-              <SubScoreBar label="Stability" value={latest.sub.stability} />
-              <SubScoreBar label="Balance" value={latest.sub.balance} />
-              <SubScoreBar label="Movement Quality" value={latest.sub.quality} />
-            </div>
-          </section>
-        )}
+        {latest && (() => {
+          const subs: Array<{ label: string; value: number }> = [
+            { label: "Mobility", value: latest.sub.mobility },
+            { label: "Stability", value: latest.sub.stability },
+            { label: "Balance", value: latest.sub.balance },
+            { label: "Movement Quality", value: latest.sub.quality },
+          ];
+          const sorted = [...subs].sort((a, b) => b.value - a.value);
+          const top = sorted[0];
+          const focus = sorted[sorted.length - 1];
+          return (
+            <section>
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-base font-bold">Sub-scores</h3>
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Out of 100</span>
+              </div>
+              <div className="space-y-4 rounded-3xl bg-card p-5 shadow-card">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-2xl bg-success/10 p-3 ring-1 ring-success/30">
+                    <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-success">
+                      <TrendingUp className="h-3 w-3" /> Top strength
+                    </div>
+                    <div className="mt-1 text-sm font-extrabold text-foreground">{top.label}</div>
+                    <div className="text-xl font-black text-success">{top.value}</div>
+                  </div>
+                  <div className="rounded-2xl bg-warning/10 p-3 ring-1 ring-warning/30">
+                    <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-warning">
+                      <Target className="h-3 w-3" /> Focus on
+                    </div>
+                    <div className="mt-1 text-sm font-extrabold text-foreground">{focus.label}</div>
+                    <div className="text-xl font-black text-warning">{focus.value}</div>
+                  </div>
+                </div>
+                <div className="space-y-3 border-t border-border/60 pt-4">
+                  {subs.map((s) => (
+                    <SubScoreBar key={s.label} label={s.label} value={s.value} />
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        })()}
 
         {u.sessions.length >= 2 && (
           <section>
