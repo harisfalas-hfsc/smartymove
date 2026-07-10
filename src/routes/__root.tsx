@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PaywallProvider } from "@/lib/paywall";
 import { SisterAppsPopup } from "@/components/growth/SisterAppsPopup";
+import { BottomTabs } from "@/components/BottomTabs";
 
 function NotFoundComponent() {
   return (
@@ -230,6 +231,7 @@ function RootComponent() {
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
         <SisterAppsPopup />
+        <BottomTabs />
       </PaywallProvider>
     </QueryClientProvider>
   );

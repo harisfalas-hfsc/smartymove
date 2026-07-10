@@ -2,6 +2,14 @@
 @source "../src";
 @import "tw-animate-css";
 
+/* Reserve space for the fixed mobile bottom tab bar so page content
+   (footer, CTAs) never sits underneath it. Desktop hides the bar. */
+@media (max-width: 1023px) {
+  body {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
