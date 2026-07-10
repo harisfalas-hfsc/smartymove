@@ -52,6 +52,7 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
   const [saved, setSaved] = useState(false);
   const [accountLoading, setAccountLoading] = useState<"export" | "delete" | null>(null);
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
+  const [dataOpen, setDataOpen] = useState(false);
   const exportData = useServerFn(exportAccountData);
   const deleteAccount = useServerFn(deleteAccountAndData);
 
