@@ -1,16 +1,13 @@
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-  Bell,
+  ClipboardList,
   Download,
   Loader2,
   LogOut,
-  MapPin,
-  Monitor,
   Save,
   Settings2,
   ShieldAlert,
-  Target,
   Trash2,
   X,
 } from "lucide-react";
@@ -33,7 +30,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
-import { clearLocalAccountData, updateUser, signOutUser, useUser, type User } from "@/lib/store";
+import { clearLocalAccountData, setOnboardingNextPath, updateUser, signOutUser, useUser, type User } from "@/lib/store";
 
 export const Route = createFileRoute("/app/profile")({ component: Profile });
 
@@ -122,25 +119,25 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
       </header>
       <div className="-mt-4 space-y-3 rounded-t-[2rem] bg-background px-5 pt-5">
         <Row
-          icon={Target}
-          label="Goal"
-          value={u.goal ?? "—"}
-          onClick={() => navigate({ to: "/onboarding/goal" })}
+          icon={ClipboardList}
+          label="Assessment & goals"
+          value={`Goal: ${u.goal ?? "—"} · Focus: ${(u.questionnaire?.joints ?? []).join(", ") || "—"}`}
+          onClick={() => {
+            // Re-run the full onboarding flow in edit mode: PAR-Q → readiness →
+            // joint focus → release of liability → goal. All screens are
+            // pre-filled with the user's saved answers, and the final step
+            // returns them to /app/profile instead of the scan.
+            setOnboardingNextPath("/app/profile");
+            navigate({ to: "/onboarding/parq" });
+          }}
         />
-        <Row
-          icon={MapPin}
-          label="Joint focus"
-          value={(u.questionnaire?.joints ?? []).join(", ") || "—"}
-          onClick={() => navigate({ to: "/onboarding/joints" })}
-        />
-        <Row icon={Bell} label="Notifications" value="Daily reminder" />
         <Row icon={Settings2} label="Account settings" value="Edit profile" onClick={openEditor} />
         <Row
-          icon={Monitor}
-          label="Desktop view"
-          value="Open"
+          icon={LogOut}
+          label="Sign out"
+          value="End your session"
           onClick={() => {
-            window.location.href = "/desktop";
+            void signOutUser().finally(() => navigate({ to: "/" }));
           }}
         />
         {editing && (
