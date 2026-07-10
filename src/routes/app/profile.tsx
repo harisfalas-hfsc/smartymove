@@ -134,14 +134,6 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
           }}
         />
         <Row icon={Settings2} label="Account settings" value="Edit profile" onClick={openEditor} />
-        <Row
-          icon={LogOut}
-          label="Sign out"
-          value="End your session"
-          onClick={() => {
-            void signOutUser().finally(() => navigate({ to: "/" }));
-          }}
-        />
         {editing && (
           <section className="rounded-3xl bg-card p-5 shadow-card">
             <div className="mb-4 flex items-center justify-between gap-3">
@@ -199,72 +191,89 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
           </div>
         )}
         <div className="rounded-3xl bg-card p-5 shadow-card">
-          <div className="flex items-start gap-3">
+          <button
+            onClick={() => setDataOpen((v) => !v)}
+            className="flex w-full items-center gap-3 text-left"
+            aria-expanded={dataOpen}
+          >
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl brand-gradient-soft text-primary">
               <ShieldAlert className="h-5 w-5" />
             </span>
-            <div>
-              <div className="font-bold">Your data</div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Download a readable data report or permanently delete your account and app data.
-              </p>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Your data
+              </div>
+              <div className="truncate font-semibold">Download report or delete account</div>
             </div>
-          </div>
-          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <Button
-              onClick={downloadAccountData}
-              disabled={!!accountLoading}
-              variant="secondary"
-              className="h-11 rounded-2xl font-semibold"
-            >
-              {accountLoading === "export" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="h-4 w-4" />
-              )}
-              Download data report
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  disabled={!!accountLoading}
-                  variant="destructive"
-                  className="h-11 rounded-2xl font-semibold"
-                >
-                  {accountLoading === "delete" ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-                  Delete account
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="mx-4 max-w-[360px] rounded-3xl">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete your account?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This permanently removes your SmartyMove profile, screening history, scores, and
-                    training data. Active subscriptions are set to stop renewing.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Keep account</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={deleteEntireAccount}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            <ChevronDown
+              className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform ${dataOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          {dataOpen && (
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <Button
+                onClick={downloadAccountData}
+                disabled={!!accountLoading}
+                variant="secondary"
+                className="h-11 rounded-2xl font-semibold"
+              >
+                {accountLoading === "export" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+                Download data report
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    disabled={!!accountLoading}
+                    variant="destructive"
+                    className="h-11 rounded-2xl font-semibold"
                   >
+                    {accountLoading === "delete" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
                     Delete account
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="mx-4 max-w-[360px] rounded-3xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This permanently removes your SmartyMove profile, screening history, scores, and
+                      training data. Active subscriptions are set to stop renewing.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Keep account</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={deleteEntireAccount}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete account
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
           {accountMessage && (
             <div className="mt-3 rounded-2xl bg-secondary p-3 text-xs font-semibold text-foreground">
               {accountMessage}
             </div>
           )}
         </div>
+        <Row
+          icon={LogOut}
+          label="Sign out"
+          value="End your session"
+          onClick={() => {
+            void signOutUser().finally(() => navigate({ to: "/" }));
+          }}
+        />
       </div>
     </div>
   );
