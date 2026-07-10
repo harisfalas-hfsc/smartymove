@@ -4,7 +4,7 @@ import { useUser } from "@/lib/store";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
 import { Activity, ArrowRight, Flame, Calendar, CheckCircle2, Dumbbell, Moon, LineChart as LineChartIcon, RefreshCw, TrendingUp, Target } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { ScoreHistoryChart, ScoreHistoryTimeline } from "@/components/ScoreHistoryChart";
 import { useCurrentPhase } from "@/lib/exercises";
 import { ExerciseSheet } from "@/components/ExerciseSheet";
 import { evaluateProgress } from "@/lib/corrective/progression";
@@ -268,17 +268,8 @@ function Home() {
                 <TrendingUp className="h-3.5 w-3.5 text-primary" />
                 <span>{u.sessions.length} screens · <strong className={delta >= 0 ? "text-success" : "text-warning"}>{delta >= 0 ? "+" : ""}{delta}</strong> since first scan</span>
               </div>
-              <div className="h-36">
-                <ResponsiveContainer>
-                  <LineChart data={chartData}>
-                    <CartesianGrid stroke="oklch(0.92 0.012 220)" vertical={false} />
-                    <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={10} />
-                    <YAxis domain={[0, 100]} tickLine={false} axisLine={false} fontSize={10} width={28} />
-                    <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid oklch(0.92 0.012 220)" }} />
-                    <Line type="monotone" dataKey="score" stroke="oklch(0.52 0.14 235)" strokeWidth={3} dot={{ r: 3, fill: "oklch(0.62 0.13 210)" }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+              <ScoreHistoryChart data={chartData} height={176} gradientId="homeScoreGradient" />
+              <ScoreHistoryTimeline sessions={u.sessions} />
             </div>
           </section>
         )}

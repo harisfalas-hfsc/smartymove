@@ -4,7 +4,7 @@ import { useUser } from "@/lib/store";
 import type { Joint } from "@/lib/store";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SubScoreBar } from "@/components/SubScoreBar";
-import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { ScoreHistoryChart, ScoreHistoryTimeline } from "@/components/ScoreHistoryChart";
 import { Calendar, ChevronDown, ShieldAlert } from "lucide-react";
 import { evaluateGraduation, recommendSmartyGym } from "@/lib/graduation";
 import { SmartyGymHandoff } from "@/components/SmartyGymHandoff";
@@ -17,32 +17,32 @@ export const Route = createFileRoute("/app/progress")({ component: Progress });
 function Progress() {
   const u = useUser();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-  if (!u) return null;
-  const sessions = u.sessions;
+  const sessions = u?.sessions ?? [];
   const latest = sessions[sessions.length - 1];
   const first = sessions[0];
   const data = sessions.map((s, i) => ({ name: `#${i + 1}`, score: s.overall }));
   const delta = latest && first ? latest.overall - first.overall : 0;
-  const graduation = evaluateGraduation(u);
-  const recommendation = recommendSmartyGym(u.goal, graduation.status);
   const safeIdx = selectedIdx == null
     ? Math.max(0, sessions.length - 1)
     : Math.min(selectedIdx, Math.max(0, sessions.length - 1));
   const selected = sessions[safeIdx] ?? latest;
-  const completedDays = u.programCompletedDays ?? [];
-  const fmtDate = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
   // Plain-language findings + focus assignment for the selected session.
   // Uses the same decision engine that drives the assigned program.
   const joints = useMemo<Joint[]>(
-    () => (u.questionnaire?.joints ?? []) as Joint[],
-    [u.questionnaire?.joints],
+    () => (u?.questionnaire?.joints ?? []) as Joint[],
+    [u?.questionnaire?.joints],
   );
   const selectedDecision = useMemo(
-    () => (selected ? analyzeScan(selected.tests, joints, u.goal) : null),
-    [selected, joints, u.goal],
+    () => (selected && u ? analyzeScan(selected.tests, joints, u.goal) : null),
+    [selected, joints, u?.goal],
   );
+  if (!u) return null;
+  const completedDays = u.programCompletedDays ?? [];
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  const graduation = evaluateGraduation(u);
+  const recommendation = recommendSmartyGym(u.goal, graduation.status);
 
   return (
     <div className="pb-6">
@@ -92,19 +92,10 @@ function Progress() {
             <p className="mb-3 text-xs text-muted-foreground">
               Your overall movement score over time. Higher is better (out of 100).
             </p>
-            <div className="h-40">
-              <ResponsiveContainer>
-                <LineChart data={data}>
-                  <CartesianGrid stroke="oklch(0.92 0.012 220)" vertical={false} />
-                  <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={11} />
-                  <YAxis domain={[0, 100]} tickLine={false} axisLine={false} fontSize={11} />
-                  <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid oklch(0.92 0.012 220)" }} />
-                  <Line type="monotone" dataKey="score" stroke="oklch(0.52 0.14 235)" strokeWidth={3} dot={{ r: 4, fill: "oklch(0.62 0.13 210)" }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <ScoreHistoryChart data={data} height={192} gradientId="progressScoreGradient" />
+            <ScoreHistoryTimeline sessions={sessions} onSelect={setSelectedIdx} />
             {delta !== 0 && (
-              <p className="mt-2 text-xs text-foreground/80">
+              <p className="mt-3 text-xs text-foreground/80">
                 {delta > 0 ? "🎉" : "⚠️"} You&apos;re {delta > 0 ? "up" : "down"} <strong>{Math.abs(delta)} points</strong> since your first scan.
               </p>
             )}
