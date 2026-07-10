@@ -192,6 +192,14 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
             Profile updated
           </div>
         )}
+        {isAdminEmail(u.email) && (
+          <Row
+            icon={Shield}
+            label="Admin"
+            value="Open admin panel"
+            onClick={() => navigate({ to: "/admin" })}
+          />
+        )}
         <div className="rounded-3xl bg-card p-5 shadow-card">
           <button
             onClick={() => setDataOpen((v) => !v)}
