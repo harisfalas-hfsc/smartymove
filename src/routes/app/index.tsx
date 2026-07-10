@@ -206,7 +206,7 @@ function Home() {
                 style={{ textDecoration: "none" }}
               >
                 <span className="grid h-10 w-10 place-items-center rounded-xl brand-gradient-soft text-primary">
-                  <LineChart className="h-5 w-5" />
+                  <LineChartIcon className="h-5 w-5" />
                 </span>
                 <span className="text-xs font-bold text-foreground">Progress</span>
               </Link>
