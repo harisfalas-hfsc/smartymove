@@ -214,17 +214,54 @@ function Home() {
           </section>
         )}
 
-        {latest && (
-          <section>
-            <h3 className="mb-2 text-base font-bold">Sub-scores</h3>
-            <div className="space-y-3 rounded-3xl bg-card p-5 shadow-card">
-              <SubScoreBar label="Mobility" value={latest.sub.mobility} />
-              <SubScoreBar label="Stability" value={latest.sub.stability} />
-              <SubScoreBar label="Balance" value={latest.sub.balance} />
-              <SubScoreBar label="Movement Quality" value={latest.sub.quality} />
-            </div>
-          </section>
-        )}
+        {latest && (() => {
+          const subs: Array<{ label: string; value: number }> = [
+            { label: "Mobility", value: latest.sub.mobility },
+            { label: "Stability", value: latest.sub.stability },
+            { label: "Balance", value: latest.sub.balance },
+            { label: "Movement Quality", value: latest.sub.quality },
+          ];
+          const sorted = [...subs].sort((a, b) => b.value - a.value);
+          const top = sorted[0];
+          const focus = sorted[sorted.length - 1];
+          return (
+            <section>
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-base font-bold">Sub-scores</h3>
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Out of 100</span>
+              </div>
+              <div className="space-y-4 rounded-3xl bg-card p-5 shadow-card">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-2xl bg-success/10 p-3 ring-1 ring-success/30">
+                    <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-success">
+                      <TrendingUp className="h-3 w-3" /> Top strength
+                    </div>
+                    <div className="mt-1 text-sm font-extrabold text-foreground">{top.label}</div>
+                    <div className="text-xl font-black text-success">{top.value}</div>
+                  </div>
+                  <div className="rounded-2xl bg-warning/10 p-3 ring-1 ring-warning/30">
+                    <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-warning">
+                      <Target className="h-3 w-3" /> Focus on
+                    </div>
+                    <div className="mt-1 text-sm font-extrabold text-foreground">{focus.label}</div>
+                    <div className="text-xl font-black text-warning">{focus.value}</div>
+                  </div>
+                </div>
+                <div className="space-y-3 border-t border-border/60 pt-4">
+                  {subs.map((s) => (
+                    <div key={s.label}>
+                      <div className="mb-1 flex items-center justify-between text-xs">
+                        <span className="font-semibold text-foreground">{s.label}</span>
+                        <span className="font-extrabold text-foreground">{s.value}<span className="text-muted-foreground">/100</span></span>
+                      </div>
+                      <SubScoreBar label="" value={s.value} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        })()}
 
         {u.sessions.length >= 2 && (
           <section>
