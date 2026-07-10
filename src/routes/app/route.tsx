@@ -1,6 +1,5 @@
 import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import { BottomTabs } from "@/components/BottomTabs";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { getFirstIncompleteOnboardingPath, getUser, restoreUserFromBackend, setOnboardingNextPath } from "@/lib/store";
@@ -38,7 +37,6 @@ function AppLayout() {
           {!isScreenRun && <SiteFooter />}
         </div>
       </div>
-      {!isScreenRun && <BottomTabs />}
     </div>
   );
 }
