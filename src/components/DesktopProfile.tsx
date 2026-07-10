@@ -17,15 +17,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { ScoreHistoryChart, ScoreHistoryTimeline } from "@/components/ScoreHistoryChart";
 
 import {
   AlertDialog,
@@ -369,25 +361,8 @@ function DesktopProfileInner() {
           {u.sessions.length >= 2 && (
             <div className="rounded-3xl bg-card p-6 shadow-card">
               <h3 className="mb-2 text-base font-bold">Score history</h3>
-              <div className="h-44">
-                <ResponsiveContainer>
-                  <LineChart data={data}>
-                    <CartesianGrid stroke="oklch(0.92 0.012 220)" vertical={false} />
-                    <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={11} />
-                    <YAxis domain={[0, 100]} tickLine={false} axisLine={false} fontSize={11} />
-                    <Tooltip
-                      contentStyle={{ borderRadius: 12, border: "1px solid oklch(0.92 0.012 220)" }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="score"
-                      stroke="oklch(0.52 0.14 235)"
-                      strokeWidth={3}
-                      dot={{ r: 4, fill: "oklch(0.62 0.13 210)" }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+              <ScoreHistoryChart data={data} height={176} gradientId="desktopScoreGradient" />
+              <ScoreHistoryTimeline sessions={u.sessions} />
             </div>
           )}
         </aside>
