@@ -249,13 +249,7 @@ function Home() {
                 </div>
                 <div className="space-y-3 border-t border-border/60 pt-4">
                   {subs.map((s) => (
-                    <div key={s.label}>
-                      <div className="mb-1 flex items-center justify-between text-xs">
-                        <span className="font-semibold text-foreground">{s.label}</span>
-                        <span className="font-extrabold text-foreground">{s.value}<span className="text-muted-foreground">/100</span></span>
-                      </div>
-                      <SubScoreBar label="" value={s.value} />
-                    </div>
+                    <SubScoreBar key={s.label} label={s.label} value={s.value} />
                   ))}
                 </div>
               </div>
