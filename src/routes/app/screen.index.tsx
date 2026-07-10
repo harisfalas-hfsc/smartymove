@@ -4,7 +4,7 @@ import { getFirstIncompleteOnboardingPath, isOnboardingComplete, setOnboardingNe
 import { CORE_TESTS } from "@/lib/movement";
 import { Play, Loader2, Camera, ShieldCheck, Smartphone, EyeOff, Ruler, Sparkles, Timer, HelpCircle, ListChecks, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
+import { getScanAccess } from "@/lib/scans.functions";
 import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
 import { TestPreviewSheet } from "@/components/TestPreviewSheet";
 import { isAdminEmail } from "@/lib/admin";
@@ -81,7 +81,7 @@ function ScreenIndex() {
           ) : canScan ? (
             <>✅ You have <strong>{credits}</strong> scan{credits === 1 ? "" : "s"} available.</>
           ) : (
-            <>💳 Buy one scan for <strong>€{SCAN_PRICE_EUR.toFixed(2)}</strong> — includes a 2-week program you keep forever.</>
+            <>💳 One scan includes a 2-week program you keep forever.</>
           )}
         </div>
         <div className="mt-4">{primaryCta}</div>
