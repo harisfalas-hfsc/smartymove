@@ -30,6 +30,7 @@ import { Route as OnboardingRouteRouteImport } from './routes/onboarding/route'
 import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PremiumReturnRouteImport } from './routes/premium.return'
 import { Route as OnboardingQuestionnaireRouteImport } from './routes/onboarding/questionnaire'
 import { Route as OnboardingParqRouteImport } from './routes/onboarding/parq'
@@ -153,6 +154,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PremiumReturnRoute = PremiumReturnRouteImport.update({
   id: '/return',
   path: '/return',
@@ -274,6 +280,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/parq': typeof OnboardingParqRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
   '/premium/return': typeof PremiumReturnRoute
+  '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/setup': typeof AppScreenSetupRoute
@@ -312,6 +319,7 @@ export interface FileRoutesByTo {
   '/onboarding/parq': typeof OnboardingParqRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
   '/premium/return': typeof PremiumReturnRoute
+  '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/setup': typeof AppScreenSetupRoute
@@ -353,6 +361,7 @@ export interface FileRoutesById {
   '/onboarding/parq': typeof OnboardingParqRoute
   '/onboarding/questionnaire': typeof OnboardingQuestionnaireRoute
   '/premium/return': typeof PremiumReturnRoute
+  '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/setup': typeof AppScreenSetupRoute
@@ -395,6 +404,7 @@ export interface FileRouteTypes {
     | '/onboarding/parq'
     | '/onboarding/questionnaire'
     | '/premium/return'
+    | '/admin/'
     | '/app/'
     | '/app/screen/run'
     | '/app/screen/setup'
@@ -433,6 +443,7 @@ export interface FileRouteTypes {
     | '/onboarding/parq'
     | '/onboarding/questionnaire'
     | '/premium/return'
+    | '/admin'
     | '/app'
     | '/app/screen/run'
     | '/app/screen/setup'
@@ -473,6 +484,7 @@ export interface FileRouteTypes {
     | '/onboarding/parq'
     | '/onboarding/questionnaire'
     | '/premium/return'
+    | '/admin/'
     | '/app/'
     | '/app/screen/run'
     | '/app/screen/setup'
@@ -503,6 +515,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   WhyMovementMattersRoute: typeof WhyMovementMattersRoute
   AdminExercisesRoute: typeof AdminExercisesRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   ApiPublicAdminSyncPremiumRoute: typeof ApiPublicAdminSyncPremiumRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -655,6 +668,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRouteRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/premium/return': {
       id: '/premium/return'
@@ -877,9 +897,20 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   WhyMovementMattersRoute: WhyMovementMattersRoute,
   AdminExercisesRoute: AdminExercisesRoute,
+  AdminIndexRoute: AdminIndexRoute,
   ApiPublicAdminSyncPremiumRoute: ApiPublicAdminSyncPremiumRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -9,6 +9,7 @@ import {
   Save,
   Settings2,
   ShieldAlert,
+  Shield,
   Trash2,
   X,
 } from "lucide-react";
@@ -31,6 +32,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
+import { isAdminEmail } from "@/lib/admin";
 import { clearLocalAccountData, setOnboardingNextPath, updateUser, signOutUser, useUser, type User } from "@/lib/store";
 
 export const Route = createFileRoute("/app/profile")({ component: Profile });
@@ -189,6 +191,14 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
           <div className="rounded-2xl bg-success/10 p-3 text-center text-sm font-semibold text-foreground">
             Profile updated
           </div>
+        )}
+        {isAdminEmail(u.email) && (
+          <Row
+            icon={Shield}
+            label="Admin"
+            value="Open admin panel"
+            onClick={() => navigate({ to: "/admin" })}
+          />
         )}
         <div className="rounded-3xl bg-card p-5 shadow-card">
           <button
