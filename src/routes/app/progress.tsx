@@ -17,32 +17,32 @@ export const Route = createFileRoute("/app/progress")({ component: Progress });
 function Progress() {
   const u = useUser();
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-  if (!u) return null;
-  const sessions = u.sessions;
+  const sessions = u?.sessions ?? [];
   const latest = sessions[sessions.length - 1];
   const first = sessions[0];
   const data = sessions.map((s, i) => ({ name: `#${i + 1}`, score: s.overall }));
   const delta = latest && first ? latest.overall - first.overall : 0;
-  const graduation = evaluateGraduation(u);
-  const recommendation = recommendSmartyGym(u.goal, graduation.status);
   const safeIdx = selectedIdx == null
     ? Math.max(0, sessions.length - 1)
     : Math.min(selectedIdx, Math.max(0, sessions.length - 1));
   const selected = sessions[safeIdx] ?? latest;
-  const completedDays = u.programCompletedDays ?? [];
-  const fmtDate = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
   // Plain-language findings + focus assignment for the selected session.
   // Uses the same decision engine that drives the assigned program.
   const joints = useMemo<Joint[]>(
-    () => (u.questionnaire?.joints ?? []) as Joint[],
-    [u.questionnaire?.joints],
+    () => (u?.questionnaire?.joints ?? []) as Joint[],
+    [u?.questionnaire?.joints],
   );
   const selectedDecision = useMemo(
-    () => (selected ? analyzeScan(selected.tests, joints, u.goal) : null),
-    [selected, joints, u.goal],
+    () => (selected && u ? analyzeScan(selected.tests, joints, u.goal) : null),
+    [selected, joints, u?.goal],
   );
+  if (!u) return null;
+  const completedDays = u.programCompletedDays ?? [];
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  const graduation = evaluateGraduation(u);
+  const recommendation = recommendSmartyGym(u.goal, graduation.status);
 
   return (
     <div className="pb-6">
