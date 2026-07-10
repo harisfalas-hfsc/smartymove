@@ -109,12 +109,15 @@ function Home() {
         )}
         {phase && (
           <div className="rounded-3xl bg-card p-4 shadow-card">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
                 <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Phase</div>
                 <div className="text-base font-extrabold capitalize">{phase.label} · Week {phase.weekInPhase}</div>
+                <div className="mt-1 text-[11px] text-muted-foreground">
+                  Program #{Math.max(1, u.sessions.length)} · {(u.programCompletedDays?.length ?? 0)} sessions this program · {u.sessions.length} scan{u.sessions.length === 1 ? "" : "s"} total
+                </div>
               </div>
-              <div className="flex gap-1.5 text-[10px] font-bold uppercase tracking-wide">
+              <div className="flex shrink-0 flex-wrap justify-end gap-1.5 text-[10px] font-bold uppercase tracking-wide">
                 <span className="rounded-full bg-accent px-2 py-1">Mob {Math.round(phase.ratios.mobility * 100)}%</span>
                 <span className="rounded-full bg-accent px-2 py-1">Stab {Math.round(phase.ratios.stability * 100)}%</span>
                 <span className="rounded-full bg-accent px-2 py-1">Str {Math.round(phase.ratios.strength * 100)}%</span>
