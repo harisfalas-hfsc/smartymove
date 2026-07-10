@@ -4,7 +4,7 @@ import { getFirstIncompleteOnboardingPath, isOnboardingComplete, setOnboardingNe
 import { CORE_TESTS } from "@/lib/movement";
 import { Play, Loader2, Camera, ShieldCheck, Smartphone, EyeOff, Ruler, Sparkles, Timer, HelpCircle, ListChecks, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
+import { getScanAccess } from "@/lib/scans.functions";
 import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
 import { TestPreviewSheet } from "@/components/TestPreviewSheet";
 import { isAdminEmail } from "@/lib/admin";
