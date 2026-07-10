@@ -91,10 +91,10 @@ function Welcome() {
       return;
     }
     const cached = getUser();
-    if (isOnboardingComplete(cached)) navigate({ to: "/app/screen" });
+    if (isOnboardingComplete(cached)) navigate({ to: "/app" });
     void restoreUserFromBackend()
       .then((u) => {
-        if (isOnboardingComplete(u)) navigate({ to: "/app/screen" });
+        if (isOnboardingComplete(u)) navigate({ to: "/app" });
       })
       .catch(() => undefined);
   }, [navigate]);
@@ -148,7 +148,7 @@ function Welcome() {
     setSubmitting(true);
     try {
       const u = await signInWithEmailProfile(email, pw);
-      const destination = nextPath ?? (isOnboardingComplete(u) ? getOnboardingNextPath("/app/screen") : (getFirstIncompleteOnboardingPath(u) ?? "/app/screen"));
+      const destination = nextPath ?? (isOnboardingComplete(u) ? "/app" : (getFirstIncompleteOnboardingPath(u) ?? "/app"));
       if (isOnboardingComplete(u)) clearOnboardingNextPath();
       navigate({ to: destination });
     } catch (error) {
