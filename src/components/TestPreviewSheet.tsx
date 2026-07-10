@@ -31,6 +31,7 @@ type Props = {
 };
 
 export function TestPreviewSheet({ open, onClose, testIds, focusTestId, title }: Props) {
+  const visibleIds = focusTestId ? [focusTestId] : testIds;
   const [expanded, setExpanded] = useState<string | null>(focusTestId ?? testIds[0] ?? null);
 
   useEffect(() => {
@@ -71,10 +72,10 @@ export function TestPreviewSheet({ open, onClose, testIds, focusTestId, title }:
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <div className="space-y-3">
-            {testIds.map((id, i) => {
+            {visibleIds.map((id, i) => {
               const g = TEST_GUIDES[id];
               if (!g) return null;
-              const isOpen = expanded === id;
+              const isOpen = focusTestId ? true : expanded === id;
               const img = TEST_DEMO_IMAGES[id];
               return (
                 <div key={id} className="overflow-hidden rounded-2xl border border-border">
