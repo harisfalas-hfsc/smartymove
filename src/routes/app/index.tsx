@@ -77,16 +77,33 @@ function Home() {
         {rescan && rescan.reason !== "first-scan" && (
           <Link
             to="/app/screen"
-            className={`block rounded-3xl p-5 shadow-soft ${rescan.urgency === "high" ? "brand-gradient text-primary-foreground" : "bg-card"}`}
-            style={{ textDecoration: "none" }}
+            className="group relative block overflow-hidden rounded-3xl bg-card p-[2px] shadow-soft transition-transform duration-200 hover:-translate-y-0.5"
+            style={{ textDecoration: "none", background: "linear-gradient(135deg, oklch(0.62 0.13 210), oklch(0.72 0.15 160))" }}
           >
-            <div className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest ${rescan.urgency === "high" ? "opacity-90" : "text-muted-foreground"}`}>
-              <Calendar className="h-3.5 w-3.5" /> {rescan.reason === "foundation-complete" ? "Foundation complete" : rescan.reason === "goal-changed" ? "Goal updated" : rescan.reason === "self-reported-change" ? "Something shifted" : rescan.reason === "no-improvement" ? "Program adjustment" : "Time to rescan"}
-            </div>
-            <div className={`mt-1 text-lg font-extrabold ${rescan.urgency === "high" ? "" : "text-foreground"}`}>{rescan.title}</div>
-            <p className={`mt-1 text-sm ${rescan.urgency === "high" ? "opacity-95" : "text-muted-foreground"}`}>{rescan.message}</p>
-            <div className={`mt-3 inline-flex items-center gap-1 text-sm font-semibold ${rescan.urgency === "high" ? "" : "text-primary"}`}>
-              {rescan.cta} <ArrowRight className="h-4 w-4" />
+            <div className="relative rounded-[calc(1.5rem-2px)] bg-card p-5">
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-20 blur-2xl"
+                style={{ background: "linear-gradient(135deg, oklch(0.62 0.13 210), oklch(0.72 0.15 160))" }}
+              />
+              <div className="flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-xl brand-gradient text-primary-foreground shadow-soft">
+                  <RefreshCw className="h-4 w-4" />
+                </span>
+                <div className="text-[10px] font-black uppercase tracking-widest brand-text">
+                  {rescan.reason === "foundation-complete" ? "Foundation complete" : rescan.reason === "goal-changed" ? "Goal updated" : rescan.reason === "self-reported-change" ? "Something shifted" : rescan.reason === "no-improvement" ? "Program adjustment" : "Time to rescan"}
+                </div>
+                {rescan.urgency === "high" && (
+                  <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-widest text-primary">
+                    Recommended
+                  </span>
+                )}
+              </div>
+              <div className="mt-2 text-xl font-extrabold text-foreground">{rescan.title}</div>
+              <p className="mt-1.5 text-sm text-muted-foreground">{rescan.message}</p>
+              <div className="mt-4 inline-flex h-11 items-center gap-2 rounded-2xl brand-gradient px-5 text-sm font-bold text-primary-foreground shadow-soft transition-transform duration-200 group-hover:scale-[1.02]">
+                {rescan.cta} <ArrowRight className="h-4 w-4" />
+              </div>
             </div>
           </Link>
         )}
