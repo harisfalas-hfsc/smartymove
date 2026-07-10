@@ -81,7 +81,7 @@ function ScreenIndex() {
           ) : canScan ? (
             <>✅ You have <strong>{credits}</strong> scan{credits === 1 ? "" : "s"} available.</>
           ) : (
-            <>💳 Buy one scan for <strong>€{SCAN_PRICE_EUR.toFixed(2)}</strong> — includes a 2-week program you keep forever.</>
+            <>💳 One scan includes a 2-week program you keep forever.</>
           )}
         </div>
         <div className="mt-4">{primaryCta}</div>
