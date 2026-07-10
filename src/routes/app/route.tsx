@@ -33,12 +33,12 @@ function AppLayout() {
     <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
       {!isScreenRun && <SiteHeader showBack={!isAppHome} />}
       <div className={`mx-auto flex w-full flex-1 flex-col bg-background ${isScreenRun ? "max-w-none" : "max-w-[440px] lg:max-w-6xl lg:px-8"}`}>
-        <div className={`flex flex-1 flex-col overflow-y-auto ${isScreenRun ? "pb-0" : "pb-24 lg:pb-0"}`}>
+        <div className="flex flex-1 flex-col">
           <div className="flex-1"><Outlet /></div>
           {!isScreenRun && <SiteFooter />}
         </div>
-        {!isScreenRun && <div className="lg:hidden"><BottomTabs /></div>}
       </div>
+      {!isScreenRun && <BottomTabs />}
     </div>
   );
 }
