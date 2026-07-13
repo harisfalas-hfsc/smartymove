@@ -30,7 +30,7 @@ function AppLayout() {
   }, [location.pathname, navigate]);
   return (
     <div
-      className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground"
+      className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground lg:!pb-0"
       style={
         !isScreenRun
           ? { paddingBottom: "calc(4rem + env(safe-area-inset-bottom, 0px))" }
