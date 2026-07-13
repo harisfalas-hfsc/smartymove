@@ -26,6 +26,12 @@ export function BottomTabs() {
   const user = useUser();
   const [gateOpen, setGateOpen] = useState(false);
 
+  // Hide during full-screen flows where the bar overlaps critical content.
+  const hiddenRoutes = ["/app/screen/run", "/app/screen/setup"];
+  if (hiddenRoutes.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+    return null;
+  }
+
   const hasScan = !!user && (user.sessions?.length ?? 0) > 0;
   const gated = !user || !hasScan;
 
