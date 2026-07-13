@@ -29,7 +29,14 @@ function AppLayout() {
     }).catch(() => navigate({ to: "/" }));
   }, [location.pathname, navigate]);
   return (
-    <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
+    <div
+      className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground"
+      style={
+        !isScreenRun
+          ? { paddingBottom: "calc(4rem + env(safe-area-inset-bottom, 0px))" }
+          : undefined
+      }
+    >
       {!isScreenRun && <SiteHeader showBack={!isAppHome} />}
       <div className={`mx-auto flex w-full flex-1 flex-col bg-background ${isScreenRun ? "max-w-none" : "max-w-[440px] lg:max-w-6xl lg:px-8"}`}>
         <div className="flex flex-1 flex-col">
