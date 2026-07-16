@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { ExternalLink, Sparkles } from "lucide-react";
-import logoMove from "@/assets/smartymove-logo.png";
+import { ChevronLeft, ExternalLink, Sparkles } from "lucide-react";
 import logoDiet from "@/assets/smartydiet-logo.png";
 import logoGym from "@/assets/smartygym-icon.png";
 
 const CURRENT_APP: "gym" | "move" | "diet" = "move";
+const DELAY_MS = 10000;
 
 type SisterApp = {
   id: "gym" | "move" | "diet";
@@ -14,7 +12,6 @@ type SisterApp = {
   tagline: string;
   url: string;
   image: string;
-  darkImage?: boolean;
 };
 
 const SISTER_APPS: SisterApp[] = [
@@ -26,13 +23,6 @@ const SISTER_APPS: SisterApp[] = [
     image: logoGym,
   },
   {
-    id: "move",
-    name: "SmartyMove",
-    tagline: "Check your posture. Correct your movement. Live better.",
-    url: "https://smarty-motion-pro.lovable.app",
-    image: logoMove,
-  },
-  {
     id: "diet",
     name: "SmartyDiet",
     tagline: "Eat smart. Fuel your body. Live longer.",
@@ -41,70 +31,86 @@ const SISTER_APPS: SisterApp[] = [
   },
 ];
 
-const DELAY_MS = 5000;
-
 export const SisterAppsPopup = () => {
-  const [open, setOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(true);
 
   useEffect(() => {
-    const t = window.setTimeout(() => setOpen(true), DELAY_MS);
+    const t = window.setTimeout(() => setVisible(true), DELAY_MS);
     return () => window.clearTimeout(t);
   }, []);
 
   const others = SISTER_APPS.filter((a) => a.id !== CURRENT_APP);
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="w-[calc(100vw-2.5rem)] max-w-[350px] sm:max-w-2xl sm:w-[95vw] max-h-[calc(100dvh-2.5rem)] overflow-y-auto p-0 border-2 border-primary/40 rounded-xl bg-card shadow-2xl">
-        <DialogTitle className="sr-only">Complete your Smarty Wellness journey</DialogTitle>
-        <div className="p-3 sm:p-6">
-          <div className="text-center mb-3 sm:mb-5 px-4 sm:px-0">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] sm:text-[11px] font-bold uppercase tracking-normal mb-2 sm:mb-3">
-              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Smarty Wellness Family
-            </span>
-            <h2 className="text-base sm:text-2xl font-bold text-foreground leading-tight">
-              Complete your Smarty Wellness journey
-            </h2>
-            <p className="hidden sm:block text-sm text-muted-foreground mt-1">
-              Two more apps designed to work together with {SISTER_APPS.find(a => a.id === CURRENT_APP)?.name}.
-            </p>
-          </div>
+  if (!visible) return null;
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4">
+  return (
+    <div className="fixed left-0 top-1/2 -translate-y-1/2 z-50 flex items-center pointer-events-none">
+      {/* Panel */}
+      <div
+        className={`pointer-events-auto bg-white shadow-2xl rounded-r-2xl overflow-hidden transition-transform duration-500 ease-out ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+        style={{ width: 260 }}
+      >
+        <div className="p-4">
+          <div className="flex items-center gap-1.5 text-primary font-bold text-xs uppercase tracking-wide mb-1">
+            <Sparkles className="w-3.5 h-3.5" /> Smarty Family
+          </div>
+          <p className="text-[13px] text-slate-600 mb-3 leading-snug">
+            Complete your wellness journey
+          </p>
+          <div className="flex flex-col gap-2">
             {others.map((app) => (
               <a
                 key={app.id}
                 href={app.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex flex-row sm:flex-col items-center sm:items-stretch rounded-lg border border-border bg-background overflow-hidden hover:border-primary/60 hover:shadow-lg transition-all"
+                className="group flex items-center gap-3 py-1.5 hover:opacity-90 transition-opacity"
               >
-                <div className={`w-20 h-20 shrink-0 sm:w-full sm:h-auto sm:aspect-[4/3] overflow-hidden flex items-center justify-center ${app.darkImage ? "bg-[#0F172A] p-2 sm:p-4" : "bg-white p-3 sm:p-6"}`}>
+                <div className="w-14 h-14 shrink-0 flex items-center justify-center bg-white">
                   <img
                     src={app.image}
                     alt={app.name}
                     loading="lazy"
-                    className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                    className="max-w-full max-h-full object-contain"
                   />
                 </div>
-                <div className="p-2.5 sm:p-4 flex flex-col gap-1 sm:gap-2 flex-1 min-w-0">
-                  <h3 className="text-sm sm:text-lg font-bold text-foreground">{app.name}</h3>
-                  <p className="text-[11px] sm:text-sm text-muted-foreground leading-snug flex-1 line-clamp-2 sm:line-clamp-3">{app.tagline}</p>
-                  <Button
-                    size="sm"
-                    className="w-full mt-0.5 sm:mt-2 gap-1.5 font-semibold text-xs sm:text-sm h-7 sm:h-9"
-                  >
-                    <span className="hidden sm:inline">Visit {app.name}</span>
-                    <span className="sm:hidden">Visit</span>
-                    <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                  </Button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1 text-slate-900 font-semibold text-sm">
+                    {app.name}
+                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                  </div>
+                  <p className="text-[11px] text-slate-500 leading-snug line-clamp-2">
+                    {app.tagline}
+                  </p>
                 </div>
               </a>
             ))}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+
+      {/* Tuck / reopen handle */}
+      {open ? (
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          aria-label="Hide Smarty Family"
+          className="pointer-events-auto bg-white shadow-md rounded-r-lg py-3 px-1 border-l border-slate-100 hover:bg-slate-50 transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4 text-slate-500" />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Show Smarty Family"
+          className="pointer-events-auto bg-primary hover:bg-primary/90 transition-colors w-1.5 h-24 rounded-r-full"
+        />
+      )}
+    </div>
   );
 };
 
