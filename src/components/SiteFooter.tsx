@@ -49,26 +49,6 @@ export function SiteFooter() {
             <Link to="/disclaimer" className="hover:text-primary transition-colors">Disclaimer</Link>
           </div>
 
-          <div className="flex flex-nowrap items-center justify-center gap-x-3 whitespace-nowrap text-xs sm:text-sm text-muted-foreground">
-            <a
-              href="https://smartygym.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-primary transition-colors"
-            >
-              Smarty Gym
-            </a>
-            <span className="text-muted-foreground/40">·</span>
-            <a
-              href="https://smartydiet.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-primary transition-colors"
-            >
-              Smarty Diet
-            </a>
-          </div>
-
           <div className="text-center text-sm text-muted-foreground">
             <p>
               © {new Date().getFullYear()}{" "}
