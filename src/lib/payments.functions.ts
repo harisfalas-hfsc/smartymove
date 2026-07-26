@@ -138,34 +138,10 @@ function getSubscriptionCatalogInfo(subscription: Stripe.Subscription) {
   };
 }
 
-export const createPremiumCheckout = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((data: { returnUrl: string; environment: StripeEnv; email?: string }) => data)
-  .handler(async ({ data, context }): Promise<CheckoutResult> => {
-    try {
-      const stripe = createStripeClient(data.environment);
-      const prices = await stripe.prices.list({ lookup_keys: ["smartymove_premium_monthly"] });
-      if (!prices.data.length) throw new Error("Price not found");
-      const price = prices.data[0];
-      const customerId = await resolveOrCreateCustomer(stripe, {
-        email: data.email,
-        userId: context.userId,
-      });
-      const checkoutParams: EmbeddedCheckoutSessionParams = {
-        line_items: [{ price: price.id, quantity: 1 }],
-        mode: "subscription",
-        ui_mode: "embedded_page",
-        return_url: data.returnUrl,
-        customer: customerId,
-        metadata: { userId: context.userId },
-        subscription_data: { metadata: { userId: context.userId } },
-      };
-      const session = await stripe.checkout.sessions.create(checkoutParams);
-      return { clientSecret: session.client_secret ?? "" };
-    } catch (error) {
-      return { error: getStripeErrorMessage(error) };
-    }
-  });
+// NOTE: SmartyMove is strictly pay-per-scan. The recurring monthly checkout was
+// removed so no customer can ever be signed up for renewing billing again.
+// Only the billing portal + cancel helpers below remain, so legacy subscribers
+// can manage/stop any existing recurring charge.
 
 export const createBillingPortalSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
