@@ -1,20 +1,21 @@
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
-import { createPremiumCheckout } from "@/lib/payments.functions";
 import { createScanCheckout } from "@/lib/scans.functions";
 
+// SmartyMove is strictly pay-per-scan: every checkout is a one-time payment.
+// There is no recurring/subscription checkout mode by design.
 export function StripeEmbeddedCheckout({
   email,
   returnUrl,
-  mode = "premium",
 }: {
   email?: string;
   returnUrl: string;
-  mode?: "premium" | "scan";
+  mode?: "scan";
 }) {
   const fetchClientSecret = async (): Promise<string> => {
-    const args = { data: { returnUrl, environment: getStripeEnvironment(), email } };
-    const result = mode === "scan" ? await createScanCheckout(args) : await createPremiumCheckout(args);
+    const result = await createScanCheckout({
+      data: { returnUrl, environment: getStripeEnvironment(), email },
+    });
     if ("error" in result) throw new Error(result.error);
     if (!result.clientSecret) throw new Error("Stripe did not return a client secret");
     return result.clientSecret;
