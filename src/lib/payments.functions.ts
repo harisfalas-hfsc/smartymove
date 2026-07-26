@@ -4,12 +4,8 @@ import type Stripe from "stripe";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 
-type CheckoutResult = { clientSecret: string } | { error: string };
 type PortalResult = { url: string } | { error: string };
 type CancelSubscriptionResult = { ok: true; currentPeriodEnd: string | null } | { error: string };
-type EmbeddedCheckoutSessionParams = Stripe.Checkout.SessionCreateParams & {
-  ui_mode: "embedded_page";
-};
 type StripeSubscriptionWithPeriod = {
   id?: string;
   status?: string;
@@ -18,37 +14,6 @@ type StripeSubscriptionWithPeriod = {
 };
 
 const BILLING_MANAGED_STATUSES = ["active", "trialing", "past_due", "incomplete"];
-
-async function resolveOrCreateCustomer(
-  stripe: ReturnType<typeof createStripeClient>,
-  options: { email?: string; userId?: string },
-): Promise<string> {
-  if (options.userId && !/^[a-zA-Z0-9_-]+$/.test(options.userId)) throw new Error("Invalid userId");
-  if (options.userId) {
-    const found = await stripe.customers.search({
-      query: `metadata['userId']:'${options.userId}'`,
-      limit: 1,
-    });
-    if (found.data.length) return found.data[0].id;
-  }
-  if (options.email) {
-    const existing = await stripe.customers.list({ email: options.email, limit: 1 });
-    if (existing.data.length) {
-      const customer = existing.data[0];
-      if (options.userId && customer.metadata?.userId !== options.userId) {
-        await stripe.customers.update(customer.id, {
-          metadata: { ...customer.metadata, userId: options.userId },
-        });
-      }
-      return customer.id;
-    }
-  }
-  const created = await stripe.customers.create({
-    ...(options.email && { email: options.email }),
-    ...(options.userId && { metadata: { userId: options.userId } }),
-  });
-  return created.id;
-}
 
 async function resolveExistingCustomer(
   stripe: ReturnType<typeof createStripeClient>,
@@ -138,34 +103,10 @@ function getSubscriptionCatalogInfo(subscription: Stripe.Subscription) {
   };
 }
 
-export const createPremiumCheckout = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((data: { returnUrl: string; environment: StripeEnv; email?: string }) => data)
-  .handler(async ({ data, context }): Promise<CheckoutResult> => {
-    try {
-      const stripe = createStripeClient(data.environment);
-      const prices = await stripe.prices.list({ lookup_keys: ["smartymove_premium_monthly"] });
-      if (!prices.data.length) throw new Error("Price not found");
-      const price = prices.data[0];
-      const customerId = await resolveOrCreateCustomer(stripe, {
-        email: data.email,
-        userId: context.userId,
-      });
-      const checkoutParams: EmbeddedCheckoutSessionParams = {
-        line_items: [{ price: price.id, quantity: 1 }],
-        mode: "subscription",
-        ui_mode: "embedded_page",
-        return_url: data.returnUrl,
-        customer: customerId,
-        metadata: { userId: context.userId },
-        subscription_data: { metadata: { userId: context.userId } },
-      };
-      const session = await stripe.checkout.sessions.create(checkoutParams);
-      return { clientSecret: session.client_secret ?? "" };
-    } catch (error) {
-      return { error: getStripeErrorMessage(error) };
-    }
-  });
+// NOTE: SmartyMove is strictly pay-per-scan. The recurring monthly checkout was
+// removed so no customer can ever be signed up for renewing billing again.
+// Only the billing portal + cancel helpers below remain, so legacy subscribers
+// can manage/stop any existing recurring charge.
 
 export const createBillingPortalSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

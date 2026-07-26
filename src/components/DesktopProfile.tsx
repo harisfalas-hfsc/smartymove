@@ -38,11 +38,14 @@ import { SubScoreBar } from "@/components/SubScoreBar";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
+import { createBillingPortalSession } from "@/lib/payments.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
 import { clearLocalAccountData, signOutUser, updateUser, type Goal } from "@/lib/store";
 import { useUserPremium } from "@/lib/useUserPremium";
 
 type ExportResult = { data: unknown } | { error: string };
 type DeleteResult = { ok: true; canceledSubscriptions: number } | { error: string };
+type PortalResult = { url: string } | { error: string };
 
 export function DesktopProfile() {
   const [mounted, setMounted] = useState(false);
@@ -80,9 +83,10 @@ function DesktopProfileInner() {
   const [goal, setGoal] = useState<Goal | undefined>(u?.goal);
   const [saved, setSaved] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState<"export" | "delete" | null>(null);
+  const [loading, setLoading] = useState<"export" | "delete" | "billing" | null>(null);
   const exportData = useServerFn(exportAccountData);
   const deleteAccount = useServerFn(deleteAccountAndData);
+  const openPortal = useServerFn(createBillingPortalSession);
 
   if (!u) return null;
 
@@ -114,6 +118,26 @@ function DesktopProfileInner() {
       setMessage("Your readable data report has downloaded.");
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Could not download your data");
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  async function openBilling() {
+    setLoading("billing");
+    setMessage(null);
+    try {
+      await requireSession();
+      const result = (await openPortal({
+        data: {
+          environment: getStripeEnvironment(),
+          returnUrl: `${window.location.origin}/app/profile`,
+        },
+      })) as PortalResult;
+      if ("error" in result) throw new Error(result.error);
+      window.open(result.url, "_blank", "noopener");
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Could not open billing");
     } finally {
       setLoading(null);
     }
@@ -274,6 +298,19 @@ function DesktopProfileInner() {
               Download a readable SmartyMove data report or permanently delete your account and app data.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
+              <Button
+                onClick={openBilling}
+                disabled={loading === "billing"}
+                variant="secondary"
+                className="rounded-2xl"
+              >
+                {loading === "billing" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <CreditCard className="h-4 w-4" />
+                )}
+                Billing &amp; purchases
+              </Button>
               <Button
                 onClick={downloadAccountData}
                 disabled={loading === "export"}
