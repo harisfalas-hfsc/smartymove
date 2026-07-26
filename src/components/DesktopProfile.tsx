@@ -86,6 +86,7 @@ function DesktopProfileInner() {
   const [loading, setLoading] = useState<"export" | "delete" | "billing" | null>(null);
   const exportData = useServerFn(exportAccountData);
   const deleteAccount = useServerFn(deleteAccountAndData);
+  const openPortal = useServerFn(createBillingPortalSession);
 
   if (!u) return null;
 
