@@ -122,6 +122,26 @@ function DesktopProfileInner() {
     }
   }
 
+  async function openBilling() {
+    setLoading("billing");
+    setMessage(null);
+    try {
+      await requireSession();
+      const result = (await openPortal({
+        data: {
+          environment: getStripeEnvironment(),
+          returnUrl: `${window.location.origin}/app/profile`,
+        },
+      })) as PortalResult;
+      if ("error" in result) throw new Error(result.error);
+      window.open(result.url, "_blank", "noopener");
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Could not open billing");
+    } finally {
+      setLoading(null);
+    }
+  }
+
   async function deleteEntireAccount() {
     setLoading("delete");
     setMessage(null);
