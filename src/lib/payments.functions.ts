@@ -4,12 +4,8 @@ import type Stripe from "stripe";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 
-type CheckoutResult = { clientSecret: string } | { error: string };
 type PortalResult = { url: string } | { error: string };
 type CancelSubscriptionResult = { ok: true; currentPeriodEnd: string | null } | { error: string };
-type EmbeddedCheckoutSessionParams = Stripe.Checkout.SessionCreateParams & {
-  ui_mode: "embedded_page";
-};
 type StripeSubscriptionWithPeriod = {
   id?: string;
   status?: string;
