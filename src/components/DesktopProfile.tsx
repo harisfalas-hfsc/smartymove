@@ -38,11 +38,14 @@ import { SubScoreBar } from "@/components/SubScoreBar";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
+import { createBillingPortalSession } from "@/lib/payments.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
 import { clearLocalAccountData, signOutUser, updateUser, type Goal } from "@/lib/store";
 import { useUserPremium } from "@/lib/useUserPremium";
 
 type ExportResult = { data: unknown } | { error: string };
 type DeleteResult = { ok: true; canceledSubscriptions: number } | { error: string };
+type PortalResult = { url: string } | { error: string };
 
 export function DesktopProfile() {
   const [mounted, setMounted] = useState(false);
@@ -80,7 +83,7 @@ function DesktopProfileInner() {
   const [goal, setGoal] = useState<Goal | undefined>(u?.goal);
   const [saved, setSaved] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState<"export" | "delete" | null>(null);
+  const [loading, setLoading] = useState<"export" | "delete" | "billing" | null>(null);
   const exportData = useServerFn(exportAccountData);
   const deleteAccount = useServerFn(deleteAccountAndData);
 
