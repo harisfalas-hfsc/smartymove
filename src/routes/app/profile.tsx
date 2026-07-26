@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ChevronDown,
   ClipboardList,
+  CreditCard,
   Download,
   Loader2,
   LogOut,
@@ -33,12 +34,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
 import { isAdminEmail } from "@/lib/admin";
+import { createBillingPortalSession } from "@/lib/payments.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
 import { clearLocalAccountData, setOnboardingNextPath, updateUser, signOutUser, useUser, type User } from "@/lib/store";
 
 export const Route = createFileRoute("/app/profile")({ component: Profile });
 
 type ExportResult = { data: unknown } | { error: string };
 type DeleteResult = { ok: true; canceledSubscriptions: number } | { error: string };
+type PortalResult = { url: string } | { error: string };
 
 function Profile() {
   const u = useUser();
@@ -52,15 +56,32 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
   const [name, setName] = useState(u.name);
   const [age, setAge] = useState(String(u.age));
   const [saved, setSaved] = useState(false);
-  const [accountLoading, setAccountLoading] = useState<"export" | "delete" | null>(null);
+  const [accountLoading, setAccountLoading] = useState<"export" | "delete" | "billing" | null>(null);
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
   const [dataOpen, setDataOpen] = useState(false);
   const exportData = useServerFn(exportAccountData);
   const deleteAccount = useServerFn(deleteAccountAndData);
+  const openPortal = useServerFn(createBillingPortalSession);
 
   async function requireSession() {
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw new Error("Please sign in again before managing your account data.");
+  }
+  async function openBilling() {
+    setAccountLoading("billing");
+    setAccountMessage(null);
+    try {
+      await requireSession();
+      const res = (await openPortal({
+        data: { environment: getStripeEnvironment(), returnUrl: `${window.location.origin}/app/profile` },
+      })) as PortalResult;
+      if ("error" in res) throw new Error(res.error);
+      window.open(res.url, "_blank", "noopener");
+    } catch (e) {
+      setAccountMessage(e instanceof Error ? e.message : "Could not open billing");
+    } finally {
+      setAccountLoading(null);
+    }
   }
   async function downloadAccountData() {
     setAccountLoading("export");
