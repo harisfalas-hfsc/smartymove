@@ -53,6 +53,12 @@ async function markCanceled(sub: any, env: StripeEnv) {
 async function grantScanCredits(session: any) {
   const meta = session.metadata ?? {};
   if (meta.type !== "scan_pack") return;
+  // Only grant once the money actually landed. `checkout.session.completed`
+  // can fire with `payment_status: "unpaid"` for delayed/async payment methods.
+  if (session.payment_status !== "paid" && session.payment_status !== "no_payment_required") {
+    console.log("scan_pack session not paid yet, skipping grant", session.id, session.payment_status);
+    return;
+  }
   const userId = meta.userId;
   if (!userId) {
     console.error("scan_pack checkout missing userId metadata", session.id);
@@ -84,6 +90,7 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
               await markCanceled(event.data.object, env);
               break;
             case "checkout.session.completed":
+            case "checkout.session.async_payment_succeeded":
               await grantScanCredits(event.data.object);
               break;
             default:
