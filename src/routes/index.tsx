@@ -220,7 +220,7 @@ function Welcome() {
         {mode === "intro" ? (
           <>
           {/* FULL-BLEED HERO — image with content on top (SmartyGym concept) */}
-          <section className="relative -mx-5 -mt-5 mb-6 overflow-hidden lg:-mx-6 lg:-mt-16 lg:mb-14">
+          <section className="relative left-1/2 -mt-5 mb-6 w-screen -translate-x-1/2 overflow-hidden lg:-mt-16 lg:mb-14">
             <img
               src={heroSquat}
               alt="Man performing a squat in front of a phone camera running a movement scan"
@@ -231,7 +231,7 @@ function Welcome() {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/92 via-black/75 to-black/25" />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent" />
-            <div className="relative px-1 py-16 lg:py-32">
+            <div className="relative mx-auto w-full max-w-[430px] px-5 py-16 lg:max-w-[1080px] lg:px-6 lg:py-36">
               <div className="max-w-xl">
                 <h1 className="text-[38px] font-extrabold leading-[1.05] tracking-tight text-white lg:text-[60px]">
                   Know how you move,
