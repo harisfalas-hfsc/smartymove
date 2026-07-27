@@ -18,6 +18,7 @@ import {
 } from "@/lib/store";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import heroSquat from "@/assets/hero-squat-camera.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Activity,
