@@ -336,36 +336,8 @@ function Welcome() {
 
           {/* DESKTOP — SmartyDiet-inspired layout */}
           <div className="hidden lg:block">
-            <div className="text-center">
-              <div className="mx-auto grid place-items-center h-20 w-20 text-primary">
-                <Activity className="h-16 w-16" strokeWidth={1.8} />
-              </div>
-              <h1 className="mt-6 text-[52px] leading-[1.05] font-extrabold tracking-tight text-[#0f172a]">
-                Know how you move, <br />
-                <span className="text-primary">move smarter.</span>
-              </h1>
-              <p className="mt-6 text-lg text-slate-500 max-w-2xl mx-auto">
-                Run a camera-based Movement Screen. Get your Movement Score, Movement Age, and a personalized 2-week corrective program — built around your real mobility limits.
-              </p>
-              <div className="mt-8 flex items-center justify-center gap-3">
-                <button
-                  onClick={() => navigate({ to: "/onboarding/parq" })}
-                  className="h-12 px-8 rounded-full bg-primary text-primary-foreground text-base font-bold hover:opacity-95"
-                >
-                  Get started
-                </button>
-                <Link
-                  to="/about"
-                  className="h-12 px-8 rounded-full border-2 border-primary text-primary text-base font-bold inline-flex items-center hover:bg-primary/5"
-                >
-                  How it works
-                </Link>
-              </div>
-              <p className="mt-4 text-sm text-slate-400">One-time €9.99 per scan. No subscription.</p>
-            </div>
-
             {/* Big framed card: How it works */}
-            <div className="mt-14 rounded-[32px] border-2 border-primary bg-white p-12">
+            <div className="rounded-[32px] border-2 border-primary bg-card p-12">
               <div className="flex items-center gap-4">
                 <div className="flex-1 inline-flex items-center gap-3 rounded-full border-2 border-primary/40 px-6 py-3">
                   <Sparkles className="h-4 w-4 text-primary" />
