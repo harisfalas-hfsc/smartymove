@@ -232,11 +232,6 @@ function Welcome() {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/92 via-black/75 to-black/25" />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent" />
-            <img
-              src={heroMark}
-              alt="SmartyMove icon"
-              className="pointer-events-none absolute left-1/2 top-6 h-12 w-12 -translate-x-1/2 object-contain lg:top-10 lg:h-16 lg:w-16"
-            />
             <div className="relative mx-auto w-full max-w-[430px] px-5 py-16 lg:max-w-[1080px] lg:px-6 lg:py-36">
               <div className="max-w-xl">
                 <h1 className="text-[38px] font-extrabold leading-[1.05] tracking-tight text-white lg:text-[60px]">
