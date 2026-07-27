@@ -2,6 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUser } from "@/lib/store";
+import brandIcon from "@/assets/smartymove-logo.png";
 
 type Props = {
   onSignIn?: () => void;
@@ -59,7 +60,7 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
           <Link
             to={user ? "/app" : "/"}
             aria-label="SmartyMove home"
-            className="text-lg font-extrabold tracking-tight leading-none"
+            className="flex items-center gap-1.5 text-lg font-extrabold tracking-tight leading-none"
             style={{ textDecoration: "none" }}
             onClick={() => {
               if (pathname === "/" || pathname === "/app" || pathname === "/app/") {
@@ -67,6 +68,7 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
               }
             }}
           >
+            <img src={brandIcon} alt="" aria-hidden="true" className="h-6 w-6 shrink-0 object-contain" />
             <span className="text-primary">SMARTY</span>
             <span className="text-green-500">MOVE</span>
           </Link>
