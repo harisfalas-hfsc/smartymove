@@ -219,25 +219,51 @@ function Welcome() {
       >
         {mode === "intro" ? (
           <>
+          {/* FULL-BLEED HERO — image with content on top (SmartyGym concept) */}
+          <section className="relative -mx-5 -mt-5 mb-6 overflow-hidden lg:-mx-6 lg:-mt-16 lg:mb-14">
+            <img
+              src={heroSquat}
+              alt="Man performing a squat in front of a phone camera running a movement scan"
+              width={1920}
+              height={1088}
+              decoding="async"
+              className="absolute inset-0 h-full w-full object-cover object-[68%_center]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/92 via-black/75 to-black/25" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent" />
+            <div className="relative px-1 py-16 lg:py-32">
+              <div className="max-w-xl">
+                <h1 className="text-[38px] font-extrabold leading-[1.05] tracking-tight text-white lg:text-[60px]">
+                  Know how you move,
+                  <br />
+                  <span className="text-primary">move smarter.</span>
+                </h1>
+                <p className="mt-5 text-base leading-relaxed text-white/80 lg:mt-6 lg:text-lg">
+                  Run a camera-based Movement Screen. Get your Movement Score, Movement Age, and a
+                  personalized 2-week corrective program — built around your real mobility limits.
+                </p>
+                <div className="mt-7 flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => navigate({ to: "/onboarding/parq" })}
+                    className="h-12 rounded-full bg-primary px-8 text-base font-bold text-primary-foreground hover:opacity-95"
+                  >
+                    Get started
+                  </button>
+                  <Link
+                    to="/about"
+                    className="inline-flex h-12 items-center rounded-full border-2 border-primary px-8 text-base font-bold text-primary hover:bg-primary/10"
+                  >
+                    How it works
+                  </Link>
+                </div>
+                <p className="mt-4 text-sm text-white/60">One-time €9.99 per scan. No subscription.</p>
+              </div>
+            </div>
+          </section>
+
           {/* MOBILE — untouched wellness grid */}
           <div className="lg:hidden">
             <div className="sm-wellness-grid">
-              <section className="sm-panel sm-panel-hero sm-border-hero">
-                <div className="sm-eyebrow"><Sparkles className="h-3 w-3" /> Movement diagnostic</div>
-                <h1 className="sm-wellness-title">
-                  <span>Know How You Move.</span>
-                  <span>Move Smarter.</span>
-                </h1>
-                <div className="sm-hero-motto">
-                  <Smartphone className="h-4 w-4" />
-                  <span>Your pocket movement coach.</span>
-                </div>
-                <Link to="/about" className="sm-read-more-link">
-                  Read more <ArrowRight className="h-4 w-4" />
-                </Link>
-
-              </section>
-
               <div className="sm-panel-score-picture sm-border-score">
                 <div className="sm-score-card">
                   <div>Movement Score</div>
