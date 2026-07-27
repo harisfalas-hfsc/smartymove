@@ -160,3 +160,116 @@
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 }
+
+/* ============ DARK MODE COMPATIBILITY LAYER ============
+   Neutralizes hardcoded light-theme colors so the whole app reads
+   correctly with the dark theme enabled by default. */
+
+.dark [style*="color:#14213A"],
+.dark [style*="color: #14213A"],
+.dark [style*="color: rgb(20, 33, 58)"] { color: #E8EEF7 !important; }
+.dark [style*="color:#0f172a"],
+.dark [style*="color: #0f172a"],
+.dark [style*="color: rgb(15, 23, 42)"] { color: #E8EEF7 !important; }
+.dark [style*="color:#10213F"],
+.dark [style*="color: #10213F"],
+.dark [style*="color: rgb(16, 33, 63)"] { color: #E8EEF7 !important; }
+.dark [style*="color:#3B4A63"],
+.dark [style*="color: #3B4A63"],
+.dark [style*="color: rgb(59, 74, 99)"] { color: #AFBED4 !important; }
+.dark [style*="color:#5A6B85"],
+.dark [style*="color: #5A6B85"],
+.dark [style*="color: rgb(90, 107, 133)"] { color: #9FB0C7 !important; }
+.dark [style*="color:#6B7A90"],
+.dark [style*="color: #6B7A90"],
+.dark [style*="color: rgb(107, 122, 144)"] { color: #9FB0C7 !important; }
+.dark [style*="color:#4A5971"],
+.dark [style*="color: #4A5971"],
+.dark [style*="color: rgb(74, 89, 113)"] { color: #AFBED4 !important; }
+.dark [style*="color:#5F6E84"],
+.dark [style*="color: #5F6E84"],
+.dark [style*="color: rgb(95, 110, 132)"] { color: #9FB0C7 !important; }
+.dark [style*="background:#ffffff"],
+.dark [style*="background: #ffffff"],
+.dark [style*="background-color:#ffffff"],
+.dark [style*="background-color: #ffffff"],
+.dark [style*="background: rgb(255, 255, 255)"],
+.dark [style*="background-color: rgb(255, 255, 255)"] { background-color: #1B2431 !important; background-image: none !important; }
+.dark [style*="background:#F1F7F8"],
+.dark [style*="background: #F1F7F8"],
+.dark [style*="background-color:#F1F7F8"],
+.dark [style*="background-color: #F1F7F8"],
+.dark [style*="background: rgb(241, 247, 248)"],
+.dark [style*="background-color: rgb(241, 247, 248)"] { background-color: #163034 !important; background-image: none !important; }
+.dark [style*="background:#F7FCFE"],
+.dark [style*="background: #F7FCFE"],
+.dark [style*="background-color:#F7FCFE"],
+.dark [style*="background-color: #F7FCFE"],
+.dark [style*="background: rgb(247, 252, 254)"],
+.dark [style*="background-color: rgb(247, 252, 254)"] { background-color: #152A33 !important; background-image: none !important; }
+.dark [style*="background:#EEF1F2"],
+.dark [style*="background: #EEF1F2"],
+.dark [style*="background-color:#EEF1F2"],
+.dark [style*="background-color: #EEF1F2"],
+.dark [style*="background: rgb(238, 241, 242)"],
+.dark [style*="background-color: rgb(238, 241, 242)"] { background-color: #232C3A !important; background-image: none !important; }
+.dark [style*="background:#E5EAEC"],
+.dark [style*="background: #E5EAEC"],
+.dark [style*="background-color:#E5EAEC"],
+.dark [style*="background-color: #E5EAEC"],
+.dark [style*="background: rgb(229, 234, 236)"],
+.dark [style*="background-color: rgb(229, 234, 236)"] { background-color: #232C3A !important; background-image: none !important; }
+.dark [style*="background:#E6F5F5"],
+.dark [style*="background: #E6F5F5"],
+.dark [style*="background-color:#E6F5F5"],
+.dark [style*="background-color: #E6F5F5"],
+.dark [style*="background: rgb(230, 245, 245)"],
+.dark [style*="background-color: rgb(230, 245, 245)"] { background-color: #123236 !important; background-image: none !important; }
+.dark [style*="background:#DBEAFE"],
+.dark [style*="background: #DBEAFE"],
+.dark [style*="background-color:#DBEAFE"],
+.dark [style*="background-color: #DBEAFE"],
+.dark [style*="background: rgb(219, 234, 254)"],
+.dark [style*="background-color: rgb(219, 234, 254)"] { background-color: #152742 !important; background-image: none !important; }
+.dark [style*="background:#FDECD8"],
+.dark [style*="background: #FDECD8"],
+.dark [style*="background-color:#FDECD8"],
+.dark [style*="background-color: #FDECD8"],
+.dark [style*="background: rgb(253, 236, 216)"],
+.dark [style*="background-color: rgb(253, 236, 216)"] { background-color: #3A2513 !important; background-image: none !important; }
+.dark [style*="background:#F1E9FA"],
+.dark [style*="background: #F1E9FA"],
+.dark [style*="background-color:#F1E9FA"],
+.dark [style*="background-color: #F1E9FA"],
+.dark [style*="background: rgb(241, 233, 250)"],
+.dark [style*="background-color: rgb(241, 233, 250)"] { background-color: #241839 !important; background-image: none !important; }
+.dark [style*="background:#DCFCE7"],
+.dark [style*="background: #DCFCE7"],
+.dark [style*="background-color:#DCFCE7"],
+.dark [style*="background-color: #DCFCE7"],
+.dark [style*="background: rgb(220, 252, 231)"],
+.dark [style*="background-color: rgb(220, 252, 231)"] { background-color: #0F2E20 !important; background-image: none !important; }
+.dark [style*="background:#F0FBFF"],
+.dark [style*="background: #F0FBFF"],
+.dark [style*="background-color:#F0FBFF"],
+.dark [style*="background-color: #F0FBFF"],
+.dark [style*="background: rgb(240, 251, 255)"],
+.dark [style*="background-color: rgb(240, 251, 255)"] { background-color: #152A33 !important; background-image: none !important; }
+.dark [style*="border-color:#EEF1F2"], .dark [style*="border-color: #EEF1F2"], .dark [style*="border-color: rgb(238, 241, 242)"], .dark [style*="border-color:#E5EAEC"], .dark [style*="border-color: #E5EAEC"], .dark [style*="border-color: rgb(229, 234, 236)"] { border-color: var(--color-border) !important; }
+
+/* Tailwind literal / palette classes used across the app */
+.dark .text-\[\#0f172a\] { color: #E8EEF7 !important; }
+.dark .bg-white { background-color: var(--color-card) !important; }
+.dark .text-slate-400, .dark .text-slate-500, .dark .text-gray-500 { color: #9FB0C7 !important; }
+.dark .text-slate-600, .dark .text-slate-700, .dark .text-slate-800, .dark .text-slate-900,
+.dark .text-gray-600, .dark .text-gray-700, .dark .text-gray-800, .dark .text-gray-900 { color: #D7E1EF !important; }
+.dark .bg-slate-50, .dark .bg-slate-100, .dark .bg-gray-50, .dark .bg-gray-100 { background-color: var(--color-muted) !important; }
+.dark .border-slate-100, .dark .border-slate-200, .dark .border-gray-100, .dark .border-gray-200 { border-color: var(--color-border) !important; }
+
+/* Homepage wellness panels (scoped <style> blocks) */
+.dark .sm-panel { background: var(--color-card) !important; box-shadow: 0 12px 36px -28px rgba(0,0,0,.8); }
+.dark .sm-panel h2, .dark .sm-wellness-title, .dark .sm-feature-line strong { color: #E8EEF7; }
+.dark .sm-panel p, .dark .sm-hero-motto, .dark .sm-feature-line small { color: #AFBED4; }
+.dark .sm-eyebrow, .dark .sm-primary-cta, .dark .sm-card-icon { background: rgba(44,153,179,.12) !important; }
+.dark .sm-home-shell::before { background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px); }
+
