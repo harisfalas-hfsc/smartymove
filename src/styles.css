@@ -273,3 +273,10 @@
 .dark .sm-eyebrow, .dark .sm-primary-cta, .dark .sm-card-icon { background: rgba(44,153,179,.12) !important; }
 .dark .sm-home-shell::before { background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px); }
 
+/* Sister apps popup stays light in dark mode */
+.dark .sm-sister-panel.bg-white,
+.dark .sm-sister-handle.bg-white { background-color: #ffffff !important; }
+.dark .sm-sister-panel .text-slate-900 { color: #0f172a !important; }
+.dark .sm-sister-panel .text-slate-700 { color: #334155 !important; }
+.dark .sm-sister-handle.text-slate-900 { color: #0f172a !important; }
+
