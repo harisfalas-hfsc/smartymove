@@ -18,6 +18,7 @@ import {
 } from "@/lib/store";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import heroSquat from "@/assets/hero-squat-camera.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Activity,
@@ -218,25 +219,51 @@ function Welcome() {
       >
         {mode === "intro" ? (
           <>
+          {/* FULL-BLEED HERO — image with content on top (SmartyGym concept) */}
+          <section className="relative left-1/2 -mt-5 mb-6 w-screen -translate-x-1/2 overflow-hidden lg:-mt-16 lg:mb-14">
+            <img
+              src={heroSquat}
+              alt="Man performing a squat in front of a phone camera running a movement scan"
+              width={1920}
+              height={1088}
+              decoding="async"
+              className="absolute inset-0 h-full w-full object-cover object-[68%_center]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/92 via-black/75 to-black/25" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent" />
+            <div className="relative mx-auto w-full max-w-[430px] px-5 py-16 lg:max-w-[1080px] lg:px-6 lg:py-36">
+              <div className="max-w-xl">
+                <h1 className="text-[38px] font-extrabold leading-[1.05] tracking-tight text-white lg:text-[60px]">
+                  Know how you move,
+                  <br />
+                  <span className="text-primary">move smarter.</span>
+                </h1>
+                <p className="mt-5 text-base leading-relaxed text-white/80 lg:mt-6 lg:text-lg">
+                  Run a camera-based Movement Screen. Get your Movement Score, Movement Age, and a
+                  personalized 2-week corrective program — built around your real mobility limits.
+                </p>
+                <div className="mt-7 flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => navigate({ to: "/onboarding/parq" })}
+                    className="h-12 rounded-full bg-primary px-8 text-base font-bold text-primary-foreground hover:opacity-95"
+                  >
+                    Get started
+                  </button>
+                  <Link
+                    to="/about"
+                    className="inline-flex h-12 items-center rounded-full border-2 border-primary px-8 text-base font-bold text-primary hover:bg-primary/10"
+                  >
+                    How it works
+                  </Link>
+                </div>
+                <p className="mt-4 text-sm text-white/60">One-time €9.99 per scan. No subscription.</p>
+              </div>
+            </div>
+          </section>
+
           {/* MOBILE — untouched wellness grid */}
           <div className="lg:hidden">
             <div className="sm-wellness-grid">
-              <section className="sm-panel sm-panel-hero sm-border-hero">
-                <div className="sm-eyebrow"><Sparkles className="h-3 w-3" /> Movement diagnostic</div>
-                <h1 className="sm-wellness-title">
-                  <span>Know How You Move.</span>
-                  <span>Move Smarter.</span>
-                </h1>
-                <div className="sm-hero-motto">
-                  <Smartphone className="h-4 w-4" />
-                  <span>Your pocket movement coach.</span>
-                </div>
-                <Link to="/about" className="sm-read-more-link">
-                  Read more <ArrowRight className="h-4 w-4" />
-                </Link>
-
-              </section>
-
               <div className="sm-panel-score-picture sm-border-score">
                 <div className="sm-score-card">
                   <div>Movement Score</div>
@@ -309,36 +336,8 @@ function Welcome() {
 
           {/* DESKTOP — SmartyDiet-inspired layout */}
           <div className="hidden lg:block">
-            <div className="text-center">
-              <div className="mx-auto grid place-items-center h-20 w-20 text-primary">
-                <Activity className="h-16 w-16" strokeWidth={1.8} />
-              </div>
-              <h1 className="mt-6 text-[52px] leading-[1.05] font-extrabold tracking-tight text-[#0f172a]">
-                Know how you move, <br />
-                <span className="text-primary">move smarter.</span>
-              </h1>
-              <p className="mt-6 text-lg text-slate-500 max-w-2xl mx-auto">
-                Run a camera-based Movement Screen. Get your Movement Score, Movement Age, and a personalized 2-week corrective program — built around your real mobility limits.
-              </p>
-              <div className="mt-8 flex items-center justify-center gap-3">
-                <button
-                  onClick={() => navigate({ to: "/onboarding/parq" })}
-                  className="h-12 px-8 rounded-full bg-primary text-primary-foreground text-base font-bold hover:opacity-95"
-                >
-                  Get started
-                </button>
-                <Link
-                  to="/about"
-                  className="h-12 px-8 rounded-full border-2 border-primary text-primary text-base font-bold inline-flex items-center hover:bg-primary/5"
-                >
-                  How it works
-                </Link>
-              </div>
-              <p className="mt-4 text-sm text-slate-400">One-time €9.99 per scan. No subscription.</p>
-            </div>
-
             {/* Big framed card: How it works */}
-            <div className="mt-14 rounded-[32px] border-2 border-primary bg-white p-12">
+            <div className="rounded-[32px] border-2 border-primary bg-card p-12">
               <div className="flex items-center gap-4">
                 <div className="flex-1 inline-flex items-center gap-3 rounded-full border-2 border-primary/40 px-6 py-3">
                   <Sparkles className="h-4 w-4 text-primary" />
