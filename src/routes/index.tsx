@@ -267,7 +267,7 @@ function Welcome() {
               {/* Mobile hero card — app-native card holding headline, copy and CTAs */}
               <section
                 className="sm-panel sm-border-hero sm-mobile-hero-card lg:hidden"
-                style={{ backgroundImage: `linear-gradient(to bottom, rgba(4,10,18,0.72), rgba(4,10,18,0.92)), url(${heroSquat})` }}
+                style={{ backgroundImage: `linear-gradient(to bottom, rgba(4,10,18,0.30), rgba(4,10,18,0.80)), url(${heroSquat})` }}
               >
                 <h1 className="sm-mobile-hero-title">
                   Know how you move,
