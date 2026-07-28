@@ -268,7 +268,8 @@
 
 /* Homepage wellness panels (scoped <style> blocks) */
 .dark .sm-panel { background: var(--color-card) !important; box-shadow: 0 12px 36px -28px rgba(0,0,0,.8); }
-.dark .sm-panel h2, .dark .sm-wellness-title, .dark .sm-feature-line strong, .dark .sm-mobile-hero-title { color: #E8EEF7; }
+.dark .sm-panel h2, .dark .sm-wellness-title, .dark .sm-feature-line strong { color: #E8EEF7; }
+.dark .sm-mobile-hero-title { color: #E8EEF7 !important; }
 .dark .sm-panel p, .dark .sm-hero-motto, .dark .sm-feature-line small { color: #AFBED4; }
 .dark .sm-eyebrow, .dark .sm-primary-cta, .dark .sm-card-icon { background: rgba(44,153,179,.12) !important; }
 .dark .sm-home-shell::before { background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px); }
