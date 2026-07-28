@@ -759,6 +759,34 @@ function Welcome() {
             line-height: 1.6;
             margin: 0;
           }
+          .sm-mobile-hero-title{
+            color: #10213F;
+            font-size: 30px;
+            line-height: 1.08;
+            font-weight: 900;
+            letter-spacing: -0.01em;
+            margin: 0;
+          }
+          .sm-mobile-hero-title span{ color: #2B8FA3; }
+          .sm-mobile-hero-secondary{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 46px;
+            margin-top: 10px;
+            border-radius: 999px;
+            border: 2px solid #2B8FA3;
+            color: #2B8FA3;
+            font-size: 15px;
+            font-weight: 800;
+            text-decoration: none;
+          }
+          .sm-mobile-hero-note{
+            margin-top: 12px !important;
+            text-align: center;
+            font-size: 13px !important;
+            color: #6B7A91 !important;
+          }
           .sm-panel-hero{
             min-height: 200px;
             display: flex;
