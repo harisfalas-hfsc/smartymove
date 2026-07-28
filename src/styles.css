@@ -268,6 +268,12 @@
 
 /* Homepage wellness panels (scoped <style> blocks) */
 .dark .sm-panel { background: var(--color-card) !important; box-shadow: 0 12px 36px -28px rgba(0,0,0,.8); }
+.dark .sm-panel.sm-mobile-hero-card {
+  background: linear-gradient(to bottom, rgba(4,10,18,0.55), rgba(4,10,18,0.88)), var(--sm-hero-img) !important;
+  background-size: cover !important;
+  background-position: 68% center !important;
+  background-repeat: no-repeat !important;
+}
 .dark .sm-panel h2, .dark .sm-wellness-title, .dark .sm-feature-line strong { color: #E8EEF7; }
 .dark .sm-mobile-hero-title { color: #E8EEF7 !important; }
 .dark .sm-panel p, .dark .sm-hero-motto, .dark .sm-feature-line small { color: #AFBED4; }

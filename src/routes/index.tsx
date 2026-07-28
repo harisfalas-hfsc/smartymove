@@ -220,7 +220,7 @@ function Welcome() {
         {mode === "intro" ? (
           <>
           {/* FULL-BLEED HERO — image with content on top (SmartyGym concept) */}
-          <section className="relative left-1/2 -mt-5 mb-4 h-[280px] w-screen -translate-x-1/2 overflow-hidden lg:-mt-16 lg:mb-14 lg:h-auto">
+          <section className="relative left-1/2 -mt-5 mb-4 hidden h-[280px] w-screen -translate-x-1/2 overflow-hidden lg:-mt-16 lg:mb-14 lg:block lg:h-auto">
             <img
               src={heroSquat}
               alt="Man performing a squat in front of a phone camera running a movement scan"
@@ -265,7 +265,13 @@ function Welcome() {
           <div className="lg:hidden">
             <div className="sm-wellness-grid">
               {/* Mobile hero card — app-native card holding headline, copy and CTAs */}
-              <section className="sm-panel sm-border-hero lg:hidden">
+              <section
+                className="sm-panel sm-border-hero sm-mobile-hero-card lg:hidden"
+                style={{
+                  ["--sm-hero-img" as string]: `url(${heroSquat})`,
+                  backgroundImage: `linear-gradient(to bottom, rgba(4,10,18,0.55), rgba(4,10,18,0.88)), url(${heroSquat})`,
+                } as React.CSSProperties}
+              >
                 <h1 className="sm-mobile-hero-title">
                   Know how you move,
                   <br />
@@ -759,15 +765,27 @@ function Welcome() {
             line-height: 1.6;
             margin: 0;
           }
+          .sm-mobile-hero-card{
+            background-size: cover;
+            background-position: 68% center;
+            background-repeat: no-repeat;
+          }
+          .sm-mobile-hero-card p{ color: rgba(232,238,247,0.82) !important; }
+          .sm-mobile-hero-card .sm-mobile-hero-note{ color: rgba(232,238,247,0.6) !important; }
+          .sm-mobile-hero-card .sm-mobile-hero-secondary{
+            border-color: #86D0EF;
+            color: #86D0EF;
+            background: rgba(4,10,18,0.35);
+          }
           .sm-mobile-hero-title{
-            color: #10213F;
+            color: #E8EEF7;
             font-size: 30px;
             line-height: 1.08;
             font-weight: 900;
             letter-spacing: -0.01em;
             margin: 0;
           }
-          .sm-mobile-hero-title span{ color: #2B8FA3; }
+          .sm-mobile-hero-title span{ color: #86D0EF; }
           .sm-mobile-hero-secondary{
             display: flex;
             align-items: center;
