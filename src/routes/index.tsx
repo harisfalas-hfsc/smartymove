@@ -220,7 +220,7 @@ function Welcome() {
         {mode === "intro" ? (
           <>
           {/* FULL-BLEED HERO — image with content on top (SmartyGym concept) */}
-          <section className="relative left-1/2 -mt-5 mb-6 w-screen -translate-x-1/2 overflow-hidden lg:-mt-16 lg:mb-14">
+          <section className="relative left-1/2 -mt-5 mb-4 h-[280px] w-screen -translate-x-1/2 overflow-hidden lg:-mt-16 lg:mb-14 lg:h-auto">
             <img
               src={heroSquat}
               alt="Man performing a squat in front of a phone camera running a movement scan"
@@ -231,7 +231,7 @@ function Welcome() {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/92 via-black/75 to-black/25" />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent" />
-            <div className="relative mx-auto w-full max-w-[430px] px-5 py-16 lg:max-w-[1080px] lg:px-6 lg:py-36">
+            <div className="relative mx-auto hidden w-full max-w-[430px] px-5 py-16 lg:block lg:max-w-[1080px] lg:px-6 lg:py-36">
               <div className="max-w-xl">
                 <h1 className="text-[38px] font-extrabold leading-[1.05] tracking-tight text-white lg:text-[60px]">
                   Know how you move,
@@ -264,6 +264,26 @@ function Welcome() {
           {/* MOBILE — untouched wellness grid */}
           <div className="lg:hidden">
             <div className="sm-wellness-grid">
+              {/* Mobile hero card — app-native card holding headline, copy and CTAs */}
+              <section className="sm-panel sm-border-hero">
+                <h1 className="sm-mobile-hero-title">
+                  Know how you move,
+                  <br />
+                  <span>move smarter.</span>
+                </h1>
+                <p className="mt-3">
+                  Run a camera-based Movement Screen. Get your Movement Score, Movement Age, and a
+                  personalized 2-week corrective program — built around your real mobility limits.
+                </p>
+                <button className="sm-primary-cta mt-4" onClick={() => navigate({ to: "/onboarding/parq" })}>
+                  Get started <ArrowRight className="h-4 w-4" />
+                </button>
+                <Link to="/about" className="sm-mobile-hero-secondary">
+                  How it works
+                </Link>
+                <p className="sm-mobile-hero-note">One-time €9.99 per scan. No subscription.</p>
+              </section>
+
               <div className="sm-panel-score-picture sm-border-score">
                 <div className="sm-score-card">
                   <div>Movement Score</div>
