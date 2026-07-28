@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { HelpCircle, ChevronDown } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { SmartyCard } from "@/components/SmartyCard";
 
 export const Route = createFileRoute("/faq")({
   head: () => ({
