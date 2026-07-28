@@ -762,15 +762,27 @@ function Welcome() {
             line-height: 1.6;
             margin: 0;
           }
+          .sm-mobile-hero-card{
+            background-size: cover;
+            background-position: 68% center;
+            background-repeat: no-repeat;
+          }
+          .sm-mobile-hero-card p{ color: rgba(232,238,247,0.82) !important; }
+          .sm-mobile-hero-card .sm-mobile-hero-note{ color: rgba(232,238,247,0.6) !important; }
+          .sm-mobile-hero-card .sm-mobile-hero-secondary{
+            border-color: #86D0EF;
+            color: #86D0EF;
+            background: rgba(4,10,18,0.35);
+          }
           .sm-mobile-hero-title{
-            color: #10213F;
+            color: #E8EEF7;
             font-size: 30px;
             line-height: 1.08;
             font-weight: 900;
             letter-spacing: -0.01em;
             margin: 0;
           }
-          .sm-mobile-hero-title span{ color: #2B8FA3; }
+          .sm-mobile-hero-title span{ color: #86D0EF; }
           .sm-mobile-hero-secondary{
             display: flex;
             align-items: center;
