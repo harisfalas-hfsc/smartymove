@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { HelpCircle, ChevronDown } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { SmartyCard } from "@/components/SmartyCard";
 
 export const Route = createFileRoute("/faq")({
   head: () => ({
@@ -103,26 +102,39 @@ function Faq() {
     <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
       <SiteHeader showBack />
 
-      {/* MOBILE — untouched */}
-      <main className="mx-auto w-full max-w-[760px] flex-1 px-4 pb-6 pt-4 lg:hidden">
-        <SmartyCard
-          Icon={HelpCircle}
-          iconColor="#C2410C"
-          iconBg="#FDECD8"
-          title="FAQ"
-          subtitle="Everything people ask before their first scan."
-        >
-          <div className="mt-1 flex flex-col gap-2">
-            {FAQ_ITEMS.map((f) => (
-              <details key={f.q} style={{ borderTop: "1px solid #EEF1F2", paddingTop: 10 }}>
-                <summary style={{ fontWeight: 700, color: "#14213A", fontSize: 14.5, cursor: "pointer", listStyle: "none" }}>
-                  {f.q}
-                </summary>
-                <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.55, color: "#3B4A63" }}>{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </SmartyCard>
+      {/* MOBILE — brand-consistent card stack */}
+      <main className="mx-auto w-full max-w-[430px] flex-1 px-5 pb-8 pt-5 lg:hidden">
+        <section className="rounded-[15px] border-[1.5px] border-primary/45 bg-card p-5 shadow-sm">
+          <span className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-primary/40 bg-primary/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em] text-primary">
+            <HelpCircle className="h-3.5 w-3.5" /> FAQ
+          </span>
+          <h1 className="mt-3 text-[28px] font-black leading-[1.1] tracking-tight text-foreground">
+            Your <span className="text-primary">questions</span>, answered
+          </h1>
+          <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+            Everything people ask before their first Movement Screen. Tap a question to open the answer.
+          </p>
+        </section>
+
+        <div className="mt-3.5 flex flex-col gap-3">
+          {FAQ_ITEMS.map((f, i) => (
+            <details
+              key={f.q}
+              className="group rounded-[15px] border-[1.5px] border-border bg-card p-4 shadow-sm open:border-primary/45"
+            >
+              <summary className="flex cursor-pointer list-none items-center gap-3">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border-[1.5px] border-primary/40 bg-primary/10 text-[11px] font-extrabold text-primary">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="min-w-0 flex-1 text-[15.5px] font-bold leading-snug text-foreground">{f.q}</span>
+                <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+              </summary>
+              <p className="mt-3 border-t border-border pt-3 text-[15px] leading-relaxed text-muted-foreground">
+                {f.a}
+              </p>
+            </details>
+          ))}
+        </div>
       </main>
 
       {/* DESKTOP — SmartyDiet-inspired layout */}
