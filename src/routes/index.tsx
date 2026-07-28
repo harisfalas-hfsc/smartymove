@@ -265,7 +265,7 @@ function Welcome() {
           <div className="lg:hidden">
             <div className="sm-wellness-grid">
               {/* Mobile hero card — app-native card holding headline, copy and CTAs */}
-              <section className="sm-panel sm-border-hero">
+              <section className="sm-panel sm-border-hero lg:hidden">
                 <h1 className="sm-mobile-hero-title">
                   Know how you move,
                   <br />
