@@ -220,7 +220,7 @@ function Welcome() {
         {mode === "intro" ? (
           <>
           {/* FULL-BLEED HERO — image with content on top (SmartyGym concept) */}
-          <section className="relative left-1/2 -mt-5 mb-4 h-[280px] w-screen -translate-x-1/2 overflow-hidden lg:-mt-16 lg:mb-14 lg:h-auto">
+          <section className="relative left-1/2 -mt-5 mb-4 hidden h-[280px] w-screen -translate-x-1/2 overflow-hidden lg:-mt-16 lg:mb-14 lg:block lg:h-auto">
             <img
               src={heroSquat}
               alt="Man performing a squat in front of a phone camera running a movement scan"
@@ -265,7 +265,10 @@ function Welcome() {
           <div className="lg:hidden">
             <div className="sm-wellness-grid">
               {/* Mobile hero card — app-native card holding headline, copy and CTAs */}
-              <section className="sm-panel sm-border-hero lg:hidden">
+              <section
+                className="sm-panel sm-border-hero sm-mobile-hero-card lg:hidden"
+                style={{ backgroundImage: `linear-gradient(to bottom, rgba(4,10,18,0.72), rgba(4,10,18,0.92)), url(${heroSquat})` }}
+              >
                 <h1 className="sm-mobile-hero-title">
                   Know how you move,
                   <br />
