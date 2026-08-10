@@ -84,6 +84,7 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
             >
               {user.name.slice(0,1).toUpperCase()}
             </Link>
+            </>
           ) : (
             <>
               <button
