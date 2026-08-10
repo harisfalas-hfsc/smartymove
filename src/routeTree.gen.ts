@@ -47,6 +47,7 @@ import { Route as AppScreenIndexRouteImport } from './routes/app/screen.index'
 import { Route as AppScreenSetupRouteImport } from './routes/app/screen.setup'
 import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicHooksBillingRunRouteImport } from './routes/api/public/hooks/billing-run'
 import { Route as ApiPublicAdminSyncPremiumRouteImport } from './routes/api/public/admin/sync-premium'
 
 const WhyMovementMattersRoute = WhyMovementMattersRouteImport.update({
@@ -240,6 +241,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksBillingRunRoute =
+  ApiPublicHooksBillingRunRouteImport.update({
+    id: '/api/public/hooks/billing-run',
+    path: '/api/public/hooks/billing-run',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAdminSyncPremiumRoute =
   ApiPublicAdminSyncPremiumRouteImport.update({
     id: '/api/public/admin/sync-premium',
@@ -286,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/app/screen/setup': typeof AppScreenSetupRoute
   '/app/screen/': typeof AppScreenIndexRoute
   '/api/public/admin/sync-premium': typeof ApiPublicAdminSyncPremiumRoute
+  '/api/public/hooks/billing-run': typeof ApiPublicHooksBillingRunRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -325,6 +333,7 @@ export interface FileRoutesByTo {
   '/app/screen/setup': typeof AppScreenSetupRoute
   '/app/screen': typeof AppScreenIndexRoute
   '/api/public/admin/sync-premium': typeof ApiPublicAdminSyncPremiumRoute
+  '/api/public/hooks/billing-run': typeof ApiPublicHooksBillingRunRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -367,6 +376,7 @@ export interface FileRoutesById {
   '/app/screen/setup': typeof AppScreenSetupRoute
   '/app/screen/': typeof AppScreenIndexRoute
   '/api/public/admin/sync-premium': typeof ApiPublicAdminSyncPremiumRoute
+  '/api/public/hooks/billing-run': typeof ApiPublicHooksBillingRunRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -410,6 +420,7 @@ export interface FileRouteTypes {
     | '/app/screen/setup'
     | '/app/screen/'
     | '/api/public/admin/sync-premium'
+    | '/api/public/hooks/billing-run'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -449,6 +460,7 @@ export interface FileRouteTypes {
     | '/app/screen/setup'
     | '/app/screen'
     | '/api/public/admin/sync-premium'
+    | '/api/public/hooks/billing-run'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -490,6 +502,7 @@ export interface FileRouteTypes {
     | '/app/screen/setup'
     | '/app/screen/'
     | '/api/public/admin/sync-premium'
+    | '/api/public/hooks/billing-run'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -517,6 +530,7 @@ export interface RootRouteChildren {
   AdminExercisesRoute: typeof AdminExercisesRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ApiPublicAdminSyncPremiumRoute: typeof ApiPublicAdminSyncPremiumRoute
+  ApiPublicHooksBillingRunRoute: typeof ApiPublicHooksBillingRunRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -788,6 +802,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/billing-run': {
+      id: '/api/public/hooks/billing-run'
+      path: '/api/public/hooks/billing-run'
+      fullPath: '/api/public/hooks/billing-run'
+      preLoaderRoute: typeof ApiPublicHooksBillingRunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/admin/sync-premium': {
       id: '/api/public/admin/sync-premium'
       path: '/api/public/admin/sync-premium'
@@ -899,18 +920,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminExercisesRoute: AdminExercisesRoute,
   AdminIndexRoute: AdminIndexRoute,
   ApiPublicAdminSyncPremiumRoute: ApiPublicAdminSyncPremiumRoute,
+  ApiPublicHooksBillingRunRoute: ApiPublicHooksBillingRunRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

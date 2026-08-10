@@ -50,6 +50,73 @@ async function markCanceled(sub: any, env: StripeEnv) {
     .eq("environment", env);
 }
 
+function money(amount: number | null | undefined, currency: string | null | undefined): string {
+  if (typeof amount !== "number") return "your payment";
+  const value = (amount / 100).toFixed(2);
+  const code = currency?.toUpperCase();
+  return code === "EUR" ? `€${value}` : `${code ? `${code} ` : ""}${value}`;
+}
+
+function dayFromUnix(seconds: number | null | undefined, withYear = true): string | null {
+  if (!seconds) return null;
+  return new Date(seconds * 1000).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    ...(withYear ? { year: "numeric" as const } : {}),
+  });
+}
+
+async function userIdForInvoice(invoice: any, env: StripeEnv): Promise<string | null> {
+  const customerId = typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
+  if (!customerId) return null;
+  const client = getSupabase() as any;
+  const { data } = await client
+    .from("subscriptions")
+    .select("user_id")
+    .eq("stripe_customer_id", customerId)
+    .eq("environment", env)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return (data as { user_id?: string } | null)?.user_id ?? null;
+}
+
+async function handleInvoicePaid(invoice: any, env: StripeEnv) {
+  const userId = await userIdForInvoice(invoice, env);
+  if (!userId) return;
+  const { notifyOnce } = await import("@/lib/billing-notify.server");
+  const amount = money(invoice.amount_paid ?? invoice.total, invoice.currency);
+  const until = dayFromUnix(invoice.lines?.data?.[0]?.period?.end);
+  await notifyOnce(getSupabase() as any, {
+    userId,
+    kind: "billing",
+    title: "Thank you — your payment went through",
+    body: `We received ${amount} for your SmartyMove plan.${
+      until ? ` Your access is active until ${until}.` : ""
+    } Thank you for moving smarter with us — your receipt is on its way by email.`,
+    dedupeKey: `invoice-paid:${invoice.id}`,
+  });
+}
+
+async function handleInvoiceFailed(invoice: any, env: StripeEnv) {
+  const userId = await userIdForInvoice(invoice, env);
+  if (!userId) return;
+  const { notifyOnce } = await import("@/lib/billing-notify.server");
+  const attempt = Number(invoice.attempt_count ?? 1);
+  const amount = money(invoice.amount_due ?? invoice.total, invoice.currency);
+  const nextAttempt = dayFromUnix(invoice.next_payment_attempt, false);
+  const body = nextAttempt
+    ? `We couldn't take ${amount} for your SmartyMove plan (attempt ${attempt}). This usually means the card expired, there weren't enough funds, or the bank asked for a confirmation. We'll try again automatically on ${nextAttempt}. To sort it now — or to pay with a different card — open Billing & purchases in your profile and update your payment method. Your access stays on in the meantime.`
+    : `We couldn't take ${amount} for your SmartyMove plan (attempt ${attempt}). This was the last automatic attempt, so the plan will pause unless the payment is completed. Open Billing & purchases in your profile to update your card and complete it manually — nothing in your scans, scores or program is lost.`;
+  await notifyOnce(getSupabase() as any, {
+    userId,
+    kind: "billing",
+    title: nextAttempt ? "Payment didn't go through" : "Payment failed — action needed",
+    body,
+    dedupeKey: `invoice-failed:${invoice.id}:${attempt}`,
+  });
+}
+
 async function grantScanCredits(session: any) {
   const meta = session.metadata ?? {};
   if (meta.type !== "scan_pack") return;
@@ -92,6 +159,13 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
             case "checkout.session.completed":
             case "checkout.session.async_payment_succeeded":
               await grantScanCredits(event.data.object);
+              break;
+            case "invoice.paid":
+            case "invoice.payment_succeeded":
+              await handleInvoicePaid(event.data.object, env);
+              break;
+            case "invoice.payment_failed":
+              await handleInvoiceFailed(event.data.object, env);
               break;
             default:
               console.log("Unhandled event:", event.type);
