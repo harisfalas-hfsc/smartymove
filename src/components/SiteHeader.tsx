@@ -2,6 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUser } from "@/lib/store";
+import { NotificationsBell } from "@/components/NotificationsBell";
 
 type Props = {
   onSignIn?: () => void;
@@ -73,6 +74,8 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
         </div>
         <div className="flex items-center gap-2">
           {user ? (
+            <>
+            <NotificationsBell />
             <Link
               to="/app/profile"
               aria-label="Profile"
@@ -81,6 +84,7 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
             >
               {user.name.slice(0,1).toUpperCase()}
             </Link>
+            </>
           ) : (
             <>
               <button
