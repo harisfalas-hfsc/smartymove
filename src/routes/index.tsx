@@ -18,6 +18,7 @@ import {
 } from "@/lib/store";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import heroSquat from "@/assets/hero-squat-camera.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -66,6 +67,7 @@ export const Route = createFileRoute("/")({
 
 function Welcome() {
   const navigate = useNavigate();
+  const { freeAccessMode } = useFreeAccessMode();
   const user = useUser();
   const [mode, setMode] = useState<"intro" | "signup" | "signin" | "forgot">("intro");
   const [name, setName] = useState("");
