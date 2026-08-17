@@ -115,12 +115,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     scripts: [
       {
+        children: THEME_INIT_SCRIPT,
+      },
+      {
         src: "https://www.googletagmanager.com/gtag/js?id=G-NWZ6X648E0",
         async: true,
       },
       {
         children: `window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());\ngtag('config', 'G-NWZ6X648E0');`,
       },
+
       {
         type: "application/ld+json",
         children: JSON.stringify({
