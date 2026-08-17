@@ -15,6 +15,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PaywallProvider } from "@/lib/paywall";
 import { SisterAppsPopup } from "@/components/growth/SisterAppsPopup";
 import { BottomTabs } from "@/components/BottomTabs";
+import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
+
 
 function NotFoundComponent() {
   return (
