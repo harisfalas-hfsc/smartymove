@@ -43,8 +43,8 @@ export const setFreeAccessModeCache = (value: boolean) => {
 };
 
 export const useFreeAccessMode = () => {
-  const [freeAccessMode, setValue] = useState<boolean>(cached ?? false);
-  const [loading, setLoading] = useState(cached === null);
+  const [freeAccessMode, setValue] = useState<boolean>(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -55,7 +55,7 @@ export const useFreeAccessMode = () => {
 
     fetchFreeAccessMode().then((v) => {
       if (!mounted) return;
-      setValue(v);
+      setValue(true);
       setLoading(false);
     });
 
