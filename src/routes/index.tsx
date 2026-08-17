@@ -773,26 +773,27 @@ function Welcome() {
             margin: 0;
           }
           .sm-mobile-hero-card{
+            background-image: linear-gradient(to bottom, rgba(255,255,255,.90), rgba(255,255,255,.97)), var(--sm-hero-img);
             background-size: cover;
             background-position: 68% center;
             background-repeat: no-repeat;
           }
-          .sm-mobile-hero-card p{ color: rgba(232,238,247,0.82) !important; }
-          .sm-mobile-hero-card .sm-mobile-hero-note{ color: rgba(232,238,247,0.6) !important; }
+          .sm-mobile-hero-card p{ color: #4A5971 !important; }
+          .sm-mobile-hero-card .sm-mobile-hero-note{ color: #6B7A91 !important; }
           .sm-mobile-hero-card .sm-mobile-hero-secondary{
-            border-color: #86D0EF;
-            color: #86D0EF;
-            background: rgba(4,10,18,0.35);
+            border-color: #2B8FA3;
+            color: #1D7E95;
+            background: rgba(255,255,255,0.7);
           }
           .sm-mobile-hero-title{
-            color: #E8EEF7;
+            color: #10213F;
             font-size: 30px;
             line-height: 1.08;
             font-weight: 900;
             letter-spacing: -0.01em;
             margin: 0;
           }
-          .sm-mobile-hero-title span{ color: #86D0EF; }
+          .sm-mobile-hero-title span{ color: #1D7E95; }
           .sm-mobile-hero-secondary{
             display: flex;
             align-items: center;
