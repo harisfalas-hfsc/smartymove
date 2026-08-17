@@ -265,35 +265,50 @@ function Welcome() {
             </div>
           </section>
 
-          {/* MOBILE — untouched wellness grid */}
+          {/* MOBILE — centered, image-free header + CTAs (SmartyWorkout/Diet style) */}
           <div className="lg:hidden">
-            <div className="sm-wellness-grid">
-              {/* Mobile hero card — app-native card holding headline, copy and CTAs */}
-              <section
-                className="sm-panel sm-border-hero sm-mobile-hero-card lg:hidden"
-                style={{
-                  ["--sm-hero-img" as string]: `url(${heroSquat})`,
-                } as React.CSSProperties}
-              >
-                <h1 className="sm-mobile-hero-title">
-                  Know how you move,
-                  <br />
-                  <span>move smarter.</span>
-                </h1>
-                <p className="mt-3">
-                  Run a camera-based Movement Screen. Get your Movement Score, Movement Age, and a
-                  personalized 2-week corrective program — built around your real mobility limits.
-                </p>
-                <button className="sm-primary-cta mt-4" onClick={() => navigate({ to: "/onboarding/parq" })}>
-                  Get started <ArrowRight className="h-4 w-4" />
+            <section className="py-4 text-center">
+              <h1 className="text-[34px] font-extrabold uppercase leading-[1.05] tracking-tight text-foreground">
+                Know how you move,
+                <br />
+                <span className="text-primary">move smarter.</span>
+              </h1>
+              <p className="mx-auto mt-5 max-w-[22rem] text-[15px] leading-relaxed text-muted-foreground">
+                Run a camera-based Movement Screen. Get your Movement Score, Movement Age, and a
+                personalized 2-week corrective program — built around your real mobility limits.
+              </p>
+              <div className="mx-auto mt-8 flex max-w-xs flex-col gap-3">
+                <button
+                  onClick={() => navigate({ to: "/onboarding/parq" })}
+                  className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-primary text-[16px] font-extrabold text-primary-foreground"
+                >
+                  <Camera className="h-4 w-4 shrink-0" />
+                  Get started
                 </button>
-                <Link to="/about" className="sm-mobile-hero-secondary">
+                <Link
+                  to="/about"
+                  className="flex h-14 w-full items-center justify-center gap-2 rounded-full border-2 border-primary text-[16px] font-bold text-primary no-underline"
+                  style={{ textDecoration: "none" }}
+                >
                   How it works
                 </Link>
-                {!freeAccessMode && (
-                  <p className="sm-mobile-hero-note">One-time €9.99 per scan. No subscription.</p>
-                )}
-              </section>
+                <Link
+                  to="/learn"
+                  className="flex h-14 w-full items-center justify-center gap-2 rounded-full border-2 border-primary text-[16px] font-bold text-primary no-underline"
+                  style={{ textDecoration: "none" }}
+                >
+                  <BookOpen className="h-4 w-4 shrink-0" />
+                  Learn the program
+                </Link>
+              </div>
+              {!freeAccessMode && (
+                <p className="mx-auto mt-5 max-w-[22rem] text-[12px] leading-snug text-muted-foreground/70">
+                  One-time €9.99 per scan. No subscription.
+                </p>
+              )}
+            </section>
+
+            <div className="sm-wellness-grid">
 
               <div className="sm-panel-score-picture sm-border-score">
                 <div className="sm-score-card">
@@ -710,7 +725,6 @@ function Welcome() {
             transform: translateY(-4px) scale(1.01);
             box-shadow: 0 20px 40px -20px rgba(20,33,58,.35);
           }
-          .sm-border-hero{ border: 1.5px solid #86D0EF; }
           .sm-border-score{ border: 1.5px solid #43AD5C; }
           .sm-border-mobile{ border: 1.5px solid #FF8A4C; }
           .sm-border-about{ border: 1.5px solid #7A3EBA; }
@@ -756,47 +770,6 @@ function Welcome() {
             font-size: 15px;
             line-height: 1.6;
             margin: 0;
-          }
-          .sm-mobile-hero-card{
-            background-image: linear-gradient(to bottom, rgba(255,255,255,.90), rgba(255,255,255,.97)), var(--sm-hero-img);
-            background-size: cover;
-            background-position: 68% center;
-            background-repeat: no-repeat;
-          }
-          .sm-mobile-hero-card p{ color: #4A5971 !important; }
-          .sm-mobile-hero-card .sm-mobile-hero-note{ color: #6B7A91 !important; }
-          .sm-mobile-hero-card .sm-mobile-hero-secondary{
-            border-color: #2B8FA3;
-            color: #1D7E95;
-            background: rgba(255,255,255,0.7);
-          }
-          .sm-mobile-hero-title{
-            color: #10213F;
-            font-size: 30px;
-            line-height: 1.08;
-            font-weight: 900;
-            letter-spacing: -0.01em;
-            margin: 0;
-          }
-          .sm-mobile-hero-title span{ color: #1D7E95; }
-          .sm-mobile-hero-secondary{
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 46px;
-            margin-top: 10px;
-            border-radius: 999px;
-            border: 2px solid #2B8FA3;
-            color: #2B8FA3;
-            font-size: 15px;
-            font-weight: 800;
-            text-decoration: none;
-          }
-          .sm-mobile-hero-note{
-            margin-top: 12px !important;
-            text-align: center;
-            font-size: 13px !important;
-            color: #6B7A91 !important;
           }
           .sm-panel-hero{
             min-height: 200px;
