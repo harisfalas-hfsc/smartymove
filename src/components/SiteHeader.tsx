@@ -1,7 +1,8 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle, Sparkles, User, LogOut, Sun, Moon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useUser, signOutUser, type User } from "@/lib/store";
+import { useUser, signOutUser, type User as UserType } from "@/lib/store";
+
 import { useTheme } from "@/lib/theme";
 import { isAdminEmail } from "@/lib/admin";
 import { NotificationsBell } from "@/components/NotificationsBell";
