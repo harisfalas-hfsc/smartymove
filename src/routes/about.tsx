@@ -102,27 +102,6 @@ function About() {
           </CardContent>
         </Card>
 
-        {/* Link to How it works */}
-        <Card className="border-2 border-primary">
-          <CardContent className="p-6">
-            <div className="text-center space-y-3">
-              <Play className="w-12 h-12 text-primary mx-auto" />
-              <h2 className="text-2xl font-bold text-foreground">
-                How <span className="text-primary">It Works</span>
-              </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Set up, screen with your camera, see your results, train 5 minutes a day, and rescan
-                every 14 days. The full 5-step flow — plus the movement patterns we test — lives on its own page.
-              </p>
-              <Link
-                to="/how-it-works"
-                className="inline-flex items-center gap-1 text-sm font-extrabold text-primary hover:underline"
-              >
-                See how it works <ChevronRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Who it's for */}
         <Card className="border-2 border-primary">
@@ -147,7 +126,29 @@ function About() {
           </CardContent>
         </Card>
 
-        {/* Safety */}
+
+        {/* Link to How it works */}
+        <Card className="border-2 border-primary">
+          <CardContent className="p-6">
+            <div className="text-center space-y-3">
+              <Play className="w-12 h-12 text-primary mx-auto" />
+              <h2 className="text-2xl font-bold text-foreground">
+                How <span className="text-primary">It Works</span>
+              </h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Set up, screen with your camera, see your results, train 5 minutes a day, and rescan
+                every 14 days. The full 5-step flow — plus the movement patterns we test — lives on its own page.
+              </p>
+              <Link
+                to="/how-it-works"
+                className="inline-flex items-center gap-1 text-sm font-extrabold text-primary hover:underline"
+              >
+                See how it works <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card className="border-2 border-primary">
           <CardContent className="p-6">
             <div className="text-center space-y-3">
