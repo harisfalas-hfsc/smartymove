@@ -5,6 +5,8 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
+
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
@@ -20,6 +22,7 @@ export const Route = createFileRoute("/about")({
 });
 
 function About() {
+  const { freeAccessMode } = useFreeAccessMode();
   const whatItDoes = [
     { Icon: Camera, color: "text-blue-500", label: "Camera-based Movement Screen" },
     { Icon: Activity, color: "text-emerald-500", label: "Movement Score & Movement Age" },
@@ -77,7 +80,7 @@ function About() {
               <p className="text-sm text-muted-foreground leading-relaxed pt-1">
                 Your pocket movement coach — a camera-based screen and a short daily routine built around what your body actually needs.
               </p>
-              <Link to="/pricing">
+              <Link to={freeAccessMode ? "/app/screen" : "/pricing"}>
                 <Button size="lg" className="w-full mt-2">Take a Movement Scan</Button>
               </Link>
             </div>
