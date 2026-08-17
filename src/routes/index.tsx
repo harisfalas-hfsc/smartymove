@@ -292,14 +292,6 @@ function Welcome() {
                 >
                   How it works
                 </Link>
-                <Link
-                  to="/learn"
-                  className="flex h-14 w-full items-center justify-center gap-2 rounded-full border-2 border-primary text-[16px] font-bold text-primary no-underline"
-                  style={{ textDecoration: "none" }}
-                >
-                  <BookOpen className="h-4 w-4 shrink-0" />
-                  Learn the program
-                </Link>
               </div>
               {!freeAccessMode && (
                 <p className="mx-auto mt-5 max-w-[22rem] text-[12px] leading-snug text-muted-foreground/70">
