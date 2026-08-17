@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useBuyScan } from "@/components/BuyScanDialog";
 import { useUser } from "@/lib/store";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,14 @@ function Pricing() {
   const u = useUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { freeAccessMode, loading: freeAccessLoading } = useFreeAccessMode();
   const { openBuyScan, buyScanElement } = useBuyScan("/pricing?paid=1");
+
+  // Global Free Access Mode: this page must not be reachable, even by URL.
+  useEffect(() => {
+    if (freeAccessMode) navigate({ to: u ? "/app" : "/", replace: true });
+  }, [freeAccessMode, navigate, u]);
+
   const access = useQuery({
     queryKey: ["scan-access", u?.id ?? "anon"],
     queryFn: () => getScanAccess(),
