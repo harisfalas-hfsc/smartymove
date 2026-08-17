@@ -298,19 +298,21 @@ function DesktopProfileInner() {
               Download a readable SmartyMove data report or permanently delete your account and app data.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              <Button
-                onClick={openBilling}
-                disabled={loading === "billing"}
-                variant="secondary"
-                className="rounded-2xl"
-              >
-                {loading === "billing" ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <CreditCard className="h-4 w-4" />
-                )}
-                Billing &amp; purchases
-              </Button>
+              {!freeAccessMode && (
+                <Button
+                  onClick={openBilling}
+                  disabled={loading === "billing"}
+                  variant="secondary"
+                  className="rounded-2xl"
+                >
+                  {loading === "billing" ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CreditCard className="h-4 w-4" />
+                  )}
+                  Billing &amp; purchases
+                </Button>
+              )}
               <Button
                 onClick={downloadAccountData}
                 disabled={loading === "export"}
