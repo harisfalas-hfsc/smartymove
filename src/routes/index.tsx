@@ -725,7 +725,6 @@ function Welcome() {
             transform: translateY(-4px) scale(1.01);
             box-shadow: 0 20px 40px -20px rgba(20,33,58,.35);
           }
-          .sm-border-hero{ border: 1.5px solid #86D0EF; }
           .sm-border-score{ border: 1.5px solid #43AD5C; }
           .sm-border-mobile{ border: 1.5px solid #FF8A4C; }
           .sm-border-about{ border: 1.5px solid #7A3EBA; }
@@ -771,47 +770,6 @@ function Welcome() {
             font-size: 15px;
             line-height: 1.6;
             margin: 0;
-          }
-          .sm-mobile-hero-card{
-            background-image: linear-gradient(to bottom, rgba(255,255,255,.90), rgba(255,255,255,.97)), var(--sm-hero-img);
-            background-size: cover;
-            background-position: 68% center;
-            background-repeat: no-repeat;
-          }
-          .sm-mobile-hero-card p{ color: #4A5971 !important; }
-          .sm-mobile-hero-card .sm-mobile-hero-note{ color: #6B7A91 !important; }
-          .sm-mobile-hero-card .sm-mobile-hero-secondary{
-            border-color: #2B8FA3;
-            color: #1D7E95;
-            background: rgba(255,255,255,0.7);
-          }
-          .sm-mobile-hero-title{
-            color: #10213F;
-            font-size: 30px;
-            line-height: 1.08;
-            font-weight: 900;
-            letter-spacing: -0.01em;
-            margin: 0;
-          }
-          .sm-mobile-hero-title span{ color: #1D7E95; }
-          .sm-mobile-hero-secondary{
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 46px;
-            margin-top: 10px;
-            border-radius: 999px;
-            border: 2px solid #2B8FA3;
-            color: #2B8FA3;
-            font-size: 15px;
-            font-weight: 800;
-            text-decoration: none;
-          }
-          .sm-mobile-hero-note{
-            margin-top: 12px !important;
-            text-align: center;
-            font-size: 13px !important;
-            color: #6B7A91 !important;
           }
           .sm-panel-hero{
             min-height: 200px;
