@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 import { isAdminEmail } from "@/lib/admin";
+import { FREE_ACCESS_BLOCK_MESSAGE, isFreeAccessMode } from "@/lib/free-access.server";
 
 export const SCAN_PRICE_ID = "smartymove_scan_single";
 export const SCAN_PRICE_EUR = 9.99;
@@ -73,6 +74,10 @@ export const getScanAccess = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<ScanAccessResult> => {
     const { supabase, userId } = context;
     const email = await resolveEmail(supabase, context.claims, userId);
+    // Global Free Access Mode: unlimited access granted in memory only.
+    if (await isFreeAccessMode()) {
+      return { credits: 9999, scansPurchased: 0, hasActiveSubscription: true, canScan: true };
+    }
     if (isAdminEmail(email)) {
       return { credits: 9999, scansPurchased: 0, hasActiveSubscription: true, canScan: true };
     }
@@ -109,6 +114,10 @@ export const consumeScanCredit = createServerFn({ method: "POST" })
   .handler(async ({ context }): Promise<ConsumeResult> => {
     const { supabase, userId } = context;
     const email = await resolveEmail(supabase, context.claims, userId);
+    // Global Free Access Mode: never consume a credit, never write.
+    if (await isFreeAccessMode()) {
+      return { ok: true, credits: 9999 };
+    }
     if (isAdminEmail(email)) {
       return { ok: true, credits: 9999 };
     }
@@ -123,6 +132,10 @@ export const createScanCheckout = createServerFn({ method: "POST" })
   .inputValidator((data: { returnUrl: string; environment: StripeEnv; email?: string }) => data)
   .handler(async ({ data, context }): Promise<CheckoutResult> => {
     try {
+      // Global Free Access Mode: no checkout may be created on any platform.
+      if (await isFreeAccessMode()) {
+        return { error: FREE_ACCESS_BLOCK_MESSAGE };
+      }
       const stripe = createStripeClient(data.environment);
       const prices = await stripe.prices.list({ lookup_keys: [SCAN_PRICE_ID] });
       if (!prices.data.length) throw new Error("Scan price not found in Stripe");
