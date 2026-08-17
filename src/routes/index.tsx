@@ -256,7 +256,9 @@ function Welcome() {
                     How it works
                   </Link>
                 </div>
-                <p className="mt-4 text-sm text-white/60">One-time €9.99 per scan. No subscription.</p>
+                {!freeAccessMode && (
+                  <p className="mt-4 text-sm text-white/60">One-time €9.99 per scan. No subscription.</p>
+                )}
               </div>
             </div>
           </section>
@@ -287,7 +289,9 @@ function Welcome() {
                 <Link to="/about" className="sm-mobile-hero-secondary">
                   How it works
                 </Link>
-                <p className="sm-mobile-hero-note">One-time €9.99 per scan. No subscription.</p>
+                {!freeAccessMode && (
+                  <p className="sm-mobile-hero-note">One-time €9.99 per scan. No subscription.</p>
+                )}
               </section>
 
               <div className="sm-panel-score-picture sm-border-score">
@@ -377,7 +381,9 @@ function Welcome() {
               <h2 className="mt-10 text-[34px] leading-tight font-extrabold text-[#0f172a]">
                 From scan <span className="text-primary">to program.</span>
               </h2>
-              <p className="mt-3 text-slate-500">Three steps. One payment. No subscription.</p>
+              <p className="mt-3 text-slate-500">
+                {freeAccessMode ? "Three steps. Scan, get your plan, train." : "Three steps. One payment. No subscription."}
+              </p>
 
               <div className="mt-10 grid grid-cols-3 gap-10">
                 <div className="text-center">
