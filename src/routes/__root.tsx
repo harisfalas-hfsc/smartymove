@@ -15,6 +15,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PaywallProvider } from "@/lib/paywall";
 import { SisterAppsPopup } from "@/components/growth/SisterAppsPopup";
 import { BottomTabs } from "@/components/BottomTabs";
+import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
+
 
 function NotFoundComponent() {
   return (
@@ -113,12 +115,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     scripts: [
       {
+        children: THEME_INIT_SCRIPT,
+      },
+      {
         src: "https://www.googletagmanager.com/gtag/js?id=G-NWZ6X648E0",
         async: true,
       },
       {
         children: `window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());\ngtag('config', 'G-NWZ6X648E0');`,
       },
+
       {
         type: "application/ld+json",
         children: JSON.stringify({
@@ -218,11 +224,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
-      <body className="dark">
+      <body>
         {children}
         <Scripts />
       </body>
@@ -247,12 +253,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PaywallProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <SisterAppsPopup />
-        <BottomTabs />
-      </PaywallProvider>
+      <ThemeProvider>
+        <PaywallProvider>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+          <SisterAppsPopup />
+          <BottomTabs />
+        </PaywallProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
+
