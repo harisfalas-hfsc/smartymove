@@ -41,6 +41,7 @@ import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions
 import { createBillingPortalSession } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { clearLocalAccountData, signOutUser, updateUser, type Goal } from "@/lib/store";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { useUserPremium } from "@/lib/useUserPremium";
 
 type ExportResult = { data: unknown } | { error: string };
@@ -76,6 +77,7 @@ export function DesktopProfile() {
 }
 
 function DesktopProfileInner() {
+  const { freeAccessMode } = useFreeAccessMode();
   const u = useUserPremium();
   const [name, setName] = useState(u?.name ?? "");
   const [email, setEmail] = useState(u?.email ?? "");

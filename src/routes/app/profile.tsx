@@ -52,6 +52,7 @@ function Profile() {
 }
 
 function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof useNavigate> }) {
+  const { freeAccessMode } = useFreeAccessMode();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(u.name);
   const [age, setAge] = useState(String(u.age));
