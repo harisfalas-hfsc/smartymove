@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { useState, type ComponentType } from "react";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 import {
   AlertDialog,
