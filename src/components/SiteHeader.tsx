@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle, Sparkles, User, LogOut, Sun, Moon } from "lucide-react";
+import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle, Sparkles, User, LogOut, Sun, Moon, Compass } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUser, signOutUser, type User as UserType } from "@/lib/store";
 
@@ -202,6 +202,7 @@ function NavDrawer({ onClose, isAuthed, isAdmin }: { onClose: () => void; isAuth
       heading: "SmartyMove",
       items: [
         { to: "/about", label: "About", Icon: Info },
+        { to: "/about", label: "How it works", Icon: Compass },
         ...(freeAccessMode ? [] : [{ to: "/pricing", label: "Pricing", Icon: Crown }]),
         { to: "/why-movement-matters", label: "Why Movement Matters", Icon: Sparkles },
         { to: "/faq", label: "FAQ", Icon: HelpCircle },
