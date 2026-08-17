@@ -252,7 +252,7 @@ function Welcome() {
                     Get started
                   </button>
                   <Link
-                    to="/about"
+                    to="/how-it-works"
                     className="inline-flex h-12 items-center rounded-full border-2 border-primary px-8 text-base font-bold text-primary hover:bg-primary/10"
                   >
                     How it works
@@ -286,7 +286,7 @@ function Welcome() {
                   Get started
                 </button>
                 <Link
-                  to="/about"
+                  to="/how-it-works"
                   className="flex h-14 w-full items-center justify-center gap-2 rounded-full border-2 border-primary text-[16px] font-bold text-primary no-underline"
                   style={{ textDecoration: "none" }}
                 >

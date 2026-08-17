@@ -102,7 +102,7 @@ function About() {
           </CardContent>
         </Card>
 
-        {/* How it works */}
+        {/* Link to How it works */}
         <Card className="border-2 border-primary">
           <CardContent className="p-6">
             <div className="text-center space-y-3">
@@ -110,67 +110,16 @@ function About() {
               <h2 className="text-2xl font-bold text-foreground">
                 How <span className="text-primary">It Works</span>
               </h2>
-              <div className="grid gap-4 pt-2 lg:grid-cols-[1fr_280px] lg:items-start">
-                <div className="space-y-3 text-left">
-                  {howItWorks.map(({ n, Icon, color, title, body }) => {
-                    const isScreen = n === 2;
-                    const row = (
-                      <div className={`flex items-start gap-3 rounded-xl ${isScreen ? "sm-step-screen p-2 -m-2 cursor-pointer transition hover:bg-primary/5" : ""}`}>
-                        <div className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-extrabold ${isScreen ? "bg-primary text-white sm-step-pulse" : "bg-primary/10 text-primary"}`}>
-                          {n}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <Icon className={`w-4 h-4 ${color}`} />
-                            <span className="text-sm font-bold text-foreground">{title}</span>
-                            {isScreen && <ChevronRight className="w-4 h-4 text-primary lg:hidden" />}
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-0.5">{body}</div>
-                        </div>
-                      </div>
-                    );
-                    return isScreen ? (
-                      <Link key={n} to="/movement-patterns" aria-label="See the 5 movement patterns we test">
-                        {row}
-                      </Link>
-                    ) : (
-                      <div key={n}>{row}</div>
-                    );
-                  })}
-                </div>
-                {/* Methodology mini-card — 5 movement patterns */}
-                <Link
-                  to="/movement-patterns"
-                  className="block rounded-2xl border-2 border-primary/40 bg-primary/5 p-4 text-left transition hover:border-primary hover:bg-primary/10"
-                >
-                  <div className="flex items-center gap-2">
-                    <ListChecks className="w-5 h-5 text-primary" />
-                    <span className="text-sm font-extrabold text-foreground">The 5 Movement Patterns</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Our methodology: 5 functional tests scored by your camera — full-body mobility, stability & control.
-                  </p>
-                  <ul className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
-                    {eightPatterns.map((p, i) => (
-                      <li key={p} className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
-                        <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-primary/15 text-[9px] font-extrabold text-primary">{i + 1}</span>
-                        <span className="truncate">{p}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-3 flex items-center gap-1 text-xs font-bold text-primary">
-                    See the tests <ChevronRight className="w-4 h-4" />
-                  </div>
-                </Link>
-              </div>
-              <style>{`
-                @keyframes sm-step-pulse-kf {
-                  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55); }
-                  50%      { transform: scale(1.08); box-shadow: 0 0 0 8px hsl(var(--primary) / 0); }
-                }
-                .sm-step-pulse { animation: sm-step-pulse-kf 1.6s ease-in-out infinite; }
-                @media (prefers-reduced-motion: reduce) { .sm-step-pulse { animation: none; } }
-              `}</style>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Set up, screen with your camera, see your results, train 5 minutes a day, and rescan
+                every 14 days. The full 5-step flow — plus the movement patterns we test — lives on its own page.
+              </p>
+              <Link
+                to="/how-it-works"
+                className="inline-flex items-center gap-1 text-sm font-extrabold text-primary hover:underline"
+              >
+                See how it works <ChevronRight className="w-4 h-4" />
+              </Link>
             </div>
           </CardContent>
         </Card>
