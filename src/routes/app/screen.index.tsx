@@ -9,6 +9,7 @@ import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
 import { TestPreviewSheet } from "@/components/TestPreviewSheet";
 import { isAdminEmail } from "@/lib/admin";
 import { useBuyScan } from "@/components/BuyScanDialog";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 export const Route = createFileRoute("/app/screen/")({ component: ScreenIndex });
 
@@ -16,20 +17,21 @@ function ScreenIndex() {
   const u = useUser();
   const navigate = useNavigate();
   const isAdmin = !!u && isAdminEmail(u.email);
+  const { freeAccessMode } = useFreeAccessMode();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewFocus, setPreviewFocus] = useState<string | undefined>(undefined);
   const { openBuyScan, buyScanElement } = useBuyScan("/pricing?paid=1");
   const access = useQuery({
     queryKey: ["scan-access", u?.id ?? "pending"],
     queryFn: () => getScanAccess(),
-    enabled: !!u && !isAdmin,
+    enabled: !!u && !isAdmin && !freeAccessMode,
     staleTime: 30_000,
   });
   if (!u) return null;
   const last = u.sessions[u.sessions.length - 1];
-  const canScan = isAdmin ? true : (access.data?.canScan ?? false);
-  const credits = isAdmin ? 9999 : (access.data?.credits ?? 0);
-  const accessLoading = !isAdmin && access.isLoading;
+  const canScan = isAdmin || freeAccessMode ? true : (access.data?.canScan ?? false);
+  const credits = isAdmin || freeAccessMode ? 9999 : (access.data?.credits ?? 0);
+  const accessLoading = !isAdmin && !freeAccessMode && access.isLoading;
   function startScreen(e: React.MouseEvent) {
     if (!isOnboardingComplete(u)) {
       e.preventDefault();
@@ -76,6 +78,8 @@ function ScreenIndex() {
         <div className="mt-1 rounded-2xl p-3 text-center text-sm" style={{ background: "#F1F7F8", color: "#14213A" }}>
           {accessLoading ? (
             <span className="inline-flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Checking scan access…</span>
+          ) : freeAccessMode ? (
+            <><span style={{ color: "#0E7C86" }}>✓</span> Your scan includes a 2-week program you keep forever.</>
           ) : isAdmin ? (
             <><span style={{ color: "#0E7C86" }}>✓</span> <strong>Admin access</strong> — unlimited scans.</>
           ) : canScan ? (
