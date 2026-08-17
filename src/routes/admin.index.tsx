@@ -13,6 +13,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { ShieldAlert, Users, CreditCard, TrendingUp, Search, Loader2, Plus, Minus, Crown } from "lucide-react";
 import { isAdminEmail } from "@/lib/admin";
 import { adminListUsers, adminGrantScans, adminSetRole, adminGetStripeAnalytics, type AdminUserRow, type AdminAnalytics } from "@/lib/admin.functions";
+import { adminGetFreeAccessMode, adminSetFreeAccessMode } from "@/lib/admin.functions";
+import { setFreeAccessModeCache } from "@/hooks/useFreeAccessMode";
+import { Switch } from "@/components/ui/switch";
 import { getStripeEnvironment } from "@/lib/stripe";
 
 export const Route = createFileRoute("/admin/")({ component: AdminPage });
@@ -133,6 +136,7 @@ function AdminInner() {
         </TabsList>
 
         <TabsContent value="overview">
+          <FreeAccessModeCard />
           <OverviewTab analytics={analytics} loading={analyticsLoading} error={analyticsError} users={users} onReload={reloadAnalytics} />
         </TabsContent>
 
