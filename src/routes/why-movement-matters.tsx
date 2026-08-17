@@ -1,3 +1,4 @@
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Activity,
@@ -47,6 +48,7 @@ export const Route = createFileRoute("/why-movement-matters")({
 });
 
 function WhyMovementMatters() {
+  const { freeAccessMode } = useFreeAccessMode();
   const stats = [
     {
       Icon: AlertTriangle,
@@ -424,7 +426,7 @@ function WhyMovementMatters() {
                 Take a 5-minute camera-based screen. Get your Movement Score. Fix the root cause.
               </p>
               <div className="flex flex-col sm:flex-row gap-2 justify-center pt-1">
-                <Link to="/pricing">
+                <Link to={freeAccessMode ? "/app/screen" : "/pricing"}>
                   <Button size="lg" className="w-full sm:w-auto">Take a Movement Scan</Button>
                 </Link>
                 <Link to="/movement-patterns">
