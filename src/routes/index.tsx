@@ -961,8 +961,8 @@ function Welcome() {
           .sm-score-card{
             margin-top:18px;
             border-radius:14px;
-            background: linear-gradient(160deg,#10213F 0%, #0C1729 100%);
-            color:#fff;
+            background: linear-gradient(160deg,#F7FCFE 0%, #E6F5F5 100%);
+            color:#10213F;
             min-height:180px;
             display:flex;
             flex-direction:column;
@@ -971,6 +971,7 @@ function Welcome() {
             text-align:center;
             overflow:hidden;
             position:relative;
+            border: 1px solid #A5DDF4;
           }
           .sm-score-card::before{
             content:"";
@@ -980,7 +981,7 @@ function Welcome() {
             top:18px;
             height:3px;
             border-radius:99px;
-            background:linear-gradient(90deg, transparent, #4FB286 24%, #7CFFB8 50%, #4FB286 76%, transparent);
+            background:linear-gradient(90deg, transparent, #43AD5C 24%, #7CFFB8 50%, #43AD5C 76%, transparent);
             box-shadow:0 0 16px 3px rgba(79,178,134,.72);
             animation: sm-score-pulse 2.4s ease-in-out infinite;
           }
@@ -997,7 +998,7 @@ function Welcome() {
             }
           }
           .sm-score-card div{
-            color:rgba(255,255,255,.62);
+            color:rgba(16,33,63,.62);
             font-size:10px;
             text-transform:uppercase;
             letter-spacing:.16em;
@@ -1010,14 +1011,22 @@ function Welcome() {
             margin-top:5px;
           }
           .sm-score-card small{
-            color:rgba(255,255,255,.52);
+            color:rgba(16,33,63,.52);
             font-size:16px;
           }
           .sm-score-card p{
-            color:rgba(255,255,255,.78);
+            color:rgba(16,33,63,.78);
             font-size:12px;
             margin-top:8px;
           }
+          .dark .sm-score-card{
+            background: linear-gradient(160deg,#10213F 0%, #0C1729 100%);
+            color:#fff;
+            border-color: transparent;
+          }
+          .dark .sm-score-card div{ color:rgba(255,255,255,.62); }
+          .dark .sm-score-card small{ color:rgba(255,255,255,.52); }
+          .dark .sm-score-card p{ color:rgba(255,255,255,.78); }
           @media (max-width: 1023px){
             .sm-wellness-grid{ gap:12px; }
             .sm-panel{ padding:18px; }
