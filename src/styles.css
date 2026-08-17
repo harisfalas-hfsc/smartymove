@@ -276,6 +276,10 @@
 }
 .dark .sm-panel h2, .dark .sm-wellness-title, .dark .sm-feature-line strong { color: #E8EEF7; }
 .dark .sm-mobile-hero-title { color: #E8EEF7 !important; }
+.dark .sm-mobile-hero-title span { color: #86D0EF !important; }
+.dark .sm-mobile-hero-card p { color: rgba(232,238,247,0.82) !important; }
+.dark .sm-mobile-hero-card .sm-mobile-hero-note { color: rgba(232,238,247,0.6) !important; }
+.dark .sm-mobile-hero-card .sm-mobile-hero-secondary { border-color: #86D0EF !important; color: #86D0EF !important; background: rgba(4,10,18,0.35) !important; }
 .dark .sm-panel p, .dark .sm-hero-motto, .dark .sm-feature-line small { color: #AFBED4; }
 .dark .sm-eyebrow, .dark .sm-primary-cta, .dark .sm-card-icon { background: rgba(44,153,179,.12) !important; }
 .dark .sm-home-shell::before { background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px); }
