@@ -20,6 +20,7 @@ import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as MovementPatternsRouteImport } from './routes/movement-patterns'
 import { Route as MovementIntelligenceRouteImport } from './routes/movement-intelligence'
 import { Route as LearnRouteImport } from './routes/learn'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as GlossaryRouteImport } from './routes/glossary'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
@@ -103,6 +104,11 @@ const MovementIntelligenceRoute = MovementIntelligenceRouteImport.update({
 const LearnRoute = LearnRouteImport.update({
   id: '/learn',
   path: '/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GlossaryRoute = GlossaryRouteImport.update({
@@ -264,6 +270,7 @@ export interface FileRoutesByFullPath {
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
   '/glossary': typeof GlossaryRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRouteWithChildren
   '/movement-intelligence': typeof MovementIntelligenceRoute
   '/movement-patterns': typeof MovementPatternsRoute
@@ -305,6 +312,7 @@ export interface FileRoutesByTo {
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
   '/glossary': typeof GlossaryRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRouteWithChildren
   '/movement-intelligence': typeof MovementIntelligenceRoute
   '/movement-patterns': typeof MovementPatternsRoute
@@ -347,6 +355,7 @@ export interface FileRoutesById {
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
   '/glossary': typeof GlossaryRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRouteWithChildren
   '/movement-intelligence': typeof MovementIntelligenceRoute
   '/movement-patterns': typeof MovementPatternsRoute
@@ -391,6 +400,7 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/faq'
     | '/glossary'
+    | '/how-it-works'
     | '/learn'
     | '/movement-intelligence'
     | '/movement-patterns'
@@ -432,6 +442,7 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/faq'
     | '/glossary'
+    | '/how-it-works'
     | '/learn'
     | '/movement-intelligence'
     | '/movement-patterns'
@@ -473,6 +484,7 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/faq'
     | '/glossary'
+    | '/how-it-works'
     | '/learn'
     | '/movement-intelligence'
     | '/movement-patterns'
@@ -516,6 +528,7 @@ export interface RootRouteChildren {
   DisclaimerRoute: typeof DisclaimerRoute
   FaqRoute: typeof FaqRoute
   GlossaryRoute: typeof GlossaryRoute
+  HowItWorksRoute: typeof HowItWorksRoute
   LearnRoute: typeof LearnRouteWithChildren
   MovementIntelligenceRoute: typeof MovementIntelligenceRoute
   MovementPatternsRoute: typeof MovementPatternsRoute
@@ -611,6 +624,13 @@ declare module '@tanstack/react-router' {
       path: '/learn'
       fullPath: '/learn'
       preLoaderRoute: typeof LearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/glossary': {
@@ -906,6 +926,7 @@ const rootRouteChildren: RootRouteChildren = {
   DisclaimerRoute: DisclaimerRoute,
   FaqRoute: FaqRoute,
   GlossaryRoute: GlossaryRoute,
+  HowItWorksRoute: HowItWorksRoute,
   LearnRoute: LearnRouteWithChildren,
   MovementIntelligenceRoute: MovementIntelligenceRoute,
   MovementPatternsRoute: MovementPatternsRoute,

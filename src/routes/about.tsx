@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Camera, Activity, Target, ShieldCheck, Repeat, Compass, Users, Heart, GraduationCap, Dumbbell, Plane, Briefcase, Play, Search, Calendar, TrendingUp, ListChecks, ChevronRight, ArrowRight } from "lucide-react";
+import { Sparkles, Camera, Activity, Target, ShieldCheck, Repeat, Users, Heart, GraduationCap, Dumbbell, Plane, Briefcase, Play, ChevronRight, ArrowRight } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,22 +39,6 @@ function About() {
     { Icon: Heart, color: "text-pink-500", label: "Parents" },
     { Icon: GraduationCap, color: "text-purple-500", label: "Beginners" },
     { Icon: Plane, color: "text-cyan-500", label: "Travelers" },
-  ];
-
-  const howItWorks = [
-    { n: 1, Icon: Compass, color: "text-blue-500", title: "Set up", body: "Quick readiness questionnaire and goal." },
-    { n: 2, Icon: Camera, color: "text-orange-500", title: "Screen", body: "Prop your phone, follow the prompts, 5 short tests." },
-    { n: 3, Icon: Search, color: "text-purple-500", title: "See your results", body: "Score, Movement Age, and the real root cause." },
-    { n: 4, Icon: Play, color: "text-emerald-500", title: "Train", body: "Your 5-minute daily routine — mobility, stability, strength." },
-    { n: 5, Icon: TrendingUp, color: "text-cyan-500", title: "Rescan every 14 days", body: "Watch your score improve, your program evolve." },
-  ];
-
-  const eightPatterns = [
-    "Deep squat",
-    "Hip hinge",
-    "Active straight-leg raise",
-    "Shoulder mobility",
-    "In-line lunge",
   ];
 
   return (
