@@ -303,21 +303,6 @@ function Welcome() {
                 </div>
               </div>
 
-              <section className="sm-panel sm-panel-mobile sm-border-mobile">
-                <div className="sm-eyebrow">Best experience</div>
-                <h2><span>SMARTY</span> MOVE</h2>
-                <p className="hidden lg:block">
-                  For better results, open SmartyMove on your phone. The camera scan is easier,
-                  the movement test fits naturally in your space, and your daily training sessions
-                  stay with you wherever you are.
-                </p>
-                <p className="lg:hidden">
-                  Scan movement, get your score, and follow your corrective workout from your pocket.
-                </p>
-                <button className="sm-primary-cta" onClick={() => navigate({ to: "/onboarding/parq" })}>
-                  Get started <ArrowRight className="h-4 w-4" />
-                </button>
-              </section>
 
               <section className="sm-panel sm-panel-about sm-border-about">
                 <div className="sm-card-topline"><span /> Assess <IconBubble Icon={Activity} /></div>
