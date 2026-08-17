@@ -90,9 +90,12 @@ function Pricing() {
     { n: 4, Icon: TrendingUp, color: "text-emerald-500", title: "Rescan & progress", body: "After 14 days, update your program." },
   ];
 
+  // Render nothing while Free Access Mode is on (or still resolving) so no
+  // price string can ever appear before the redirect completes.
+  if (freeAccessMode || freeAccessLoading) return null;
+
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
-      {(freeAccessMode || freeAccessLoading) && <div className="hidden" aria-hidden="true" />}
       <SiteHeader showBack />
 
       {/* MOBILE — untouched */}
