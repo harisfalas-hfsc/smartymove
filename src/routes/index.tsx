@@ -232,7 +232,7 @@ function Welcome() {
               className="absolute inset-0 h-full w-full object-cover object-[68%_center]"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/92 via-black/75 to-black/25" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050B16] via-[#050B16]/25 to-transparent" />
             <div className="relative mx-auto hidden w-full max-w-[430px] px-5 py-16 lg:block lg:max-w-[1080px] lg:px-6 lg:py-36">
               <div className="max-w-xl">
                 <h1 className="text-[38px] font-extrabold leading-[1.05] tracking-tight text-white lg:text-[60px]">
