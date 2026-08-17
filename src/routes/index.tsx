@@ -273,7 +273,6 @@ function Welcome() {
                 className="sm-panel sm-border-hero sm-mobile-hero-card lg:hidden"
                 style={{
                   ["--sm-hero-img" as string]: `url(${heroSquat})`,
-                  backgroundImage: `linear-gradient(to bottom, rgba(4,10,18,0.55), rgba(4,10,18,0.88)), url(${heroSquat})`,
                 } as React.CSSProperties}
               >
                 <h1 className="sm-mobile-hero-title">
