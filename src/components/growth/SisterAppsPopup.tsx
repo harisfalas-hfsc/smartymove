@@ -1,17 +1,16 @@
-import { useEffect, useState } from "react";
-import { ExternalLink, Sparkles, ChevronLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ExternalLink, Sparkles, X } from "lucide-react";
 import logoDiet from "@/assets/smartydiet-logo.png";
 import logoWorkout from "@/assets/smartyworkout-icon.png";
 
-const CURRENT_APP: "gym" | "move" | "diet" = "move";
+const CURRENT_APP: "workout" | "gym" | "move" | "diet" | "logbook" = "move";
 
 type SisterApp = {
-  id: "gym" | "move" | "diet" | "logbook" | "workout";
+  id: "workout" | "gym" | "move" | "diet" | "logbook";
   name: string;
   tagline: string;
   url: string;
   image: string;
-  darkImage?: boolean;
 };
 
 const SISTER_APPS: SisterApp[] = [
@@ -19,7 +18,7 @@ const SISTER_APPS: SisterApp[] = [
     id: "diet",
     name: "SmartyDiet",
     tagline: "Eat smart. Fuel your body. Live longer.",
-    url: "https://smarty-meals-hub.lovable.app",
+    url: "https://smartydiet.com",
     image: logoDiet,
   },
   {
@@ -36,6 +35,7 @@ const DELAY_MS = 30000;
 export const SisterAppsPopup = () => {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -45,6 +45,18 @@ export const SisterAppsPopup = () => {
     return () => window.clearTimeout(t);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (panelRef.current && !panelRef.current.contains(target)) {
+        setOpen(false);
+      }
+    };
+    window.addEventListener("mousedown", handleClick);
+    return () => window.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
   const others = SISTER_APPS.filter((a) => a.id !== CURRENT_APP);
 
   if (!mounted) return null;
@@ -53,14 +65,16 @@ export const SisterAppsPopup = () => {
     <>
       {open && (
         <div
-          className="fixed inset-0 z-[55]"
-          aria-hidden="true"
+          aria-hidden="false"
+          className="fixed inset-0 z-[58] bg-black/20"
           onClick={() => setOpen(false)}
         />
       )}
+
       <div
+        ref={panelRef}
         aria-hidden={!open}
-        className={`fixed top-1/2 -translate-y-1/2 left-0 z-[60] flex items-center gap-2 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${open ? "translate-x-0" : "-translate-x-[calc(100%+56px)]"}`}
+        className={`fixed top-1/2 -translate-y-1/2 left-0 z-[60] flex items-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${open ? "translate-x-0" : "-translate-x-[calc(100%+10px)]"}`}
       >
         <aside className="sm-sister-panel w-[260px] pl-4 pr-2 py-4 bg-white rounded-r-2xl shadow-[4px_0_24px_rgba(15,23,42,0.12)]">
           <div className="mb-4">
@@ -71,6 +85,7 @@ export const SisterAppsPopup = () => {
               Complete your wellness journey
             </h2>
           </div>
+
           <div className="flex flex-col gap-4">
             {others.map((app) => (
               <a
@@ -85,35 +100,43 @@ export const SisterAppsPopup = () => {
                     src={app.image}
                     alt={app.name}
                     loading="lazy"
-                    className={`max-w-full max-h-full object-contain ${app.darkImage ? "rounded-2xl" : ""}`}
+                    className="max-w-full max-h-full object-contain"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-extrabold text-slate-900 leading-tight group-hover:text-primary transition-colors">{app.name}</h3>
-                  <p className="text-[11px] font-medium text-slate-700 leading-snug line-clamp-2 mt-0.5">
-                    {app.tagline}
-                  </p>
+                  <p className="text-[11px] font-medium text-slate-700 leading-snug line-clamp-2 mt-0.5">{app.tagline}</p>
                 </div>
                 <ExternalLink className="w-3.5 h-3.5 text-primary shrink-0" />
               </a>
             ))}
           </div>
         </aside>
+
         <button
           type="button"
           onClick={() => setOpen(false)}
           aria-label="Hide panel"
-          className="sm-sister-handle h-14 w-14 rounded-full bg-white text-slate-900 flex items-center justify-center hover:bg-slate-50 transition-colors shadow-[0_4px_18px_rgba(15,23,42,0.22)]"
+          className="sm-sister-handle ml-2 h-14 w-14 rounded-full bg-white text-slate-900 flex items-center justify-center hover:bg-slate-50 hover:text-primary transition-colors shadow-[4px_0_12px_rgba(15,23,42,0.08)] border border-slate-100"
         >
-          <ChevronLeft className="w-7 h-7" />
+          <X className="w-7 h-7" />
         </button>
       </div>
+
       <button
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Show sister apps"
         className={`fixed top-1/2 -translate-y-1/2 left-0 z-[59] w-2 h-24 rounded-r-full bg-primary shadow-[0_0_28px_hsl(var(--primary)/0.65)] hover:w-3 hover:bg-primary transition-all duration-300 ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       />
+      {!open && (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Show sister apps"
+          className="fixed top-1/2 -translate-y-1/2 left-0 z-[58] w-6 h-20 opacity-0"
+        />
+      )}
     </>
   );
 };
