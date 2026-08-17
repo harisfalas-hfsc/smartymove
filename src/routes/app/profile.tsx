@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { useState, type ComponentType } from "react";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 import {
   AlertDialog,
@@ -52,6 +53,7 @@ function Profile() {
 }
 
 function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof useNavigate> }) {
+  const { freeAccessMode } = useFreeAccessMode();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(u.name);
   const [age, setAge] = useState(String(u.age));
@@ -157,12 +159,14 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
           }}
         />
         <Row icon={Settings2} label="Account settings" value="Edit profile" onClick={openEditor} />
-        <Row
-          icon={CreditCard}
-          label="Billing & purchases"
-          value={accountLoading === "billing" ? "Opening…" : "Receipts, payment method, stop any recurring billing"}
-          onClick={openBilling}
-        />
+        {!freeAccessMode && (
+          <Row
+            icon={CreditCard}
+            label="Billing & purchases"
+            value={accountLoading === "billing" ? "Opening…" : "Receipts, payment method, stop any recurring billing"}
+            onClick={openBilling}
+          />
+        )}
         {editing && (
           <section className="rounded-3xl bg-card p-5 shadow-card">
             <div className="mb-4 flex items-center justify-between gap-3">

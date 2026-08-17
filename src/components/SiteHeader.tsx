@@ -3,6 +3,7 @@ import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, Crown, Mail,
 import { useEffect, useState } from "react";
 import { useUser } from "@/lib/store";
 import { NotificationsBell } from "@/components/NotificationsBell";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 type Props = {
   onSignIn?: () => void;
@@ -14,6 +15,7 @@ type Props = {
 export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Props) {
   const navigate = useNavigate();
   const user = useUser();
+  const { freeAccessMode } = useFreeAccessMode();
   const pathname = useRouterState({ select: s => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
@@ -111,6 +113,7 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
 }
 
 function NavDrawer({ onClose, isAuthed }: { onClose: () => void; isAuthed: boolean }) {
+  const { freeAccessMode } = useFreeAccessMode();
   const sections: { heading: string; items: { to: string; label: string; Icon: any }[] }[] = [
     ...(isAuthed
       ? [{
@@ -127,7 +130,7 @@ function NavDrawer({ onClose, isAuthed }: { onClose: () => void; isAuthed: boole
       heading: "SmartyMove",
       items: [
         { to: "/about", label: "About", Icon: Info },
-        { to: "/pricing", label: "Pricing", Icon: Crown },
+        ...(freeAccessMode ? [] : [{ to: "/pricing", label: "Pricing", Icon: Crown }]),
         { to: "/why-movement-matters", label: "Why Movement Matters", Icon: Sparkles },
         { to: "/faq", label: "FAQ", Icon: HelpCircle },
         { to: "/contact", label: "Contact us", Icon: Mail },

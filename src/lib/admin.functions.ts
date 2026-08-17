@@ -206,3 +206,44 @@ export const adminGetStripeAnalytics = createServerFn({ method: "POST" })
       return { error: getStripeErrorMessage(e) };
     }
   });
+// ---------------------------------------------------------------------------
+// Global Free Access Mode (master switch)
+// ---------------------------------------------------------------------------
+export const adminGetFreeAccessMode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ enabled: boolean } | { error: string }> => {
+    try {
+      await assertAdmin(context as any);
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data, error } = await (supabaseAdmin as any)
+        .from("system_settings")
+        .select("setting_value")
+        .eq("setting_key", "free_access_mode")
+        .maybeSingle();
+      if (error) return { error: error.message };
+      const v = data?.setting_value;
+      return { enabled: v === true || v === "true" };
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : "Failed" };
+    }
+  });
+
+export const adminSetFreeAccessMode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { enabled: boolean }) => data)
+  .handler(async ({ context, data }): Promise<{ ok: true; enabled: boolean } | { error: string }> => {
+    try {
+      await assertAdmin(context as any);
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { error } = await (supabaseAdmin as any)
+        .from("system_settings")
+        .upsert(
+          { setting_key: "free_access_mode", setting_value: data.enabled, updated_at: new Date().toISOString() },
+          { onConflict: "setting_key" },
+        );
+      if (error) return { error: error.message };
+      return { ok: true, enabled: data.enabled };
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : "Failed" };
+    }
+  });

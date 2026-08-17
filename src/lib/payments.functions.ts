@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
+import { FREE_ACCESS_BLOCK_MESSAGE, isFreeAccessMode } from "@/lib/free-access.server";
 
 type PortalResult = { url: string } | { error: string };
 type CancelSubscriptionResult = { ok: true; currentPeriodEnd: string | null } | { error: string };
@@ -114,6 +115,8 @@ export const createBillingPortalSession = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<PortalResult> => {
     const { supabase, userId } = context;
     try {
+      // Global Free Access Mode: no billing surface is reachable.
+      if (await isFreeAccessMode()) return { error: FREE_ACCESS_BLOCK_MESSAGE };
       const [{ data: sub }, { data: profile }] = await Promise.all([
         supabase
           .from("subscriptions")

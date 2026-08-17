@@ -13,6 +13,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { ShieldAlert, Users, CreditCard, TrendingUp, Search, Loader2, Plus, Minus, Crown } from "lucide-react";
 import { isAdminEmail } from "@/lib/admin";
 import { adminListUsers, adminGrantScans, adminSetRole, adminGetStripeAnalytics, type AdminUserRow, type AdminAnalytics } from "@/lib/admin.functions";
+import { adminGetFreeAccessMode, adminSetFreeAccessMode } from "@/lib/admin.functions";
+import { setFreeAccessModeCache } from "@/hooks/useFreeAccessMode";
+import { Switch } from "@/components/ui/switch";
 import { getStripeEnvironment } from "@/lib/stripe";
 
 export const Route = createFileRoute("/admin/")({ component: AdminPage });
@@ -133,6 +136,7 @@ function AdminInner() {
         </TabsList>
 
         <TabsContent value="overview">
+          <FreeAccessModeCard />
           <OverviewTab analytics={analytics} loading={analyticsLoading} error={analyticsError} users={users} onReload={reloadAnalytics} />
         </TabsContent>
 
@@ -269,4 +273,85 @@ function UserTable({ users, onGrant, onToggleAdmin, busy }: { users: AdminUserRo
 
 function safeEnv() {
   try { return getStripeEnvironment(); } catch { return "sandbox" as const; }
+}
+/**
+ * Global Free Access Mode — master switch.
+ * When ON, every signed-in user gets full access and all payment, pricing,
+ * premium and subscription surfaces are hidden app-wide (including for
+ * signed-out visitors). Fully reversible: flipping it OFF restores paid mode.
+ * Nothing is charged, refunded or deleted in Stripe either way.
+ */
+function FreeAccessModeCard() {
+  const getMode = useServerFn(adminGetFreeAccessMode);
+  const setMode = useServerFn(adminSetFreeAccessMode);
+  const [enabled, setEnabled] = useState<boolean | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    getMode({ data: undefined as never })
+      .then((r: any) => {
+        if (!mounted) return;
+        if ("error" in r) setError(r.error);
+        else setEnabled(r.enabled);
+      })
+      .catch((e: unknown) => mounted && setError(e instanceof Error ? e.message : "Failed to load"));
+    return () => { mounted = false; };
+  }, [getMode]);
+
+  const toggle = async (next: boolean) => {
+    setSaving(true);
+    setError(null);
+    try {
+      const r: any = await setMode({ data: { enabled: next } });
+      if ("error" in r) setError(r.error);
+      else {
+        setEnabled(r.enabled);
+        setFreeAccessModeCache(r.enabled);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card className="mb-4 border-2 border-amber-400/70">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ShieldAlert className="h-4 w-4 text-amber-500" />
+          Global Free Access Mode
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-sm text-muted-foreground">
+          Makes the entire app free for every signed-in user and hides all payment,
+          pricing, premium and subscription references everywhere. Reversible at any time.
+        </p>
+        <div className="flex items-center justify-between rounded-2xl bg-amber-500/10 p-3">
+          <div className="text-sm font-semibold">
+            {enabled === null ? "Loading…" : enabled ? "ON — the whole app is free" : "OFF — normal pay-per-scan"}
+          </div>
+          <div className="flex items-center gap-2">
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            <Switch
+              checked={!!enabled}
+              disabled={enabled === null || saving}
+              onCheckedChange={toggle}
+              aria-label="Toggle global free access mode"
+            />
+          </div>
+        </div>
+        {enabled && (
+          <div className="rounded-2xl border border-amber-400/60 bg-amber-500/10 p-3 text-xs font-semibold text-amber-600">
+            Free Access Mode overrides all purchase flows. New checkouts are blocked and
+            no scan credits are consumed while this is on.
+          </div>
+        )}
+        {error && <div className="text-xs font-semibold text-destructive">{error}</div>}
+      </CardContent>
+    </Card>
+  );
 }

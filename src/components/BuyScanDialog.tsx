@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/store";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -13,10 +14,13 @@ import { Button } from "@/components/ui/button";
  */
 export function useBuyScan(returnPath: string = "/pricing?paid=1") {
   const u = useUser();
+  const { freeAccessMode } = useFreeAccessMode();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [signInPromptOpen, setSignInPromptOpen] = useState(false);
 
   const openBuyScan = useCallback(async () => {
+    // Global Free Access Mode: there is nothing to buy.
+    if (freeAccessMode) return;
     const { data } = await supabase.auth.getSession();
     const authUser = data.session?.user;
     if (!u || !authUser) {
@@ -28,11 +32,11 @@ export function useBuyScan(returnPath: string = "/pricing?paid=1") {
       return;
     }
     setCheckoutOpen(true);
-  }, [u]);
+  }, [u, freeAccessMode]);
 
   const buyScanElement = (
     <>
-      {checkoutOpen && u && (
+      {checkoutOpen && u && !freeAccessMode && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center p-3 sm:items-center" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-black/60" onClick={() => setCheckoutOpen(false)} />
           <div className="relative w-full max-w-[560px] max-h-[92dvh] overflow-y-auto rounded-3xl bg-white shadow-2xl">

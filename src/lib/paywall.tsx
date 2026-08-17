@@ -1,20 +1,27 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Crown, X } from "lucide-react";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 
 type Ctx = { requirePremium: (feature?: string) => void; close: () => void };
 const PaywallCtx = createContext<Ctx | null>(null);
 
 export function PaywallProvider({ children }: { children: ReactNode }) {
+  const { freeAccessMode } = useFreeAccessMode();
   const [open, setOpen] = useState(false);
   const [feature, setFeature] = useState<string | undefined>(undefined);
-  const requirePremium = useCallback((f?: string) => { setFeature(f); setOpen(true); }, []);
+  const requirePremium = useCallback((f?: string) => {
+    // Global Free Access Mode: never show a paywall.
+    if (freeAccessMode) return;
+    setFeature(f);
+    setOpen(true);
+  }, [freeAccessMode]);
   const close = useCallback(() => setOpen(false), []);
   const value = useMemo(() => ({ requirePremium, close }), [requirePremium, close]);
   return (
     <PaywallCtx.Provider value={value}>
       {children}
-      {open && <PaywallModal feature={feature} onClose={close} />}
+      {open && !freeAccessMode && <PaywallModal feature={feature} onClose={close} />}
     </PaywallCtx.Provider>
   );
 }

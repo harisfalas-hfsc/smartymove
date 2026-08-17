@@ -41,6 +41,7 @@ import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions
 import { createBillingPortalSession } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { clearLocalAccountData, signOutUser, updateUser, type Goal } from "@/lib/store";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { useUserPremium } from "@/lib/useUserPremium";
 
 type ExportResult = { data: unknown } | { error: string };
@@ -76,6 +77,7 @@ export function DesktopProfile() {
 }
 
 function DesktopProfileInner() {
+  const { freeAccessMode } = useFreeAccessMode();
   const u = useUserPremium();
   const [name, setName] = useState(u?.name ?? "");
   const [email, setEmail] = useState(u?.email ?? "");
@@ -298,19 +300,21 @@ function DesktopProfileInner() {
               Download a readable SmartyMove data report or permanently delete your account and app data.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
-              <Button
-                onClick={openBilling}
-                disabled={loading === "billing"}
-                variant="secondary"
-                className="rounded-2xl"
-              >
-                {loading === "billing" ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <CreditCard className="h-4 w-4" />
-                )}
-                Billing &amp; purchases
-              </Button>
+              {!freeAccessMode && (
+                <Button
+                  onClick={openBilling}
+                  disabled={loading === "billing"}
+                  variant="secondary"
+                  className="rounded-2xl"
+                >
+                  {loading === "billing" ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CreditCard className="h-4 w-4" />
+                  )}
+                  Billing &amp; purchases
+                </Button>
+              )}
               <Button
                 onClick={downloadAccountData}
                 disabled={loading === "export"}

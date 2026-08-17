@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FileText } from "lucide-react";
 import { LegalLayout } from "@/components/LegalLayout";
 
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
+
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
@@ -25,6 +27,7 @@ export const Route = createFileRoute("/terms")({
 });
 
 function Terms() {
+  const { freeAccessMode } = useFreeAccessMode();
   return (
     <LegalLayout
       title="Terms & Conditions"
@@ -108,28 +111,42 @@ function Terms() {
         </li>
       </ul>
 
-      <h2>5. Payments (Pay-Per-Scan)</h2>
-      <ul>
-        <li>
-          SmartyMove operates on a <strong>pay-per-scan</strong> model. There is no subscription
-          and no recurring billing. Each movement scan is purchased as a one-time payment
-          (currently €9.99 per scan, one-time payment — no subscription).
-        </li>
-        <li>
-          Once purchased, a scan credit is added to your account. After running the scan, your
-          personalized training program is generated and remains available to you at no additional
-          cost. A new scan is only required when you want to re-measure your progress (recommended
-          every 14 days).
-        </li>
-        <li>
-          Payments are processed securely via Stripe, a PCI DSS compliant payment processor. We do
-          not store full payment card details on our servers.
-        </li>
-        <li>All fees are stated in Euros (€) and, where applicable, include VAT.</li>
-        <li>
-          Pricing is displayed on the Pricing page and at checkout, and forms part of these Terms.
-        </li>
-      </ul>
+      {freeAccessMode ? (
+        <>
+          <h2>5. Access</h2>
+          <ul>
+            <li>
+              SmartyMove is currently provided free of charge to signed-in members. No payment,
+              fee or subscription is required to use any feature of the app.
+            </li>
+          </ul>
+        </>
+      ) : (
+        <>
+        <h2>5. Payments (Pay-Per-Scan)</h2>
+        <ul>
+          <li>
+            SmartyMove operates on a <strong>pay-per-scan</strong> model. There is no subscription
+            and no recurring billing. Each movement scan is purchased as a one-time payment
+            (currently €9.99 per scan, one-time payment — no subscription).
+          </li>
+          <li>
+            Once purchased, a scan credit is added to your account. After running the scan, your
+            personalized training program is generated and remains available to you at no additional
+            cost. A new scan is only required when you want to re-measure your progress (recommended
+            every 14 days).
+          </li>
+          <li>
+            Payments are processed securely via Stripe, a PCI DSS compliant payment processor. We do
+            not store full payment card details on our servers.
+          </li>
+          <li>All fees are stated in Euros (€) and, where applicable, include VAT.</li>
+          <li>
+            Pricing is displayed on the Pricing page and at checkout, and forms part of these Terms.
+          </li>
+        </ul>
+        </>
+      )}
 
       <h2>6. Refunds &amp; Withdrawal (EU Consumer Rights)</h2>
       <ul>

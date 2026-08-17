@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useBuyScan } from "@/components/BuyScanDialog";
 import { useUser } from "@/lib/store";
+import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { getScanAccess, SCAN_PRICE_EUR } from "@/lib/scans.functions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,14 @@ function Pricing() {
   const u = useUser();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { freeAccessMode, loading: freeAccessLoading } = useFreeAccessMode();
   const { openBuyScan, buyScanElement } = useBuyScan("/pricing?paid=1");
+
+  // Global Free Access Mode: this page must not be reachable, even by URL.
+  useEffect(() => {
+    if (freeAccessMode) navigate({ to: u ? "/app" : "/", replace: true });
+  }, [freeAccessMode, navigate, u]);
+
   const access = useQuery({
     queryKey: ["scan-access", u?.id ?? "anon"],
     queryFn: () => getScanAccess(),
@@ -81,6 +89,10 @@ function Pricing() {
     { n: 3, Icon: Calendar, color: "text-purple-500", title: "Follow your 2-week plan", body: "Mark sessions complete as you go." },
     { n: 4, Icon: TrendingUp, color: "text-emerald-500", title: "Rescan & progress", body: "After 14 days, update your program." },
   ];
+
+  // Render nothing while Free Access Mode is on (or still resolving) so no
+  // price string can ever appear before the redirect completes.
+  if (freeAccessMode || freeAccessLoading) return null;
 
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
