@@ -1,9 +1,19 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle, Sparkles } from "lucide-react";
+import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle, Sparkles, User, LogOut, Sun, Moon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useUser } from "@/lib/store";
+import { useUser, signOutUser, type User } from "@/lib/store";
+import { useTheme } from "@/lib/theme";
+import { isAdminEmail } from "@/lib/admin";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Props = {
   onSignIn?: () => void;
@@ -16,6 +26,7 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
   const navigate = useNavigate();
   const user = useUser();
   const { freeAccessMode } = useFreeAccessMode();
+  const { theme, toggleTheme } = useTheme();
   const pathname = useRouterState({ select: s => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
@@ -34,6 +45,12 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
   };
   const handleSignIn = () => onSignIn ? onSignIn() : window.location.assign("/?auth=signin");
   const handleSignUp = () => onSignUp ? onSignUp() : window.location.assign("/?auth=signup");
+  const handleSignOut = () => {
+    void signOutUser().finally(() => navigate({ to: "/", replace: true }));
+  };
+  const accountName = user?.name || user?.email || "Account";
+  const initial = accountName.slice(0, 1).toUpperCase();
+  const isAdmin = user ? isAdminEmail(user.email) : false;
   return (
     <header
       className="sticky top-0 z-30 w-full bg-background"
@@ -75,44 +92,97 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
           </Link>
         </div>
         <div className="flex items-center gap-2">
+          {user ? <NotificationsBell /> : null}
           {user ? (
-            <>
-            <NotificationsBell />
-            <Link
-              to="/app/profile"
-              aria-label="Profile"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary bg-primary text-xs font-bold text-primary-foreground"
-              style={{ textDecoration: "none" }}
-            >
-              {user.name.slice(0,1).toUpperCase()}
-            </Link>
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Account"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary bg-primary text-xs font-bold text-primary-foreground"
+                >
+                  {initial}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="space-y-0.5">
+                  <span className="block truncate">{accountName}</span>
+                  {user.email && accountName !== user.email && (
+                    <span className="block truncate text-xs font-normal text-muted-foreground">{user.email}</span>
+                  )}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/app">Home</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/app/screen">Movement Screen</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/app/program">Training Program</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/app/progress">Progress</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/app/profile">Profile</Link>
+                </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin">
+                      <Shield className="h-4 w-4 mr-2" /> Admin
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => toggleTheme()}>
+                  {theme === "dark" ? (
+                    <><Sun className="h-4 w-4 mr-2" /> Light view</>
+                  ) : (
+                    <><Moon className="h-4 w-4 mr-2" /> Dark view</>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" /> End your session
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
-            <>
-              <button
-                type="button"
-                onClick={handleSignIn}
-                className="inline-flex h-7 shrink-0 items-center justify-center whitespace-nowrap rounded-full px-3 text-xs font-semibold text-foreground/80 hover:text-primary"
-              >
-                Sign in
-              </button>
-              <button
-                type="button"
-                onClick={handleSignUp}
-                className="inline-flex h-7 shrink-0 items-center justify-center whitespace-nowrap rounded-full border-2 border-primary px-3 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-              >
-                Sign up
-              </button>
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Account"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary text-primary hover:bg-primary/10"
+                >
+                  <User className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuLabel>Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={handleSignIn}>Sign in</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleSignUp}>Sign up</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => toggleTheme()}>
+                  {theme === "dark" ? (
+                    <><Sun className="h-4 w-4 mr-2" /> Light view</>
+                  ) : (
+                    <><Moon className="h-4 w-4 mr-2" /> Dark view</>
+                  )}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>
-      {menuOpen && <NavDrawer onClose={() => setMenuOpen(false)} isAuthed={!!user} />}
+      {menuOpen && <NavDrawer onClose={() => setMenuOpen(false)} isAuthed={!!user} isAdmin={isAdmin} />}
     </header>
   );
 }
 
-function NavDrawer({ onClose, isAuthed }: { onClose: () => void; isAuthed: boolean }) {
+function NavDrawer({ onClose, isAuthed, isAdmin }: { onClose: () => void; isAuthed: boolean; isAdmin: boolean }) {
   const { freeAccessMode } = useFreeAccessMode();
   const sections: { heading: string; items: { to: string; label: string; Icon: any }[] }[] = [
     ...(isAuthed
@@ -123,6 +193,7 @@ function NavDrawer({ onClose, isAuthed }: { onClose: () => void; isAuthed: boole
             { to: "/app/screen", label: "Movement Screen", Icon: Activity },
             { to: "/app/program", label: "Training Program", Icon: Dumbbell },
             { to: "/app/progress", label: "Progress", Icon: LineChart },
+            ...(isAdmin ? [{ to: "/admin", label: "Admin", Icon: Shield }] : []),
           ],
         }]
       : []),
