@@ -92,6 +92,7 @@ function Pricing() {
 
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
+      {(freeAccessMode || freeAccessLoading) && <div className="hidden" aria-hidden="true" />}
       <SiteHeader showBack />
 
       {/* MOBILE — untouched */}
