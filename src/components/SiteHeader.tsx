@@ -113,6 +113,7 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
 }
 
 function NavDrawer({ onClose, isAuthed }: { onClose: () => void; isAuthed: boolean }) {
+  const { freeAccessMode } = useFreeAccessMode();
   const sections: { heading: string; items: { to: string; label: string; Icon: any }[] }[] = [
     ...(isAuthed
       ? [{
