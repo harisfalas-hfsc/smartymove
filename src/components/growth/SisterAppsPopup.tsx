@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { ExternalLink, Sparkles, ChevronLeft } from "lucide-react";
-import logoMove from "@/assets/smartymove-logo.png";
 import logoDiet from "@/assets/smartydiet-logo.png";
-import logoGym from "@/assets/smartygym-icon.png";
-import logoLogbook from "@/assets/smartylogbook-icon.png";
 import logoWorkout from "@/assets/smartyworkout-icon.png";
 
 const CURRENT_APP: "gym" | "move" | "diet" = "move";
@@ -19,21 +16,6 @@ type SisterApp = {
 
 const SISTER_APPS: SisterApp[] = [
   {
-    id: "gym",
-    name: "SmartyGym",
-    tagline: "Train smart. Get stronger. Feel younger.",
-    url: "https://smartygym.com",
-    image: logoGym,
-    darkImage: true,
-  },
-  {
-    id: "move",
-    name: "SmartyMove",
-    tagline: "Check your posture. Correct your movement. Live better.",
-    url: "https://smarty-motion-pro.lovable.app",
-    image: logoMove,
-  },
-  {
     id: "diet",
     name: "SmartyDiet",
     tagline: "Eat smart. Fuel your body. Live longer.",
@@ -46,13 +28,6 @@ const SISTER_APPS: SisterApp[] = [
     tagline: "Plan your training. Track every rep. Progress faster.",
     url: "https://smarty-workout-buddy.lovable.app",
     image: logoWorkout,
-  },
-  {
-    id: "logbook",
-    name: "SmartyLogbook",
-    tagline: "Organize your day. Track your habits. Live smarter.",
-    url: "https://smartylogbook.lovable.app",
-    image: logoLogbook,
   },
 ];
 
@@ -76,9 +51,16 @@ export const SisterAppsPopup = () => {
 
   return (
     <>
+      {open && (
+        <div
+          className="fixed inset-0 z-[55]"
+          aria-hidden="true"
+          onClick={() => setOpen(false)}
+        />
+      )}
       <div
         aria-hidden={!open}
-        className={`fixed top-1/2 -translate-y-1/2 left-0 z-[60] flex items-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${open ? "translate-x-0" : "-translate-x-[calc(100%+10px)]"}`}
+        className={`fixed top-1/2 -translate-y-1/2 left-0 z-[60] flex items-center gap-2 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${open ? "translate-x-0" : "-translate-x-[calc(100%+56px)]"}`}
       >
         <aside className="sm-sister-panel w-[260px] pl-4 pr-2 py-4 bg-white rounded-r-2xl shadow-[4px_0_24px_rgba(15,23,42,0.12)]">
           <div className="mb-4">
@@ -121,9 +103,9 @@ export const SisterAppsPopup = () => {
           type="button"
           onClick={() => setOpen(false)}
           aria-label="Hide panel"
-          className="sm-sister-handle h-12 w-6 rounded-r-full bg-white text-slate-900 flex items-center justify-center hover:bg-slate-50 transition-colors shadow-[4px_0_12px_rgba(15,23,42,0.08)]"
+          className="sm-sister-handle h-14 w-14 rounded-full bg-white text-slate-900 flex items-center justify-center hover:bg-slate-50 transition-colors shadow-[0_4px_18px_rgba(15,23,42,0.22)]"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-7 h-7" />
         </button>
       </div>
       <button
