@@ -15,12 +15,7 @@ export default defineConfig({
   },
   // Native (Capacitor) builds produce a fully static, bundled shell so the app
   // boots with no network at all. Web/production builds are untouched.
-  nitro: process.env["NATIVE_BUILD"]
-    ? {
-        preset: "static",
-        prerender: { routes: ["/"], crawlLinks: false, failOnError: false },
-      }
-    : undefined,
+  nitro: process.env["NATIVE_BUILD"] ? { preset: "static" } : undefined,
   plugins: [
     VitePWA({
       strategies: "generateSW",
