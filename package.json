@@ -7,6 +7,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "build:native": "node scripts/build-native.mjs",
+    "cap:sync": "node scripts/build-native.mjs && npx cap sync",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write ."
