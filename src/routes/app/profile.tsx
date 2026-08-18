@@ -36,6 +36,9 @@ import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
 import { isAdminEmail } from "@/lib/admin";
 import { createBillingPortalSession } from "@/lib/payments.functions";
+import { forgetDevice, hasDeviceRecord } from "@/lib/offline/device-auth";
+import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
+import { OFFLINE_ACTION_MESSAGE } from "@/components/offline/OfflineBanner";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { clearLocalAccountData, setOnboardingNextPath, updateUser, signOutUser, useUser, type User } from "@/lib/store";
 
@@ -61,6 +64,8 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
   const [accountLoading, setAccountLoading] = useState<"export" | "delete" | "billing" | null>(null);
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
   const [dataOpen, setDataOpen] = useState(false);
+  const online = useOnlineStatus();
+  const [deviceCleared, setDeviceCleared] = useState(false);
   const exportData = useServerFn(exportAccountData);
   const deleteAccount = useServerFn(deleteAccountAndData);
   const openPortal = useServerFn(createBillingPortalSession);
@@ -73,6 +78,7 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
     setAccountLoading("billing");
     setAccountMessage(null);
     try {
+      if (!online) throw new Error(OFFLINE_ACTION_MESSAGE);
       await requireSession();
       const res = (await openPortal({
         data: { environment: getStripeEnvironment(), returnUrl: `${window.location.origin}/app/profile` },
@@ -89,6 +95,7 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
     setAccountLoading("export");
     setAccountMessage(null);
     try {
+      if (!online) throw new Error(OFFLINE_ACTION_MESSAGE);
       await requireSession();
       const res = (await exportData({ data: {} })) as ExportResult;
       if ("error" in res) throw new Error(res.error);
@@ -104,6 +111,7 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
     setAccountLoading("delete");
     setAccountMessage(null);
     try {
+      if (!online) throw new Error(OFFLINE_ACTION_MESSAGE);
       await requireSession();
       const res = (await deleteAccount({ data: {} })) as DeleteResult;
       if ("error" in res) throw new Error(res.error);
@@ -300,6 +308,20 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
                 </AlertDialogContent>
               </AlertDialog>
             </div>
+          )}
+          {dataOpen && hasDeviceRecord(u.email) && (
+            <button
+              type="button"
+              onClick={() => {
+                forgetDevice(u.email);
+                setDeviceCleared(true);
+              }}
+              className="mt-2 w-full rounded-2xl border border-border px-4 py-3 text-left text-xs font-semibold text-muted-foreground"
+            >
+              {deviceCleared
+                ? "Offline sign-in for this device cleared."
+                : "Clear offline sign-in saved on this device"}
+            </button>
           )}
           {accountMessage && (
             <div className="mt-3 rounded-2xl bg-secondary p-3 text-xs font-semibold text-foreground">
