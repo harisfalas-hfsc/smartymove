@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Bell, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/store";
+import { readCache, scopedKey, writeCache } from "@/lib/offline/store";
+import { enqueueAction } from "@/lib/offline/queue";
+import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
 
 type Note = {
   id: string;
@@ -15,19 +18,34 @@ type Note = {
 export function NotificationsBell() {
   const user = useUser();
   const userId = user?.id;
+  const online = useOnlineStatus();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Note[]>([]);
+  const [fromCache, setFromCache] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   const load = useCallback(async () => {
     if (!userId) return;
-    const { data } = await supabase
-      .from("notifications")
-      .select("id,kind,title,body,read_at,created_at")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(30);
-    setItems((data as Note[] | null) ?? []);
+    const key = scopedKey(userId, "inbox:notifications");
+    try {
+      if (typeof navigator !== "undefined" && navigator.onLine === false) throw new Error("offline");
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("id,kind,title,body,read_at,created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(30);
+      if (error) throw error;
+      const rows = (data as Note[] | null) ?? [];
+      setItems(rows);
+      setFromCache(false);
+      void writeCache(key, rows);
+    } catch {
+      // Offline: show the copy saved on this device.
+      const cached = await readCache<Note[]>(key);
+      setItems(cached?.data ?? []);
+      setFromCache(true);
+    }
   }, [userId]);
 
   useEffect(() => {
@@ -45,12 +63,21 @@ export function NotificationsBell() {
   const markAllRead = async () => {
     if (!userId || !unread) return;
     const now = new Date().toISOString();
-    setItems((prev) => prev.map((n) => (n.read_at ? n : { ...n, read_at: now })));
-    await supabase
-      .from("notifications")
-      .update({ read_at: now })
-      .eq("user_id", userId)
-      .is("read_at", null);
+    const next = items.map((n) => (n.read_at ? n : { ...n, read_at: now }));
+    setItems(next);
+    void writeCache(scopedKey(userId, "inbox:notifications"), next);
+    try {
+      if (!online) throw new Error("offline");
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read_at: now })
+        .eq("user_id", userId)
+        .is("read_at", null);
+      if (error) throw error;
+    } catch {
+      // Queued and replayed automatically when the connection returns.
+      await enqueueAction("notifications-read", { readAt: now }, userId);
+    }
   };
 
   const openPanel = () => {
@@ -115,7 +142,9 @@ export function NotificationsBell() {
           <div className="max-h-[65vh] overflow-y-auto">
             {items.length === 0 ? (
               <p className="px-4 py-6 text-sm text-muted-foreground">
-                You're all caught up. Billing updates and reminders will appear here.
+                {fromCache && !online
+                  ? "You're offline and this device has no saved notifications yet. Connect once and they'll be stored here."
+                  : "You're all caught up. Billing updates and reminders will appear here."}
               </p>
             ) : (
               items.map((n) => (

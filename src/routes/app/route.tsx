@@ -18,7 +18,8 @@ function AppLayout() {
     const u = getUser();
     void restoreUserFromBackend().then((restored) => {
       if (!restored) {
-        if (!u) navigate({ to: "/" });
+        // Offline with a cached member: stay in the app.
+        if (!u && navigator.onLine !== false) navigate({ to: "/" });
         return;
       }
       const incompletePath = getFirstIncompleteOnboardingPath(restored);
@@ -26,7 +27,9 @@ function AppLayout() {
         setOnboardingNextPath(location.pathname.startsWith("/app/screen") ? location.pathname : "/app/screen");
         navigate({ to: incompletePath });
       }
-    }).catch(() => navigate({ to: "/" }));
+    }).catch(() => {
+      if (!getUser() && navigator.onLine !== false) navigate({ to: "/" });
+    });
   }, [location.pathname, navigate]);
   return (
     <div

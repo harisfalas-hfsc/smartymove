@@ -16,6 +16,7 @@ import {
   signUpWithEmailProfile,
   useUser,
 } from "@/lib/store";
+import { offlineSignIn } from "@/lib/offline/device-auth";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
@@ -156,6 +157,22 @@ function Welcome() {
       navigate({ to: destination });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Sign in failed. Check your email and password.";
+      // No internet: verify against the credentials stored on this device and
+      // restore the saved session in read-only mode.
+      const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+      if (offline || /failed to fetch|network|load failed|fetch failed/i.test(message)) {
+        const result = await offlineSignIn(email, pw);
+        if (result === "ok") {
+          window.location.href = nextPath ?? "/app";
+          return;
+        }
+        setAuthError(
+          result === "bad-password"
+            ? "That password doesn't match the one saved on this device."
+            : "You're offline and this device has no saved sign-in yet. Connect once and sign in, then it will work offline.",
+        );
+        return;
+      }
       if (/email not (confirmed|verified)/i.test(message)) {
         setEmailUnverified(true);
         setAuthError("Please verify your email before signing in. Check your inbox, or resend the verification email below.");

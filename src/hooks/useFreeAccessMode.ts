@@ -2,6 +2,24 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const FREE_ACCESS_SETTING_KEY = "free_access_mode";
+const LOCAL_KEY = "smartymove.free-access-mode";
+
+function readLocal(): boolean | null {
+  try {
+    const raw = localStorage.getItem(LOCAL_KEY);
+    return raw === null ? null : raw === "true";
+  } catch {
+    return null;
+  }
+}
+
+function writeLocal(value: boolean) {
+  try {
+    localStorage.setItem(LOCAL_KEY, String(value));
+  } catch {
+    /* ignore */
+  }
+}
 
 let cached: boolean | null = null;
 let inflight: Promise<boolean> | null = null;
@@ -19,15 +37,27 @@ export const fetchFreeAccessMode = async (force = false): Promise<boolean> => {
 
   inflight = (async () => {
     try {
+      // Offline: keep the last known setting so the UI stays consistent.
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        cached = readLocal() ?? false;
+        listeners.forEach((l) => l(cached!));
+        inflight = null;
+        return cached!;
+      }
       const { data, error } = await (supabase as any)
         .from("system_settings")
         .select("setting_value")
         .eq("setting_key", FREE_ACCESS_SETTING_KEY)
         .maybeSingle();
       const value = data?.setting_value;
-      cached = !error && (value === true || (value as unknown) === "true");
+      if (error) {
+        cached = readLocal() ?? false;
+      } else {
+        cached = value === true || (value as unknown) === "true";
+        writeLocal(cached);
+      }
     } catch {
-      cached = false;
+      cached = readLocal() ?? false;
     }
     listeners.forEach((l) => l(cached!));
     inflight = null;
@@ -39,6 +69,7 @@ export const fetchFreeAccessMode = async (force = false): Promise<boolean> => {
 
 export const setFreeAccessModeCache = (value: boolean) => {
   cached = value;
+  writeLocal(value);
   listeners.forEach((l) => l(value));
 };
 

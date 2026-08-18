@@ -17,10 +17,16 @@ export function useBuyScan(returnPath: string = "/pricing?paid=1") {
   const { freeAccessMode } = useFreeAccessMode();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [signInPromptOpen, setSignInPromptOpen] = useState(false);
+  const [offlineOpen, setOfflineOpen] = useState(false);
 
   const openBuyScan = useCallback(async () => {
     // Global Free Access Mode: there is nothing to buy.
     if (freeAccessMode) return;
+    // Payments need a live connection.
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      setOfflineOpen(true);
+      return;
+    }
     const { data } = await supabase.auth.getSession();
     const authUser = data.session?.user;
     if (!u || !authUser) {
@@ -62,6 +68,21 @@ export function useBuyScan(returnPath: string = "/pricing?paid=1") {
           <DialogFooter className="gap-2 sm:gap-2">
             <Button variant="outline" onClick={() => setSignInPromptOpen(false)}>Cancel</Button>
             <Button onClick={() => { window.location.href = "/?auth=signin&next=%2Fpricing"; }}>Sign in</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={offlineOpen} onOpenChange={setOfflineOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>You're offline</DialogTitle>
+            <DialogDescription>
+              You can view everything saved on this device. Creating new items needs an internet
+              connection.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setOfflineOpen(false)}>Got it</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
