@@ -111,6 +111,37 @@ export function hasDeviceRecord(email: string): boolean {
   }
 }
 
+/**
+ * Boot-time restore for the native app / installed PWA.
+ *
+ * The Supabase client reads its session from localStorage at startup. If the
+ * app was killed and relaunched with no network, and the token entry was
+ * evicted (iOS/Android can clear WebView storage), we put the last remembered
+ * session back before anything else runs. Returns true when a session was
+ * restored.
+ */
+export function restoreDeviceSession(): boolean {
+  try {
+    if (typeof localStorage === "undefined") return false;
+    if (findSupabaseAuthEntry()) return false;
+    let newest: DeviceRecord | null = null;
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const k = localStorage.key(i);
+      if (!k || !k.startsWith(VAULT_PREFIX)) continue;
+      const raw = localStorage.getItem(k);
+      if (!raw) continue;
+      const record = JSON.parse(raw) as DeviceRecord;
+      if (!record?.storageKey || !record?.session) continue;
+      if (!newest || (record.savedAt ?? 0) > (newest.savedAt ?? 0)) newest = record;
+    }
+    if (!newest) return false;
+    localStorage.setItem(newest.storageKey, newest.session);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function forgetDevice(email: string | null | undefined): void {
   if (!email) return;
   try {
