@@ -10,6 +10,9 @@ import { TestPreviewSheet } from "@/components/TestPreviewSheet";
 import { isAdminEmail } from "@/lib/admin";
 import { useBuyScan } from "@/components/BuyScanDialog";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
+import { offlineFirst } from "@/lib/offline/offline-first";
+import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
+import { OFFLINE_ACTION_MESSAGE } from "@/components/offline/OfflineBanner";
 
 export const Route = createFileRoute("/app/screen/")({ component: ScreenIndex });
 
@@ -21,9 +24,11 @@ function ScreenIndex() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewFocus, setPreviewFocus] = useState<string | undefined>(undefined);
   const { openBuyScan, buyScanElement } = useBuyScan("/pricing?paid=1");
+  const online = useOnlineStatus();
   const access = useQuery({
     queryKey: ["scan-access", u?.id ?? "pending"],
-    queryFn: () => getScanAccess(),
+    // Offline-first: falls back to the copy saved on this device.
+    queryFn: () => offlineFirst("account:access", () => getScanAccess(), u?.id),
     enabled: !!u && !isAdmin && !freeAccessMode,
     staleTime: 30_000,
   });
@@ -41,6 +46,7 @@ function ScreenIndex() {
     }
     if (canScan) return;
     e.preventDefault();
+    if (!online) return;
     void openBuyScan();
   }
 
@@ -56,17 +62,25 @@ function ScreenIndex() {
   ) : (
     <button
       type="button"
-      onClick={() => void openBuyScan()}
-      className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold text-white"
+      onClick={() => { if (online) void openBuyScan(); }}
+      disabled={!online}
+      className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold text-white disabled:opacity-60"
       style={{ background: "#FF6B4A", boxShadow: "0 14px 24px -10px rgba(255,107,74,0.55)" }}
     >
       <Play className="h-5 w-5" /> {last ? "Rescan" : "Start scan"}
     </button>
   );
 
+  const offlineNote = !online ? (
+    <p className="rounded-2xl border border-border bg-card px-4 py-3 text-[13px] font-medium text-muted-foreground">
+      {OFFLINE_ACTION_MESSAGE}
+    </p>
+  ) : null;
+
   return (
     <>
     <div className="space-y-4 px-5 pb-6 pt-4" style={{ background: "#ffffff" }}>
+      {offlineNote}
       {/* HERO CARD */}
       <SmartyCard
         Icon={Camera}
