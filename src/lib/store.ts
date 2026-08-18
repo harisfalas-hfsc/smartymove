@@ -1,6 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "./admin";
+import { enqueueAction } from "./offline/queue";
+import { readCache, scopedKey, writeCache } from "./offline/store";
+import { refreshRememberedSession, rememberDevice } from "./offline/device-auth";
+
+function isOffline() {
+  return typeof navigator !== "undefined" && navigator.onLine === false;
+}
+
+function isNetworkError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  return isOffline() || /failed to fetch|network|load failed|fetch failed|timeout/i.test(message);
+}
 
 export type Joint = "ankle" | "knee" | "hip" | "back" | "shoulder" | "elbow" | "wrist" | "none";
 export type Pain = "none" | "mild" | "moderate" | "severe";
@@ -403,6 +415,36 @@ async function saveProfile(user: User) {
   const authUser = sessionData.session?.user;
   if (!authUser) return;
   const profile = makeUser(authUser.id, user.name, authUser.email ?? user.email, user.age, user);
+  cacheOnly(profile);
+  void writeCache(scopedKey(authUser.id, "profile"), profile);
+  try {
+    if (isOffline()) throw new Error("offline");
+    const { error } = await (supabase as any).from("profiles").upsert({
+      id: authUser.id,
+      email: profile.email,
+      name: profile.name,
+      age: profile.age,
+      app_user: profile,
+    });
+    if (error) throw error;
+  } catch (error) {
+    // Offline: keep the change on the device and replay it on reconnect.
+    if (isNetworkError(error)) {
+      await enqueueAction("profile-sync", {}, authUser.id);
+      return;
+    }
+    throw error;
+  }
+}
+
+/** Replays the locally stored profile to the backend (used after reconnect). */
+export async function syncLocalProfile(): Promise<void> {
+  const local = getUser();
+  if (!local) return;
+  const { data: sessionData } = await supabase.auth.getSession();
+  const authUser = sessionData.session?.user;
+  if (!authUser) return;
+  const profile = makeUser(authUser.id, local.name, authUser.email ?? local.email, local.age, local);
   const { error } = await (supabase as any).from("profiles").upsert({
     id: authUser.id,
     email: profile.email,
@@ -411,7 +453,6 @@ async function saveProfile(user: User) {
     app_user: profile,
   });
   if (error) throw error;
-  cacheOnly(profile);
 }
 
 export async function restoreUserFromBackend(): Promise<User | null> {
@@ -421,18 +462,40 @@ export async function restoreUserFromBackend(): Promise<User | null> {
     cacheOnly(null);
     return null;
   }
-  if (!authUser.email_confirmed_at && !authUser.confirmed_at) {
+  refreshRememberedSession(authUser.email);
+  if (!authUser.email_confirmed_at && !authUser.confirmed_at && !isOffline()) {
     await supabase.auth.signOut();
     cacheOnly(null);
     return null;
   }
 
-  const { data, error } = await (supabase as any)
-    .from("profiles")
-    .select("id,email,name,age,app_user")
-    .eq("id", authUser.id)
-    .maybeSingle();
-  if (error) throw error;
+  // Offline (or the request fails): fall back to the copy stored on this
+  // device so the member keeps their full profile, scans and program.
+  const offlineProfile = async (): Promise<User | null> => {
+    const cachedLocal = getUser();
+    if (cachedLocal && cachedLocal.id === authUser.id) return cachedLocal;
+    const stored = await readCache<User>(scopedKey(authUser.id, "profile"));
+    if (stored?.data) {
+      cacheOnly(stored.data);
+      return stored.data;
+    }
+    return cachedLocal ?? null;
+  };
+
+  let data: unknown = null;
+  try {
+    if (isOffline()) throw new Error("offline");
+    const res = await (supabase as any)
+      .from("profiles")
+      .select("id,email,name,age,app_user")
+      .eq("id", authUser.id)
+      .maybeSingle();
+    if (res.error) throw res.error;
+    data = res.data;
+  } catch (error) {
+    if (isNetworkError(error)) return offlineProfile();
+    throw error;
+  }
   if (data) {
     const user = fromProfile(data as ProfileRow);
     const merged = mergeMissingOnboarding(user, localOnboardingFor(authUser.email ?? user.email));
@@ -443,6 +506,7 @@ export async function restoreUserFromBackend(): Promise<User | null> {
       return merged.user;
     }
     cacheOnly(user);
+    void writeCache(scopedKey(authUser.id, "profile"), user);
     return user;
   }
 
@@ -481,6 +545,7 @@ export async function signUpWithEmailProfile(
   const user = makeUser(data.user?.id ?? crypto.randomUUID(), name, normalizedEmail, age, partial);
   setPendingProfile(user);
   if (data.session) {
+    await rememberDevice(normalizedEmail, password);
     await saveProfile(user);
     clearOnboardingDraft();
     clearPendingProfile();
@@ -496,6 +561,8 @@ export async function signInWithEmailProfile(email: string, password: string): P
   const cached = getUser();
   const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
   if (error) throw error;
+  // Remember this device so the member can sign in again with no internet.
+  await rememberDevice(normalizedEmail, password);
   if (cached && normalizeEmail(cached.email) === normalizedEmail) setPendingProfile(cached);
   const user = await restoreUserFromBackend();
   if (!user) throw new Error("Signed in, but your profile could not be loaded.");
@@ -503,7 +570,7 @@ export async function signInWithEmailProfile(email: string, password: string): P
 }
 
 export async function signOutUser() {
-  await supabase.auth.signOut();
+  await supabase.auth.signOut().catch(() => undefined);
   setUser(null);
 }
 

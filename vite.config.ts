@@ -5,6 +5,7 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   tanstackStart: {
@@ -12,4 +13,72 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  plugins: [
+    VitePWA({
+      strategies: "generateSW",
+      registerType: "autoUpdate",
+      injectRegister: null,
+      filename: "sw.js",
+      devOptions: { enabled: false },
+      manifest: false,
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
+        // The app is server-rendered: there is no index.html to fall back to.
+        // Navigations are handled by public/sw-extra.js instead.
+        importScripts: ["/sw-extra.js"],
+        // Precached branded page for routes never opened while online.
+        navigateFallback: "/offline.html",
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+        // The client build is output to dist/client, but the public site serves
+        // those files from root (/assets/...). Strip the private "client/" prefix
+        // so the precache URLs match the URLs the browser actually requests.
+        manifestTransforms: [
+          async (manifest) => {
+            for (const entry of manifest) {
+              if (entry.url.startsWith("client/")) {
+                entry.url = entry.url.slice("client/".length);
+              }
+              if (!entry.url.startsWith("/")) entry.url = `/${entry.url}`;
+            }
+            return { manifest, warnings: [] };
+          },
+        ],
+        runtimeCaching: [
+          {
+            // JS/CSS chunks: cache first so the app shell works offline.
+            urlPattern: ({ url }) => /\.(?:js|css)$/.test(url.pathname),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "smartymove-assets",
+              expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+
+          {
+            // Exercise demo images / GIFs (signed storage URLs).
+            urlPattern: ({ request, url }) =>
+              request.destination === "image" || /\/storage\/v1\/object\//.test(url.pathname),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "smartymove-media",
+              expiration: { maxEntries: 600, maxAgeSeconds: 60 * 60 * 24 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: ({ url }) => /\.(?:woff2?|ttf|otf)$/.test(url.pathname),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "smartymove-fonts",
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
+            },
+          },
+        ],
+      },
+    }),
+  ],
 });
