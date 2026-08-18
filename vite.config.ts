@@ -13,6 +13,14 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Native (Capacitor) builds produce a fully static, bundled shell so the app
+  // boots with no network at all. Web/production builds are untouched.
+  nitro: process.env["NATIVE_BUILD"]
+    ? {
+        preset: "static",
+        prerender: { routes: ["/"], crawlLinks: false, failOnError: false },
+      }
+    : undefined,
   plugins: [
     VitePWA({
       strategies: "generateSW",
