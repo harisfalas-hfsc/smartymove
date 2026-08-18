@@ -69,6 +69,7 @@ export const fetchFreeAccessMode = async (force = false): Promise<boolean> => {
 
 export const setFreeAccessModeCache = (value: boolean) => {
   cached = value;
+  writeLocal(value);
   listeners.forEach((l) => l(value));
 };
 
