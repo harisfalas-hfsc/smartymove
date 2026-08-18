@@ -1,0 +1,1 @@
+import{r as e}from"./useRouter-CYijDE91.js";import{t}from"./link-DWJ98Qvg.js";var n=e(),r=()=>(0,n.jsxs)(`div`,{style:{padding:`20px 0`},children:[(0,n.jsx)(`p`,{style:{color:`#3B4A63`},children:`Guide not found.`}),(0,n.jsx)(t,{to:`/learn`,style:{color:`#0E7C86`,fontWeight:700},children:`← Back to all guides`})]});export{r as notFoundComponent};

@@ -21,6 +21,8 @@ import { OfflineBootstrap } from "@/components/offline/OfflineBootstrap";
 import { OfflineSync } from "@/components/offline/OfflineSync";
 import { UpdatePrompt } from "@/components/offline/UpdatePrompt";
 import { registerAppServiceWorker } from "@/lib/offline/register-sw";
+import { initConnectivity } from "@/lib/offline/connectivity";
+import { restoreDeviceSession } from "@/lib/offline/device-auth";
 
 
 function NotFoundComponent() {
@@ -249,6 +251,10 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
+    // Boot order matters: know the real network state, put the remembered
+    // session back, then (web only) register the service worker.
+    initConnectivity();
+    restoreDeviceSession();
     registerAppServiceWorker();
   }, []);
 
