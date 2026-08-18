@@ -16,6 +16,11 @@ import { PaywallProvider } from "@/lib/paywall";
 import { SisterAppsPopup } from "@/components/growth/SisterAppsPopup";
 import { BottomTabs } from "@/components/BottomTabs";
 import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
+import { OfflineBanner } from "@/components/offline/OfflineBanner";
+import { OfflineBootstrap } from "@/components/offline/OfflineBootstrap";
+import { OfflineSync } from "@/components/offline/OfflineSync";
+import { UpdatePrompt } from "@/components/offline/UpdatePrompt";
+import { registerAppServiceWorker } from "@/lib/offline/register-sw";
 
 
 function NotFoundComponent() {
@@ -82,7 +87,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { title: "SmartyMove — AI Movement Intelligence Platform | Movement Score & Corrective Coach" },
       { name: "description", content: "SmartyMove is the AI Movement Intelligence Platform. Scan your movement with your phone camera, get your Smarty Movement Score™, Movement Age™, and a personalized 5-minute daily corrective exercise program." },
       { name: "author", content: "SmartyMove" },
@@ -241,6 +249,10 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
+    registerAppServiceWorker();
+  }, []);
+
+  useEffect(() => {
     const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag;
     if (typeof gtag === "function") {
       gtag("event", "page_view", {
@@ -255,8 +267,12 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <PaywallProvider>
+          <OfflineBanner />
+          <OfflineBootstrap />
+          <OfflineSync />
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
+          <UpdatePrompt />
           <SisterAppsPopup />
           <BottomTabs />
         </PaywallProvider>
