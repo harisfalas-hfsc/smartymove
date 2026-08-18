@@ -16,6 +16,7 @@ import {
   signUpWithEmailProfile,
   useUser,
 } from "@/lib/store";
+import { offlineSignIn } from "@/lib/offline/device-auth";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
