@@ -1,18 +1,17 @@
 import { useEffect, useState } from "react";
+import { getOnline, initConnectivity, subscribeConnectivity } from "./connectivity";
 
-/** Live online/offline flag. Assumes online until the browser says otherwise. */
+/**
+ * Live online/offline flag, sourced from the one connectivity module so the
+ * web app, the PWA and the native shell all agree.
+ */
 export function useOnlineStatus(): boolean {
   const [online, setOnline] = useState(true);
 
   useEffect(() => {
-    const update = () => setOnline(navigator.onLine);
-    update();
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
-    };
+    initConnectivity();
+    setOnline(getOnline());
+    return subscribeConnectivity(setOnline);
   }, []);
 
   return online;
