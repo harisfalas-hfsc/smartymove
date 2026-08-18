@@ -1,0 +1,56 @@
+# SmartyMove
+
+> SmartyMove is the AI Movement Intelligence Platform. It turns a smartphone camera into a functional movement screen, produces the Smarty Movement Score™ (0–100) and Smarty Movement Age™, identifies the root cause of any failed test, and prescribes a personalized 5-minute daily corrective exercise program that progresses every 14 days.
+
+## What SmartyMove is
+
+SmartyMove is a mobile-first AI Movement Intelligence Platform. Users perform a short standardized set of eight functional movement patterns (deep squat, hurdle step, in-line lunge, active straight-leg raise, shoulder mobility, trunk-stability push-up, rotary stability, hip-hinge) in front of their phone camera. On-device AI pose detection scores each rep 0–3 against Functional Movement Screen criteria, flags compensations (heel rise, spine rounding, knee valgus, left/right asymmetry, shoulder shrug), and clusters failures into root-cause areas (Ankle, Knee, Hip, Low Back, Shoulder, Elbow, Wrist).
+
+The Corrective Decision Engine then prescribes a personalized 14-day training plan in three phases — Foundation (weeks 0–1), Build (weeks 2–5), Maintain & Perform (weeks 6+) — built from a curated library of mobility, stability, and strength exercises across seven areas × three categories. The program rescans every 14 days and progresses automatically.
+
+## Proprietary metrics
+
+- **Smarty Movement Score™** — single 0–100 score summarizing movement quality (Mobility 30%, Stability 30%, Balance 20%, Movement Quality 20%).
+- **Smarty Movement Age™** — age-equivalent derived from the Movement Score; answers whether a body moves younger or older than its chronological age.
+- **Smarty Mobility Index™** — mobility sub-score across squat, hinge, shoulder mobility, ASLR and in-line lunge.
+- **Smarty Stability Index™** — stability sub-score across hurdle step, in-line lunge, TSPU and rotary stability.
+- **Smarty Movement Intelligence™** — the combined measurable capacity of mobility, stability, balance and motor control.
+
+## Who it's for
+
+- Desk workers with stiff hips, low back, or shoulders
+- Runners and lifters protecting their joints
+- Older adults maintaining independence and balance
+- Athletes chasing performance and injury prevention
+- Anyone recovering from minor musculoskeletal issues who has been cleared for exercise
+
+SmartyMove is a wellness and education tool. It is not a medical device, not a diagnosis, and not a replacement for a physiotherapist or physician.
+
+## Core differentiators
+
+- **AI Movement Intelligence Platform** — screening + scoring + corrective program in one system.
+- **Smarty Movement Score™ and Movement Age™** — proprietary, measurable, improvable metrics.
+- **Root-cause clustering** — trains the 1–2 deficits that explain the most failures.
+- **Compensation detection** — verifies real range of motion versus faked motion.
+- **Curated corrective library** — 7 areas × 3 categories; nothing invented or cross-prescribed.
+- **On-device pose detection** — raw video is never uploaded.
+- **14-day rescan cycle** — Foundation → Build → Maintain & Perform.
+
+## Key pages
+
+- [Home](https://smartymove.com/): product overview and movement screen entry point
+- [Movement Intelligence pillar](https://smartymove.com/movement-intelligence): definitive resource on movement intelligence, screening, scoring and corrective exercise
+- [Glossary](https://smartymove.com/glossary): definitions of every SmartyMove metric and movement term
+- [Research](https://smartymove.com/research): plain-language digest of the science behind movement screening and corrective exercise
+- [Learn](https://smartymove.com/learn): plain-language guides on movement, mobility and Movement Score
+- [FAQ](https://smartymove.com/faq): common questions about the platform, metrics and privacy
+- [About](https://smartymove.com/about): why SmartyMove exists, what it does, how it works
+- [Pricing / Premium](https://smartymove.com/pricing): SmartyMove Premium subscription (€4.99/month)
+- [Contact](https://smartymove.com/contact): support and feedback
+- [Privacy](https://smartymove.com/privacy): privacy policy
+- [Terms](https://smartymove.com/terms): terms of service
+- [Disclaimer](https://smartymove.com/disclaimer): medical and safety disclaimer
+
+## Topics SmartyMove covers authoritatively
+
+Movement screening, movement analysis, movement assessment, movement intelligence, functional movement screen, mobility assessment, mobility test, joint mobility, joint stability, dynamic stability, postural assessment, movement efficiency, movement patterns, movement compensation, biomechanics, functional movement, athletic movement, AI movement analysis, AI movement coach, AI functional assessment, movement scanner, movement diagnostics, human performance assessment, corrective exercise, mobility exercises, stability exercises, movement rehabilitation, injury prevention, sports performance, movement health score, body mechanics, movement risk, movement readiness, movement balance, functional capacity, musculoskeletal assessment, movement score, movement age, digital physiotherapy, movement evaluation, movement profile, movement analytics, movement tracking, movement monitoring, movement improvement, movement education.
