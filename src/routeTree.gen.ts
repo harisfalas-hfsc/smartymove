@@ -19,12 +19,15 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as MovementPatternsRouteImport } from './routes/movement-patterns'
 import { Route as MovementIntelligenceRouteImport } from './routes/movement-intelligence'
+import { Route as MovementAssessmentRouteImport } from './routes/movement-assessment'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as GlossaryRouteImport } from './routes/glossary'
+import { Route as FunctionalMovementScreeningRouteImport } from './routes/functional-movement-screening'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as DesktopRouteImport } from './routes/desktop'
+import { Route as CorrectiveExerciseRouteImport } from './routes/corrective-exercise'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as OnboardingRouteRouteImport } from './routes/onboarding/route'
@@ -101,6 +104,11 @@ const MovementIntelligenceRoute = MovementIntelligenceRouteImport.update({
   path: '/movement-intelligence',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MovementAssessmentRoute = MovementAssessmentRouteImport.update({
+  id: '/movement-assessment',
+  path: '/movement-assessment',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearnRoute = LearnRouteImport.update({
   id: '/learn',
   path: '/learn',
@@ -116,6 +124,12 @@ const GlossaryRoute = GlossaryRouteImport.update({
   path: '/glossary',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FunctionalMovementScreeningRoute =
+  FunctionalMovementScreeningRouteImport.update({
+    id: '/functional-movement-screening',
+    path: '/functional-movement-screening',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
@@ -129,6 +143,11 @@ const DisclaimerRoute = DisclaimerRouteImport.update({
 const DesktopRoute = DesktopRouteImport.update({
   id: '/desktop',
   path: '/desktop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CorrectiveExerciseRoute = CorrectiveExerciseRouteImport.update({
+  id: '/corrective-exercise',
+  path: '/corrective-exercise',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -266,12 +285,15 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/corrective-exercise': typeof CorrectiveExerciseRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
+  '/functional-movement-screening': typeof FunctionalMovementScreeningRoute
   '/glossary': typeof GlossaryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRouteWithChildren
+  '/movement-assessment': typeof MovementAssessmentRoute
   '/movement-intelligence': typeof MovementIntelligenceRoute
   '/movement-patterns': typeof MovementPatternsRoute
   '/premium': typeof PremiumRouteWithChildren
@@ -308,12 +330,15 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/corrective-exercise': typeof CorrectiveExerciseRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
+  '/functional-movement-screening': typeof FunctionalMovementScreeningRoute
   '/glossary': typeof GlossaryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRouteWithChildren
+  '/movement-assessment': typeof MovementAssessmentRoute
   '/movement-intelligence': typeof MovementIntelligenceRoute
   '/movement-patterns': typeof MovementPatternsRoute
   '/premium': typeof PremiumRouteWithChildren
@@ -351,12 +376,15 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/corrective-exercise': typeof CorrectiveExerciseRoute
   '/desktop': typeof DesktopRoute
   '/disclaimer': typeof DisclaimerRoute
   '/faq': typeof FaqRoute
+  '/functional-movement-screening': typeof FunctionalMovementScreeningRoute
   '/glossary': typeof GlossaryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/learn': typeof LearnRouteWithChildren
+  '/movement-assessment': typeof MovementAssessmentRoute
   '/movement-intelligence': typeof MovementIntelligenceRoute
   '/movement-patterns': typeof MovementPatternsRoute
   '/premium': typeof PremiumRouteWithChildren
@@ -396,12 +424,15 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/about'
     | '/contact'
+    | '/corrective-exercise'
     | '/desktop'
     | '/disclaimer'
     | '/faq'
+    | '/functional-movement-screening'
     | '/glossary'
     | '/how-it-works'
     | '/learn'
+    | '/movement-assessment'
     | '/movement-intelligence'
     | '/movement-patterns'
     | '/premium'
@@ -438,12 +469,15 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/about'
     | '/contact'
+    | '/corrective-exercise'
     | '/desktop'
     | '/disclaimer'
     | '/faq'
+    | '/functional-movement-screening'
     | '/glossary'
     | '/how-it-works'
     | '/learn'
+    | '/movement-assessment'
     | '/movement-intelligence'
     | '/movement-patterns'
     | '/premium'
@@ -480,12 +514,15 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/about'
     | '/contact'
+    | '/corrective-exercise'
     | '/desktop'
     | '/disclaimer'
     | '/faq'
+    | '/functional-movement-screening'
     | '/glossary'
     | '/how-it-works'
     | '/learn'
+    | '/movement-assessment'
     | '/movement-intelligence'
     | '/movement-patterns'
     | '/premium'
@@ -524,12 +561,15 @@ export interface RootRouteChildren {
   OnboardingRouteRoute: typeof OnboardingRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
+  CorrectiveExerciseRoute: typeof CorrectiveExerciseRoute
   DesktopRoute: typeof DesktopRoute
   DisclaimerRoute: typeof DisclaimerRoute
   FaqRoute: typeof FaqRoute
+  FunctionalMovementScreeningRoute: typeof FunctionalMovementScreeningRoute
   GlossaryRoute: typeof GlossaryRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LearnRoute: typeof LearnRouteWithChildren
+  MovementAssessmentRoute: typeof MovementAssessmentRoute
   MovementIntelligenceRoute: typeof MovementIntelligenceRoute
   MovementPatternsRoute: typeof MovementPatternsRoute
   PremiumRoute: typeof PremiumRouteWithChildren
@@ -619,6 +659,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MovementIntelligenceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/movement-assessment': {
+      id: '/movement-assessment'
+      path: '/movement-assessment'
+      fullPath: '/movement-assessment'
+      preLoaderRoute: typeof MovementAssessmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/learn': {
       id: '/learn'
       path: '/learn'
@@ -640,6 +687,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GlossaryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/functional-movement-screening': {
+      id: '/functional-movement-screening'
+      path: '/functional-movement-screening'
+      fullPath: '/functional-movement-screening'
+      preLoaderRoute: typeof FunctionalMovementScreeningRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/faq': {
       id: '/faq'
       path: '/faq'
@@ -659,6 +713,13 @@ declare module '@tanstack/react-router' {
       path: '/desktop'
       fullPath: '/desktop'
       preLoaderRoute: typeof DesktopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/corrective-exercise': {
+      id: '/corrective-exercise'
+      path: '/corrective-exercise'
+      fullPath: '/corrective-exercise'
+      preLoaderRoute: typeof CorrectiveExerciseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -922,12 +983,15 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRouteRoute: OnboardingRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
+  CorrectiveExerciseRoute: CorrectiveExerciseRoute,
   DesktopRoute: DesktopRoute,
   DisclaimerRoute: DisclaimerRoute,
   FaqRoute: FaqRoute,
+  FunctionalMovementScreeningRoute: FunctionalMovementScreeningRoute,
   GlossaryRoute: GlossaryRoute,
   HowItWorksRoute: HowItWorksRoute,
   LearnRoute: LearnRouteWithChildren,
+  MovementAssessmentRoute: MovementAssessmentRoute,
   MovementIntelligenceRoute: MovementIntelligenceRoute,
   MovementPatternsRoute: MovementPatternsRoute,
   PremiumRoute: PremiumRouteWithChildren,
