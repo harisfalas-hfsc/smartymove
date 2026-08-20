@@ -217,9 +217,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           keywords: "AI movement screening, movement analysis, functional movement screen, corrective exercise, movement score, movement age, mobility assessment, biomechanics",
           offers: {
             "@type": "Offer",
-            price: "4.99",
+            price: "9.99",
             priceCurrency: "EUR",
-            category: "subscription",
+            category: "one-time payment per movement scan",
           },
           publisher: { "@type": "Organization", name: "SmartyMove" },
         }),
