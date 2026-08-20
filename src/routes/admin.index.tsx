@@ -18,7 +18,9 @@ import { setFreeAccessModeCache } from "@/hooks/useFreeAccessMode";
 import { Switch } from "@/components/ui/switch";
 import { getStripeEnvironment } from "@/lib/stripe";
 
-export const Route = createFileRoute("/admin/")({ component: AdminPage });
+export const Route = createFileRoute("/admin/")({
+  head: () => ({ meta: [{ title: "SmartyMove Admin" }, { name: "robots", content: "noindex, nofollow" }] }),
+  component: AdminPage });
 
 function AdminPage() {
   const [authed, setAuthed] = useState<boolean | null>(null);

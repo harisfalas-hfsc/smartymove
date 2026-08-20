@@ -17,6 +17,14 @@ export const Route = createFileRoute("/sitemap.xml")({
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/movement-intelligence", changefreq: "weekly", priority: "0.95" },
+          { path: "/movement-assessment", changefreq: "weekly", priority: "0.95" },
+          { path: "/functional-movement-screening", changefreq: "weekly", priority: "0.95" },
+          { path: "/corrective-exercise", changefreq: "weekly", priority: "0.9" },
+          { path: "/mobility-and-stability", changefreq: "weekly", priority: "0.9" },
+          { path: "/posture-and-movement-quality", changefreq: "weekly", priority: "0.85" },
+          { path: "/injury-prevention", changefreq: "weekly", priority: "0.85" },
+          { path: "/movement-patterns", changefreq: "weekly", priority: "0.85" },
+          { path: "/why-movement-matters", changefreq: "monthly", priority: "0.75" },
           { path: "/about", changefreq: "weekly", priority: "0.7" },
           { path: "/how-it-works", changefreq: "weekly", priority: "0.7" },
           { path: "/contact", changefreq: "monthly", priority: "0.6" },
@@ -33,13 +41,11 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/learn/ankle-mobility-and-your-squat", changefreq: "monthly", priority: "0.6" },
         ];
 
-        const today = new Date().toISOString().split("T")[0];
-
         const urls = entries.map((e) =>
           [
             `  <url>`,
             `    <loc>${BASE_URL}${e.path}</loc>`,
-            `    <lastmod>${today}</lastmod>`,
+            e.lastmod ? `    <lastmod>${e.lastmod}</lastmod>` : null,
             e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
             e.priority ? `    <priority>${e.priority}</priority>` : null,
             `  </url>`,

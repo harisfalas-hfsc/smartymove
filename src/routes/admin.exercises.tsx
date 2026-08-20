@@ -9,7 +9,9 @@ import { Upload, Image as ImageIcon, Database, Search, FileDown, Wrench, ShieldA
 import { isAdminEmail } from "@/lib/admin";
 import { useUnresolvedCanonicals } from "@/lib/exercises";
 
-export const Route = createFileRoute("/admin/exercises")({ component: AdminExercises });
+export const Route = createFileRoute("/admin/exercises")({
+  head: () => ({ meta: [{ title: "SmartyMove Admin — Exercises" }, { name: "robots", content: "noindex, nofollow" }] }),
+  component: AdminExercises });
 
 type Row = {
   id: string;

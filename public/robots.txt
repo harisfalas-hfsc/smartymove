@@ -2,6 +2,13 @@
 # Default: allow all crawlers
 User-agent: *
 Allow: /
+# Private application areas — never index user data or account screens
+Disallow: /app/
+Disallow: /admin
+Disallow: /onboarding/
+Disallow: /premium
+Disallow: /reset-password
+Disallow: /desktop
 
 # Explicitly allow major AI crawlers (GEO)
 User-agent: GPTBot

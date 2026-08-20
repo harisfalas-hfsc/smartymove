@@ -142,9 +142,9 @@ function Faq() {
         <div className="mx-auto w-full max-w-[1080px] px-6 pt-16 pb-20">
           <div className="text-center">
             <span className="inline-block text-[11px] font-extrabold tracking-[0.28em] uppercase text-primary">FAQ</span>
-            <h1 className="mt-4 text-[52px] leading-[1.05] font-extrabold tracking-tight text-[#0f172a]">
+            <div className="mt-4 text-[52px] leading-[1.05] font-extrabold tracking-tight text-[#0f172a]">
               Your <span className="text-primary">questions</span>, answered
-            </h1>
+            </div>
             <p className="mt-5 text-lg text-slate-500">
               The answers we get most often. Still unsure? Reach out via the footer.
             </p>

@@ -92,7 +92,25 @@ function Pricing() {
 
   // Render nothing while Free Access Mode is on (or still resolving) so no
   // price string can ever appear before the redirect completes.
-  if (freeAccessMode || freeAccessLoading) return null;
+  if (freeAccessMode) return null;
+  if (freeAccessLoading) {
+    // Price-free shell: keeps the page crawlable without ever flashing a price.
+    return (
+      <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
+        <SiteHeader showBack />
+        <main className="mx-auto w-full max-w-[760px] flex-1 px-4 pb-6 pt-8">
+          <h1 className="text-2xl font-bold text-foreground lg:text-4xl">
+            SmartyMove pricing — one movement scan, one price
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground lg:text-base">
+            Pay once for a full camera-based Movement Screen plus a personalized 2-week corrective
+            exercise program you keep forever. No subscription.
+          </p>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">

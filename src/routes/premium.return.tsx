@@ -7,7 +7,7 @@ export const Route = createFileRoute("/premium/return")({
   validateSearch: (search: Record<string, unknown>) => ({
     session_id: typeof search.session_id === "string" ? search.session_id : undefined,
   }),
-  head: () => ({ meta: [{ title: "Welcome to SmartyMove Premium" }] }),
+  head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }, { title: "Welcome to SmartyMove Premium" }] }),
   component: PremiumReturn,
 });
 
