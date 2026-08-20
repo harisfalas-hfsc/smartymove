@@ -116,9 +116,9 @@ function Contact() {
             <div className="mx-auto grid place-items-center h-20 w-20 rounded-2xl text-primary">
               <Mail className="h-16 w-16" strokeWidth={1.8} />
             </div>
-            <h1 className="mt-6 text-[46px] leading-[1.05] font-extrabold tracking-tight text-[#0f172a]">
+            <div className="mt-6 text-[46px] leading-[1.05] font-extrabold tracking-tight text-[#0f172a]">
               Get in <span className="text-primary">Touch</span>
-            </h1>
+            </div>
             <p className="mt-5 text-lg text-slate-500 max-w-2xl mx-auto">
               Questions, feedback, partnerships, or a bug? Drop us a message — we reply within{" "}
               <strong className="text-primary">24 to 48 hours</strong>.
