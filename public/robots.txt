@@ -49,4 +49,12 @@ Allow: /
 User-agent: Meta-ExternalAgent
 Allow: /
 
+# Private application areas — never index user data
+User-agent: *
+Disallow: /app/
+Disallow: /admin
+Disallow: /onboarding/
+Disallow: /premium
+Disallow: /reset-password
+Disallow: /desktop
 Sitemap: https://smartymove.com/sitemap.xml
