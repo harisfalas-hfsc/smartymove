@@ -36,6 +36,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as OnboardingRouteRouteImport } from './routes/onboarding/route'
 import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PremiumReturnRouteImport } from './routes/premium.return'
@@ -194,6 +195,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LearnIndexRoute = LearnIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LearnRoute,
+} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -340,6 +346,7 @@ export interface FileRoutesByFullPath {
   '/premium/return': typeof PremiumReturnRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/learn/': typeof LearnIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/setup': typeof AppScreenSetupRoute
   '/app/screen/': typeof AppScreenIndexRoute
@@ -360,7 +367,6 @@ export interface FileRoutesByTo {
   '/glossary': typeof GlossaryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/injury-prevention': typeof InjuryPreventionRoute
-  '/learn': typeof LearnRouteWithChildren
   '/mobility-and-stability': typeof MobilityAndStabilityRoute
   '/movement-assessment': typeof MovementAssessmentRoute
   '/movement-intelligence': typeof MovementIntelligenceRoute
@@ -387,6 +393,7 @@ export interface FileRoutesByTo {
   '/premium/return': typeof PremiumReturnRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
+  '/learn': typeof LearnIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/setup': typeof AppScreenSetupRoute
   '/app/screen': typeof AppScreenIndexRoute
@@ -437,6 +444,7 @@ export interface FileRoutesById {
   '/premium/return': typeof PremiumReturnRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/learn/': typeof LearnIndexRoute
   '/app/screen/run': typeof AppScreenRunRoute
   '/app/screen/setup': typeof AppScreenSetupRoute
   '/app/screen/': typeof AppScreenIndexRoute
@@ -488,6 +496,7 @@ export interface FileRouteTypes {
     | '/premium/return'
     | '/admin/'
     | '/app/'
+    | '/learn/'
     | '/app/screen/run'
     | '/app/screen/setup'
     | '/app/screen/'
@@ -508,7 +517,6 @@ export interface FileRouteTypes {
     | '/glossary'
     | '/how-it-works'
     | '/injury-prevention'
-    | '/learn'
     | '/mobility-and-stability'
     | '/movement-assessment'
     | '/movement-intelligence'
@@ -535,6 +543,7 @@ export interface FileRouteTypes {
     | '/premium/return'
     | '/admin'
     | '/app'
+    | '/learn'
     | '/app/screen/run'
     | '/app/screen/setup'
     | '/app/screen'
@@ -584,6 +593,7 @@ export interface FileRouteTypes {
     | '/premium/return'
     | '/admin/'
     | '/app/'
+    | '/learn/'
     | '/app/screen/run'
     | '/app/screen/setup'
     | '/app/screen/'
@@ -818,6 +828,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/learn/': {
+      id: '/learn/'
+      path: '/'
+      fullPath: '/learn/'
+      preLoaderRoute: typeof LearnIndexRouteImport
+      parentRoute: typeof LearnRoute
+    }
     '/app/': {
       id: '/app/'
       path: '/'
@@ -1019,10 +1036,12 @@ const OnboardingRouteRouteWithChildren = OnboardingRouteRoute._addFileChildren(
 
 interface LearnRouteChildren {
   LearnSlugRoute: typeof LearnSlugRoute
+  LearnIndexRoute: typeof LearnIndexRoute
 }
 
 const LearnRouteChildren: LearnRouteChildren = {
   LearnSlugRoute: LearnSlugRoute,
+  LearnIndexRoute: LearnIndexRoute,
 }
 
 const LearnRouteWithChildren = LearnRoute._addFileChildren(LearnRouteChildren)
