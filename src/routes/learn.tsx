@@ -27,7 +27,7 @@ const ARTICLES = [
   {
     slug: "what-is-a-movement-score",
     title: "What Is a Movement Score?",
-    blurb: "How SmartyMove turns an 8-minute camera test into a single 0–100 number you can actually improve.",
+    blurb: "How SmartyMove turns a short camera screen into a single 0–100 number you can actually improve.",
   },
   {
     slug: "functional-movement-screening-explained",
@@ -39,6 +39,16 @@ const ARTICLES = [
     title: "Ankle Mobility and Why It Affects Your Squat",
     blurb: "Why a stiff ankle is one of the most common root causes behind a bad squat, sore knees, and a tight low back.",
   },
+];
+
+const TOPICS: { to: "/movement-assessment" | "/functional-movement-screening" | "/corrective-exercise" | "/mobility-and-stability" | "/posture-and-movement-quality" | "/injury-prevention" | "/movement-patterns"; title: string; blurb: string }[] = [
+  { to: "/movement-assessment", title: "Movement assessment online", blurb: "What a movement assessment measures and how to run one at home." },
+  { to: "/functional-movement-screening", title: "Functional movement screening", blurb: "The tests, the scoring, and what a screen can and cannot tell you." },
+  { to: "/corrective-exercise", title: "Corrective exercise", blurb: "Turning a screen finding into a five-minute daily program." },
+  { to: "/mobility-and-stability", title: "Mobility vs stability", blurb: "Two different problems that look identical from the outside." },
+  { to: "/posture-and-movement-quality", title: "Posture & movement quality", blurb: "Movement compensations and why they matter more than posture." },
+  { to: "/injury-prevention", title: "Injury prevention", blurb: "Asymmetry, weak links, and smarter movement preparation." },
+  { to: "/movement-patterns", title: "The 5 movement patterns", blurb: "Every test in the SmartyMove screen, explained." },
 ];
 
 function LearnLayout() {
@@ -92,6 +102,37 @@ function LearnIndex() {
           </li>
         ))}
       </ul>
+
+      <section className="mt-8">
+        <h2 style={{ fontWeight: 800, fontSize: 20, letterSpacing: "-0.01em", margin: "0 0 6px" }}>
+          Movement topics
+        </h2>
+        <p style={{ fontSize: 14, lineHeight: 1.6, color: "#3B4A63", margin: "0 0 12px" }}>
+          Deeper reference pages on assessment, screening, corrective exercise, mobility, stability and
+          movement quality.
+        </p>
+        <ul className="flex flex-col gap-3" style={{ listStyle: "none", padding: 0 }}>
+          {TOPICS.map((t) => (
+            <li key={t.to}>
+              <Link
+                to={t.to}
+                style={{
+                  display: "block",
+                  background: "#fff",
+                  border: "1px solid #E5EAEC",
+                  borderRadius: 14,
+                  padding: "16px 18px",
+                  textDecoration: "none",
+                  color: "#14213A",
+                }}
+              >
+                <div style={{ fontWeight: 700, fontSize: 16 }}>{t.title}</div>
+                <div style={{ marginTop: 4, fontSize: 13.5, color: "#3B4A63", lineHeight: 1.5 }}>{t.blurb}</div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
     </>
   );
 }
