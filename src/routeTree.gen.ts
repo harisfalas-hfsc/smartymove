@@ -17,10 +17,13 @@ import { Route as ResearchRouteImport } from './routes/research'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as PostureAndMovementQualityRouteImport } from './routes/posture-and-movement-quality'
 import { Route as MovementPatternsRouteImport } from './routes/movement-patterns'
 import { Route as MovementIntelligenceRouteImport } from './routes/movement-intelligence'
 import { Route as MovementAssessmentRouteImport } from './routes/movement-assessment'
+import { Route as MobilityAndStabilityRouteImport } from './routes/mobility-and-stability'
 import { Route as LearnRouteImport } from './routes/learn'
+import { Route as InjuryPreventionRouteImport } from './routes/injury-prevention'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as GlossaryRouteImport } from './routes/glossary'
 import { Route as FunctionalMovementScreeningRouteImport } from './routes/functional-movement-screening'
@@ -94,6 +97,12 @@ const PremiumRoute = PremiumRouteImport.update({
   path: '/premium',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PostureAndMovementQualityRoute =
+  PostureAndMovementQualityRouteImport.update({
+    id: '/posture-and-movement-quality',
+    path: '/posture-and-movement-quality',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const MovementPatternsRoute = MovementPatternsRouteImport.update({
   id: '/movement-patterns',
   path: '/movement-patterns',
@@ -109,9 +118,19 @@ const MovementAssessmentRoute = MovementAssessmentRouteImport.update({
   path: '/movement-assessment',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MobilityAndStabilityRoute = MobilityAndStabilityRouteImport.update({
+  id: '/mobility-and-stability',
+  path: '/mobility-and-stability',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearnRoute = LearnRouteImport.update({
   id: '/learn',
   path: '/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InjuryPreventionRoute = InjuryPreventionRouteImport.update({
+  id: '/injury-prevention',
+  path: '/injury-prevention',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
@@ -292,10 +311,13 @@ export interface FileRoutesByFullPath {
   '/functional-movement-screening': typeof FunctionalMovementScreeningRoute
   '/glossary': typeof GlossaryRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/injury-prevention': typeof InjuryPreventionRoute
   '/learn': typeof LearnRouteWithChildren
+  '/mobility-and-stability': typeof MobilityAndStabilityRoute
   '/movement-assessment': typeof MovementAssessmentRoute
   '/movement-intelligence': typeof MovementIntelligenceRoute
   '/movement-patterns': typeof MovementPatternsRoute
+  '/posture-and-movement-quality': typeof PostureAndMovementQualityRoute
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -337,10 +359,13 @@ export interface FileRoutesByTo {
   '/functional-movement-screening': typeof FunctionalMovementScreeningRoute
   '/glossary': typeof GlossaryRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/injury-prevention': typeof InjuryPreventionRoute
   '/learn': typeof LearnRouteWithChildren
+  '/mobility-and-stability': typeof MobilityAndStabilityRoute
   '/movement-assessment': typeof MovementAssessmentRoute
   '/movement-intelligence': typeof MovementIntelligenceRoute
   '/movement-patterns': typeof MovementPatternsRoute
+  '/posture-and-movement-quality': typeof PostureAndMovementQualityRoute
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -383,10 +408,13 @@ export interface FileRoutesById {
   '/functional-movement-screening': typeof FunctionalMovementScreeningRoute
   '/glossary': typeof GlossaryRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/injury-prevention': typeof InjuryPreventionRoute
   '/learn': typeof LearnRouteWithChildren
+  '/mobility-and-stability': typeof MobilityAndStabilityRoute
   '/movement-assessment': typeof MovementAssessmentRoute
   '/movement-intelligence': typeof MovementIntelligenceRoute
   '/movement-patterns': typeof MovementPatternsRoute
+  '/posture-and-movement-quality': typeof PostureAndMovementQualityRoute
   '/premium': typeof PremiumRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -431,10 +459,13 @@ export interface FileRouteTypes {
     | '/functional-movement-screening'
     | '/glossary'
     | '/how-it-works'
+    | '/injury-prevention'
     | '/learn'
+    | '/mobility-and-stability'
     | '/movement-assessment'
     | '/movement-intelligence'
     | '/movement-patterns'
+    | '/posture-and-movement-quality'
     | '/premium'
     | '/pricing'
     | '/privacy'
@@ -476,10 +507,13 @@ export interface FileRouteTypes {
     | '/functional-movement-screening'
     | '/glossary'
     | '/how-it-works'
+    | '/injury-prevention'
     | '/learn'
+    | '/mobility-and-stability'
     | '/movement-assessment'
     | '/movement-intelligence'
     | '/movement-patterns'
+    | '/posture-and-movement-quality'
     | '/premium'
     | '/pricing'
     | '/privacy'
@@ -521,10 +555,13 @@ export interface FileRouteTypes {
     | '/functional-movement-screening'
     | '/glossary'
     | '/how-it-works'
+    | '/injury-prevention'
     | '/learn'
+    | '/mobility-and-stability'
     | '/movement-assessment'
     | '/movement-intelligence'
     | '/movement-patterns'
+    | '/posture-and-movement-quality'
     | '/premium'
     | '/pricing'
     | '/privacy'
@@ -568,10 +605,13 @@ export interface RootRouteChildren {
   FunctionalMovementScreeningRoute: typeof FunctionalMovementScreeningRoute
   GlossaryRoute: typeof GlossaryRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  InjuryPreventionRoute: typeof InjuryPreventionRoute
   LearnRoute: typeof LearnRouteWithChildren
+  MobilityAndStabilityRoute: typeof MobilityAndStabilityRoute
   MovementAssessmentRoute: typeof MovementAssessmentRoute
   MovementIntelligenceRoute: typeof MovementIntelligenceRoute
   MovementPatternsRoute: typeof MovementPatternsRoute
+  PostureAndMovementQualityRoute: typeof PostureAndMovementQualityRoute
   PremiumRoute: typeof PremiumRouteWithChildren
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -645,6 +685,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PremiumRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/posture-and-movement-quality': {
+      id: '/posture-and-movement-quality'
+      path: '/posture-and-movement-quality'
+      fullPath: '/posture-and-movement-quality'
+      preLoaderRoute: typeof PostureAndMovementQualityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/movement-patterns': {
       id: '/movement-patterns'
       path: '/movement-patterns'
@@ -666,11 +713,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MovementAssessmentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mobility-and-stability': {
+      id: '/mobility-and-stability'
+      path: '/mobility-and-stability'
+      fullPath: '/mobility-and-stability'
+      preLoaderRoute: typeof MobilityAndStabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/learn': {
       id: '/learn'
       path: '/learn'
       fullPath: '/learn'
       preLoaderRoute: typeof LearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/injury-prevention': {
+      id: '/injury-prevention'
+      path: '/injury-prevention'
+      fullPath: '/injury-prevention'
+      preLoaderRoute: typeof InjuryPreventionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-it-works': {
@@ -990,10 +1051,13 @@ const rootRouteChildren: RootRouteChildren = {
   FunctionalMovementScreeningRoute: FunctionalMovementScreeningRoute,
   GlossaryRoute: GlossaryRoute,
   HowItWorksRoute: HowItWorksRoute,
+  InjuryPreventionRoute: InjuryPreventionRoute,
   LearnRoute: LearnRouteWithChildren,
+  MobilityAndStabilityRoute: MobilityAndStabilityRoute,
   MovementAssessmentRoute: MovementAssessmentRoute,
   MovementIntelligenceRoute: MovementIntelligenceRoute,
   MovementPatternsRoute: MovementPatternsRoute,
+  PostureAndMovementQualityRoute: PostureAndMovementQualityRoute,
   PremiumRoute: PremiumRouteWithChildren,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
