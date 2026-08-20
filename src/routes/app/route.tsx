@@ -4,7 +4,9 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { getFirstIncompleteOnboardingPath, getUser, restoreUserFromBackend, setOnboardingNextPath } from "@/lib/store";
 
-export const Route = createFileRoute("/app")({ component: AppLayout });
+export const Route = createFileRoute("/app")({
+  head: () => ({ meta: [{ title: "SmartyMove App" }, { name: "robots", content: "noindex, nofollow" }] }),
+  component: AppLayout });
 
 function AppLayout() {
   const navigate = useNavigate();

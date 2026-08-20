@@ -11,7 +11,9 @@ const STEPS = [
   { path: "/onboarding/goal", label: "Goal" },
 ];
 
-export const Route = createFileRoute("/onboarding")({ component: OnboardingLayout });
+export const Route = createFileRoute("/onboarding")({
+  head: () => ({ meta: [{ title: "Get started — SmartyMove" }, { name: "robots", content: "noindex, nofollow" }] }),
+  component: OnboardingLayout });
 
 function OnboardingLayout() {
   const navigate = useNavigate();
