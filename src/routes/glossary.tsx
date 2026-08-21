@@ -91,6 +91,17 @@ function Glossary() {
             </div>
           ))}
         </dl>
+        <div style={{ marginTop: 22, background: "#fff", border: "1px solid #E5EAEC", borderRadius: 18, padding: "18px 24px" }}>
+          <h2 style={{ fontWeight: 700, fontSize: 18, color: "#14213A", margin: "0 0 10px" }}>Movement topics</h2>
+          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 15.5, lineHeight: 1.9, color: "#3B4A63" }}>
+            <li><Link to="/movement-assessment" style={{ color: "#0E7C86", fontWeight: 600 }}>Movement assessment</Link></li>
+            <li><Link to="/functional-movement-screening" style={{ color: "#0E7C86", fontWeight: 600 }}>Functional movement screening</Link></li>
+            <li><Link to="/corrective-exercise" style={{ color: "#0E7C86", fontWeight: 600 }}>Corrective exercise</Link></li>
+            <li><Link to="/mobility-and-stability" style={{ color: "#0E7C86", fontWeight: 600 }}>Mobility &amp; stability</Link></li>
+            <li><Link to="/posture-and-movement-quality" style={{ color: "#0E7C86", fontWeight: 600 }}>Movement quality</Link></li>
+            <li><Link to="/injury-prevention" style={{ color: "#0E7C86", fontWeight: 600 }}>Injury prevention</Link></li>
+          </ul>
+        </div>
         <p style={{ marginTop: 18 }}>
           <Link to="/movement-intelligence" style={{ color: "#0E7C86", fontWeight: 700 }}>← Back to the Movement Intelligence pillar</Link>
         </p>
