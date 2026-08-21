@@ -9,35 +9,6 @@ export function SiteFooter() {
     <footer className="bg-background mt-auto w-full pt-6 pb-4 px-4">
       <div className="container mx-auto max-w-7xl">
         <div className="flex flex-col items-center gap-4">
-          <nav
-            aria-label="Movement topics"
-            className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-xs sm:text-sm text-muted-foreground"
-          >
-            <Link to="/movement-assessment" className="hover:text-primary transition-colors">
-              Movement assessment
-            </Link>
-            <span className="text-muted-foreground/40">·</span>
-            <Link to="/functional-movement-screening" className="hover:text-primary transition-colors">
-              Functional movement screening
-            </Link>
-            <span className="text-muted-foreground/40">·</span>
-            <Link to="/corrective-exercise" className="hover:text-primary transition-colors">
-              Corrective exercise
-            </Link>
-            <span className="text-muted-foreground/40">·</span>
-            <Link to="/mobility-and-stability" className="hover:text-primary transition-colors">
-              Mobility &amp; stability
-            </Link>
-            <span className="text-muted-foreground/40">·</span>
-            <Link to="/posture-and-movement-quality" className="hover:text-primary transition-colors">
-              Movement quality
-            </Link>
-            <span className="text-muted-foreground/40">·</span>
-            <Link to="/injury-prevention" className="hover:text-primary transition-colors">
-              Injury prevention
-            </Link>
-          </nav>
-
           <div className="flex items-center gap-4">
             <a
               href="https://www.facebook.com/share/1BNn6zb2SJ/"

@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle, Sparkles, User, LogOut, Sun, Moon, Compass } from "lucide-react";
+import { ChevronLeft, Menu, X, Home, Activity, Dumbbell, LineChart, Crown, Mail, Info, Shield, FileText, AlertTriangle, HelpCircle, Sparkles, User, LogOut, Sun, Moon, Compass, BookOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUser, signOutUser, type User as UserType } from "@/lib/store";
 
@@ -217,6 +217,10 @@ function NavDrawer({ onClose, isAuthed, isAdmin }: { onClose: () => void; isAuth
         { to: "/disclaimer", label: "Disclaimer", Icon: AlertTriangle },
       ],
     },
+    {
+      heading: "Resources",
+      items: [{ to: "/glossary", label: "Glossary", Icon: BookOpen }],
+    },
   ];
   return (
     <div className="fixed inset-0 z-[90]" role="dialog" aria-modal="true">
@@ -233,7 +237,10 @@ function NavDrawer({ onClose, isAuthed, isAdmin }: { onClose: () => void; isAuth
             <X className="h-4 w-4" />
           </button>
         </div>
-        <nav className="flex-1 overflow-y-auto px-3 pb-6">
+        <nav
+          className="flex-1 overflow-y-auto px-3"
+          style={{ paddingBottom: "calc(6rem + env(safe-area-inset-bottom, 0px))" }}
+        >
           {sections.map((s) => (
             <div key={s.heading} className="mt-2">
               <div className="px-2 pb-1.5 pt-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{s.heading}</div>
