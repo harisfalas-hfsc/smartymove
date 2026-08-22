@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/admin.server";
 import { FREE_ACCESS_BLOCK_MESSAGE, isFreeAccessMode } from "@/lib/free-access.server";
 
 export const SCAN_PRICE_ID = "smartymove_scan_single";

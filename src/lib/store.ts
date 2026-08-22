@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { isAdminEmail } from "./admin";
+import { getCachedIsAdmin, refreshIsAdmin } from "./admin-access";
 import { enqueueAction } from "./offline/queue";
 import { readCache, scopedKey, writeCache } from "./offline/store";
 import { refreshRememberedSession, rememberDevice } from "./offline/device-auth";
@@ -333,7 +333,7 @@ export function useUser() {
     return () => { window.removeEventListener("smartymove:user", f); window.removeEventListener("storage", f); };
   }, []);
   return useMemo(() => {
-    if (u && isAdminEmail(u.email) && !u.premium) {
+    if (u && isAdmin && !u.premium) {
       return { ...u, premium: true };
     }
     return u;

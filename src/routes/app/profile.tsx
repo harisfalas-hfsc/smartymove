@@ -34,7 +34,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
-import { isAdminEmail } from "@/lib/admin";
+import { useIsAdmin } from "@/lib/admin-access";
 import { createBillingPortalSession } from "@/lib/payments.functions";
 import { forgetDevice, hasDeviceRecord } from "@/lib/offline/device-auth";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
@@ -231,7 +231,7 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
             Profile updated
           </div>
         )}
-        {isAdminEmail(u.email) && (
+        {isAdmin && (
           <Row
             icon={Shield}
             label="Admin"

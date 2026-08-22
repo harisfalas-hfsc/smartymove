@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getScanAccess } from "@/lib/scans.functions";
 import { SmartyCard, SmartyRow } from "@/components/SmartyCard";
 import { TestPreviewSheet } from "@/components/TestPreviewSheet";
-import { isAdminEmail } from "@/lib/admin";
+import { useIsAdmin } from "@/lib/admin-access";
 import { useBuyScan } from "@/components/BuyScanDialog";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { offlineFirst } from "@/lib/offline/offline-first";
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/app/screen/")({ component: ScreenIndex })
 function ScreenIndex() {
   const u = useUser();
   const navigate = useNavigate();
-  const isAdmin = !!u && isAdminEmail(u.email);
+  const isAdmin = useIsAdmin() === true;
   const { freeAccessMode } = useFreeAccessMode();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewFocus, setPreviewFocus] = useState<string | undefined>(undefined);
