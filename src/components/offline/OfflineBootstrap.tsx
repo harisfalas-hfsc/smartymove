@@ -6,6 +6,7 @@ import { getScanAccess } from "@/lib/scans.functions";
 import { fetchFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import { scopedKey, trimCache, writeCache } from "@/lib/offline/store";
 import { LIBRARY } from "@/lib/corrective/libraries";
+import { getOnline, initConnectivity } from "@/lib/offline/connectivity";
 
 /**
  * Downloads the signed-in member's entire world in the background as soon as
@@ -18,11 +19,12 @@ export function OfflineBootstrap() {
   const running = useRef(false);
 
   useEffect(() => {
-    if (!userId || typeof navigator === "undefined") return;
+    if (!userId || typeof window === "undefined") return;
+    initConnectivity();
     let active = true;
 
     const prefetch = async () => {
-      if (running.current || !navigator.onLine) return;
+      if (running.current || !getOnline()) return;
       running.current = true;
       const save = (key: string, value: unknown) => writeCache(scopedKey(userId, key), value);
       try {

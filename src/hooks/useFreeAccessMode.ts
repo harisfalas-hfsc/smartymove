@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getOnline, initConnectivity } from "@/lib/offline/connectivity";
 
 export const FREE_ACCESS_SETTING_KEY = "free_access_mode";
 const LOCAL_KEY = "smartymove.free-access-mode";
@@ -38,7 +39,7 @@ export const fetchFreeAccessMode = async (force = false): Promise<boolean> => {
   inflight = (async () => {
     try {
       // Offline: keep the last known setting so the UI stays consistent.
-      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      if (typeof window !== "undefined" && (initConnectivity(), !getOnline())) {
         cached = readLocal() ?? false;
         listeners.forEach((l) => l(cached!));
         inflight = null;

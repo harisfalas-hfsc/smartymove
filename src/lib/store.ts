@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { isAdminEmail } from "./admin";
+import { getCachedIsAdmin, refreshIsAdmin } from "./admin-access";
 import { enqueueAction } from "./offline/queue";
 import { readCache, scopedKey, writeCache } from "./offline/store";
 import { refreshRememberedSession, rememberDevice } from "./offline/device-auth";
+import { getOnline, initConnectivity } from "./offline/connectivity";
 
 function isOffline() {
-  return typeof navigator !== "undefined" && navigator.onLine === false;
+  if (typeof window === "undefined") return false;
+  initConnectivity();
+  return !getOnline();
 }
 
 function isNetworkError(error: unknown) {
@@ -322,6 +325,11 @@ export function clearOnboardingNextPath() {
 }
 export function useUser() {
   const [u, setU] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    setIsAdmin(getCachedIsAdmin());
+    void refreshIsAdmin().then(setIsAdmin).catch(() => {});
+  }, []);
   useEffect(() => {
     void restoreUserFromBackend().then(setU).catch(() => setU(null));
     const f = () => setU(getUser());
@@ -330,11 +338,11 @@ export function useUser() {
     return () => { window.removeEventListener("smartymove:user", f); window.removeEventListener("storage", f); };
   }, []);
   return useMemo(() => {
-    if (u && isAdminEmail(u.email) && !u.premium) {
+    if (u && isAdmin && !u.premium) {
       return { ...u, premium: true };
     }
     return u;
-  }, [u]);
+  }, [u, isAdmin]);
 }
 
 export function createUser(name: string, email: string, age: number): User {

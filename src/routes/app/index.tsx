@@ -14,7 +14,7 @@ import { evaluateRescan } from "@/lib/corrective/rescan";
 import { evaluateGraduation, recommendSmartyGym } from "@/lib/graduation";
 import { SmartyGymHandoff } from "@/components/SmartyGymHandoff";
 
-export const Route = createFileRoute("/app/")({ component: Home });
+export const Route = createFileRoute("/app/")({ ssr: false, component: Home });
 
 function Home() {
   const u = useUser();

@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/store";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
+import { getOnline, initConnectivity } from "@/lib/offline/connectivity";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,8 @@ export function useBuyScan(returnPath: string = "/pricing?paid=1") {
     // Global Free Access Mode: there is nothing to buy.
     if (freeAccessMode) return;
     // Payments need a live connection.
-    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    initConnectivity();
+    if (!getOnline()) {
       setOfflineOpen(true);
       return;
     }

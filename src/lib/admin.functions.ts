@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib/stripe.server";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/admin.server";
 
 async function assertAdmin(ctx: { supabase: any; userId: string; claims: any }) {
   // 1. email allowlist

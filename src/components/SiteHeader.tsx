@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useUser, signOutUser, type User as UserType } from "@/lib/store";
 
 import { useTheme } from "@/lib/theme";
-import { isAdminEmail } from "@/lib/admin";
+import { useIsAdmin } from "@/lib/admin-access";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
 import {
@@ -51,7 +51,7 @@ export function SiteHeader({ onSignIn, onSignUp, onBack, showBack = false }: Pro
   };
   const accountName = user?.name || user?.email || "Account";
   const initial = accountName.slice(0, 1).toUpperCase();
-  const isAdmin = user ? isAdminEmail(user.email) : false;
+  const isAdmin = useIsAdmin() === true;
   return (
     <header
       className="sticky top-0 z-30 w-full bg-background"

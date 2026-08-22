@@ -34,7 +34,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadAccountDataReport } from "@/lib/account-export";
 import { deleteAccountAndData, exportAccountData } from "@/lib/account.functions";
-import { isAdminEmail } from "@/lib/admin";
+import { useIsAdmin } from "@/lib/admin-access";
 import { createBillingPortalSession } from "@/lib/payments.functions";
 import { forgetDevice, hasDeviceRecord } from "@/lib/offline/device-auth";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
@@ -42,7 +42,7 @@ import { OFFLINE_ACTION_MESSAGE } from "@/components/offline/OfflineBanner";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { clearLocalAccountData, setOnboardingNextPath, updateUser, signOutUser, useUser, type User } from "@/lib/store";
 
-export const Route = createFileRoute("/app/profile")({ component: Profile });
+export const Route = createFileRoute("/app/profile")({ ssr: false, component: Profile });
 
 type ExportResult = { data: unknown } | { error: string };
 type DeleteResult = { ok: true; canceledSubscriptions: number } | { error: string };
@@ -57,6 +57,7 @@ function Profile() {
 
 function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof useNavigate> }) {
   const { freeAccessMode } = useFreeAccessMode();
+  const isAdmin = useIsAdmin() === true;
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(u.name);
   const [age, setAge] = useState(String(u.age));
@@ -231,7 +232,7 @@ function ProfileInner({ u, navigate }: { u: User; navigate: ReturnType<typeof us
             Profile updated
           </div>
         )}
-        {isAdminEmail(u.email) && (
+        {isAdmin && (
           <Row
             icon={Shield}
             label="Admin"

@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ShieldAlert, Users, CreditCard, TrendingUp, Search, Loader2, Plus, Minus, Crown } from "lucide-react";
-import { isAdminEmail } from "@/lib/admin";
+import { useIsAdmin } from "@/lib/admin-access";
 import { adminListUsers, adminGrantScans, adminSetRole, adminGetStripeAnalytics, type AdminUserRow, type AdminAnalytics } from "@/lib/admin.functions";
 import { adminGetFreeAccessMode, adminSetFreeAccessMode } from "@/lib/admin.functions";
 import { setFreeAccessModeCache } from "@/hooks/useFreeAccessMode";
@@ -23,10 +23,7 @@ export const Route = createFileRoute("/admin/")({
   component: AdminPage });
 
 function AdminPage() {
-  const [authed, setAuthed] = useState<boolean | null>(null);
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setAuthed(isAdminEmail(data.user?.email))).catch(() => setAuthed(false));
-  }, []);
+  const authed = useIsAdmin();
   if (authed === null) {
     return <Shell><div className="mt-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div></Shell>;
   }
@@ -109,7 +106,6 @@ function AdminInner() {
     }
   }
   async function toggleAdmin(u: AdminUserRow) {
-    if (isAdminEmail(u.email)) { setMessage("This user is admin by email allowlist (edit src/lib/admin.ts to change)."); return; }
     setBusy(true);
     const r = await setRole({ data: { userId: u.id, makeAdmin: !u.is_admin } });
     setBusy(false);
