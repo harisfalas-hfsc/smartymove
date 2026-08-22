@@ -325,6 +325,11 @@ export function clearOnboardingNextPath() {
 }
 export function useUser() {
   const [u, setU] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    setIsAdmin(getCachedIsAdmin());
+    void refreshIsAdmin().then(setIsAdmin).catch(() => {});
+  }, []);
   useEffect(() => {
     void restoreUserFromBackend().then(setU).catch(() => setU(null));
     const f = () => setU(getUser());
@@ -337,7 +342,7 @@ export function useUser() {
       return { ...u, premium: true };
     }
     return u;
-  }, [u]);
+  }, [u, isAdmin]);
 }
 
 export function createUser(name: string, email: string, age: number): User {
