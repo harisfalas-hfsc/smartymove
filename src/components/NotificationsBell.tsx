@@ -5,6 +5,7 @@ import { useUser } from "@/lib/store";
 import { readCache, scopedKey, writeCache } from "@/lib/offline/store";
 import { enqueueAction } from "@/lib/offline/queue";
 import { useOnlineStatus } from "@/lib/offline/useOnlineStatus";
+import { getOnline, initConnectivity } from "@/lib/offline/connectivity";
 
 type Note = {
   id: string;
@@ -28,7 +29,8 @@ export function NotificationsBell() {
     if (!userId) return;
     const key = scopedKey(userId, "inbox:notifications");
     try {
-      if (typeof navigator !== "undefined" && navigator.onLine === false) throw new Error("offline");
+      initConnectivity();
+      if (!getOnline()) throw new Error("offline");
       const { data, error } = await supabase
         .from("notifications")
         .select("id,kind,title,body,read_at,created_at")

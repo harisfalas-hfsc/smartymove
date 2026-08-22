@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { getFirstIncompleteOnboardingPath, getUser, restoreUserFromBackend, setOnboardingNextPath } from "@/lib/store";
+import { getOnline, initConnectivity } from "@/lib/offline/connectivity";
 
 export const Route = createFileRoute("/app")({
   head: () => ({ meta: [{ title: "SmartyMove App" }, { name: "robots", content: "noindex, nofollow" }] }),
@@ -17,11 +18,12 @@ function AppLayout() {
   useEffect(() => {
     if (restoredRef.current) return;
     restoredRef.current = true;
+    initConnectivity();
     const u = getUser();
     void restoreUserFromBackend().then((restored) => {
       if (!restored) {
         // Offline with a cached member: stay in the app.
-        if (!u && navigator.onLine !== false) navigate({ to: "/" });
+        if (!u && getOnline()) navigate({ to: "/" });
         return;
       }
       const incompletePath = getFirstIncompleteOnboardingPath(restored);
@@ -30,7 +32,7 @@ function AppLayout() {
         navigate({ to: incompletePath });
       }
     }).catch(() => {
-      if (!getUser() && navigator.onLine !== false) navigate({ to: "/" });
+      if (!getUser() && getOnline()) navigate({ to: "/" });
     });
   }, [location.pathname, navigate]);
   return (

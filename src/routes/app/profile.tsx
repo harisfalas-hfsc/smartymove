@@ -42,7 +42,7 @@ import { OFFLINE_ACTION_MESSAGE } from "@/components/offline/OfflineBanner";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { clearLocalAccountData, setOnboardingNextPath, updateUser, signOutUser, useUser, type User } from "@/lib/store";
 
-export const Route = createFileRoute("/app/profile")({ component: Profile });
+export const Route = createFileRoute("/app/profile")({ ssr: false, component: Profile });
 
 type ExportResult = { data: unknown } | { error: string };
 type DeleteResult = { ok: true; canceledSubscriptions: number } | { error: string };

@@ -17,6 +17,7 @@ import {
   useUser,
 } from "@/lib/store";
 import { offlineSignIn } from "@/lib/offline/device-auth";
+import { getOnline, initConnectivity } from "@/lib/offline/connectivity";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useFreeAccessMode } from "@/hooks/useFreeAccessMode";
@@ -159,7 +160,8 @@ function Welcome() {
       const message = error instanceof Error ? error.message : "Sign in failed. Check your email and password.";
       // No internet: verify against the credentials stored on this device and
       // restore the saved session in read-only mode.
-      const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+      initConnectivity();
+      const offline = !getOnline();
       if (offline || /failed to fetch|network|load failed|fetch failed/i.test(message)) {
         const result = await offlineSignIn(email, pw);
         if (result === "ok") {

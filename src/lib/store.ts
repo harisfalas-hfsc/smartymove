@@ -4,9 +4,12 @@ import { isAdminEmail } from "./admin";
 import { enqueueAction } from "./offline/queue";
 import { readCache, scopedKey, writeCache } from "./offline/store";
 import { refreshRememberedSession, rememberDevice } from "./offline/device-auth";
+import { getOnline, initConnectivity } from "./offline/connectivity";
 
 function isOffline() {
-  return typeof navigator !== "undefined" && navigator.onLine === false;
+  if (typeof window === "undefined") return false;
+  initConnectivity();
+  return !getOnline();
 }
 
 function isNetworkError(error: unknown) {

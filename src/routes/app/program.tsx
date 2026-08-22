@@ -21,7 +21,7 @@ import { SmartyGymHandoff } from "@/components/SmartyGymHandoff";
 import { ProgramHistory } from "@/components/ProgramHistory";
 // Program access is unlocked once the user has completed a scan — no paywall gating here.
 
-export const Route = createFileRoute("/app/program")({ component: Program });
+export const Route = createFileRoute("/app/program")({ ssr: false, component: Program });
 
 function Program() {
   const u = useUser();
