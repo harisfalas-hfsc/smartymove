@@ -63,6 +63,8 @@ export const adminListUsers = createServerFn({ method: "POST" })
         const prev = subByUser.get(s.user_id);
         if (!prev) subByUser.set(s.user_id, s);
       }
+      const { ADMIN_EMAILS } = await import("@/lib/admin.server");
+      const adminEmails = new Set(ADMIN_EMAILS);
       const adminByUser = new Set<string>();
       for (const r of (roles ?? []) as any[]) if (r.role === "admin") adminByUser.add(r.user_id);
       const users: AdminUserRow[] = (profiles ?? []).map((p: any) => {
@@ -77,7 +79,7 @@ export const adminListUsers = createServerFn({ method: "POST" })
           scan_credits: p.scan_credits ?? 0,
           scans_purchased: p.scans_purchased ?? 0,
           created_at: p.created_at,
-          is_admin: isAdminEmail(p.email) || adminByUser.has(p.id),
+          is_admin: adminEmails.has(String(p.email ?? "").trim().toLowerCase()) || adminByUser.has(p.id),
           has_active_subscription: active,
           subscription_status: s?.status ?? null,
           current_period_end: s?.current_period_end ?? null,
