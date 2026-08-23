@@ -2,6 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib/stripe.server";
 
+async function isAdminEmail(email: string | null | undefined): Promise<boolean> {
+  const mod = await import("@/lib/admin.server");
+  return mod.isAdminEmail(email);
+}
+
 async function assertAdmin(ctx: { supabase: any; userId: string; claims: any }) {
   // 1. email allowlist
   let email = ctx.claims?.email as string | undefined;
@@ -9,7 +14,7 @@ async function assertAdmin(ctx: { supabase: any; userId: string; claims: any }) 
     const { data } = await ctx.supabase.from("profiles").select("email").eq("id", ctx.userId).maybeSingle();
     email = (data as any)?.email;
   }
-  if (isAdminEmail(email)) return;
+  if (await isAdminEmail(email)) return;
   // 2. user_roles table
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: role } = await supabaseAdmin

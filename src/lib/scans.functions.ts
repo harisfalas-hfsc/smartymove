@@ -3,6 +3,11 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 import { FREE_ACCESS_BLOCK_MESSAGE, isFreeAccessMode } from "@/lib/free-access.server";
 
+async function isAdminEmail(email: string | null | undefined): Promise<boolean> {
+  const mod = await import("@/lib/admin.server");
+  return mod.isAdminEmail(email);
+}
+
 export const SCAN_PRICE_ID = "smartymove_scan_single";
 export const SCAN_PRICE_EUR = 9.99;
 
@@ -77,7 +82,7 @@ export const getScanAccess = createServerFn({ method: "GET" })
     if (await isFreeAccessMode()) {
       return { credits: 9999, scansPurchased: 0, hasActiveSubscription: true, canScan: true };
     }
-    if (isAdminEmail(email)) {
+    if (await isAdminEmail(email)) {
       return { credits: 9999, scansPurchased: 0, hasActiveSubscription: true, canScan: true };
     }
     const [{ data: profile }, { data: subs }] = await Promise.all([
@@ -117,7 +122,7 @@ export const consumeScanCredit = createServerFn({ method: "POST" })
     if (await isFreeAccessMode()) {
       return { ok: true, credits: 9999 };
     }
-    if (isAdminEmail(email)) {
+    if (await isAdminEmail(email)) {
       return { ok: true, credits: 9999 };
     }
     const { data, error } = await (supabase as any).rpc("consume_scan_credit", { _user_id: userId });
