@@ -2,13 +2,11 @@
 # Default: allow all crawlers
 User-agent: *
 Allow: /
-# Private application areas — never index user data or account screens
-Disallow: /app/
+# Private application areas are excluded from search via a per-page
+# "noindex" meta tag. They are intentionally NOT disallowed here, because
+# a blocked URL cannot be crawled and therefore its noindex is never seen.
+# Only the admin surface is hard-blocked.
 Disallow: /admin
-Disallow: /onboarding/
-Disallow: /premium
-Disallow: /reset-password
-Disallow: /desktop
 
 # Explicitly allow major AI crawlers (GEO)
 User-agent: GPTBot
