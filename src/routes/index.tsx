@@ -83,6 +83,8 @@ function Welcome() {
   const [verificationSent, setVerificationSent] = useState(false);
   const [resendSent, setResendSent] = useState(false);
   const [emailUnverified, setEmailUnverified] = useState(false);
+  const [emailTaken, setEmailTaken] = useState(false);
+
   const [nextPath, setNextPath] = useState<string | null>(null);
 
   useEffect(() => {
@@ -112,6 +114,7 @@ function Welcome() {
       setVerificationSent(false);
       setResendSent(false);
       setEmailUnverified(false);
+      setEmailTaken(false);
     };
     window.addEventListener("smartymove:home", handler);
     return () => window.removeEventListener("smartymove:home", handler);
@@ -124,13 +127,20 @@ function Welcome() {
     setVerificationSent(false);
     setResendSent(false);
     setEmailUnverified(false);
+    setEmailTaken(false);
     setSubmitting(true);
     try {
       const result = await signUpWithEmailProfile(name, email, Number(age), pw, getEmailRedirectTo(nextPath));
+      if (result.alreadyRegistered) {
+        setEmailTaken(true);
+        setAuthError("This email already has a SmartyMove account. Sign in instead, or reset your password if you forgot it.");
+        return;
+      }
       if (result.emailVerificationRequired) {
         setVerificationSent(true);
         return;
       }
+
       const draft = getOnboardingDraft();
       clearOnboardingDraft();
       const merged = { ...result.user, parq: result.user.parq ?? draft.parq, questionnaire: result.user.questionnaire ?? draft.questionnaire, goal: result.user.goal ?? draft.goal };
@@ -529,6 +539,26 @@ function Welcome() {
             {authError && (
               <p className="text-center text-sm font-semibold text-destructive">{authError}</p>
             )}
+            {emailTaken && (
+              <div className="flex items-center justify-center gap-3 text-sm font-semibold">
+                <button
+                  type="button"
+                  onClick={() => { setEmailTaken(false); setAuthError(""); setMode("signin"); }}
+                  style={{ color: "#0E7C86", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                >
+                  Sign in
+                </button>
+                <span style={{ color: "#6B7A90" }}>·</span>
+                <button
+                  type="button"
+                  onClick={() => { setEmailTaken(false); setAuthError(""); setResetSent(false); setMode("forgot"); }}
+                  style={{ color: "#0E7C86", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                >
+                  Reset password
+                </button>
+              </div>
+            )}
+
             {emailUnverified && (
               <button
                 type="button"

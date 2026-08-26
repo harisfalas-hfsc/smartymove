@@ -536,7 +536,7 @@ export async function signUpWithEmailProfile(
   age: number,
   password: string,
   emailRedirectTo?: string,
-): Promise<{ user: User; emailVerificationRequired: boolean }> {
+): Promise<{ user: User; emailVerificationRequired: boolean; alreadyRegistered?: boolean }> {
   const normalizedEmail = normalizeEmail(email);
   const draft = getOnboardingDraft();
   const partial: Partial<User> = { parq: draft.parq, questionnaire: draft.questionnaire, goal: draft.goal };
@@ -548,9 +548,21 @@ export async function signUpWithEmailProfile(
       data: { name: name.trim(), full_name: name.trim(), age },
     },
   });
-  if (error) throw error;
+  if (error) {
+    if (/already registered|already been registered|user already exists/i.test(error.message)) {
+      return { user: makeUser(crypto.randomUUID(), name, normalizedEmail, age, partial), emailVerificationRequired: false, alreadyRegistered: true };
+    }
+    throw error;
+  }
+
+  // Supabase's email-enumeration protection returns a decoy user with no
+  // identities when the address already has an account. Surface it clearly.
+  if (data.user && !data.session && (data.user.identities?.length ?? 0) === 0) {
+    return { user: makeUser(data.user.id, name, normalizedEmail, age, partial), emailVerificationRequired: false, alreadyRegistered: true };
+  }
 
   const user = makeUser(data.user?.id ?? crypto.randomUUID(), name, normalizedEmail, age, partial);
+
   setPendingProfile(user);
   if (data.session) {
     await rememberDevice(normalizedEmail, password);
