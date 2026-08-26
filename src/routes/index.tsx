@@ -114,6 +114,7 @@ function Welcome() {
       setVerificationSent(false);
       setResendSent(false);
       setEmailUnverified(false);
+      setEmailTaken(false);
     };
     window.addEventListener("smartymove:home", handler);
     return () => window.removeEventListener("smartymove:home", handler);
@@ -126,13 +127,20 @@ function Welcome() {
     setVerificationSent(false);
     setResendSent(false);
     setEmailUnverified(false);
+    setEmailTaken(false);
     setSubmitting(true);
     try {
       const result = await signUpWithEmailProfile(name, email, Number(age), pw, getEmailRedirectTo(nextPath));
+      if (result.alreadyRegistered) {
+        setEmailTaken(true);
+        setAuthError("This email already has a SmartyMove account. Sign in instead, or reset your password if you forgot it.");
+        return;
+      }
       if (result.emailVerificationRequired) {
         setVerificationSent(true);
         return;
       }
+
       const draft = getOnboardingDraft();
       clearOnboardingDraft();
       const merged = { ...result.user, parq: result.user.parq ?? draft.parq, questionnaire: result.user.questionnaire ?? draft.questionnaire, goal: result.user.goal ?? draft.goal };
