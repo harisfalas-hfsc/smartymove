@@ -539,6 +539,26 @@ function Welcome() {
             {authError && (
               <p className="text-center text-sm font-semibold text-destructive">{authError}</p>
             )}
+            {emailTaken && (
+              <div className="flex items-center justify-center gap-3 text-sm font-semibold">
+                <button
+                  type="button"
+                  onClick={() => { setEmailTaken(false); setAuthError(""); setMode("signin"); }}
+                  style={{ color: "#0E7C86", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                >
+                  Sign in
+                </button>
+                <span style={{ color: "#6B7A90" }}>·</span>
+                <button
+                  type="button"
+                  onClick={() => { setEmailTaken(false); setAuthError(""); setResetSent(false); setMode("forgot"); }}
+                  style={{ color: "#0E7C86", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                >
+                  Reset password
+                </button>
+              </div>
+            )}
+
             {emailUnverified && (
               <button
                 type="button"
