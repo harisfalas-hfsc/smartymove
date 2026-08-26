@@ -83,6 +83,8 @@ function Welcome() {
   const [verificationSent, setVerificationSent] = useState(false);
   const [resendSent, setResendSent] = useState(false);
   const [emailUnverified, setEmailUnverified] = useState(false);
+  const [emailTaken, setEmailTaken] = useState(false);
+
   const [nextPath, setNextPath] = useState<string | null>(null);
 
   useEffect(() => {
