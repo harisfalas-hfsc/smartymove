@@ -265,7 +265,7 @@ function Welcome() {
             <div className="relative mx-auto hidden w-full max-w-[430px] px-5 py-16 lg:block lg:max-w-[1080px] lg:px-6 lg:py-36">
               <div className="max-w-xl">
                 <div className="text-[38px] font-extrabold uppercase leading-[1.05] tracking-tight text-white lg:text-[60px]">
-                  Know how you move,
+                  Know how you move
                   <br />
                   <span className="text-primary">move smarter.</span>
                 </div>
@@ -298,7 +298,7 @@ function Welcome() {
           <div className="lg:hidden">
             <section className="py-4 text-center">
               <h1 className="text-[34px] font-extrabold uppercase leading-[1.05] tracking-tight text-foreground">
-                Know how you move,
+                Know how you move
                 <br />
                 <span className="text-primary">move smarter.</span>
               </h1>
