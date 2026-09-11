@@ -50,7 +50,7 @@ function About() {
           <CardContent className="p-6">
             <div className="text-center space-y-4">
               <Target className="w-12 h-12 text-primary mx-auto" />
-              <h1 className="text-2xl font-bold text-foreground">
+              <h1 className="text-2xl font-bold uppercase text-foreground">
                 Know How You Move. <span className="text-primary">Move Smarter.</span>
               </h1>
               <div className="space-y-3 text-left pt-1">
