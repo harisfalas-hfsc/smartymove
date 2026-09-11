@@ -298,7 +298,7 @@ function Welcome() {
           <div className="lg:hidden">
             <section className="py-4 text-center">
               <h1 className="text-[34px] font-extrabold uppercase leading-[1.05] tracking-tight text-foreground">
-                Know how you move,
+                Know how you move
                 <br />
                 <span className="text-primary">move smarter.</span>
               </h1>
