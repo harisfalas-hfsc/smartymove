@@ -34,6 +34,13 @@ export async function refreshIsAdmin(): Promise<boolean> {
   if (inflight) return inflight;
   inflight = (async () => {
     try {
+      // Signed out: never call the protected server fn (it throws 401).
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        writeCachedIsAdmin(false);
+        return false;
+      }
       const r = await getIsAdmin();
       writeCachedIsAdmin(r.isAdmin);
       return r.isAdmin;
