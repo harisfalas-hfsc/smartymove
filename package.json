@@ -101,6 +101,6 @@
   "overrides": {
     "browserslist": "4.29.0",
     "js-yaml": "4.3.2",
-    "baseline-browser-mapping": "2.11.25"
+    "baseline-browser-mapping": "2.11.24"
   }
 }
