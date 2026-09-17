@@ -9,139 +9,93 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WhyMovementMattersRouteImport } from './routes/why-movement-matters'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as ResearchRouteImport } from './routes/research'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as PricingRouteImport } from './routes/pricing'
-import { Route as PremiumRouteImport } from './routes/premium'
-import { Route as PostureAndMovementQualityRouteImport } from './routes/posture-and-movement-quality'
-import { Route as MovementPatternsRouteImport } from './routes/movement-patterns'
-import { Route as MovementIntelligenceRouteImport } from './routes/movement-intelligence'
-import { Route as MovementAssessmentRouteImport } from './routes/movement-assessment'
-import { Route as MobilityAndStabilityRouteImport } from './routes/mobility-and-stability'
-import { Route as LearnRouteImport } from './routes/learn'
-import { Route as InjuryPreventionRouteImport } from './routes/injury-prevention'
-import { Route as HowItWorksRouteImport } from './routes/how-it-works'
-import { Route as GlossaryRouteImport } from './routes/glossary'
-import { Route as FunctionalMovementScreeningRouteImport } from './routes/functional-movement-screening'
-import { Route as FaqRouteImport } from './routes/faq'
-import { Route as DisclaimerRouteImport } from './routes/disclaimer'
-import { Route as DesktopRouteImport } from './routes/desktop'
-import { Route as CorrectiveExerciseRouteImport } from './routes/corrective-exercise'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as OnboardingRouteRouteImport } from './routes/onboarding/route'
-import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as LearnIndexRouteImport } from './routes/learn.index'
-import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AppRouteRouteImport } from './routes/app/route'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CorrectiveExerciseRouteImport } from './routes/corrective-exercise'
+import { Route as DesktopRouteImport } from './routes/desktop'
+import { Route as DisclaimerRouteImport } from './routes/disclaimer'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as FunctionalMovementScreeningRouteImport } from './routes/functional-movement-screening'
+import { Route as GlossaryRouteImport } from './routes/glossary'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as InjuryPreventionRouteImport } from './routes/injury-prevention'
+import { Route as LearnRouteImport } from './routes/learn'
+import { Route as MobilityAndStabilityRouteImport } from './routes/mobility-and-stability'
+import { Route as MovementAssessmentRouteImport } from './routes/movement-assessment'
+import { Route as MovementIntelligenceRouteImport } from './routes/movement-intelligence'
+import { Route as MovementPatternsRouteImport } from './routes/movement-patterns'
+import { Route as OnboardingRouteRouteImport } from './routes/onboarding/route'
+import { Route as PostureAndMovementQualityRouteImport } from './routes/posture-and-movement-quality'
+import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ResearchRouteImport } from './routes/research'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as WhyMovementMattersRouteImport } from './routes/why-movement-matters'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as PremiumReturnRouteImport } from './routes/premium.return'
-import { Route as OnboardingQuestionnaireRouteImport } from './routes/onboarding/questionnaire'
-import { Route as OnboardingParqRouteImport } from './routes/onboarding/parq'
-import { Route as OnboardingJointsRouteImport } from './routes/onboarding/joints'
-import { Route as OnboardingGoalRouteImport } from './routes/onboarding/goal'
-import { Route as OnboardingDisclaimerRouteImport } from './routes/onboarding/disclaimer'
-import { Route as LearnSlugRouteImport } from './routes/learn.$slug'
-import { Route as AppScreenRouteImport } from './routes/app/screen'
-import { Route as AppProgressRouteImport } from './routes/app/progress'
-import { Route as AppProgramRouteImport } from './routes/app/program'
-import { Route as AppProfileRouteImport } from './routes/app/profile'
 import { Route as AdminExercisesRouteImport } from './routes/admin.exercises'
+import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AppProfileRouteImport } from './routes/app/profile'
+import { Route as AppProgramRouteImport } from './routes/app/program'
+import { Route as AppProgressRouteImport } from './routes/app/progress'
+import { Route as AppScreenRouteImport } from './routes/app/screen'
+import { Route as LearnIndexRouteImport } from './routes/learn.index'
+import { Route as LearnSlugRouteImport } from './routes/learn.$slug'
+import { Route as OnboardingDisclaimerRouteImport } from './routes/onboarding/disclaimer'
+import { Route as OnboardingGoalRouteImport } from './routes/onboarding/goal'
+import { Route as OnboardingJointsRouteImport } from './routes/onboarding/joints'
+import { Route as OnboardingParqRouteImport } from './routes/onboarding/parq'
+import { Route as OnboardingQuestionnaireRouteImport } from './routes/onboarding/questionnaire'
+import { Route as PremiumReturnRouteImport } from './routes/premium.return'
 import { Route as AppScreenIndexRouteImport } from './routes/app/screen.index'
-import { Route as AppScreenSetupRouteImport } from './routes/app/screen.setup'
 import { Route as AppScreenRunRouteImport } from './routes/app/screen.run'
-import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
-import { Route as ApiPublicHooksBillingRunRouteImport } from './routes/api/public/hooks/billing-run'
+import { Route as AppScreenSetupRouteImport } from './routes/app/screen.setup'
 import { Route as ApiPublicAdminSyncPremiumRouteImport } from './routes/api/public/admin/sync-premium'
+import { Route as ApiPublicHooksBillingRunRouteImport } from './routes/api/public/hooks/billing-run'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
-const WhyMovementMattersRoute = WhyMovementMattersRouteImport.update({
-  id: '/why-movement-matters',
-  path: '/why-movement-matters',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResearchRoute = ResearchRouteImport.update({
-  id: '/research',
-  path: '/research',
+const CorrectiveExerciseRoute = CorrectiveExerciseRouteImport.update({
+  id: '/corrective-exercise',
+  path: '/corrective-exercise',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
+const DesktopRoute = DesktopRouteImport.update({
+  id: '/desktop',
+  path: '/desktop',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
+const DisclaimerRoute = DisclaimerRouteImport.update({
+  id: '/disclaimer',
+  path: '/disclaimer',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PremiumRoute = PremiumRouteImport.update({
-  id: '/premium',
-  path: '/premium',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PostureAndMovementQualityRoute =
-  PostureAndMovementQualityRouteImport.update({
-    id: '/posture-and-movement-quality',
-    path: '/posture-and-movement-quality',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const MovementPatternsRoute = MovementPatternsRouteImport.update({
-  id: '/movement-patterns',
-  path: '/movement-patterns',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MovementIntelligenceRoute = MovementIntelligenceRouteImport.update({
-  id: '/movement-intelligence',
-  path: '/movement-intelligence',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MovementAssessmentRoute = MovementAssessmentRouteImport.update({
-  id: '/movement-assessment',
-  path: '/movement-assessment',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobilityAndStabilityRoute = MobilityAndStabilityRouteImport.update({
-  id: '/mobility-and-stability',
-  path: '/mobility-and-stability',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LearnRoute = LearnRouteImport.update({
-  id: '/learn',
-  path: '/learn',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InjuryPreventionRoute = InjuryPreventionRouteImport.update({
-  id: '/injury-prevention',
-  path: '/injury-prevention',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HowItWorksRoute = HowItWorksRouteImport.update({
-  id: '/how-it-works',
-  path: '/how-it-works',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GlossaryRoute = GlossaryRouteImport.update({
-  id: '/glossary',
-  path: '/glossary',
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FunctionalMovementScreeningRoute =
@@ -150,34 +104,44 @@ const FunctionalMovementScreeningRoute =
     path: '/functional-movement-screening',
     getParentRoute: () => rootRouteImport,
   } as any)
-const FaqRoute = FaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
+const GlossaryRoute = GlossaryRouteImport.update({
+  id: '/glossary',
+  path: '/glossary',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DisclaimerRoute = DisclaimerRouteImport.update({
-  id: '/disclaimer',
-  path: '/disclaimer',
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DesktopRoute = DesktopRouteImport.update({
-  id: '/desktop',
-  path: '/desktop',
+const InjuryPreventionRoute = InjuryPreventionRouteImport.update({
+  id: '/injury-prevention',
+  path: '/injury-prevention',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CorrectiveExerciseRoute = CorrectiveExerciseRouteImport.update({
-  id: '/corrective-exercise',
-  path: '/corrective-exercise',
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
+const MobilityAndStabilityRoute = MobilityAndStabilityRouteImport.update({
+  id: '/mobility-and-stability',
+  path: '/mobility-and-stability',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const MovementAssessmentRoute = MovementAssessmentRouteImport.update({
+  id: '/movement-assessment',
+  path: '/movement-assessment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MovementIntelligenceRoute = MovementIntelligenceRouteImport.update({
+  id: '/movement-intelligence',
+  path: '/movement-intelligence',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MovementPatternsRoute = MovementPatternsRouteImport.update({
+  id: '/movement-patterns',
+  path: '/movement-patterns',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRouteRoute = OnboardingRouteRouteImport.update({
@@ -185,79 +149,65 @@ const OnboardingRouteRoute = OnboardingRouteRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRouteRoute = AppRouteRouteImport.update({
-  id: '/app',
-  path: '/app',
+const PostureAndMovementQualityRoute =
+  PostureAndMovementQualityRouteImport.update({
+    id: '/posture-and-movement-quality',
+    path: '/posture-and-movement-quality',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PremiumRoute = PremiumRouteImport.update({
+  id: '/premium',
+  path: '/premium',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LearnIndexRoute = LearnIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => LearnRoute,
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppRouteRoute,
+const ResearchRoute = ResearchRouteImport.update({
+  id: '/research',
+  path: '/research',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WhyMovementMattersRoute = WhyMovementMattersRouteImport.update({
+  id: '/why-movement-matters',
+  path: '/why-movement-matters',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PremiumReturnRoute = PremiumReturnRouteImport.update({
-  id: '/return',
-  path: '/return',
-  getParentRoute: () => PremiumRoute,
+const AdminExercisesRoute = AdminExercisesRouteImport.update({
+  id: '/admin/exercises',
+  path: '/admin/exercises',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const OnboardingQuestionnaireRoute = OnboardingQuestionnaireRouteImport.update({
-  id: '/questionnaire',
-  path: '/questionnaire',
-  getParentRoute: () => OnboardingRouteRoute,
-} as any)
-const OnboardingParqRoute = OnboardingParqRouteImport.update({
-  id: '/parq',
-  path: '/parq',
-  getParentRoute: () => OnboardingRouteRoute,
-} as any)
-const OnboardingJointsRoute = OnboardingJointsRouteImport.update({
-  id: '/joints',
-  path: '/joints',
-  getParentRoute: () => OnboardingRouteRoute,
-} as any)
-const OnboardingGoalRoute = OnboardingGoalRouteImport.update({
-  id: '/goal',
-  path: '/goal',
-  getParentRoute: () => OnboardingRouteRoute,
-} as any)
-const OnboardingDisclaimerRoute = OnboardingDisclaimerRouteImport.update({
-  id: '/disclaimer',
-  path: '/disclaimer',
-  getParentRoute: () => OnboardingRouteRoute,
-} as any)
-const LearnSlugRoute = LearnSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => LearnRoute,
-} as any)
-const AppScreenRoute = AppScreenRouteImport.update({
-  id: '/screen',
-  path: '/screen',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppProgressRoute = AppProgressRouteImport.update({
-  id: '/progress',
-  path: '/progress',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppProgramRoute = AppProgramRouteImport.update({
-  id: '/program',
-  path: '/program',
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppProfileRoute = AppProfileRouteImport.update({
@@ -265,19 +215,64 @@ const AppProfileRoute = AppProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const AdminExercisesRoute = AdminExercisesRouteImport.update({
-  id: '/admin/exercises',
-  path: '/admin/exercises',
-  getParentRoute: () => rootRouteImport,
+const AppProgramRoute = AppProgramRouteImport.update({
+  id: '/program',
+  path: '/program',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProgressRoute = AppProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppScreenRoute = AppScreenRouteImport.update({
+  id: '/screen',
+  path: '/screen',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const LearnIndexRoute = LearnIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LearnRoute,
+} as any)
+const LearnSlugRoute = LearnSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => LearnRoute,
+} as any)
+const OnboardingDisclaimerRoute = OnboardingDisclaimerRouteImport.update({
+  id: '/disclaimer',
+  path: '/disclaimer',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
+const OnboardingGoalRoute = OnboardingGoalRouteImport.update({
+  id: '/goal',
+  path: '/goal',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
+const OnboardingJointsRoute = OnboardingJointsRouteImport.update({
+  id: '/joints',
+  path: '/joints',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
+const OnboardingParqRoute = OnboardingParqRouteImport.update({
+  id: '/parq',
+  path: '/parq',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
+const OnboardingQuestionnaireRoute = OnboardingQuestionnaireRouteImport.update({
+  id: '/questionnaire',
+  path: '/questionnaire',
+  getParentRoute: () => OnboardingRouteRoute,
+} as any)
+const PremiumReturnRoute = PremiumReturnRouteImport.update({
+  id: '/return',
+  path: '/return',
+  getParentRoute: () => PremiumRoute,
 } as any)
 const AppScreenIndexRoute = AppScreenIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AppScreenRoute,
-} as any)
-const AppScreenSetupRoute = AppScreenSetupRouteImport.update({
-  id: '/setup',
-  path: '/setup',
   getParentRoute: () => AppScreenRoute,
 } as any)
 const AppScreenRunRoute = AppScreenRunRouteImport.update({
@@ -285,10 +280,15 @@ const AppScreenRunRoute = AppScreenRunRouteImport.update({
   path: '/run',
   getParentRoute: () => AppScreenRoute,
 } as any)
-const ApiPublicPaymentsWebhookRoute =
-  ApiPublicPaymentsWebhookRouteImport.update({
-    id: '/api/public/payments/webhook',
-    path: '/api/public/payments/webhook',
+const AppScreenSetupRoute = AppScreenSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => AppScreenRoute,
+} as any)
+const ApiPublicAdminSyncPremiumRoute =
+  ApiPublicAdminSyncPremiumRouteImport.update({
+    id: '/api/public/admin/sync-premium',
+    path: '/api/public/admin/sync-premium',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksBillingRunRoute =
@@ -297,10 +297,10 @@ const ApiPublicHooksBillingRunRoute =
     path: '/api/public/hooks/billing-run',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicAdminSyncPremiumRoute =
-  ApiPublicAdminSyncPremiumRouteImport.update({
-    id: '/api/public/admin/sync-premium',
-    path: '/api/public/admin/sync-premium',
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -639,165 +639,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/why-movement-matters': {
-      id: '/why-movement-matters'
-      path: '/why-movement-matters'
-      fullPath: '/why-movement-matters'
-      preLoaderRoute: typeof WhyMovementMattersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/research': {
-      id: '/research'
-      path: '/research'
-      fullPath: '/research'
-      preLoaderRoute: typeof ResearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/premium': {
-      id: '/premium'
-      path: '/premium'
-      fullPath: '/premium'
-      preLoaderRoute: typeof PremiumRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/posture-and-movement-quality': {
-      id: '/posture-and-movement-quality'
-      path: '/posture-and-movement-quality'
-      fullPath: '/posture-and-movement-quality'
-      preLoaderRoute: typeof PostureAndMovementQualityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/movement-patterns': {
-      id: '/movement-patterns'
-      path: '/movement-patterns'
-      fullPath: '/movement-patterns'
-      preLoaderRoute: typeof MovementPatternsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/movement-intelligence': {
-      id: '/movement-intelligence'
-      path: '/movement-intelligence'
-      fullPath: '/movement-intelligence'
-      preLoaderRoute: typeof MovementIntelligenceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/movement-assessment': {
-      id: '/movement-assessment'
-      path: '/movement-assessment'
-      fullPath: '/movement-assessment'
-      preLoaderRoute: typeof MovementAssessmentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobility-and-stability': {
-      id: '/mobility-and-stability'
-      path: '/mobility-and-stability'
-      fullPath: '/mobility-and-stability'
-      preLoaderRoute: typeof MobilityAndStabilityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/learn': {
-      id: '/learn'
-      path: '/learn'
-      fullPath: '/learn'
-      preLoaderRoute: typeof LearnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/injury-prevention': {
-      id: '/injury-prevention'
-      path: '/injury-prevention'
-      fullPath: '/injury-prevention'
-      preLoaderRoute: typeof InjuryPreventionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/how-it-works': {
-      id: '/how-it-works'
-      path: '/how-it-works'
-      fullPath: '/how-it-works'
-      preLoaderRoute: typeof HowItWorksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/glossary': {
-      id: '/glossary'
-      path: '/glossary'
-      fullPath: '/glossary'
-      preLoaderRoute: typeof GlossaryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/functional-movement-screening': {
-      id: '/functional-movement-screening'
-      path: '/functional-movement-screening'
-      fullPath: '/functional-movement-screening'
-      preLoaderRoute: typeof FunctionalMovementScreeningRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/faq': {
-      id: '/faq'
-      path: '/faq'
-      fullPath: '/faq'
-      preLoaderRoute: typeof FaqRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/disclaimer': {
-      id: '/disclaimer'
-      path: '/disclaimer'
-      fullPath: '/disclaimer'
-      preLoaderRoute: typeof DisclaimerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/desktop': {
-      id: '/desktop'
-      path: '/desktop'
-      fullPath: '/desktop'
-      preLoaderRoute: typeof DesktopRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/corrective-exercise': {
-      id: '/corrective-exercise'
-      path: '/corrective-exercise'
-      fullPath: '/corrective-exercise'
-      preLoaderRoute: typeof CorrectiveExerciseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -807,13 +653,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/app': {
       id: '/app'
       path: '/app'
@@ -821,26 +660,173 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/learn/': {
-      id: '/learn/'
-      path: '/'
-      fullPath: '/learn/'
-      preLoaderRoute: typeof LearnIndexRouteImport
-      parentRoute: typeof LearnRoute
+    '/corrective-exercise': {
+      id: '/corrective-exercise'
+      path: '/corrective-exercise'
+      fullPath: '/corrective-exercise'
+      preLoaderRoute: typeof CorrectiveExerciseRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/app/': {
-      id: '/app/'
-      path: '/'
-      fullPath: '/app/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRouteRoute
+    '/desktop': {
+      id: '/desktop'
+      path: '/desktop'
+      fullPath: '/desktop'
+      preLoaderRoute: typeof DesktopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/disclaimer': {
+      id: '/disclaimer'
+      path: '/disclaimer'
+      fullPath: '/disclaimer'
+      preLoaderRoute: typeof DisclaimerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/functional-movement-screening': {
+      id: '/functional-movement-screening'
+      path: '/functional-movement-screening'
+      fullPath: '/functional-movement-screening'
+      preLoaderRoute: typeof FunctionalMovementScreeningRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/glossary': {
+      id: '/glossary'
+      path: '/glossary'
+      fullPath: '/glossary'
+      preLoaderRoute: typeof GlossaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/injury-prevention': {
+      id: '/injury-prevention'
+      path: '/injury-prevention'
+      fullPath: '/injury-prevention'
+      preLoaderRoute: typeof InjuryPreventionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mobility-and-stability': {
+      id: '/mobility-and-stability'
+      path: '/mobility-and-stability'
+      fullPath: '/mobility-and-stability'
+      preLoaderRoute: typeof MobilityAndStabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movement-assessment': {
+      id: '/movement-assessment'
+      path: '/movement-assessment'
+      fullPath: '/movement-assessment'
+      preLoaderRoute: typeof MovementAssessmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movement-intelligence': {
+      id: '/movement-intelligence'
+      path: '/movement-intelligence'
+      fullPath: '/movement-intelligence'
+      preLoaderRoute: typeof MovementIntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movement-patterns': {
+      id: '/movement-patterns'
+      path: '/movement-patterns'
+      fullPath: '/movement-patterns'
+      preLoaderRoute: typeof MovementPatternsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posture-and-movement-quality': {
+      id: '/posture-and-movement-quality'
+      path: '/posture-and-movement-quality'
+      fullPath: '/posture-and-movement-quality'
+      preLoaderRoute: typeof PostureAndMovementQualityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/premium': {
+      id: '/premium'
+      path: '/premium'
+      fullPath: '/premium'
+      preLoaderRoute: typeof PremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research': {
+      id: '/research'
+      path: '/research'
+      fullPath: '/research'
+      preLoaderRoute: typeof ResearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/why-movement-matters': {
+      id: '/why-movement-matters'
+      path: '/why-movement-matters'
+      fullPath: '/why-movement-matters'
+      preLoaderRoute: typeof WhyMovementMattersRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/': {
       id: '/admin/'
@@ -849,74 +835,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/premium/return': {
-      id: '/premium/return'
-      path: '/return'
-      fullPath: '/premium/return'
-      preLoaderRoute: typeof PremiumReturnRouteImport
-      parentRoute: typeof PremiumRoute
+    '/admin/exercises': {
+      id: '/admin/exercises'
+      path: '/admin/exercises'
+      fullPath: '/admin/exercises'
+      preLoaderRoute: typeof AdminExercisesRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/onboarding/questionnaire': {
-      id: '/onboarding/questionnaire'
-      path: '/questionnaire'
-      fullPath: '/onboarding/questionnaire'
-      preLoaderRoute: typeof OnboardingQuestionnaireRouteImport
-      parentRoute: typeof OnboardingRouteRoute
-    }
-    '/onboarding/parq': {
-      id: '/onboarding/parq'
-      path: '/parq'
-      fullPath: '/onboarding/parq'
-      preLoaderRoute: typeof OnboardingParqRouteImport
-      parentRoute: typeof OnboardingRouteRoute
-    }
-    '/onboarding/joints': {
-      id: '/onboarding/joints'
-      path: '/joints'
-      fullPath: '/onboarding/joints'
-      preLoaderRoute: typeof OnboardingJointsRouteImport
-      parentRoute: typeof OnboardingRouteRoute
-    }
-    '/onboarding/goal': {
-      id: '/onboarding/goal'
-      path: '/goal'
-      fullPath: '/onboarding/goal'
-      preLoaderRoute: typeof OnboardingGoalRouteImport
-      parentRoute: typeof OnboardingRouteRoute
-    }
-    '/onboarding/disclaimer': {
-      id: '/onboarding/disclaimer'
-      path: '/disclaimer'
-      fullPath: '/onboarding/disclaimer'
-      preLoaderRoute: typeof OnboardingDisclaimerRouteImport
-      parentRoute: typeof OnboardingRouteRoute
-    }
-    '/learn/$slug': {
-      id: '/learn/$slug'
-      path: '/$slug'
-      fullPath: '/learn/$slug'
-      preLoaderRoute: typeof LearnSlugRouteImport
-      parentRoute: typeof LearnRoute
-    }
-    '/app/screen': {
-      id: '/app/screen'
-      path: '/screen'
-      fullPath: '/app/screen'
-      preLoaderRoute: typeof AppScreenRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
-    '/app/progress': {
-      id: '/app/progress'
-      path: '/progress'
-      fullPath: '/app/progress'
-      preLoaderRoute: typeof AppProgressRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
-    '/app/program': {
-      id: '/app/program'
-      path: '/program'
-      fullPath: '/app/program'
-      preLoaderRoute: typeof AppProgramRouteImport
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/app/profile': {
@@ -926,25 +856,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/admin/exercises': {
-      id: '/admin/exercises'
-      path: '/admin/exercises'
-      fullPath: '/admin/exercises'
-      preLoaderRoute: typeof AdminExercisesRouteImport
-      parentRoute: typeof rootRouteImport
+    '/app/program': {
+      id: '/app/program'
+      path: '/program'
+      fullPath: '/app/program'
+      preLoaderRoute: typeof AppProgramRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/progress': {
+      id: '/app/progress'
+      path: '/progress'
+      fullPath: '/app/progress'
+      preLoaderRoute: typeof AppProgressRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/screen': {
+      id: '/app/screen'
+      path: '/screen'
+      fullPath: '/app/screen'
+      preLoaderRoute: typeof AppScreenRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/learn/': {
+      id: '/learn/'
+      path: '/'
+      fullPath: '/learn/'
+      preLoaderRoute: typeof LearnIndexRouteImport
+      parentRoute: typeof LearnRoute
+    }
+    '/learn/$slug': {
+      id: '/learn/$slug'
+      path: '/$slug'
+      fullPath: '/learn/$slug'
+      preLoaderRoute: typeof LearnSlugRouteImport
+      parentRoute: typeof LearnRoute
+    }
+    '/onboarding/disclaimer': {
+      id: '/onboarding/disclaimer'
+      path: '/disclaimer'
+      fullPath: '/onboarding/disclaimer'
+      preLoaderRoute: typeof OnboardingDisclaimerRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
+    '/onboarding/goal': {
+      id: '/onboarding/goal'
+      path: '/goal'
+      fullPath: '/onboarding/goal'
+      preLoaderRoute: typeof OnboardingGoalRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
+    '/onboarding/joints': {
+      id: '/onboarding/joints'
+      path: '/joints'
+      fullPath: '/onboarding/joints'
+      preLoaderRoute: typeof OnboardingJointsRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
+    '/onboarding/parq': {
+      id: '/onboarding/parq'
+      path: '/parq'
+      fullPath: '/onboarding/parq'
+      preLoaderRoute: typeof OnboardingParqRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
+    '/onboarding/questionnaire': {
+      id: '/onboarding/questionnaire'
+      path: '/questionnaire'
+      fullPath: '/onboarding/questionnaire'
+      preLoaderRoute: typeof OnboardingQuestionnaireRouteImport
+      parentRoute: typeof OnboardingRouteRoute
+    }
+    '/premium/return': {
+      id: '/premium/return'
+      path: '/return'
+      fullPath: '/premium/return'
+      preLoaderRoute: typeof PremiumReturnRouteImport
+      parentRoute: typeof PremiumRoute
     }
     '/app/screen/': {
       id: '/app/screen/'
       path: '/'
       fullPath: '/app/screen/'
       preLoaderRoute: typeof AppScreenIndexRouteImport
-      parentRoute: typeof AppScreenRoute
-    }
-    '/app/screen/setup': {
-      id: '/app/screen/setup'
-      path: '/setup'
-      fullPath: '/app/screen/setup'
-      preLoaderRoute: typeof AppScreenSetupRouteImport
       parentRoute: typeof AppScreenRoute
     }
     '/app/screen/run': {
@@ -954,11 +947,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppScreenRunRouteImport
       parentRoute: typeof AppScreenRoute
     }
-    '/api/public/payments/webhook': {
-      id: '/api/public/payments/webhook'
-      path: '/api/public/payments/webhook'
-      fullPath: '/api/public/payments/webhook'
-      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+    '/app/screen/setup': {
+      id: '/app/screen/setup'
+      path: '/setup'
+      fullPath: '/app/screen/setup'
+      preLoaderRoute: typeof AppScreenSetupRouteImport
+      parentRoute: typeof AppScreenRoute
+    }
+    '/api/public/admin/sync-premium': {
+      id: '/api/public/admin/sync-premium'
+      path: '/api/public/admin/sync-premium'
+      fullPath: '/api/public/admin/sync-premium'
+      preLoaderRoute: typeof ApiPublicAdminSyncPremiumRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/billing-run': {
@@ -968,11 +968,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksBillingRunRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/admin/sync-premium': {
-      id: '/api/public/admin/sync-premium'
-      path: '/api/public/admin/sync-premium'
-      fullPath: '/api/public/admin/sync-premium'
-      preLoaderRoute: typeof ApiPublicAdminSyncPremiumRouteImport
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
