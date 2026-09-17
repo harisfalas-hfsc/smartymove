@@ -4,10 +4,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 
 export function LegalLayout({ title, icon, lastUpdated, children }: { title: string; icon: ReactNode; lastUpdated: string; children: ReactNode }) {
   return (
-    <div
-      className="flex min-h-[100dvh] w-full flex-col"
-      style={{ background: "#ffffff", color: "#14213A" }}
-    >
+    <div className="flex min-h-[100dvh] w-full flex-col bg-background text-foreground">
       <SiteHeader showBack />
       <main className="mx-auto w-full max-w-[760px] flex-1 px-5 pb-6 pt-5">
         <div className="flex items-center gap-3">
@@ -17,43 +14,54 @@ export function LegalLayout({ title, icon, lastUpdated, children }: { title: str
           >
             {icon}
           </span>
-          <h1 style={{ fontWeight: 700, fontSize: 26, lineHeight: 1.1, letterSpacing: 0, margin: 0 }}>
+          <h1 className="m-0 text-foreground" style={{ fontWeight: 700, fontSize: 26, lineHeight: 1.1, letterSpacing: 0 }}>
             {title}
           </h1>
         </div>
 
         <div
-          className="mt-4"
-          style={{ background: "#fff", border: "1px solid #E5EAEC", borderRadius: 18, padding: "16px 18px", fontSize: 13, color: "#3B4A63" }}
+          className="mt-4 rounded-2xl border border-border bg-card px-[18px] py-4 text-sm text-muted-foreground"
+          style={{ fontSize: 13 }}
         >
-          <strong>Last updated:</strong> {lastUpdated} ·{" "}
-          <strong>Operator:</strong> SmartyMove (smartymove.com), part of the{" "}
-          <a href="https://smartywellness.com" target="_blank" rel="noopener noreferrer" style={{ color: "#0E7C86", fontWeight: 600 }}>Smarty Wellness</a>{" "}
+          <strong className="text-foreground">Last updated:</strong> {lastUpdated} ·{" "}
+          <strong className="text-foreground">Operator:</strong> SmartyMove (smartymove.com), part of the{" "}
+          <a href="https://smartywellness.com" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary">Smarty Wellness</a>{" "}
           family of brands (with SmartyGym and SmartyDiet) ·{" "}
-          <strong>Contact:</strong>{" "}
-          <a href="mailto:smartymove@outlook.com" style={{ color: "#0E7C86", fontWeight: 600 }}>smartymove@outlook.com</a>
+          <strong className="text-foreground">Contact:</strong>{" "}
+          <a href="mailto:smartymove@outlook.com" className="font-semibold text-primary">smartymove@outlook.com</a>
         </div>
 
         <article
-          className="legal-prose mt-6"
-          style={{ background: "#fff", border: "1px solid #E5EAEC", borderRadius: 22, padding: "22px 22px 26px", fontSize: 15, lineHeight: 1.65, color: "#3B4A63" }}
+          className="legal-prose mt-6 rounded-[22px] border border-border bg-card text-foreground"
+          style={{ padding: "22px 22px 26px", fontSize: 15, lineHeight: 1.65 }}
         >
           {children}
         </article>
 
         <style>{`
-          .legal-prose h2{ font-weight:700; font-size:18px; color:#14213A; margin:22px 0 8px; letter-spacing:0; }
+          .legal-prose h2{ font-weight:700; font-size:18px; color:var(--foreground); margin:22px 0 8px; letter-spacing:0; }
           .legal-prose h2:first-child{ margin-top:0; }
-          .legal-prose h3{ font-weight:600; font-size:15px; color:#14213A; margin:16px 0 6px; }
-          .legal-prose p{ margin:0 0 10px; }
-          .legal-prose ul{ margin:0 0 12px; padding-left:18px; }
-          .legal-prose li{ margin-bottom:6px; }
-          .legal-prose strong{ color:#14213A; }
-          .legal-prose a{ color:#0E7C86; font-weight:600; text-decoration:none; }
+          .legal-prose h3{ font-weight:600; font-size:15px; color:var(--foreground); margin:16px 0 6px; }
+          .legal-prose p{ margin:0 0 10px; color:var(--foreground); }
+          .legal-prose ul{ margin:0 0 12px; padding-left:18px; color:var(--foreground); }
+          .legal-prose li{ margin-bottom:6px; color:var(--foreground); }
+          .legal-prose strong{ color:var(--foreground); }
+          .legal-prose a{ color:var(--primary); font-weight:600; text-decoration:none; }
           .legal-prose a:hover{ text-decoration:underline; }
-          .legal-prose .callout{ background:#FFF4F0; border:1px solid #FFD7CB; border-radius:14px; padding:14px 16px; margin:14px 0; color:#7A2C13; }
-          .legal-prose .callout strong{ color:#B23A1A; }
-          .legal-prose .note{ background:#F1F5F4; border:1px solid #D9E0E2; border-radius:14px; padding:12px 14px; margin:14px 0; font-size:13.5px; }
+          .legal-prose .callout{
+            background: color-mix(in oklab, var(--destructive) 12%, var(--card));
+            border:1px solid color-mix(in oklab, var(--destructive) 35%, transparent);
+            border-radius:14px; padding:14px 16px; margin:14px 0;
+            color:var(--foreground);
+          }
+          .legal-prose .callout strong{ color:var(--destructive); }
+          .legal-prose .note{
+            background: var(--muted);
+            border:1px solid var(--border);
+            border-radius:14px; padding:12px 14px; margin:14px 0;
+            font-size:13.5px; color:var(--muted-foreground);
+          }
+          .legal-prose .note strong{ color:var(--foreground); }
         `}</style>
       </main>
       <SiteFooter />
