@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Sparkles, X } from "lucide-react";
 import logoDiet from "@/assets/smartydiet-logo.png";
-import logoWorkout from "@/assets/smartyworkout-icon.png";
+import logoGym from "@/assets/smartygym-icon-dark.png";
 
 const CURRENT_APP: "workout" | "gym" | "move" | "diet" | "logbook" = "move";
 
@@ -22,11 +22,11 @@ const SISTER_APPS: SisterApp[] = [
     image: logoDiet,
   },
   {
-    id: "workout",
-    name: "SmartyWorkout",
-    tagline: "Plan your training. Track every rep. Progress faster.",
-    url: "https://smarty-workout-buddy.lovable.app",
-    image: logoWorkout,
+    id: "gym",
+    name: "SmartyGym",
+    tagline: "Train smarter. Build strength. Perform at your peak.",
+    url: "https://smartygym.com",
+    image: logoGym,
   },
 ];
 
